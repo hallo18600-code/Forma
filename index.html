@@ -283,6 +283,13 @@
     .amt-compact{width:100%;border:0;font:inherit;display:flex;align-items:center;background:#f1f1ef;border-radius:14px;padding:0}
     .amt-compact b{flex:1;text-align:right;padding:14px;font-size:17px}.amt-compact span{padding:0 16px;color:#444;border-left:1px solid #e1e1de}
     .amt .yfertig{margin-top:10px}
+
+    .mealhero{height:150px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-size:64px;margin:6px 0 14px;border:1px solid var(--line)}
+    .mgrid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:6px;background:#fff}
+    .mgrid div{padding:14px 8px;text-align:center;border-bottom:1px solid var(--line)}.mgrid div:nth-child(odd){border-right:1px solid var(--line)}.mgrid div:nth-child(n+3){border-bottom:0}
+    .mgrid b{display:block;font-size:16px}.mgrid span{font-size:12px;color:#6b7076}
+    .mrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:14px 2px;font:inherit}
+    .mrow span{white-space:nowrap}.mrow i{font-style:normal;font-size:20px;color:#6b7076}
   </style>
 </head>
 <body>
@@ -461,7 +468,7 @@ function day(s){ s=s||state.date; if(!state.days[s]) state.days[s]=blankDay(); r
 function foods(){ return [...BASE_FOODS, ...state.customs]; }
 function allItems(){ return [...foods(), ...CARE, ...SUPS]; }
 function toast(m){ ui.toast=m; render(); setTimeout(()=>{ if(ui.toast===m){ ui.toast=null; render(); } }, 1600); }
-function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; render(); }
+function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; render(); }
 function closeModal(){ stopCam(); ui.modal=null; render(); }
 
 function targets(){
@@ -870,7 +877,7 @@ function renderHeute(){
         const marks={breakfast:"☕", lunch:"🍝", dinner:"🥗", snack:"🍎"};
         return `<div class="meal-row">
           <div class="bubble">${marks[slot.id]}</div>
-          <button class="grow" style="text-align:left" data-act="open" data-type="scan" data-slot="${slot.id}">
+          <button class="grow" style="text-align:left" data-act="meal-open" data-slot="${slot.id}">
             <div class="meal-name">${slot.name} →</div>
             <div class="sub">${showKcal()?k.toLocaleString("de-DE")+" / "+goal.toLocaleString("de-DE")+" kcal":items.length+" Einträge"}</div>
           </button>
@@ -1440,8 +1447,20 @@ function renderMeasures(){
     <div class="section"><h2>Verlauf</h2></div>
     ${(state.measures||[]).slice().reverse().map(m=>`<div class="card" style="margin-bottom:8px"><b>${labelDate(m.date)}</b><div class="sub">${fields.map(([k,l])=>m[k]?l+" "+m[k]:"").filter(Boolean).join(" · ")}</div></div>`).join("")||`<div class="card sub">Noch keine Messung.</div>`}`;
 }
+function renderMealPage(){
+  const slot=SLOTS.find(x=>x.id===ui.addSlot)||SLOTS[0], d=day();
+  const items=d.meals.filter(m=>m.slot===slot.id).map(m=>({m,p:foods().find(x=>x.id===m.id)})).filter(x=>x.p);
+  const tot=items.reduce((a,{m,p})=>{ const l=line(p,m.portion); a.kcal+=l.kcal; a.protein+=l.protein; a.carbs+=l.carbs; a.fat+=l.fat; return a; },{kcal:0,protein:0,carbs:0,fat:0});
+  const f=v=>(Math.round(v*10)/10).toString().replace(".",",")+" g";
+  const marks={breakfast:"☕",lunch:"🍝",dinner:"🥗",snack:"🍎"};
+  return `<div class="calhead"><button class="navd" data-act="dash-close">‹</button><b style="flex:1;text-align:center;margin-right:40px">${slot.name}</b></div>
+    <div class="mealhero" style="background:linear-gradient(135deg,${slot.tint},#fff)"><span>${marks[slot.id]}</span></div>
+    <div class="mgrid"><div><b>${tot.kcal.toLocaleString("de-DE")} kcal</b><span>Kalorien</span></div><div><b>${f(tot.carbs)}</b><span>Kohlenhydrate</span></div><div><b>${f(tot.protein)}</b><span>Eiweiß</span></div><div><b>${f(tot.fat)}</b><span>Fett</span></div></div>
+    ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}${m.portion} g</div></div><span>${line(p,m.portion).kcal} kcal</span><i>›</i></button>`).join("")||`<p class="sub" style="padding:16px 0">Noch nichts eingetragen.</p>`}
+    <button class="yfertig" data-act="open" data-type="scan" data-slot="${slot.id}">Mehr hinzufügen</button>`;
+}
 function renderDash(){
-  const body=ui.dash==="routine"?renderRoutineDash():ui.dash==="calendar"?renderCalendar():ui.dash==="stats"?renderStats():ui.dash==="exercises"?renderExercises():renderMeasures();
+  const body=ui.dash==="meal"?renderMealPage():ui.dash==="routine"?renderRoutineDash():ui.dash==="calendar"?renderCalendar():ui.dash==="stats"?renderStats():ui.dash==="exercises"?renderExercises():renderMeasures();
   return `<div class="screen"><div class="scroll pad">${body}</div></div>`;
 }
 
@@ -1633,7 +1652,7 @@ function newFoodView(){
     <button class="yfertig" data-act="save-custom">Speichern und eintragen</button>`;
 }
 function scanResults(){
-  const q=ui.query.trim().toLowerCase(), mode=ui.scanMode||"text";
+  const q=ui.query.trim().toLowerCase(), mode="text";
   const pool=mode==="care"?CARE:mode==="sup"?SUPS:foods().filter(p=>!p.hidden);
   const ts=qTokens(q), found0=(q?pool.filter(p=>{ const x=NORM(p.name+" "+(p.brand||"")); return ts.every(w=>x.includes(w)); }):pool).slice(0,12);
   let found=found0, more=""; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const lim=ui.scanMax||30, ids=new Set(found0.map(p=>p.id)), d=dbSearch(q,lim); found=found0.concat(d.filter(p=>!ids.has(p.id))); if(d.length>=lim) more=`<button class="pill ghost" style="width:100%;margin-top:12px" data-act="scan-more">Mehr anzeigen</button>`; }
@@ -1648,12 +1667,10 @@ function scanSheet(){
   if(v==="more") return moreView();
   if(v==="quick") return quickView();
   if(v==="newfood") return newFoodView();
-  const q=ui.query.trim().toLowerCase(), mode=ui.scanMode||"text";
+  const q=ui.query.trim().toLowerCase(), mode="text";
   return `${yHead(title)}
     <div class="ytiles"><button class="ytile" data-act="scan-view" data-v="barcode"><i>${BC_ICON}</i>Barcode</button><button class="ytile" data-act="scan-view" data-v="ai"><i>💬</i>Sprache/Text</button><button class="ytile" data-act="scan-view" data-v="more"><i>⋯</i>Mehr</button></div>
-    ${(()=>{ const mine=day().meals.filter(m=>m.slot===ui.addSlot); if(!mine.length) return ""; return `<div class="section"><h2>Eingetragen</h2></div>`+mine.map(m=>{ const p=foods().find(x=>x.id===m.id); if(!p) return ""; return `<div class="yrow"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${m.portion} g${showKcal()?" · "+Math.round(p.kcal*m.portion/100)+" kcal":""}</div></div><button class="x" data-act="del-meal" data-id="${m.uid}">✕</button></div>`; }).join(""); })()}
     <div class="field ysearch"><input value="${esc(ui.query)}" data-act="query" placeholder="${slot?"Was hattest du zum "+slot.name+"?":"Suchen"}"></div>
-    <div class="row" style="margin:10px 0 2px">${[["text","Essen"],["care","Pflege"],["sup","Supplements"]].map(([id,l])=>`<button class="chip ${mode===id?"on":""}" data-act="scan-mode" data-v="${id}">${l}</button>`).join("")}</div>
     <div id="scan-results">${scanResults()}</div>
     <p class="sub" style="font-size:11px;margin-top:10px">Produktdaten: Open Food Facts (ODbL)</p>
     <button class="yfertig" data-act="close">Fertig</button>`;
@@ -1669,7 +1686,7 @@ function fTable(it,g){
 function foodSheet(it,sc){
   const slot=SLOTS.find(s=>s.id===ui.addSlot), g=ui.portion||100;
   const src=it.src==="off"?"Quelle: Open Food Facts":it.type==="custom"?"Eigene Angaben":"Basisdaten";
-  return `<div class="yhead"><button class="yback" data-act="back-scan">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><span></span></div>
+  return `<div class="yhead"><button class="yback" data-act="${ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><span></span></div>
     <div class="ftitle"><h2>${esc(it.name)}</h2><div class="sub">${esc(it.brand||"")}</div></div>
     <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
     <div class="frate">
@@ -1688,7 +1705,7 @@ function foodSheet(it,sc){
         <div class="famt"><input id="portion" type="number" inputmode="decimal" value="${g}" data-act="portion-in" data-id="${it.id}"><span>Gramm</span></div>
         <p class="sub" style="margin:10px 0 0;font-size:12px">Nach unten wischen, um Bewertung und Nährwerte zu sehen.</p>
       </div>
-      <button class="yfertig" data-act="log-food" data-id="${it.id}" style="position:static;background:linear-gradient(135deg,#1db36a,#0f8f50)">Hinzufügen</button>
+      ${ui.editUid?`<button class="yfertig" data-act="save-meal" style="position:static;background:linear-gradient(135deg,#1db36a,#0f8f50)">Speichern</button><button class="link" style="width:100%;color:var(--bad);margin-top:6px" data-act="del-meal2">Eintrag löschen</button>`:`<button class="yfertig" data-act="log-food" data-id="${it.id}" style="position:static;background:linear-gradient(135deg,#1db36a,#0f8f50)">Hinzufügen</button>`}
     </div>`;
 }
 function productSheet(id){
@@ -1860,6 +1877,10 @@ document.getElementById("app").addEventListener("click", e=>{
     ui.scanView="list"; syncAuto(state.date); save(); toast("Hinzugefügt");
   }
   else if(act==="scan-mode") ui.scanMode=el.dataset.v;
+  else if(act==="meal-open"){ ui.addSlot=el.dataset.slot; ui.dash="meal"; ui.modal=null; }
+  else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.portion=m.portion; } }
+  else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid), i=document.getElementById("portion"); if(m) m.portion=Math.max(1,+(i&&i.value||ui.portion)||m.portion); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
+  else if(act==="del-meal2"){ day().meals=day().meals.filter(x=>x.uid!==ui.editUid); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gelöscht"); }
   else if(act==="scan-more"){ ui.scanMax=(ui.scanMax||30)+30; const bx=document.getElementById("scan-results"); if(bx) bx.innerHTML=scanResults(); return; }
   else if(act==="amt-open"||act==="amt-toggle"){
     const a=document.querySelector(".amt"); if(!a) return;
