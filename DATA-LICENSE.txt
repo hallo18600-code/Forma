@@ -1,0 +1,4 @@
+foods.json enthält Daten aus Open Food Facts.
+(c) Open Food Facts-Mitwirkende. Lizenz: Open Database License (ODbL) 1.0, https://opendatacommons.org/licenses/odbl/1-0/
+Quelle: https://world.openfoodfacts.org
+Die Datei foods.json darf unter denselben Bedingungen weiterverwendet werden.
