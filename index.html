@@ -272,6 +272,17 @@
     .famt input{flex:1;min-width:0;border:0;background:none;padding:14px;font-size:17px;text-align:right}
     .famt span{padding:0 16px;color:#444;border-left:1px solid #e1e1de}
     .fadd{position:sticky;bottom:0;background:#fff;padding:10px 0 2px}
+
+    .sec{font-weight:700;margin:18px 0 6px}
+    .ftable .frow{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:15px}
+    .ftable .sub2{padding-left:14px;color:#6b7076;font-size:14px}.ftable .sub2 b{font-weight:500}
+    .amt{position:sticky;bottom:0;background:#fff;margin:14px -4px 0;padding:6px 4px 4px;box-shadow:0 -10px 24px rgba(0,0,0,.06);border-radius:22px 22px 0 0}
+    .amt-grab{display:block;width:60px;height:22px;margin:0 auto;border:0;background:none;position:relative}
+    .amt-grab::after{content:"";position:absolute;left:9px;top:8px;width:42px;height:5px;border-radius:3px;background:#d3d6da}
+    .amt-body{display:none}.amt.open{min-height:50vh;display:flex;flex-direction:column;animation:amtUp .22s ease-out}.amt.open .amt-body{display:block;flex:1}.amt.open .amt-compact{display:none}@keyframes amtUp{from{transform:translateY(35%);opacity:.5}to{transform:none;opacity:1}}
+    .amt-compact{width:100%;border:0;font:inherit;display:flex;align-items:center;background:#f1f1ef;border-radius:14px;padding:0}
+    .amt-compact b{flex:1;text-align:right;padding:14px;font-size:17px}.amt-compact span{padding:0 16px;color:#444;border-left:1px solid #e1e1de}
+    .amt .yfertig{margin-top:10px}
   </style>
 </head>
 <body>
@@ -450,7 +461,7 @@ function day(s){ s=s||state.date; if(!state.days[s]) state.days[s]=blankDay(); r
 function foods(){ return [...BASE_FOODS, ...state.customs]; }
 function allItems(){ return [...foods(), ...CARE, ...SUPS]; }
 function toast(m){ ui.toast=m; render(); setTimeout(()=>{ if(ui.toast===m){ ui.toast=null; render(); } }, 1600); }
-function openModal(type, payload){ ui.modal={type, payload}; render(); }
+function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; render(); }
 function closeModal(){ stopCam(); ui.modal=null; render(); }
 
 function targets(){
@@ -1500,17 +1511,26 @@ const FOODDB={rows:[],lc:[],by:new Map(),ok:false};
 async function loadFoodDb(){
   if(!location.protocol.startsWith("http")) return;
   try{ const r=await fetch("foods.json"); if(!r.ok) return; const j=await r.json();
-    FOODDB.rows=j.rows||[]; FOODDB.lc=FOODDB.rows.map(x=>(x[1]+" "+(x[2]||"")).toLowerCase());
+    FOODDB.rows=j.rows||[]; FOODDB.nm=FOODDB.rows.map(x=>NORM(x[1])); FOODDB.lc=FOODDB.rows.map(x=>NORM(x[1]+" "+(x[2]||"")));
     FOODDB.rows.forEach((x,i)=>FOODDB.by.set(x[0],i)); FOODDB.ok=FOODDB.rows.length>0; if(FOODDB.ok) render();
   }catch(e){}
 }
-function dbItem(x){ return {id:"db-"+x[0],type:"custom",src:"off",name:x[1],brand:x[2]||"",emoji:"📦",kcal:Math.round(x[3]),protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7]||0,fiber:x[8]||0,salt:x[9]||0,sat:x[10]||0,processed:(x[11]||0)>=4,bc:x[0]}; }
-function dbSearch(q){
-  const t=q.toLowerCase().split(/\s+/).filter(Boolean), out=[];
-  if(!t.length) return [];
-  for(let i=0;i<FOODDB.lc.length&&out.length<60;i++){ const s=FOODDB.lc[i]; if(t.every(w=>s.includes(w))) out.push(i); }
-  out.sort((a,b)=>{ const x=FOODDB.lc[a].startsWith(t[0])?0:1, y=FOODDB.lc[b].startsWith(t[0])?0:1; return x-y||a-b; });
-  return out.slice(0,20).map(i=>dbItem(FOODDB.rows[i]));
+function dbItem(x){ return {id:"db-"+x[0],type:"custom",src:"off",name:x[1],brand:x[2]||"",emoji:"📦",kcal:Math.round(x[3]),protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7]??undefined,fiber:x[8]??undefined,salt:x[9]??undefined,sat:x[10]??undefined,processed:(x[11]||0)>=4,bc:x[0]}; }
+function NORM(t){ return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/ae/g,"a").replace(/oe/g,"o").replace(/ue/g,"u"); }
+function qTokens(q){ return NORM(q).split(/\s+/).filter(Boolean).map(w=>w.length>=7?w.replace(/(en|n|e|s)$/,""):w); }
+function dbSearch(q,limit){
+  const ts=qTokens(q); if(!ts.length) return [];
+  const res=[];
+  for(let i=0;i<FOODDB.lc.length;i++){
+    const s=FOODDB.lc[i]; let sc=0, ok=true;
+    for(const w of ts){ const p=s.indexOf(w); if(p<0){ ok=false; break; } sc+=p===0?3:(s[p-1]===" "?2:0); }
+    if(!ok) continue;
+    const n=FOODDB.nm[i]; if(n.startsWith(ts[0])) sc+=2;
+    sc-=Math.min(n.length,60)/60;
+    res.push([sc,i]);
+  }
+  res.sort((x,y)=>y[0]-x[0]||x[1]-y[1]);
+  return res.slice(0,limit||30).map(r=>dbItem(FOODDB.rows[r[1]]));
 }
 function dbGet(code){ let i=FOODDB.by.get(code); if(i==null) i=FOODDB.by.get("0"+code); if(i==null&&code.length===13&&code[0]==="0") i=FOODDB.by.get(code.slice(1)); return i==null?null:dbItem(FOODDB.rows[i]); }
 function ensureDb(id){ id=String(id); if(id.startsWith("db-")&&!foods().some(x=>x.id===id)){ const it=dbGet(id.slice(3)); if(it){ state.customs.push(it); save(); } } }
@@ -1615,11 +1635,11 @@ function newFoodView(){
 function scanResults(){
   const q=ui.query.trim().toLowerCase(), mode=ui.scanMode||"text";
   const pool=mode==="care"?CARE:mode==="sup"?SUPS:foods().filter(p=>!p.hidden);
-  const found0=(q?pool.filter(p=>(p.name+" "+(p.brand||"")).toLowerCase().includes(q)):pool).slice(0,12);
-  let found=found0; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const ids=new Set(found0.map(p=>p.id)); found=found0.concat(dbSearch(q).filter(p=>!ids.has(p.id))).slice(0,25); }
+  const ts=qTokens(q), found0=(q?pool.filter(p=>{ const x=NORM(p.name+" "+(p.brand||"")); return ts.every(w=>x.includes(w)); }):pool).slice(0,12);
+  let found=found0, more=""; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const lim=ui.scanMax||30, ids=new Set(found0.map(p=>p.id)), d=dbSearch(q,lim); found=found0.concat(d.filter(p=>!ids.has(p.id))); if(d.length>=lim) more=`<button class="pill ghost" style="width:100%;margin-top:12px" data-act="scan-more">Mehr anzeigen</button>`; }
   const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}">+</button>`:""}</div>`; };
   const hint=(mode==="text"&&q.length>=2&&!FOODDB.ok)?`<p class="sub" style="padding:8px 0">Produktdatenbank nicht geladen (foods.json fehlt oder lädt noch). Es werden nur Basis-Einträge durchsucht.</p>`:"";
-  return hint+(found.map(row).join("")||`<p class="sub" style="padding:14px 0">Nichts gefunden.</p><button class="pill ghost" style="width:100%" data-act="more-go" data-v="nobc">Eigenes Lebensmittel anlegen</button>`);
+  return hint+(found.map(row).join("")||`<p class="sub" style="padding:14px 0">Nichts gefunden.</p><button class="pill ghost" style="width:100%" data-act="more-go" data-v="nobc">Eigenes Lebensmittel anlegen</button>`)+more;
 }
 function scanSheet(){
   const v=ui.scanView||"list", slot=SLOTS.find(s=>s.id===ui.addSlot), title=slot?slot.name:"Suche";
@@ -1638,9 +1658,13 @@ function scanSheet(){
     <p class="sub" style="font-size:11px;margin-top:10px">Produktdaten: Open Food Facts (ODbL)</p>
     <button class="yfertig" data-act="close">Fertig</button>`;
 }
+function fv(x,g){ if(x==null) return "–"; return String(Math.round(x*(g/100)*10)/10).replace(".",",")+" g"; }
 function fMacros(it,g){
-  const f=(g||0)/100, r=v=>(Math.round((v||0)*f*10)/10).toString().replace(".",",");
-  return [[Math.round((it.kcal||0)*f),"Kalorien"],[r(it.carbs)+" g","Kohlenhydrate"],[r(it.protein)+" g","Eiweiß"],[r(it.fat)+" g","Fett"]].map(([v,l])=>`<div><b>${v}${l==="Kalorien"?" kcal":""}</b><span>${l}</span></div>`).join("");
+  return [[Math.round((it.kcal||0)*g/100)+" kcal","Kalorien"],[fv(it.carbs||0,g),"Kohlenhydrate"],[fv(it.protein||0,g),"Eiweiß"],[fv(it.fat||0,g),"Fett"]].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join("");
+}
+function fTable(it,g){
+  const row=(l,v,sub)=>`<div class="frow${sub?" sub2":""}"><span>${l}</span><b>${v}</b></div>`;
+  return row("Kalorien",Math.round((it.kcal||0)*g/100)+" kcal")+row("Eiweiß",fv(it.protein||0,g))+row("Kohlenhydrate",fv(it.carbs||0,g))+row("davon Zucker",fv(it.sugar,g),1)+row("Ballaststoffe",fv(it.fiber,g),1)+row("Fett",fv(it.fat||0,g))+row("davon gesättigte Fettsäuren",fv(it.sat,g),1)+row("Salz",fv(it.salt,g));
 }
 function foodSheet(it,sc){
   const slot=SLOTS.find(s=>s.id===ui.addSlot), g=ui.portion||100;
@@ -1648,16 +1672,22 @@ function foodSheet(it,sc){
   return `<div class="yhead"><button class="yback" data-act="back-scan">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><span></span></div>
     <div class="ftitle"><h2>${esc(it.name)}</h2><div class="sub">${esc(it.brand||"")}</div></div>
     <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
-    <div class="sub" style="text-align:center;margin:8px 0 0;font-size:12px">${src} · Werte pro eingegebener Menge</div>
     <div class="frate">
       <div class="top"><div class="score ${scoreClass(sc.score)}" style="width:60px;height:60px;font-size:22px;border-radius:18px">${sc.score}</div>
         <div><b style="font-size:16px">Lebensmittelbewertung</b><div class="sub">Für dein Ziel: ${goalName()}</div></div></div>
       <p class="sub" style="margin:12px 0 8px">${sc.reasons.join(" ")}</p>
       ${(sc.parts||[]).length?`<div class="why" style="background:#fff">${sc.parts.map(([l,v],i)=>`<div><span>${l}</span><b class="${i?(v>0?"up":"dn"):""}">${i&&v>0?"+":""}${v}</b></div>`).join("")}</div>`:""}
     </div>
-    <div class="fadd">
-      <div class="row" style="gap:6px;margin-bottom:8px">${[50,100,150,200,250].map(n=>`<button class="chip ${g===n?"on":""}" data-act="portion-set" data-v="${n}">${n} g</button>`).join("")}</div>
-      <div class="famt"><input id="portion" type="number" inputmode="decimal" value="${g}" data-act="portion-in" data-id="${it.id}"><span>Gramm</span></div>
+    <div class="sec">Nährwerte</div><div class="ftable" id="ftable">${fTable(it,g)}</div>
+    <div class="sub" style="font-size:12px;margin-top:8px">${src}</div>
+    <div class="amt ${ui.amtOpen?"open":""}">
+      <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>
+      <button class="amt-compact" data-act="amt-open"><b id="amt-val">${g}</b><span>Gramm ⌄</span></button>
+      <div class="amt-body">
+        <div class="row" style="gap:6px;margin-bottom:10px">${[50,100,150,200,250].map(n=>`<button class="chip ${g===n?"on":""}" data-act="portion-set" data-v="${n}">${n} g</button>`).join("")}</div>
+        <div class="famt"><input id="portion" type="number" inputmode="decimal" value="${g}" data-act="portion-in" data-id="${it.id}"><span>Gramm</span></div>
+        <p class="sub" style="margin:10px 0 0;font-size:12px">Nach unten wischen, um Bewertung und Nährwerte zu sehen.</p>
+      </div>
       <button class="yfertig" data-act="log-food" data-id="${it.id}" style="position:static;background:linear-gradient(135deg,#1db36a,#0f8f50)">Hinzufügen</button>
     </div>`;
 }
@@ -1782,6 +1812,7 @@ document.getElementById("app").addEventListener("click", e=>{
   const el=e.target.closest("[data-act]"); if(!el) return;
   const act=el.dataset.act;
   if(act==="stop"){ e.stopPropagation(); return; }
+  if((el.tagName==="INPUT"&&!["checkbox","radio","range","button"].includes(el.type))||el.tagName==="TEXTAREA") return;
   const p=state.profile;
   if(act==="start-onboard"){ state.step=0; }
   else if(act==="skip-demo"){ seedDemo(); toast("Beispieldaten geladen"); }
@@ -1829,6 +1860,14 @@ document.getElementById("app").addEventListener("click", e=>{
     ui.scanView="list"; syncAuto(state.date); save(); toast("Hinzugefügt");
   }
   else if(act==="scan-mode") ui.scanMode=el.dataset.v;
+  else if(act==="scan-more"){ ui.scanMax=(ui.scanMax||30)+30; const bx=document.getElementById("scan-results"); if(bx) bx.innerHTML=scanResults(); return; }
+  else if(act==="amt-open"||act==="amt-toggle"){
+    const a=document.querySelector(".amt"); if(!a) return;
+    const open=act==="amt-open"?true:!a.classList.contains("open");
+    a.classList.toggle("open",open); ui.amtOpen=open;
+    const i=document.getElementById("portion"); if(i){ if(open){ i.focus(); i.select(); } else i.blur(); }
+    return;
+  }
   else if(act==="back-scan"){ ui.scanView="list"; openModal("scan"); return; }
   else if(act==="portion-set"){ ui.portion=+el.dataset.v; }
   else if(act==="log-food"){
@@ -2012,11 +2051,11 @@ document.getElementById("app").addEventListener("input", e=>{
   const el=e.target.closest("[data-act]"); if(!el) return;
   if(el.dataset.act==="input"){ state.profile[el.dataset.k]=el.value; save(); }
   if(el.dataset.act==="query"){
-    ui.query=el.value;
+    ui.query=el.value; ui.scanMax=30;
     const box=document.getElementById("scan-results");
     if(box) box.innerHTML=scanResults(); else render();
   }
-  if(el.dataset.act==="portion-in"){ ui.portion=+el.value||0; const b=document.getElementById("fmacros"), it=allItems().find(p=>p.id===el.dataset.id); if(b&&it) b.innerHTML=fMacros(it,ui.portion); }
+  if(el.dataset.act==="portion-in"){ ui.portion=+el.value||0; const it=allItems().find(p=>p.id===el.dataset.id), b=document.getElementById("fmacros"), t=document.getElementById("ftable"), v=document.getElementById("amt-val"); if(it){ if(b) b.innerHTML=fMacros(it,ui.portion); if(t) t.innerHTML=fTable(it,ui.portion); } if(v) v.textContent=ui.portion||0; }
   if(el.dataset.act==="set-kg") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].kg=+el.value||0;
   if(el.dataset.act==="set-reps") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].reps=+el.value||0;
   if(el.dataset.act==="plan-name") ui.plan.name=el.value;
@@ -2038,6 +2077,12 @@ render();
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")) window.addEventListener("load",()=>{ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} });
 
+let swipeY=null;
+document.getElementById("app").addEventListener("touchstart",e=>{ swipeY=e.target.closest(".amt.open")?e.touches[0].clientY:null; },{passive:true});
+document.getElementById("app").addEventListener("touchend",e=>{
+  if(swipeY==null) return; const dy=e.changedTouches[0].clientY-swipeY; swipeY=null;
+  if(dy>50){ const a=document.querySelector(".amt"); if(a){ a.classList.remove("open"); ui.amtOpen=false; const i=document.getElementById("portion"); if(i) i.blur(); } }
+},{passive:true});
 loadFoodDb();
 </script>
 </body>
