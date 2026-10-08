@@ -263,6 +263,15 @@
 
     .rd.miss,.cdot.miss{background:#fbe0dc;color:#b3392a}.sq.miss{background:#f2b8ae}
     .rfire{font-size:12px;font-weight:700;color:#c25a12;background:#fff1e3;border-radius:10px;padding:2px 8px;margin-left:6px}
+
+    .ftitle{text-align:center;margin:6px 0 14px}.ftitle h2{font-size:22px;margin:2px 0}
+    .fmacros{display:grid;grid-template-columns:repeat(4,1fr);text-align:center;gap:4px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+    .fmacros b{display:block;font-size:15px}.fmacros span{font-size:11px;color:#6b7076}
+    .frate{margin:14px 0;padding:16px;border-radius:22px;background:#f2f6f4}.frate .top{display:flex;gap:14px;align-items:center}
+    .famt{display:flex;align-items:center;background:#f1f1ef;border-radius:14px;overflow:hidden}
+    .famt input{flex:1;min-width:0;border:0;background:none;padding:14px;font-size:17px;text-align:right}
+    .famt span{padding:0 16px;color:#444;border-left:1px solid #e1e1de}
+    .fadd{position:sticky;bottom:0;background:#fff;padding:10px 0 2px}
   </style>
 </head>
 <body>
@@ -1603,6 +1612,15 @@ function newFoodView(){
     <div class="field"><label>Fett / 100 g</label><input id="c-f" inputmode="decimal" value="3"></div>
     <button class="yfertig" data-act="save-custom">Speichern und eintragen</button>`;
 }
+function scanResults(){
+  const q=ui.query.trim().toLowerCase(), mode=ui.scanMode||"text";
+  const pool=mode==="care"?CARE:mode==="sup"?SUPS:foods().filter(p=>!p.hidden);
+  const found0=(q?pool.filter(p=>(p.name+" "+(p.brand||"")).toLowerCase().includes(q)):pool).slice(0,12);
+  let found=found0; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const ids=new Set(found0.map(p=>p.id)); found=found0.concat(dbSearch(q).filter(p=>!ids.has(p.id))).slice(0,25); }
+  const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}">+</button>`:""}</div>`; };
+  const hint=(mode==="text"&&q.length>=2&&!FOODDB.ok)?`<p class="sub" style="padding:8px 0">Produktdatenbank nicht geladen (foods.json fehlt oder lädt noch). Es werden nur Basis-Einträge durchsucht.</p>`:"";
+  return hint+(found.map(row).join("")||`<p class="sub" style="padding:14px 0">Nichts gefunden.</p><button class="pill ghost" style="width:100%" data-act="more-go" data-v="nobc">Eigenes Lebensmittel anlegen</button>`);
+}
 function scanSheet(){
   const v=ui.scanView||"list", slot=SLOTS.find(s=>s.id===ui.addSlot), title=slot?slot.name:"Suche";
   if(v==="barcode") return barcodeView();
@@ -1611,23 +1629,43 @@ function scanSheet(){
   if(v==="quick") return quickView();
   if(v==="newfood") return newFoodView();
   const q=ui.query.trim().toLowerCase(), mode=ui.scanMode||"text";
-  const pool=mode==="care"?CARE:mode==="sup"?SUPS:foods().filter(p=>!p.hidden);
-  const found0=(q?pool.filter(p=>(p.name+" "+(p.brand||"")).toLowerCase().includes(q)):pool).slice(0,12);
-  let found=found0; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const ids=new Set(found0.map(p=>p.id)); found=found0.concat(dbSearch(q).filter(p=>!ids.has(p.id))).slice(0,25); }
-  const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}">+</button>`:""}</div>`; };
   return `${yHead(title)}
     <div class="ytiles"><button class="ytile" data-act="scan-view" data-v="barcode"><i>${BC_ICON}</i>Barcode</button><button class="ytile" data-act="scan-view" data-v="ai"><i>💬</i>Sprache/Text</button><button class="ytile" data-act="scan-view" data-v="more"><i>⋯</i>Mehr</button></div>
     ${(()=>{ const mine=day().meals.filter(m=>m.slot===ui.addSlot); if(!mine.length) return ""; return `<div class="section"><h2>Eingetragen</h2></div>`+mine.map(m=>{ const p=foods().find(x=>x.id===m.id); if(!p) return ""; return `<div class="yrow"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${m.portion} g${showKcal()?" · "+Math.round(p.kcal*m.portion/100)+" kcal":""}</div></div><button class="x" data-act="del-meal" data-id="${m.uid}">✕</button></div>`; }).join(""); })()}
     <div class="field ysearch"><input value="${esc(ui.query)}" data-act="query" placeholder="${slot?"Was hattest du zum "+slot.name+"?":"Suchen"}"></div>
     <div class="row" style="margin:10px 0 2px">${[["text","Essen"],["care","Pflege"],["sup","Supplements"]].map(([id,l])=>`<button class="chip ${mode===id?"on":""}" data-act="scan-mode" data-v="${id}">${l}</button>`).join("")}</div>
-    ${found.map(row).join("")||`<p class="sub" style="padding:14px 0">Nichts gefunden.</p><button class="pill ghost" style="width:100%" data-act="more-go" data-v="nobc">Eigenes Lebensmittel anlegen</button>`}
+    <div id="scan-results">${scanResults()}</div>
     <p class="sub" style="font-size:11px;margin-top:10px">Produktdaten: Open Food Facts (ODbL)</p>
     <button class="yfertig" data-act="close">Fertig</button>`;
+}
+function fMacros(it,g){
+  const f=(g||0)/100, r=v=>(Math.round((v||0)*f*10)/10).toString().replace(".",",");
+  return [[Math.round((it.kcal||0)*f),"Kalorien"],[r(it.carbs)+" g","Kohlenhydrate"],[r(it.protein)+" g","Eiweiß"],[r(it.fat)+" g","Fett"]].map(([v,l])=>`<div><b>${v}${l==="Kalorien"?" kcal":""}</b><span>${l}</span></div>`).join("");
+}
+function foodSheet(it,sc){
+  const slot=SLOTS.find(s=>s.id===ui.addSlot), g=ui.portion||100;
+  const src=it.src==="off"?"Quelle: Open Food Facts":it.type==="custom"?"Eigene Angaben":"Basisdaten";
+  return `<div class="yhead"><button class="yback" data-act="back-scan">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><span></span></div>
+    <div class="ftitle"><h2>${esc(it.name)}</h2><div class="sub">${esc(it.brand||"")}</div></div>
+    <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
+    <div class="sub" style="text-align:center;margin:8px 0 0;font-size:12px">${src} · Werte pro eingegebener Menge</div>
+    <div class="frate">
+      <div class="top"><div class="score ${scoreClass(sc.score)}" style="width:60px;height:60px;font-size:22px;border-radius:18px">${sc.score}</div>
+        <div><b style="font-size:16px">Lebensmittelbewertung</b><div class="sub">Für dein Ziel: ${goalName()}</div></div></div>
+      <p class="sub" style="margin:12px 0 8px">${sc.reasons.join(" ")}</p>
+      ${(sc.parts||[]).length?`<div class="why" style="background:#fff">${sc.parts.map(([l,v],i)=>`<div><span>${l}</span><b class="${i?(v>0?"up":"dn"):""}">${i&&v>0?"+":""}${v}</b></div>`).join("")}</div>`:""}
+    </div>
+    <div class="fadd">
+      <div class="row" style="gap:6px;margin-bottom:8px">${[50,100,150,200,250].map(n=>`<button class="chip ${g===n?"on":""}" data-act="portion-set" data-v="${n}">${n} g</button>`).join("")}</div>
+      <div class="famt"><input id="portion" type="number" inputmode="decimal" value="${g}" data-act="portion-in" data-id="${it.id}"><span>Gramm</span></div>
+      <button class="yfertig" data-act="log-food" data-id="${it.id}" style="position:static;background:linear-gradient(135deg,#1db36a,#0f8f50)">Hinzufügen</button>
+    </div>`;
 }
 function productSheet(id){
   const item=allItems().find(p=>p.id===id);
   if(!item) return `<p>Nicht gefunden.</p>`;
   const sc=scored(item);
+  if(item.type==="food"||item.type==="custom") return foodSheet(item,sc);
   const inStack=item.type==="sup" && state.stack.includes(item.id);
   return `<div class="row" style="gap:12px">
       <div class="score ${scoreClass(sc.score)}" style="width:56px;height:56px;font-size:20px;border-radius:16px">${sc.score}</div>
@@ -1791,6 +1829,8 @@ document.getElementById("app").addEventListener("click", e=>{
     ui.scanView="list"; syncAuto(state.date); save(); toast("Hinzugefügt");
   }
   else if(act==="scan-mode") ui.scanMode=el.dataset.v;
+  else if(act==="back-scan"){ ui.scanView="list"; openModal("scan"); return; }
+  else if(act==="portion-set"){ ui.portion=+el.dataset.v; }
   else if(act==="log-food"){
     const input=document.getElementById("portion");
     const portion=Math.max(5, +(input&&input.value||ui.portion)||100);
@@ -1972,10 +2012,11 @@ document.getElementById("app").addEventListener("input", e=>{
   const el=e.target.closest("[data-act]"); if(!el) return;
   if(el.dataset.act==="input"){ state.profile[el.dataset.k]=el.value; save(); }
   if(el.dataset.act==="query"){
-    ui.query=el.value; render();
-    const n=document.querySelector('input[data-act="query"]');
-    if(n){ n.focus(); n.setSelectionRange(ui.query.length, ui.query.length); }
+    ui.query=el.value;
+    const box=document.getElementById("scan-results");
+    if(box) box.innerHTML=scanResults(); else render();
   }
+  if(el.dataset.act==="portion-in"){ ui.portion=+el.value||0; const b=document.getElementById("fmacros"), it=allItems().find(p=>p.id===el.dataset.id); if(b&&it) b.innerHTML=fMacros(it,ui.portion); }
   if(el.dataset.act==="set-kg") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].kg=+el.value||0;
   if(el.dataset.act==="set-reps") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].reps=+el.value||0;
   if(el.dataset.act==="plan-name") ui.plan.name=el.value;
