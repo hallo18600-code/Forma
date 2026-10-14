@@ -1347,7 +1347,7 @@ function renderLive(){
       <div class="stats">
         <div><b>${vol} kg</b><span>Volumen</span></div>
         <div><b>${done}/${sets}</b><span>Sätze</span></div>
-        <div><b>${ui.rest||0}s</b><span>Pause</span></div>
+        <div><b class="t-rest">${ui.rest||0}s</b><span>Pause</span></div>
       </div>
       ${ui.rest>0?`<div class="rest"><span>Pause ${ui.rest}s</span><button data-act="rest-skip" style="color:#fff">Überspringen</button></div>`:""}
       ${w.exercises.map((e,ei)=>{
@@ -2098,7 +2098,13 @@ function render(){ try{ ensureRoutine(); }catch(e){}
   if(!state.onboarded && state.step==null) html=renderWelcome();
   html += renderModal();
   if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
+  // Scroll-Positionen merken, damit ein Neuaufbau (Tipp, Toast, Timer) nicht nach oben springt
+  const keep=[...root.querySelectorAll(".scroll,.sheet-card")].map(n=>n.scrollTop);
+  const view=ui.workout?"w":ui.plan?"p":ui.dash?"d:"+ui.dash:"t:"+state.tab;
+  const same=(ui._view===view)&&!!state.onboarded;
+  ui._view=view;
   root.innerHTML = html;
+  if(same){ [...root.querySelectorAll(".scroll,.sheet-card")].forEach((n,i)=>{ if(keep[i]) n.scrollTop=keep[i]; }); }
 }
 function seedDemo(){
   state = fresh();
@@ -2131,8 +2137,6 @@ function seedDemo(){
 document.getElementById("app").addEventListener("click", e=>{
   const el=e.target.closest("[data-act]"); if(!el) return;
   const act=el.dataset.act;
-  // Nach einem Zeitraum-Tipp baut die Seite neu auf; iOS kann den Abschluss-Tipp auf einen darunterliegenden Button legen. Den ignorieren wir kurz.
-  if(act!=="wrange" && act!=="w-pick" && ui.rangeTs && Date.now()-ui.rangeTs<600) return;
   if(act==="stop"){ e.stopPropagation(); return; }
   if((el.tagName==="INPUT"&&!["checkbox","radio","range","button"].includes(el.type))||el.tagName==="TEXTAREA") return;
   const p=state.profile;
@@ -2362,7 +2366,7 @@ document.getElementById("app").addEventListener("click", e=>{
     state.measures=state.measures.filter(m=>m.date!==todayIso()).concat(row);
     save(); toast("Messung gespeichert");
   }
-  else if(act==="wrange"){ ui.wrange=el.dataset.v; ui.wpick=null; ui.rangeTs=Date.now(); }
+  else if(act==="wrange"){ ui.wrange=el.dataset.v; ui.wpick=null; }
   else if(act==="w-pick"){ ui.wpick=el.dataset.v; }
   else if(act==="plan-step"){
     const key="p-"+el.dataset.id+"-"+el.dataset.i;
@@ -2405,7 +2409,14 @@ document.getElementById("app").addEventListener("input", e=>{
 });
 function startTick(){
   stopTick();
-  ui.tick=setInterval(()=>{ if(ui.rest>0) ui.rest--; if(ui.workout) render(); }, 1000);
+  ui.tick=setInterval(()=>{
+    const was=ui.rest>0; if(ui.rest>0) ui.rest--;
+    if(!ui.workout) return;
+    const c=document.querySelector(".clock"); if(c&&ui.workout) c.textContent=clock(ui.workout.t0);
+    if(was&&ui.rest===0){ render(); return; }
+    const pb=document.querySelector(".t-rest"); if(pb) pb.textContent=(ui.rest||0)+"s";
+    const rb=document.querySelector(".rest span"); if(rb) rb.textContent="Pause "+ui.rest+"s";
+  }, 1000);
 }
 function stopTick(){ if(ui.tick){ clearInterval(ui.tick); ui.tick=null; } }
 render();
