@@ -37,7 +37,7 @@
       .notch { display:none; }
     }
     .screen { flex:1; min-height:0; display:flex; flex-direction:column; }
-    .scroll { flex:1; overflow:auto; padding:56px 16px 18px; }
+    .scroll { flex:1; min-height:0; overflow:auto; -webkit-overflow-scrolling:touch; padding:56px 16px 18px; }
     .pad { padding-bottom:96px; }
     .topbar { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:14px; gap:8px; }
     h1 { font-size:28px; margin:0; letter-spacing:-.04em; font-weight:800; }
@@ -257,6 +257,11 @@
 
     .rprev{width:100%;text-align:left;display:block}
     .rweek{display:flex;justify-content:space-between;margin-top:12px}
+    .wdeltas{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+    .wdelta{border:1px solid var(--line);border-radius:16px;padding:12px}
+    .wdelta b{display:block;font-size:20px}
+    .rhead{width:100%;text-align:left;display:block;background:none;border:0;padding:0;font:inherit;color:inherit}
+    .rlist{margin-top:10px;border-top:1px solid var(--line)}
     .rd{width:36px;height:36px;border-radius:50%;background:#eceef1;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:700;color:#6b7076}
     .rd.on{background:var(--accent);color:#fff}.rd.part{background:#cfeadb;color:#14683e}.rd.today{outline:2px solid var(--accent);outline-offset:1px}
     .cdot.part{background:#cfeadb;color:#14683e}.sq.part{background:#9fd6b6}
@@ -290,6 +295,7 @@
     .mgrid b{display:block;font-size:16px}.mgrid span{font-size:12px;color:#6b7076}
     .mrow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:14px 2px;font:inherit}
     .mrow span{white-space:nowrap}.mrow i{font-style:normal;font-size:20px;color:#6b7076}
+    .aig{width:72px;border:1.5px solid var(--line);border-radius:10px;padding:8px;text-align:right;font:inherit}
   </style>
 </head>
 <body>
@@ -352,6 +358,193 @@ energy|Energy Drink|Dose|🥤|45,0,11,0,11,1,0,0.1,0`.split("\n");
     BASE_FOODS.push({id,type:"food",name,brand,emoji,kcal,protein,carbs,fat,sugar,processed:!!pr,fiber,salt,sat}); });
   const X={hafer:{fiber:10,sat:1.3},brot:{fiber:7,salt:1.2},pizza:{salt:1.3,sat:4.5},riegel:{fiber:4,sat:5},lachs:{sat:3},ei:{sat:3}};
   BASE_FOODS.forEach(f=>Object.assign(f,X[f.id]||{}));
+})();
+const GENERIC_TXT=`Brötchen;Semmel|Schrippe|Weckle|Wecken;270;9;53;1.5;3;3;60;;
+Vollkornbrot;Brot|Schwarzbrot|Körnerbrot;215;7;38;1.5;3;7;45;45;
+Mischbrot;Brot|Bauernbrot;230;8;45;1.2;3;5;45;45;
+Roggenbrot;Brot;210;6.5;40;1.2;3;6;45;45;
+Toastbrot;Toast|Weißbrot;265;8;49;3;4;3;25;25;
+Vollkorntoast;Toast;245;9;42;3;4;6;28;28;
+Brezel;Laugenbrezel|Breze;285;9;56;2.5;1;3;90;;
+Laugenbrötchen;Laugenweckle;270;9;52;2;2;3;70;;
+Croissant;Buttercroissant;400;8;45;21;7;2;60;;1
+Knäckebrot;Knäcke;330;10;60;1.5;1;14;10;10;
+Reiswaffel;Reiscracker;385;8;80;3;1;1;9;;
+Cornflakes;Frühstücksflocken;375;7;84;1;8;3;;;1
+Müsli;Knuspermüsli|Granola;390;10;60;11;15;8;;;
+Porridge;Haferbrei;90;4;14;2;4;1.5;250;;
+Reis gekocht;Reis|Basmatireis|Jasminreis;130;2.7;28;0.3;0;0.4;;;
+Nudeln gekocht;Pasta|Spaghetti|Penne|Fusilli|Makkaroni|Tagliatelle;155;5.5;30;1;1;2;250;;
+Vollkornnudeln gekocht;Vollkornpasta;150;6;28;1.2;1;4;250;;
+Kartoffeln gekocht;Kartoffel|Salzkartoffeln|Pellkartoffeln;72;2;15;0.1;0.8;1.7;90;;
+Bratkartoffeln;;130;2.5;18;5.5;1;2;;;
+Kartoffelpüree;Püree|Kartoffelbrei;85;2;14;2.5;1.5;1.5;;;
+Pommes frites;Pommes|Fritten;280;3.5;38;13;0.5;3;150;;1
+Couscous gekocht;Couscous;115;4;22;0.5;0.5;1.5;;;
+Quinoa gekocht;Quinoa;120;4.5;21;1.9;1;2.8;;;
+Pfannkuchen;Eierkuchen|Palatschinken|Crêpe;190;6;25;7;5;1;80;;
+Pizza Margherita;Pizza;250;11;31;9;3;2;300;;1
+Pizza Salami;;270;11;30;12;3;2;300;;1
+Döner;Döner Kebab|Dürüm|Kebab;215;12;20;9;3;2;350;;1
+Currywurst;;230;10;8;18;4;1;200;;1
+Bratwurst;Rostbratwurst;300;13;2;27;1;0;100;;1
+Wiener Würstchen;Würstchen|Wiener|Frankfurter;270;12;1;24;1;0;50;;1
+Leberkäse;Fleischkäse;290;12;1;27;1;0;;100;1
+Schnitzel;Wiener Schnitzel|Schweineschnitzel;250;18;12;14;1;1;150;;1
+Hähnchenbrust;Hühnchen|Hähnchen|Chicken|Hühnerbrust;165;31;0;3.6;0;0;150;;
+Hähnchenschenkel;Hühnerkeule;200;18;0;14;0;0;150;;
+Putenbrust;Pute|Truthahn;110;24;0;1.5;0;0;150;;
+Rindersteak;Steak|Rinderfilet|Rindfleisch;150;22;0;7;0;0;200;;
+Hackfleisch;Hack|Rinderhack gemischt|Gehacktes;230;18;0;17;0;0;;;
+Schweinefleisch;Schweinebraten|Schweinefilet;180;21;0;11;0;0;150;;
+Speck;Bacon|Frühstücksspeck;420;14;0.5;40;0.5;0;8;8;1
+Kochschinken;Schinken;110;19;1;3.5;1;0;15;15;
+Salami;;400;20;1;35;1;0;6;6;1
+Leberwurst;;300;12;2;27;1;0;;20;1
+Fleischwurst;Lyoner|Mortadella;260;11;2;23;1;0;;20;1
+Gulasch;Rindergulasch;130;12;4;7;2;1;350;;
+Lasagne;;150;8;13;7;3;1;400;;1
+Spaghetti Bolognese;Bolognese|Spaghetti Bolo;140;7;17;5;3;1.5;400;;
+Spaghetti Carbonara;Carbonara;190;8;20;8;1;1;400;;
+Chili con Carne;Chili;120;9;10;5;2;4;350;;
+Linseneintopf;Eintopf;80;5;11;2;2;3;350;;
+Gemüsesuppe;Suppe;35;1.2;6;0.8;3;1.5;300;;
+Tomatensuppe;;45;1.2;7;1.5;5;1;300;;
+Hühnersuppe;Nudelsuppe;40;3;3;1.5;1;0.5;300;;
+Kartoffelsalat;;130;1.7;15;7;2;1.5;;;
+Nudelsalat;;170;3;19;9;2;1.5;;;
+Falafel;;330;13;32;18;3;5;17;;
+Hummus;;230;8;14;16;0.5;6;;;
+Tofu;Tofu natur;120;13;2;7;0.5;1;;;
+Seitan;;140;25;5;2;0;1;;;
+Lachs;Lachsfilet;200;20;0;13;0;0;150;;
+Forelle;;120;20;0;4;0;0;200;;
+Fischstäbchen;;190;13;17;8;1;1;28;;1
+Garnelen;Shrimps|Krabben;100;21;0;1.5;0;0;;;
+Kabeljau;Seelachs|Fischfilet;80;18;0;0.7;0;0;150;;
+Hering;Matjes|Bismarckhering;200;17;0;14;0;0;;;
+Ei;Eier|Frühstücksei|Hühnerei|Ei gekocht;155;13;1;11;1;0;60;;
+Spiegelei;Spiegeleier;200;13;1;16;1;0;70;;
+Rührei;Rühreier;180;11;1;14;1;0;120;;
+Vollmilch;Milch|Kuhmilch;65;3.4;4.8;3.6;4.8;0;200;;
+Milch 1,5 %;fettarme Milch|Kuhmilch 1,5;47;3.4;4.9;1.5;4.9;0;200;;
+Sojadrink;Sojamilch;40;3.5;2.5;1.8;2;0.5;200;;
+Mandeldrink;Mandelmilch;24;0.5;3;1.1;3;0.3;200;;
+Naturjoghurt 1,5 %;Joghurt|Joghurt fettarm;47;4;6;1.5;6;0;150;;
+Griechischer Joghurt;;130;5;4;10;4;0;150;;
+Hüttenkäse;Cottage Cheese;100;12;3;4;3;0;200;;
+Frischkäse;Philadelphia;250;6;4;23;4;0;;20;
+Mozzarella;;250;18;1;19;1;0;125;;
+Emmentaler;Käse;380;28;0;30;0;0;;25;
+Parmesan;Grana Padano;390;36;0;28;0;0;;5;
+Feta;Schafskäse|Hirtenkäse;260;15;1;22;1;0;;;
+Camembert;Brie;300;20;0;24;0;0;;;
+Margarine;;720;0;0;80;0;0;;10;
+Sahne;Schlagsahne;300;2.5;3.5;30;3.5;0;;;
+Banane;Bananen;90;1;20;0.3;17;2;120;;
+Birne;Birnen;55;0.5;13;0.3;9;3;170;;
+Orange;Orangen|Apfelsine;47;1;9;0.2;8;2;150;;
+Mandarine;Clementine|Mandarinen;46;0.8;10;0.3;9;1.7;80;;
+Weintrauben;Trauben;70;0.7;16;0.2;16;1;;;
+Erdbeeren;Erdbeere;32;0.7;5.5;0.3;5;2;;;
+Himbeeren;Himbeere;40;1.2;5;0.4;4.5;5;;;
+Kiwi;;50;1;10;0.6;9;2;75;;
+Ananas;;55;0.5;12;0.1;10;1.4;;;
+Mango;;60;0.8;14;0.4;13;1.8;250;;
+Wassermelone;Melone;30;0.6;7;0.2;6;0.4;;;
+Pfirsich;Nektarine|Pfirsiche;40;0.8;9;0.1;8;1.5;150;;
+Kirschen;Kirsche;60;1;13;0.3;12;1.5;;;
+Datteln;Dattel;280;2;65;0.5;63;7;8;;
+Rosinen;;300;3;70;0.5;60;4;;;
+Tomate;Tomaten|Cherrytomaten;18;0.9;2.6;0.2;2.6;1.2;100;;
+Gurke;Salatgurke|Gurken;12;0.6;2;0.2;1.7;0.5;300;;
+Paprika;;25;1;4.6;0.3;4.2;2;150;;
+Karotte;Möhre|Mohrrübe|Karotten|Möhren;35;0.9;7;0.2;5;3;80;;
+Blumenkohl;;25;2;2;0.3;2;3;;;
+Zucchini;;19;1.5;2;0.4;2;1;250;;
+Aubergine;;25;1;3;0.2;3;3;250;;
+Spinat;;23;2.7;0.6;0.4;0.5;2;;;
+Salat;Kopfsalat|Blattsalat|Eisbergsalat;14;1.3;1.1;0.2;1;1.5;;;
+Zwiebel;Zwiebeln;28;1.2;5;0.2;4;1.7;80;;
+Champignons;Pilze|Champignon;22;3;0.5;0.3;0.3;1.5;;;
+Mais;Dosenmais;85;3;15;1.5;5;3;;;
+Erbsen;;70;5;10;0.4;4;5;;;
+Kidneybohnen;Bohnen|Kidneybohne;100;7;14;0.5;1;6;;;
+Kichererbsen;Kichererbse;120;8;15;2.5;3;6;;;
+Süßkartoffel;Süßkartoffeln;85;1.5;19;0.2;6;3;200;;
+Kürbis;;26;1;4;0.1;3;1;;;
+Rote Bete;;45;1.5;8;0.1;7;2;;;
+Sauerkraut;;20;1;2;0.3;1.5;2;;;
+Oliven;;115;1;4;11;0.5;3;;;
+Walnüsse;Walnuss;650;15;7;62;3;7;;;
+Haselnüsse;Haselnuss;640;14;10;60;4;10;;;
+Cashewkerne;Cashews;570;18;30;42;6;3;;;
+Erdnüsse;Erdnuss;600;26;8;49;4;8;;;
+Pistazien;;570;21;17;45;8;10;;;
+Sonnenblumenkerne;;580;21;19;49;3;9;;;
+Chiasamen;Chia;490;17;8;31;0;34;;;
+Leinsamen;;500;18;2;42;1;27;;;
+Zartbitterschokolade;Bitterschokolade|Edelbitter;550;7;40;38;30;10;;;1
+Nutella;Nuss-Nougat-Creme|Nussnougatcreme;540;6;58;31;56;3;;;1
+Gummibärchen;Haribo|Weingummi;340;7;77;0.1;46;0;;;1
+Kekse;Keks|Butterkeks;450;7;72;14;24;2;;10;1
+Kuchen;Rührkuchen;380;5;50;18;30;1;;80;1
+Eis;Speiseeis|Vanilleeis|Eiscreme;200;3.5;24;10;22;0;50;;1
+Müsliriegel;;400;6;65;13;30;5;25;;1
+Honig;;300;0.4;75;0;75;0;;;
+Marmelade;Konfitüre;250;0.5;60;0.1;55;1;;;
+Zucker;;400;0;100;0;100;0;;;
+Pudding;;110;3;18;3;16;0;;;1
+Donut;Berliner|Krapfen;380;5;50;18;20;1.5;60;;1
+Popcorn;;400;11;62;13;1;14;;;1
+Wasser;Mineralwasser|Sprudel|Leitungswasser;0;0;0;0;0;0;250;;
+Kaffee;Espresso|Filterkaffee|Kaffee schwarz;2;0.1;0;0;0;0;200;;
+Cappuccino;;45;2.5;4;2;4;0;200;;
+Latte Macchiato;Milchkaffee|Latte;50;3;5;2;5;0;250;;
+Tee;Schwarztee|Grüner Tee|Früchtetee;1;0;0.2;0;0;0;250;;
+Cola;Coca-Cola|Pepsi|Fanta|Sprite;42;0;10.6;0;10.6;0;330;;1
+Cola Zero;Cola light|Zero;0;0;0;0;0;0;330;;1
+Apfelsaft;Saft|Multivitaminsaft;46;0.1;11;0.1;10;0;200;;
+Orangensaft;;45;0.7;10;0.2;9;0;200;;
+Apfelschorle;Schorle;22;0;5;0;5;0;250;;
+Bier;Pils|Weizenbier|Helles;43;0.4;3.5;0;0.1;0;500;;
+Wein;Rotwein|Weißwein|Rosé;75;0.1;2.5;0;1;0;150;;
+Smoothie;;55;0.6;12;0.3;11;1;250;;
+Olivenöl;Öl|Rapsöl|Sonnenblumenöl|Speiseöl;880;0;0;99;0;0;;;
+Mayonnaise;Mayo;680;1;3;75;2;0;;;1
+Ketchup;;100;1.2;23;0.1;22;0.5;;;1
+Senf;;80;4;5;4;3;3;;;
+Sojasauce;Sojasoße;60;8;5;0;1;0;;;
+Tomatensauce;Passata|Pastasauce|Tomatensoße;40;1.5;7;1;5;1.5;;;
+Pesto;;450;5;4;46;2;2;;;
+Salatdressing;Dressing;300;1;8;30;5;0.5;;;1
+Proteinriegel;Proteinbar;350;30;35;10;5;5;45;;1
+Proteinpulver;Whey|Whey Protein|Proteinshake;380;75;8;5;5;0;30;;1`;
+(function(){
+  // Format: Name;Alias|Alias;kcal;Eiweiss;KH;Fett;Zucker;Ballaststoffe;Stueck-g;Scheibe-g;verarbeitet
+  const EMO=[["brot","🍞"],["broetchen","🥖"],["brezel","🥨"],["croissant","🥐"],["reis","🍚"],["nudel","🍝"],["spaghetti","🍝"],["pasta","🍝"],["kartoffel","🥔"],["pommes","🍟"],["pizza","🍕"],["doner","🌯"],["wurst","🌭"],["salami","🌭"],["schnitzel","🍖"],["hahn","🍗"],["huhn","🍗"],["pute","🍗"],["steak","🥩"],["fleisch","🥩"],["hack","🥩"],["speck","🥓"],["schinken","🥓"],["lachs","🐟"],["fisch","🐟"],["forelle","🐟"],["kabeljau","🐟"],["hering","🐟"],["garnele","🦐"],["ei","🥚"],["milch","🥛"],["drink","🥛"],["joghurt","🥛"],["quark","🥛"],["kase","🧀"],["mozzarella","🧀"],["feta","🧀"],["camembert","🧀"],["parmesan","🧀"],["sahne","🥛"],["banane","🍌"],["birne","🍐"],["orange","🍊"],["mandarine","🍊"],["trauben","🍇"],["erdbeer","🍓"],["himbeer","🍓"],["kiwi","🥝"],["ananas","🍍"],["mango","🥭"],["melone","🍉"],["pfirsich","🍑"],["kirsche","🍒"],["tomate","🍅"],["gurke","🥒"],["paprika","🫑"],["karotte","🥕"],["blumenkohl","🥦"],["zucchini","🥒"],["aubergine","🍆"],["spinat","🥬"],["salat","🥗"],["zwiebel","🧅"],["champignon","🍄"],["mais","🌽"],["erbse","🫛"],["bohne","🫘"],["kichererbse","🫘"],["tofu","🫘"],["nuss","🥜"],["nusse","🥜"],["mandel","🌰"],["cashew","🥜"],["schokolade","🍫"],["nutella","🍫"],["gummi","🍬"],["keks","🍪"],["kuchen","🍰"],["eis","🍨"],["riegel","🍫"],["honig","🍯"],["donut","🍩"],["popcorn","🍿"],["wasser","💧"],["kaffee","☕"],["cappuccino","☕"],["latte","☕"],["tee","🍵"],["cola","🥤"],["saft","🧃"],["schorle","🧃"],["bier","🍺"],["wein","🍷"],["smoothie","🥤"],["suppe","🍲"],["eintopf","🍲"],["gulasch","🍲"],["chili","🍲"],["lasagne","🍝"],["bolognese","🍝"],["carbonara","🍝"],["ol","🫒"],["oliven","🫒"],["protein","💪"],["muesli","🥣"],["cornflakes","🥣"],["porridge","🥣"],["haferflocken","🥣"]];
+  const emo=n=>{ const x=NORM(n); for(const [k,e] of EMO){ if(x.includes(k)) return e; } return "🍽️"; };
+  const byName=new Map(); BASE_FOODS.forEach(f=>byName.set(NORM(f.name),f));
+  const num=v=>{ const n=parseFloat(String(v).replace(",",".")); return isFinite(n)?n:NaN; };
+  let added=0, merged=0, skipped=0;
+  GENERIC_TXT.split(/\r?\n/).forEach(line=>{
+    line=line.trim(); if(!line||line[0]==="#") return;
+    const c=line.split(";"); const name=(c[0]||"").trim(); const kcal=num(c[2]);
+    if(!name||!isFinite(kcal)){ skipped++; return; }
+    const al=(c[1]||"").split("|").map(x=>x.trim()).filter(Boolean);
+    const piece=num(c[8])||0, slice=num(c[9])||0;
+    const hit=byName.get(NORM(name))||al.map(a=>byName.get(NORM(a))).find(x=>x&&Math.abs(x.kcal-kcal)<=Math.max(5,kcal*0.1));
+    if(hit){
+      // Doppelung: Naehrwerte der vorhandenen Zeile bleiben, nur Alias und Gramm-Angaben ergaenzen
+      hit.al=Array.from(new Set([...(hit.al||[]),...(NORM(hit.name)===NORM(name)?[]:[name]),...al]));
+      if(piece&&!hit.pieceG) hit.pieceG=piece; if(slice&&!hit.sliceG) hit.sliceG=slice;
+      merged++; return;
+    }
+    const f={id:"g-"+NORM(name).replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,""),type:"food",name,brand:"Standard",emoji:emo(name),
+      kcal,protein:num(c[3])||0,carbs:num(c[4])||0,fat:num(c[5])||0,sugar:num(c[6])||0,fiber:num(c[7])||0,processed:c[10]==="1"||c[10]==="1\r",al,pieceG:piece||undefined,sliceG:slice||undefined};
+    BASE_FOODS.push(f); byName.set(NORM(name),f); added++;
+  });
+  window.GENERIC_STATS={added,merged,skipped};
 })();
 { const sk=BASE_FOODS.find(f=>f.id==="skyr"); if(sk) sk.bc="1111111111116"; }
 const CARE = [
@@ -622,7 +815,7 @@ function foodGlyph(id){
 }
 function weightView(){
   const all = state.weights.slice().sort((a,b)=>a.date<b.date?-1:1);
-  const days = ui.wrange==="7"?7:ui.wrange==="30"?30:ui.wrange==="90"?90:9999;
+  const days = ui.wrange==="7"?7:ui.wrange==="30"?30:ui.wrange==="90"?90:ui.wrange==="365"?365:9999;
   const from = addDays(todayIso(), -days+1);
   const ws = days>3000 ? all : all.filter(w=>w.date>=from);
   const last = lastWeight();
@@ -646,6 +839,16 @@ function weightView(){
     return [x,y];
   });
   const line = pts.map(p=>p.join(",")).join(" ");
+  const sel = (ui.wpick && ws.findIndex(w=>w.date===ui.wpick)>=0) ? ws.findIndex(w=>w.date===ui.wpick) : (ws.length? ws.length-1 : -1);
+  const selW = sel>=0 ? ws[sel] : null;
+  const hits = ws.length ? pts.map((p,i)=>{ const x0 = i===0 ? 0 : (pts[i-1][0]+p[0])/2; const x1 = i===pts.length-1 ? W : (p[0]+pts[i+1][0])/2; return `<rect x="${x0}" y="0" width="${Math.max(1,x1-x0)}" height="${H}" fill="transparent" data-act="w-pick" data-v="${ws[i].date}"/>`; }).join("") : "";
+  const dots = pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===sel?5:2.2}" fill="${i===sel?"#1aa35a":"#1aa35a"}"/>`).join("");
+  const dirTxt = (d,label)=>{ if(d===null) return `<div class="wdelta"><b>–</b><span class="sub">${label}</span></div>`; const s=d>0?"+":""; const w=d>0.05?"zugenommen":d<-0.05?"abgenommen":"unverändert"; return `<div class="wdelta"><b>${s}${d.toFixed(1)} kg</b><span class="sub">${label.replace("X",w)}</span></div>`; };
+  const weightAt = dd => { const c=all.filter(w=>w.date<=dd); return c.length? c[c.length-1].kg : null; };
+  const b30 = weightAt(addDays(todayIso(),-30)), b90 = weightAt(addDays(todayIso(),-90));
+  const d30 = (all.length && b30!==null) ? +(last-b30).toFixed(1) : null;
+  const d90 = (all.length && b90!==null) ? +(last-b90).toFixed(1) : null;
+  const picked = selW ? `<div class="row space" style="margin-top:4px"><b style="font-size:18px">${selW.kg.toFixed(1)} kg</b><span class="sub">${selW.date.split("-").reverse().join(".")}</span></div>` : `<div class="sub">Noch keine Einträge</div>`;
   const area = pts.length ? `M${pts[0][0]},${H-pad} L${line.replace(/ /g," L")} L${pts[pts.length-1][0]},${H-pad} Z` : "";
   const gy = H-pad - ((goal-min)/(max-min))*(H-2*pad);
   return `<div class="card">
@@ -672,14 +875,17 @@ function weightView(){
   <div class="card">
     <div class="row space"><h2>Gewichtsfortschritt</h2><span class="sub">${(last-start>=0?"+":"")+(last-start).toFixed(1)} kg</span></div>
     <div class="seg" style="margin:12px 0">
-      ${[["7","Tage"],["30","Wochen"],["90","Monate"],["all","Alles"]].map(([id,l])=>`<button class="${ui.wrange===id?"on":""}" data-act="wrange" data-v="${id}">${l}</button>`).join("")}
+      ${[["7","Tage"],["30","Wochen"],["90","Monate"],["365","Jahre"]].map(([id,l])=>`<button class="${ui.wrange===id?"on":""}" data-act="wrange" data-v="${id}">${l}</button>`).join("")}
     </div>
     <div class="row" style="align-items:baseline;gap:8px"><b style="font-size:22px">${avg.toFixed(1)} kg</b><span class="sub">BMI ${bmi()} · Schnitt</span></div>
     <svg class="spark" viewBox="0 0 ${W} ${H}" style="height:120px;margin-top:8px">
       <path d="${area}" fill="#1aa35a" opacity=".12"/>
       <line x1="8" y1="${gy}" x2="312" y2="${gy}" stroke="#1aa35a" stroke-dasharray="4 4" stroke-width="1"/>
       <polyline fill="none" stroke="#1aa35a" stroke-width="3" points="${line}"/>
+      ${dots}${hits}
     </svg>
+    ${picked}
+    <div class="wdeltas">${dirTxt(d30,"In 30 Tagen X")}${dirTxt(d90,"In 90 Tagen X")}</div>
     <p class="sub">Richtwert ${weightSpan().low}–${weightSpan().high} kg. Die Linie ist der Verlauf, kein Versprechen.</p>
   </div>`;
 }
@@ -867,7 +1073,6 @@ function renderHeute(){
         ${[["Kohlenhydrate", tot.carbs, t.carbs],["Eiweiß", tot.protein, t.protein],["Fett", tot.fat, t.fat]].map(([name,val,goal])=>`<div class="mac"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
       </div>
     </div>
-    ${insight()}
     <div class="section"><h2>Ernährung</h2><button class="link" data-act="open" data-type="custom">Mehr</button></div>
     <div class="card meals">
       ${SLOTS.map(slot=>{
@@ -884,20 +1089,19 @@ function renderHeute(){
           <button class="plus dark" data-act="open" data-type="scan" data-slot="${slot.id}">+</button>
         </div>`;
       }).join("")}
+    </div>
+    <div class="section"><h2>Wasser &amp; Schritte</h2></div>
+    <div class="card meals">
       <div class="meal-row">
         <div class="bubble">💧</div>
         <div class="grow"><div class="meal-name">Wasser</div><div class="sub">${d.water} / ${state.profile.waterTarget} Gläser</div></div>
         <button class="plus dark" data-act="water-add">+</button>
       </div>
-    </div>
-    <div class="card" style="margin-top:12px">
-      <div class="kpi">
-        <div><span>Gewicht</span><b>${Number(lastWeight()).toFixed(1)}</b><span>kg</span></div>
-        <div><span>Ziel</span><b>${state.profile.target}</b><span>kg</span></div>
-        <div><span>Wasser</span><b>${d.water}</b><span>von ${state.profile.waterTarget}</span></div>
+      <div class="meal-row">
+        <div class="bubble">👟</div>
+        <div class="grow"><div class="meal-name">Schritte</div><div class="sub">${(d.steps||0).toLocaleString("de-DE")} / ${(state.profile.stepGoal||10000).toLocaleString("de-DE")}</div></div>
+        <button class="plus dark" data-act="open" data-type="steps">+</button>
       </div>
-      <div class="gap"></div>
-      <button class="pill ghost" style="width:100%" data-act="open" data-type="weigh">Gewicht erfassen</button>
     </div>
   </div>`;
 }
@@ -1011,14 +1215,10 @@ function renderCoach(){
       </div>
     </div>
     <div class="gap"></div>
-    ${routine.length?`<div class="card meals">
-      <div class="row space" style="padding:8px 0 4px"><b>Heute</b><span class="sub">${done}/${routine.length}</span></div>
-      ${routine.map(r=>`<button class="meal-row" data-act="routine-check" data-id="${r.id}">
-        <div class="bubble">${topicMark(r.topic)}</div>
-        <div class="grow"><div class="meal-name">${esc(r.title)}</div><div class="sub">${esc(r.detail)}</div></div>
-        <span class="chk ${routineOn(r.id)?"on":""}">${routineOn(r.id)?"✓":""}</span>
-      </button>`).join("")}
-    </div>`:`<div class="card"><b>Noch keine Routine</b><div class="sub" style="margin-top:4px">Thema wählen, Fragen beantworten, Vorschlag übernehmen.</div></div>`}
+    ${routine.length?`<div class="card rcoach">
+      <button class="rhead" data-act="c-toggle"><div class="row space"><b>Routine</b><span class="sub">${done}/${routine.length} heute ${ui.cOpen?"▴":"▾"}</span></div></button>
+      ${ui.cOpen?`<div class="rlist">${routine.map(r=>`<button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${routineOn(r.id)?"on":""}">${routineOn(r.id)?"✓":""}</span><div class="grow"><b>${esc(r.title)}</b>${r.detail?`<div class="sub">${esc(r.detail)}</div>`:""}</div></button>`).join("")}</div>`:""}
+    </div>`:`<div class="card"><b>Noch keine Routine</b><div class="sub" style="margin-top:4px">Thema wählen, Fragen beantworten, Vorschlag in die Routine einbauen.</div></div>`}
     <div class="section"><h2>Themen</h2></div>
     <div class="card meals">
     ${coachTopics().map(t=>{
@@ -1174,6 +1374,38 @@ function dayKcal(s){
   const meals=((state.days[s]||{}).meals)||[];
   return meals.reduce((n,m)=>{ const food=foods().find(x=>x.id===m.id); return n+(food?line(food,m.portion).kcal:0); },0);
 }
+function stepsSheet(){
+  const goal=state.profile.stepGoal||10000, n=day().steps||0;
+  return `<h2>Schritte</h2><p class="sub">${labelDate(state.date)} · Ziel ${goal.toLocaleString("de-DE")}</p>
+    <div class="field"><label>Schritte</label><input id="st-input" type="number" inputmode="numeric" value="${n||""}" placeholder="z. B. 8500"></div>
+    <div class="row" style="gap:6px;margin:8px 0">${[500,1000,2500].map(v=>`<button class="chip" data-act="steps-add" data-v="${v}">+${v}</button>`).join("")}</div>
+    <button class="pill primary" style="width:100%" data-act="steps-save">Speichern</button>
+    <div class="sub" style="margin-top:14px">Tagesziel</div>
+    <div class="row" style="gap:6px;margin-top:6px">${[6000,8000,10000,12000].map(v=>`<button class="chip ${goal===v?"on":""}" data-act="step-goal" data-v="${v}">${v/1000}k</button>`).join("")}</div>`;
+}
+function stepsCard(){
+  const goal=state.profile.stepGoal||10000, fmt=v=>Math.round(v).toLocaleString("de-DE");
+  const sel=(state.days[state.date]||{}).steps||0, pct=Math.min(1,sel/goal);
+  const pts=Array.from({length:14},(_,i)=>addDays(state.date,i-13)).map((s,i)=>({s,i,v:(state.days[s]||{}).steps||0}));
+  const last7=pts.slice(7).filter(q=>q.v>0), avg=last7.length?last7.reduce((a,q)=>a+q.v,0)/last7.length:0;
+  const best=Math.max(0,...pts.map(q=>q.v));
+  let streak=0, d=todayIso(); const got=x=>((state.days[x]||{}).steps||0)>=goal;
+  if(!got(d)) d=addDays(d,-1); while(got(d)&&streak<400){ streak++; d=addDays(d,-1); }
+  const R=34, C=2*Math.PI*R;
+  const ring=`<svg viewBox="0 0 84 84" width="84" height="84"><circle cx="42" cy="42" r="${R}" fill="none" stroke="#e8eaee" stroke-width="9"/><circle cx="42" cy="42" r="${R}" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C*pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 42 42)"/><text x="42" y="47" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1c1f">${Math.round(pct*100)}%</text></svg>`;
+  const W=300,H=120,P=16,L=18, mx=Math.max(goal*1.15,...pts.map(q=>q.v)), step=(W-2*P)/14, bw=step-5, Y=v=>H-L-(v/mx)*(H-L-8);
+  const bars=pts.map(q=>{ const h=Math.max(0,H-L-Y(q.v)), on=q.v>=goal&&q.v>0, cur=q.s===state.date, x=P+q.i*step;
+    return `<rect x="${x.toFixed(1)}" y="${Y(q.v).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="4" fill="${on?"var(--accent)":(q.v?"#b9e4cb":"#eef0f3")}" ${cur?'stroke="#14683e" stroke-width="1.5"':""}/><text x="${(x+bw/2).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="9" fill="${cur?"#14683e":"#8a8f98"}" font-weight="${cur?700:400}">${weekday(q.s)[0]}</text>`; }).join("");
+  const svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block"><line x1="${P-4}" x2="${W-P+4}" y1="${Y(goal).toFixed(1)}" y2="${Y(goal).toFixed(1)}" stroke="#c9ced6" stroke-dasharray="4 4"/><text x="${W-P+4}" y="${(Y(goal)-4).toFixed(1)}" text-anchor="end" font-size="9" fill="#8a8f98">Ziel ${fmt(goal)}</text>${bars}</svg>`;
+  const left=goal-sel;
+  return `<div class="section"><h2>Schritte</h2><span class="sub">${labelDate(state.date)}</span></div>
+  <div class="card">
+    <div class="row" style="gap:16px;align-items:center">${ring}<div class="grow"><b style="font-size:28px;letter-spacing:-.02em">${fmt(sel)}</b><div class="sub">${sel>=goal?"Ziel erreicht ✓":"noch "+fmt(left)+" bis "+fmt(goal)}</div></div></div>
+    <div style="margin-top:14px">${svg}</div>
+    <div class="kpi" style="margin-top:10px"><div><span>Ø 7 Tage</span><b>${avg?fmt(avg):"–"}</b></div><div><span>Bester Tag</span><b>${best?fmt(best):"–"}</b></div><div><span>Serie</span><b>${streak} ${streak===1?"Tag":"Tage"}</b></div></div>
+    <button class="pill primary" style="width:100%;margin-top:12px" data-act="open" data-type="steps">Schritte eintragen</button>
+  </div>`;
+}
 function sleepCard(){
   const h=day().sleep, fmt=v=>String(v).replace(".",",")+" h";
   const pts=Array.from({length:14},(_,i)=>addDays(state.date,i-13)).map((s,i)=>({s,i,v:(state.days[s]||{}).sleep||0}));
@@ -1208,9 +1440,12 @@ function rDone(s){ const rt=state.coach.routine||[]; return {c:rt.filter(r=>rout
 function rState(s){ const x=rDone(s); if(!x.n) return ""; if(x.c===x.n) return "on"; if(x.c) return "part"; const st=state.rStart||(state.rStart=todayIso()); return (s<todayIso()&&s>=st)?"miss":""; }
 function rStreak(){ let n=0, s=todayIso(); if(!(state.coach.routine||[]).length) return 0; if(rState(s)!=="on") s=addDays(s,-1); while(rState(s)==="on"&&n<400){ n++; s=addDays(s,-1); } return n; }
 function routineBlock(){
-  const rt=state.coach.routine||[], wk=weekStart(state.date), t=rDone(todayIso());
-  return `<button class="card rprev" data-act="dash" data-id="routine"><div class="row space"><b>Routine${rStreak()>=3?` <span class="rfire">🔥 ${rStreak()}</span>`:""}</b><span class="sub">${rt.length?t.c+"/"+t.n+" heute ›":"Anlegen ›"}</span></div>
-    <div class="rweek">${Array.from({length:7},(_,i)=>addDays(wk,i)).map(s=>`<i class="rd ${rState(s)} ${s===todayIso()?"today":""}">${weekday(s)}</i>`).join("")}</div></button>`;
+  const rt=state.coach.routine||[], wk=weekStart(state.date), t=rDone(state.date), open=!!ui.rOpen&&rt.length>0;
+  const when=state.date===todayIso()?"heute":labelDate(state.date);
+  const list=open?`<div class="rlist">${rt.map(r=>{ const on=routineOn(r.id,state.date); return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><div class="grow"><b>${esc(r.title)}</b>${r.detail?`<div class="sub">${esc(r.detail)}</div>`:""}</div></button></div>`; }).join("")}
+      <button class="link" data-act="dash" data-id="routine" style="margin-top:10px">Kalender, Serie &amp; eigene Punkte ›</button></div>`:"";
+  return `<div class="card rprev"><button class="rhead" data-act="${rt.length?"r-toggle":"dash"}" ${rt.length?"":'data-id="routine"'}><div class="row space"><b>Routine${rStreak()>=3?` <span class="rfire">🔥 ${rStreak()}</span>`:""}</b><span class="sub">${rt.length?t.c+"/"+t.n+" "+when+" "+(open?"▴":"▾"):"Anlegen ›"}</span></div></button>
+    <div class="rweek">${Array.from({length:7},(_,i)=>addDays(wk,i)).map(s=>`<i class="rd ${rState(s)} ${s===todayIso()?"today":""}">${weekday(s)}</i>`).join("")}</div>${list}</div>`;
 }
 function rMonth(y,mo){
   const first=new Date(y,mo,1), pad=(first.getDay()+6)%7, count=new Date(y,mo+1,0).getDate();
@@ -1227,7 +1462,7 @@ function renderRoutineDash(){
     const n=rDone(state.date);
     body=`${state.rHint?"":`<div class="insight" style="margin-bottom:4px"><b>Was ist das?</b><span>Das ist deine Basis-Routine als Beispiel. Hake ab, was du heute geschafft hast. Ändere oder lösche Einträge und füge eigene hinzu. Schaffst du alle, wächst deine Serie. Ein Tag ohne Haken wird rot.</span><button class="link" data-act="rhint" style="text-align:left;margin-top:4px">Verstanden</button></div>`}
     <h2 style="margin:16px 0 8px">${labelDate(state.date)}${rt.length?` · ${n.c}/${n.n}`:""}</h2><div class="card">
-      ${rt.map(r=>{ const on=routineOn(r.id,state.date); return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><b>${esc(r.title)}</b></button>${r.topic==="eigen"?`<button class="x" data-act="routine-del" data-id="${r.id}">✕</button>`:""}</div>`; }).join("")||`<p class="sub" style="padding:6px 0">Noch keine Routine. Leg unten deine erste an.</p>`}
+      ${rt.map(r=>{ const on=routineOn(r.id,state.date); return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><b>${esc(r.title)}</b></button><button class="x" data-act="routine-del" data-id="${r.id}">✕</button></div>`; }).join("")||`<p class="sub" style="padding:6px 0">Noch keine Routine. Leg unten deine erste an.</p>`}
       <div class="row" style="gap:8px;margin-top:14px"><input id="r-new" placeholder="Eigene Routine, z. B. 10 Min lesen" style="flex:1;min-width:0;border:1.5px solid var(--line);border-radius:14px;padding:11px 12px;font:inherit"><button class="pill dark" data-act="routine-add" style="width:auto;padding:0 18px">+</button></div></div>`;
   } else if(m==="month") body=rMonth(now.getFullYear(),now.getMonth())+rMonth(now.getFullYear(),now.getMonth()-1);
   else { const y=now.getFullYear();
@@ -1262,6 +1497,7 @@ function renderVerlauf(){
     ${routine.some(r=>r.topic==="schlaf")?sleepCard():""}
     <div class="section"><h2>Gewicht</h2></div>
     ${weightView()}
+    ${stepsCard()}
   </div>`;
 }
 function renderProfil(){
@@ -1494,6 +1730,7 @@ function renderModal(){
   if(type==="ex-hist") inner=exHist(payload);
   if(type==="wo-detail") inner=woDetail(payload);
   if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Später</button>`;
+  if(type==="steps") inner=stepsSheet();
   if(type==="entries") inner=`<h2>Einträge</h2>${state.weights.slice().reverse().map(w=>`<div class="row space" style="padding:10px 0;border-bottom:1px solid var(--line)"><span>${labelDate(w.date)}</span><b>${w.kg.toFixed(1)} kg</b></div>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
   if(type==="export") inner=`<h2>Lokal gespeichert</h2><p class="sub">${state.weights.length} Wiegepunkte, ${state.workouts.length} Trainings, ${Object.keys(state.days).length} Tage mit Einträgen.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
   return `<div class="sheet" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
@@ -1537,6 +1774,14 @@ async function loadFoodDb(){
 function dbItem(x){ return {id:"db-"+x[0],type:"custom",src:"off",name:x[1],brand:x[2]||"",emoji:"📦",kcal:Math.round(x[3]),protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7]??undefined,fiber:x[8]??undefined,salt:x[9]??undefined,sat:x[10]??undefined,processed:(x[11]||0)>=4,bc:x[0]}; }
 function NORM(t){ return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/ae/g,"a").replace(/oe/g,"o").replace(/ue/g,"u"); }
 function qTokens(q){ return NORM(q).split(/\s+/).filter(Boolean).map(w=>w.length>=7?w.replace(/(en|n|e|s)$/,""):w); }
+function hay(p){ return NORM(p.name+" "+(p.brand||"")+" "+((p.al||[]).join(" "))); }
+function foodRank(p,q){
+  const qn=NORM(q).trim(); if(!qn) return 5;
+  const n=NORM(p.name), als=(p.al||[]).map(NORM);
+  if(n===qn) return 0; if(als.includes(qn)) return 1; if(n.startsWith(qn)) return 2; if(als.some(a=>a.startsWith(qn))) return 3;
+  if(n.split(" ").some(w=>w.startsWith(qn))) return 4; return 5;
+}
+function rankSort(list,q){ const k=p=>{ const r=foodRank(p,q); return r*1000+(r>=2?Math.min(p.name.length,200):0); }; return list.map((p,i)=>[k(p),i,p]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>x[2]); }
 function dbSearch(q,limit){
   const ts=qTokens(q); if(!ts.length) return [];
   const res=[];
@@ -1597,10 +1842,65 @@ function aiMic(){
   r.onend=r.onerror=()=>{ ui.listening=false; render(); };
   try{ r.start(); }catch(e){ ui.listening=false; render(); }
 }
+const U_G={g:1,gramm:1,kg:1000,ml:1,l:1000,liter:1000,el:10,"esslöffel":10,essloeffel:10,tl:4,"teelöffel":4,teeloeffel:4,tasse:200,tassen:200,glas:200,"gläser":200,glaeser:200,becher:150,schale:150,schalen:150,portion:100,portionen:100,handvoll:30,dose:250,dosen:250,teller:350,"schüssel":300,"schüsseln":300,schuessel:300,flasche:500,flaschen:500,kugel:50,kugeln:50,prise:1,prisen:1};
+const U_P=["scheibe","scheiben","stück","stueck","stücke","stuecke","stk","riegel"];
+const isG=u=>!!u&&Object.prototype.hasOwnProperty.call(U_G,u), isP=u=>!!u&&U_P.includes(u);
+const PIECE={ei:60,eier:60,apfel:180,"äpfel":180,banane:120,bananen:120,birne:170,orange:150,"brötchen":60,broetchen:60,semmel:60,brezel:80,croissant:60,tomate:100,tomaten:100,avocado:150,kiwi:75,mandarine:80,kartoffel:90,kartoffeln:90,riegel:40,joghurt:150,skyr:150,"würstchen":50,wurst:50};
+const SLICE={brot:40,toast:25,"käse":25,kaese:25,wurst:15,salami:15,schinken:15};
+const DEF={butter:10,margarine:10,"öl":10,oel:10,"olivenöl":10,marmelade:20,honig:15,zucker:5,kaffee:200,tee:200,wasser:250,milch:200,saft:200,cola:330};
+const NUMW={ein:1,eine:1,einen:1,einem:1,einer:1,zwei:2,drei:3,vier:4,"fünf":5,fuenf:5,sechs:6,halb:.5,halbe:.5,halben:.5,halbes:.5,anderthalb:1.5};
+// Synonyme, die nicht schon als Alias in der Datenbank stehen (Schluessel = ganzer Name nach dem Normalisieren)
+const SYN={"protein shake":"proteinpulver","eiweissshake":"proteinpulver","eiweiss shake":"proteinpulver","weissbrot":"toastbrot","vollkornbroetchen":"brötchen","kaffee schwarz":"kaffee","spaghetti":"nudeln gekocht","hahnchen":"hähnchenbrust","hahnchenfleisch":"hähnchenbrust","huhn":"hähnchenbrust"};
+function matchFood(name){
+  const syn=SYN[NORM(name).trim()]; if(syn) name=syn;
+  const strict=["butter","ol","oel","salz"].includes(NORM(name).trim());
+  const sing=w=>w.length>3?w.replace(/(er|en|n|e|s)$/,""):w;
+  const variants=[name,name.split(/\s+/).map(sing).join(" ")];
+  for(const q of variants){
+    const ts=qTokens(q); if(!ts.length) continue;
+    const pool=foods().filter(p=>!p.hidden&&!String(p.id).startsWith("db-")&&!String(p.id).startsWith("off-"));
+    const qn=NORM(q).trim(), loc=rankSort(pool.filter(p=>{ const x=NORM(p.name+" "+(p.brand||"")); return (!strict&&ts.every(w=>x.includes(w)))||NORM(p.name)===qn||(p.al||[]).some(a=>NORM(a)===qn); }),q);
+    if(loc[0]) return loc[0];
+    if(FOODDB.ok){ const d=dbSearch(q,1); if(d[0]) return d[0]; }
+  }
+  return null;
+}
+function smartParse(text){
+  const segs=text.toLowerCase().replace(/(\d),(\d)/g,"$1.$2").replace(/\b(ca\.?|etwa|ungefähr|circa|so)\b/g," ").split(/,|;|\n|\+|&|\bund\b|\bmit\b|\bsowie\b|\bdazu\b|\bplus\b/).map(x=>x.trim()).filter(Boolean);
+  const items=[], miss=[];
+  for(const seg of segs){
+    const tk=seg.split(/\s+/); let i=0, qty=null, unit=null;
+    const mm=tk[0].match(/^(\d+(?:[.,]\d+)?)([a-zäöüß]*)$/);
+    if(mm){ qty=parseFloat(mm[1].replace(",",".")); if(mm[2]&&(isG(mm[2])||isP(mm[2]))) unit=mm[2]; i=1; }
+    else if(NUMW[tk[0]]!==undefined){ qty=NUMW[tk[0]]; i=1; if(qty===1&&tk[1]&&String(tk[1]).startsWith("halb")){ qty=.5; i=2; } }
+    if(unit==null&&tk[i]&&(isG(tk[i])||isP(tk[i]))&&tk.length>i+1){ unit=tk[i]; i++; }
+    while(["von","vom","an","aus","der","die","das","dem"].includes(tk[i])) i++;
+    let name=tk.slice(i).join(" ");
+    if(!name&&unit&&isP(unit)){ name=unit; unit=null; }
+    if(!name){ miss.push(seg); continue; }
+    const f=matchFood(name);
+    if(!f){ miss.push(name); continue; }
+    // Gramm aus Stueck/Scheibe/Portion: erst Daten der Datenbank, dann alte Tabellen, dann Standard
+    const words=name.split(/\s+/), pw=f.pieceG||words.map(w=>PIECE[w]).find(Boolean)||0, sw=f.sliceG||words.map(w=>SLICE[w]).find(Boolean)||0;
+    let grams;
+    if(unit&&/^scheibe/.test(unit)) grams=(qty||1)*(sw||30);
+    else if(unit&&isP(unit)) grams=(qty||1)*(pw||100);
+    else if(unit==="portion"||unit==="portionen") grams=(qty||1)*(pw>=50?pw:100);
+    else if(unit==="teller"||unit==="schüssel"||unit==="schüsseln"||unit==="schuessel") grams=(qty||1)*(pw>=250?pw:((f.kcal||0)>300?80:U_G[unit]));
+    else if(unit==="flasche"||unit==="flaschen"||unit==="dose"||unit==="dosen") grams=(qty||1)*(pw||U_G[unit]);
+    else if(unit) grams=(qty||1)*U_G[unit];
+    else if(qty!=null) grams=qty*(pw||sw||100);
+    else grams=words.map(w=>DEF[w]).find(Boolean)||(pw>=50?pw:100);
+    items.push({name:f.name,brand:f.brand||"",grams:Math.round(grams),kcal:f.kcal||0,protein:f.protein||0,carbs:f.carbs||0,fat:f.fat||0,sugar:f.sugar||0,processed:!!f.processed,ref:f.id});
+  }
+  return {items,miss};
+}
+
 async function aiRun(){
   const ta=document.getElementById("ai-text"); ui.aiText=(ta&&ta.value||"").trim();
   if(!ui.aiText){ toast("Beschreibe dein Essen"); return; }
-  ui.aiBusy=true; ui.aiErr=""; ui.aiRes=null; render();
+  if(!window.claude){ const r=smartParse(ui.aiText); ui.aiRes=r.items.length?r.items:null; ui.aiMiss=r.miss; ui.aiErr=r.items.length?"":'Nichts erkannt. Schreib z. B. "200 g Haferflocken, 2 Eier, ein Apfel".'; render(); return; }
+  ui.aiBusy=true; ui.aiErr=""; ui.aiRes=null; ui.aiMiss=[]; render();
   try{
     const sample=window.claude?await claude.use("sample"):null;
     if(!sample) throw new Error("Die KI-Erkennung braucht einen eigenen Server und ist in dieser Version noch aus.");
@@ -1624,11 +1924,12 @@ function barcodeView(){
 function aiView(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition, r=ui.aiRes;
   return `${yHead("Sprache/Text","list")}
-    <p class="sub">Schreib oder sprich, was du gegessen hast. Die KI schätzt Mengen und Nährwerte.</p>
+    <p class="sub">Schreib oder sprich, was du gegessen hast, z. B. „200 g Haferflocken, 2 Eier, ein Apfel“. Die App erkennt Mengen und sucht die Lebensmittel in der Datenbank.</p>
     <textarea id="ai-text" class="aitext" placeholder="z. B. 2 Eier, 2 Scheiben Vollkornbrot mit Butter und ein Kaffee mit Milch">${esc(ui.aiText||"")}</textarea>
     <div class="row" style="gap:8px">${SR?`<button class="pill ghost" data-act="ai-mic">🎤 ${ui.listening?"Hört zu…":"Sprechen"}</button>`:""}<button class="pill primary" style="flex:1" data-act="ai-run" ${ui.aiBusy?"disabled":""}>${ui.aiBusy?"Erkenne…":"Erkennen"}</button></div>
     ${ui.aiErr?`<p class="sub" style="color:var(--bad)">${esc(ui.aiErr)}</p>`:""}
-    ${r?`<div class="section"><h2>Erkannt</h2></div>${r.map(i=>`<div class="yrow"><div class="grow"><b>${esc(i.name)}</b><div class="sub">${i.grams} g · ${Math.round(i.protein*i.grams/100)} g Protein</div></div><b>${Math.round(i.kcal*i.grams/100)} kcal</b></div>`).join("")}<button class="yfertig" data-act="ai-add">Alles hinzufügen</button>`:""}`;
+    ${r?`<div class="section"><h2>Erkannt</h2><span class="sub">Gesamt <b id="ai-tot">${r.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0)}</b> kcal</span></div>${r.map((i,k)=>`<div class="yrow"><div class="grow"><b>${esc(i.name)}</b><div class="sub">${esc(i.brand||"")}${i.brand?" · ":""}<span id="ai-k${k}">${Math.round(i.kcal*i.grams/100)}</span> kcal</div></div><input class="aig" type="number" inputmode="decimal" value="${i.grams}" data-act="ai-g" data-i="${k}"><span class="sub">g</span><button class="x" data-act="ai-del" data-i="${k}">✕</button></div>`).join("")}<button class="yfertig" data-act="ai-add">Alles hinzufügen</button>`:""}
+    ${(ui.aiMiss||[]).length?`<p class="sub" style="margin-top:10px">Nicht gefunden: ${ui.aiMiss.map(esc).join(", ")}. Such sie einzeln oder leg sie an.</p>`:""}`;
 }
 function moreView(){
   return `${yHead("Was möchtest du erstellen?","list")}
@@ -1654,7 +1955,7 @@ function newFoodView(){
 function scanResults(){
   const q=ui.query.trim().toLowerCase(), mode="text";
   const pool=mode==="care"?CARE:mode==="sup"?SUPS:foods().filter(p=>!p.hidden);
-  const ts=qTokens(q), found0=(q?pool.filter(p=>{ const x=NORM(p.name+" "+(p.brand||"")); return ts.every(w=>x.includes(w)); }):pool).slice(0,12);
+  const ts=qTokens(q), found0=(q?rankSort(pool.filter(p=>{ const x=hay(p); return ts.every(w=>x.includes(w)); }),q):pool).slice(0,12);
   let found=found0, more=""; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const lim=ui.scanMax||30, ids=new Set(found0.map(p=>p.id)), d=dbSearch(q,lim); found=found0.concat(d.filter(p=>!ids.has(p.id))); if(d.length>=lim) more=`<button class="pill ghost" style="width:100%;margin-top:12px" data-act="scan-more">Mehr anzeigen</button>`; }
   const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}">+</button>`:""}</div>`; };
   const hint=(mode==="text"&&q.length>=2&&!FOODDB.ok)?`<p class="sub" style="padding:8px 0">Produktdatenbank nicht geladen (foods.json fehlt oder lädt noch). Es werden nur Basis-Einträge durchsucht.</p>`:"";
@@ -1753,7 +2054,9 @@ function areaSheet(id){
       return `<button class="food" data-act="open" data-type="product" data-id="${pid}"><div class="thumb">${item.emoji||""}</div><div class="grow"><b>${item.name}</b><div class="sub">${item.brand||""}</div></div></button>`;
     }).join("")}`:""}
     <div class="gap"></div>
-    <button class="pill primary" data-act="coach-add" data-topic="${id}">In meine Routine</button>
+    ${(state.coach.routine||[]).some(r=>r.topic===id)
+      ?`<button class="pill ghost" style="width:100%" data-act="coach-remove" data-topic="${id}">Aus der Routine entfernen</button>`
+      :`<button class="pill primary" data-act="coach-add" data-topic="${id}">In die Routine einbauen</button>`}
     <div class="gap"></div>
     <button class="pill ghost" style="width:100%" data-act="coach-reset" data-topic="${id}">Antworten ändern</button>`;
 }
@@ -1828,6 +2131,8 @@ function seedDemo(){
 document.getElementById("app").addEventListener("click", e=>{
   const el=e.target.closest("[data-act]"); if(!el) return;
   const act=el.dataset.act;
+  // Nach einem Zeitraum-Tipp baut die Seite neu auf; iOS kann den Abschluss-Tipp auf einen darunterliegenden Button legen. Den ignorieren wir kurz.
+  if(act!=="wrange" && act!=="w-pick" && ui.rangeTs && Date.now()-ui.rangeTs<600) return;
   if(act==="stop"){ e.stopPropagation(); return; }
   if((el.tagName==="INPUT"&&!["checkbox","radio","range","button"].includes(el.type))||el.tagName==="TEXTAREA") return;
   const p=state.profile;
@@ -1866,7 +2171,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="ai-run"){ aiRun(); return; }
   else if(act==="ai-mic"){ aiMic(); return; }
   else if(act==="ai-add"){
-    (ui.aiRes||[]).forEach(i=>{ const it={id:"a-"+uid(),type:"custom",hidden:true,name:i.name,brand:"KI",emoji:"✨",kcal:i.kcal,protein:i.protein,carbs:i.carbs,fat:i.fat,sugar:i.sugar,processed:i.processed}; state.customs.push(it); day().meals.push({uid:uid(),id:it.id,portion:i.grams,slot:ui.addSlot||"snack"}); });
+    (ui.aiRes||[]).forEach(i=>{ if(i.ref){ ensureDb(i.ref); day().meals.push({uid:uid(),id:i.ref,portion:i.grams,slot:ui.addSlot||"snack"}); return; } const it={id:"a-"+uid(),type:"custom",hidden:true,name:i.name,brand:"KI",emoji:"✨",kcal:i.kcal,protein:i.protein,carbs:i.carbs,fat:i.fat,sugar:i.sugar,processed:i.processed}; state.customs.push(it); day().meals.push({uid:uid(),id:it.id,portion:i.grams,slot:ui.addSlot||"snack"}); });
     ui.aiRes=null; ui.aiText=""; ui.scanView="list"; syncAuto(state.date); save(); toast("Im Tagebuch");
   }
   else if(act==="save-quick"){
@@ -1881,6 +2186,10 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.portion=m.portion; } }
   else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid), i=document.getElementById("portion"); if(m) m.portion=Math.max(1,+(i&&i.value||ui.portion)||m.portion); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
   else if(act==="del-meal2"){ day().meals=day().meals.filter(x=>x.uid!==ui.editUid); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gelöscht"); }
+  else if(act==="ai-del"){ (ui.aiRes||[]).splice(+el.dataset.i,1); if(!(ui.aiRes||[]).length) ui.aiRes=null; }
+  else if(act==="steps-add"){ const i=document.getElementById("st-input"); if(i) i.value=(+i.value||0)+ +el.dataset.v; return; }
+  else if(act==="steps-save"){ const i=document.getElementById("st-input"); day().steps=Math.max(0,Math.round(+(i&&i.value)||0)); ui.modal=null; save(); toast("Gespeichert"); }
+  else if(act==="step-goal"){ state.profile.stepGoal=+el.dataset.v; save(); }
   else if(act==="scan-more"){ ui.scanMax=(ui.scanMax||30)+30; const bx=document.getElementById("scan-results"); if(bx) bx.innerHTML=scanResults(); return; }
   else if(act==="amt-open"||act==="amt-toggle"){
     const a=document.querySelector(".amt"); if(!a) return;
@@ -1940,6 +2249,9 @@ document.getElementById("app").addEventListener("click", e=>{
     state.coach.routine=state.coach.routine.filter(r=>r.topic!==topic).concat(advice.items.map((item,i)=>({id:topic+"-"+i, topic, title:item.title, detail:item.detail, product:item.product})));
     ui.modal=null; save(); toast("In der Routine");
   }
+  else if(act==="coach-remove"){ state.coach.routine=(state.coach.routine||[]).filter(r=>r.topic!==el.dataset.topic); ui.modal=null; save(); toast("Aus der Routine entfernt"); }
+  else if(act==="r-toggle"){ ui.rOpen=!ui.rOpen; }
+  else if(act==="c-toggle"){ ui.cOpen=!ui.cOpen; }
   else if(act==="rhint"){ state.rHint=1; save(); }
   else if(act==="r-pick"){ state.date=el.dataset.v; ui.rcal="day"; save(); }
   else if(act==="rcal-mode"){ ui.rcal=el.dataset.v; ui.rOff=0; }
@@ -2050,7 +2362,8 @@ document.getElementById("app").addEventListener("click", e=>{
     state.measures=state.measures.filter(m=>m.date!==todayIso()).concat(row);
     save(); toast("Messung gespeichert");
   }
-  else if(act==="wrange"){ ui.wrange=el.dataset.v; }
+  else if(act==="wrange"){ ui.wrange=el.dataset.v; ui.wpick=null; ui.rangeTs=Date.now(); }
+  else if(act==="w-pick"){ ui.wpick=el.dataset.v; }
   else if(act==="plan-step"){
     const key="p-"+el.dataset.id+"-"+el.dataset.i;
     day().checks[key]=day().checks[key]?0:1;
@@ -2076,6 +2389,7 @@ document.getElementById("app").addEventListener("input", e=>{
     const box=document.getElementById("scan-results");
     if(box) box.innerHTML=scanResults(); else render();
   }
+  if(el.dataset.act==="ai-g"){ const k=+el.dataset.i, it=(ui.aiRes||[])[k]; if(it){ it.grams=Math.max(0,+el.value||0); const kc=document.getElementById("ai-k"+k), tt=document.getElementById("ai-tot"); if(kc) kc.textContent=Math.round(it.kcal*it.grams/100); if(tt) tt.textContent=ui.aiRes.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0); } }
   if(el.dataset.act==="portion-in"){ ui.portion=+el.value||0; const it=allItems().find(p=>p.id===el.dataset.id), b=document.getElementById("fmacros"), t=document.getElementById("ftable"), v=document.getElementById("amt-val"); if(it){ if(b) b.innerHTML=fMacros(it,ui.portion); if(t) t.innerHTML=fTable(it,ui.portion); } if(v) v.textContent=ui.portion||0; }
   if(el.dataset.act==="set-kg") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].kg=+el.value||0;
   if(el.dataset.act==="set-reps") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].reps=+el.value||0;
