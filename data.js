@@ -244,24 +244,26 @@ Proteinpulver;Whey|Whey Protein|Proteinshake;380;75;8;5;5;0;30;;1`;
   window.GENERIC_STATS={added,merged,skipped};
 })();
 { const sk=BASE_FOODS.find(f=>f.id==="skyr"); if(sk) sk.bc="1111111111116"; }
+// Partnerlinks/Bezugsquellen erst einschalten, wenn es echte Partner gibt.
+const PARTNERS_ENABLED = false;
 const CARE = [
-  { id:"cerave", type:"care", name:"Feuchtigkeitscreme", brand:"CeraVe", emoji:"🧴", skin:["trocken","sensibel","normal"], fragrance:false, alcohol:false, actives:["Ceramides"] },
-  { id:"nia", type:"care", name:"Niacinamid 10 %", brand:"Plain Lab", emoji:"💧", skin:["fettig","unrein","normal"], fragrance:false, alcohol:false, actives:["Niacinamid"] },
-  { id:"spf", type:"care", name:"Sonnencreme LSF 50", brand:"DayShield", emoji:"☀️", skin:["trocken","sensibel","fettig","normal"], fragrance:false, alcohol:false, actives:["UV-Filter"] },
-  { id:"toner", type:"care", name:"Gesichtswasser", brand:"SharpGlow", emoji:"💧", skin:["fettig"], fragrance:true, alcohol:true, actives:["Menthol"] }
+  { id:"cerave", type:"care", name:"Feuchtigkeitscreme", emoji:"🧴", skin:["trocken","sensibel","normal"], fragrance:false, alcohol:false, actives:["Ceramides"] },
+  { id:"nia", type:"care", name:"Niacinamid 10 %", emoji:"💧", skin:["fettig","unrein","normal"], fragrance:false, alcohol:false, actives:["Niacinamid"] },
+  { id:"spf", type:"care", name:"Sonnencreme LSF 50", emoji:"☀️", skin:["trocken","sensibel","fettig","normal"], fragrance:false, alcohol:false, actives:["UV-Filter"] },
+  { id:"toner", type:"care", name:"Gesichtswasser", emoji:"💧", skin:["fettig"], fragrance:true, alcohol:true, actives:["Menthol"] }
 ];
 CARE.push(
-  {id:"cleanser",type:"care",name:"Mildes Reinigungsgel",brand:"Basic",emoji:"🧼",skin:["fettig","unrein","normal","sensibel"],fragrance:false,alcohol:false,actives:[]},
-  {id:"shampoo",type:"care",name:"Mildes Shampoo",brand:"Basic",emoji:"🚿",skin:["normal","sensibel","trocken"],fragrance:false,alcohol:false,actives:[]},
-  {id:"duft",type:"care",name:"Duschgel parfümiert",brand:"FreshWave",emoji:"🧴",skin:["normal"],fragrance:true,alcohol:false,actives:[]}
+  {id:"cleanser",type:"care",name:"Mildes Reinigungsgel",emoji:"🧼",skin:["fettig","unrein","normal","sensibel"],fragrance:false,alcohol:false,actives:[]},
+  {id:"shampoo",type:"care",name:"Mildes Shampoo",emoji:"🚿",skin:["normal","sensibel","trocken"],fragrance:false,alcohol:false,actives:[]},
+  {id:"duft",type:"care",name:"Duschgel parfümiert",emoji:"🧴",skin:["normal"],fragrance:true,alcohol:false,actives:[]}
 );
 const SUPS = [
-  { id:"crea", type:"sup", name:"Creatin Monohydrat", brand:"Plain Lab", emoji:"⚪", dose:"5 g", when:"täglich", note:"Am klarsten belegt für Kraft." },
-  { id:"whey", type:"sup", name:"Whey Isolat", brand:"CleanPro", emoji:"🥛", dose:"25 g", when:"nach dem Training", note:"Nur wenn Protein aus Essen fehlt." },
-  { id:"d3", type:"sup", name:"Vitamin D3", brand:"Nord", emoji:"☀️", dose:"2000 IE", when:"morgens", note:"Basis bei wenig Sonne." },
-  { id:"o3", type:"sup", name:"Omega-3", brand:"Nord", emoji:"🐟", dose:"1–2 g EPA/DHA", when:"zur Mahlzeit", note:"Sinnvoll bei wenig Fisch." },
-  { id:"mg", type:"sup", name:"Magnesium", brand:"Night", emoji:"🌙", dose:"200–300 mg", when:"abends", note:"Kann den Schlaf ruhiger machen." },
-  { id:"col", type:"sup", name:"Kollagen", brand:"Glow", emoji:"🧴", dose:"10 g", when:"morgens", note:"Schwächer als Schlaf, LSF, Essen." }
+  { id:"crea", type:"sup", name:"Creatin Monohydrat", emoji:"⚪", dose:"5 g", when:"täglich", note:"Am klarsten belegt für Kraft." },
+  { id:"whey", type:"sup", name:"Whey Isolat", emoji:"🥛", dose:"25 g", when:"nach dem Training", note:"Nur wenn Protein aus Essen fehlt." },
+  { id:"d3", type:"sup", name:"Vitamin D3", emoji:"☀️", dose:"2000 IE", when:"morgens", note:"Basis bei wenig Sonne." },
+  { id:"o3", type:"sup", name:"Omega-3", emoji:"🐟", dose:"1–2 g EPA/DHA", when:"zur Mahlzeit", note:"Sinnvoll bei wenig Fisch." },
+  { id:"mg", type:"sup", name:"Magnesium", emoji:"🌙", dose:"200–300 mg", when:"abends", note:"Kann den Schlaf ruhiger machen." },
+  { id:"col", type:"sup", name:"Kollagen", emoji:"🧴", dose:"10 g", when:"morgens", note:"Schwächer als Schlaf, LSF, Essen." }
 ];
 const ROUTINES = [
   { id:"push", name:"Push", detail:"Bankdrücken, Schulterdrücken", exercises:["bp","ohp"] },

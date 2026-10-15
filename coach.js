@@ -279,9 +279,9 @@ function productSheet(id){
     `:item.type==="sup"?`
       <div class="sub">${item.dose} · ${item.when}</div><div class="gap"></div>
       <button class="pill ${inStack?"ghost":"primary"}" style="width:100%" data-act="toggle-stack" data-id="${item.id}">${inStack?"Aus dem Stack":"In den Stack"}</button>
-      ${state.profile.affiliates?`<div class="gap"></div><button class="pill ghost" style="width:100%" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}
+      ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost" style="width:100%" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}
     `:`<button class="pill ghost" style="width:100%" data-act="mark-pflege">Für Pflege merken</button>
-      ${state.profile.affiliates?`<div class="gap"></div><button class="pill ghost" style="width:100%" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}`}
+      ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost" style="width:100%" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}`}
   `;
 }
 function areaSheet(id){
@@ -322,8 +322,7 @@ function supsSheet(){
       <div class="score ${scoreClass(r.score)}">${r.score}</div></button>`; }).join("")}
     <div class="gap"></div><button class="pill primary" data-act="apply-stack">Vorschlag übernehmen</button>
     <div class="section"><h2>Rest</h2></div>
-    ${rest.map(p=>`<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${p.note}</div></div><div class="score ${scoreClass(scored(p).score)}">${scored(p).score}</div></button>`).join("")}
-    <p class="sub">Partnerlinks ändern den Score nicht.</p>`;
+    ${rest.map(p=>`<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${p.note}</div></div><div class="score ${scoreClass(scored(p).score)}">${scored(p).score}</div></button>`).join("")}`;
 }
 function skinSheet(){
   const q=[

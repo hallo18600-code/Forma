@@ -384,7 +384,7 @@ function renderModal(){
     <div class="opts">${[["wenig","Selten"],["oft","Oft"]].map(([v,l])=>`<button class="chip ${state.profile.fish===v?"on":""}" data-act="set" data-k="fish" data-v="${v}">${l}</button>`).join("")}</div>
     <div class="gap"></div><button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="weigh") inner=weighSheet();
-  if(type==="legal") inner=`<h2>Hinweise</h2><p class="sub">Nur für Erwachsene. Richtwerte, keine medizinische Beratung. Supplements ersetzen kein Essen. Partnerlinks sind Anzeigen und ändern den Score nicht. Produktdaten teils von Open Food Facts (© Open Food Facts-Mitwirkende, ODbL 1.0). Daten bleiben im Browser dieses Geräts.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  if(type==="legal") inner=`<h2>Hinweise</h2><p class="sub">Nur für Erwachsene. Richtwerte, keine medizinische Beratung. Supplements ersetzen kein Essen. Produktdaten teils von Open Food Facts (© Open Food Facts-Mitwirkende, ODbL 1.0). Daten bleiben im Browser dieses Geräts.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
   if(type==="stack") inner=stackSheet();
   if(type==="custom") inner=customSheet();
   if(type==="ex"||type==="plan-ex") inner=exPicker(type==="plan-ex"?"plan":"live");

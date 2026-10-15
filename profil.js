@@ -24,7 +24,7 @@ function renderProfil(){
     <div class="group">
       <button class="g-row" data-act="toggle" data-k="calories"><div class="grow"><b>Kalorien im Tagebuch</b></div>${tog(p.calories)}</button>
       <button class="g-row" data-act="toggle" data-k="reminders"><div class="grow"><b>Erinnerungen</b><div class="sub">Nur Markierung, kein Push</div></div>${tog(p.reminders)}</button>
-      <button class="g-row" data-act="toggle" data-k="affiliates"><div class="grow"><b>Partnerlinks</b><div class="sub">Anzeige, Score bleibt unabhängig</div></div>${tog(p.affiliates)}</button>
+      ${PARTNERS_ENABLED?`<button class="g-row" data-act="toggle" data-k="affiliates"><div class="grow"><b>Partnerlinks</b><div class="sub">Anzeige, Score bleibt unabhängig</div></div>${tog(p.affiliates)}</button>`:""}
     </div>
     <div class="section"><h2>Konto</h2></div>
     <div class="group">
