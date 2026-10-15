@@ -527,7 +527,8 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="water"){ day().water = day().water===+el.dataset.v ? +el.dataset.v-1 : +el.dataset.v; syncAuto(state.date); save(); }
   else if(act==="sleep-adj"){ const d=day(); d.sleep=d.sleep==null?7:Math.max(0,Math.min(14,Math.round((d.sleep+ +el.dataset.v)*2)/2)); save(); }
-  else if(act==="water-add"){ day().water=Math.min(state.profile.waterTarget, day().water+1); syncAuto(state.date); save(); }
+  else if(act==="water-add"){ day().water=(day().water||0)+1; syncAuto(state.date); save(); }
+  else if(act==="water-sub"){ day().water=Math.max(0,(day().water||0)-1); syncAuto(state.date); save(); }
   else if(act==="task"){
     const id=el.dataset.id;
     if(id==="wasser"){ state.tab="heute"; }

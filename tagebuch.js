@@ -41,7 +41,8 @@ function renderHeute(){
       <div class="meal-row">
         <div class="bubble">💧</div>
         <div class="grow"><div class="meal-name">Wasser</div><div class="sub">${d.water} / ${state.profile.waterTarget} Gläser</div></div>
-        <button class="plus dark" data-act="water-add">+</button>
+        <div class="row" style="gap:8px"><button class="plus" data-act="water-sub" aria-label="Ein Glas weniger" ${d.water>0?"":"disabled"}>−</button>
+        <button class="plus dark" data-act="water-add" aria-label="Ein Glas mehr">+</button></div>
       </div>
       <div class="meal-row">
         <div class="bubble">👟</div>

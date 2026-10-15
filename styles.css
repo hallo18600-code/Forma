@@ -41,6 +41,7 @@ h2 { font-size:16px; margin:0; font-weight:700; }
 .pill:disabled { opacity:.45; }
 .pill:active { transform:scale(.98); }
 .plus { width:36px; height:36px; border-radius:50%; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; font-size:22px; flex:none; }
+.plus:disabled { opacity:.35; }
 .plus.dark { width:42px; height:42px; border-radius:50%; background:#1c1d1f; color:#fff; font-size:26px; }
 .tabs { position:absolute; left:12px; right:12px; bottom:10px; background:#fff; border-radius:22px; box-shadow:0 8px 24px rgba(16,24,40,.08); display:grid; grid-template-columns:repeat(5,1fr); padding:8px 0 10px; z-index:8; }
 .tab { display:flex; flex-direction:column; align-items:center; gap:2px; color:#9aa0a6; font-size:9px; font-weight:650; }
