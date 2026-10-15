@@ -153,8 +153,36 @@ function woDetail(id){
   if(!w) return "<p>Nicht gefunden.</p>";
   return `<h2>${esc(w.name)}</h2><p class="sub">${labelDate(w.date)} · ${w.min} min · ${w.volume} kg</p>
     ${(w.exercises||[]).map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")}
-    <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+    <div class="gap"></div><button class="pill primary" data-act="close">OK</button>
+    <div class="gap"></div><div class="row" style="gap:8px"><button class="pill ghost" style="flex:1" data-act="wo-edit" data-id="${w.id}">Bearbeiten</button><button class="pill ghost" style="flex:1;color:#d93636" data-act="wo-del-ask" data-id="${w.id}">Löschen</button></div>`;
 }
+// Gespeichertes Training bearbeiten (Kopie liegt in ui.woEdit, erst "Speichern" ändert die Daten)
+function woEditSheet(){
+  const w=ui.woEdit; if(!w) return "";
+  const inp='style="width:64px;height:36px;border:1px solid var(--line);border-radius:10px;padding:0 8px"';
+  return `<h2>Training bearbeiten</h2>
+    <div class="field"><label for="wo-name">Name</label><input id="wo-name" data-act="wo-f" data-k="name" value="${esc(w.name)}"></div>
+    <div class="field"><label for="wo-date">Datum</label><input id="wo-date" type="date" data-act="wo-f" data-k="date" max="${todayIso()}" value="${w.date}"></div>
+    <div class="field"><label for="wo-min">Dauer in Minuten</label><input id="wo-min" type="number" inputmode="numeric" min="1" data-act="wo-f" data-k="min" value="${w.min}"></div>
+    ${w.exercises.map((e,ei)=>`<div style="padding:10px 0;border-top:1px solid var(--line)">
+      <b>${exName(e.id)}</b>
+      ${e.sets.map((st,si)=>`<div class="row" style="gap:8px;margin-top:6px;align-items:center"><span class="sub" style="width:44px">Satz ${si+1}</span>
+        <input ${inp} type="number" inputmode="decimal" data-act="wo-set" data-f="kg" data-e="${ei}" data-s="${si}" value="${st.kg}" aria-label="kg"><span class="sub">kg ×</span>
+        <input ${inp} type="number" inputmode="numeric" data-act="wo-set" data-f="reps" data-e="${ei}" data-s="${si}" value="${st.reps}" aria-label="Wiederholungen"><span class="sub">Wdh.</span>
+        <button class="x" data-act="wo-del-set" data-e="${ei}" data-s="${si}" aria-label="Satz entfernen">✕</button></div>`).join("")}
+    </div>`).join("")}
+    <div class="gap"></div><button class="pill primary" data-act="wo-save">Speichern</button>
+    <div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Abbrechen</button>`;
+}
+function woDelSheet(id){
+  const w=state.workouts.find(x=>x.id===id); if(!w) return "";
+  return `<h2>Training löschen?</h2>
+    <p class="sub"><b>${esc(w.name)}</b> vom ${w.date.split("-").reverse().join(".")} (${w.sets} ${w.sets===1?"Satz":"Sätze"}) wird gelöscht. Das lässt sich nicht rückgängig machen.</p>
+    <div class="gap"></div><button class="pill danger" data-act="wo-del-go" data-id="${w.id}">Ja, löschen</button>
+    <div class="gap"></div><button class="pill ghost" style="width:100%" data-act="open" data-type="wo-detail" data-id="${w.id}">Abbrechen</button>`;
+}
+// Haken "Sport" am Tag passend setzen, nachdem Trainings geändert wurden
+function syncSport(date){ if(state.days[date]) state.days[date].checks.sport = state.workouts.some(w=>w.date===date)?1:0; }
 
 function workoutOn(date){
   return state.workouts.filter(w=>w.date===date);

@@ -392,7 +392,10 @@ function renderModal(){
   if(type==="wo-detail") inner=woDetail(payload);
   if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Später</button>`;
   if(type==="steps") inner=stepsSheet();
-  if(type==="entries") inner=`<h2>Einträge</h2>${state.weights.slice().reverse().map(w=>`<div class="row space" style="padding:10px 0;border-bottom:1px solid var(--line)"><span>${labelDate(w.date)}</span><b>${w.kg.toFixed(1)} kg</b></div>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
+  if(type==="entries") inner=`<h2>Einträge</h2><p class="sub">Tippe auf einen Eintrag, um ihn zu ändern oder zu löschen.</p>${state.weights.slice().reverse().map(w=>`<button class="row space" style="width:100%;padding:10px 0;border-bottom:1px solid var(--line)" data-act="w-edit" data-v="${w.date}"><span>${labelDate(w.date)}</span><span><b>${w.kg.toFixed(1)} kg</b> <span class="sub">›</span></span></button>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
+  if(type==="w-edit") inner=weightEditSheet(payload);
+  if(type==="wo-edit") inner=woEditSheet();
+  if(type==="wo-del") inner=woDelSheet(payload);
   if(type==="import") inner=importSheet();
   if(type==="reset") inner=resetSheet();
   return `<div class="sheet" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
@@ -686,6 +689,51 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="haut-reset"){ state.hautPlan=false; save(); }
   else if(act==="goal-weeks"){ state.profile.goalDate=addDays(todayIso(), 7*8); save(); toast("Ziel in 8 Wochen"); }
   else if(act==="affiliate") toast("Anzeige · Score bleibt gleich");
+  else if(act==="w-edit"){ const w=state.weights.find(x=>x.date===el.dataset.v); if(!w) return; ui.draftKg=w.kg; openModal("w-edit", w.date); ui.confirmDel=false; render(); return; }
+  else if(act==="w-edit-step"){ const i=document.getElementById("w-edit-kg"); const v=+((i&&i.value)||ui.draftKg).toString().replace(",","."); ui.draftKg=Math.max(35,Math.min(220,+((v||ui.draftKg)+ +el.dataset.d).toFixed(1))); if(i){ i.value=ui.draftKg.toFixed(1); return; } }
+  else if(act==="w-save"){
+    const i=document.getElementById("w-edit-kg"), kg=+(String(i&&i.value||"").replace(",","."));
+    if(!(kg>=35&&kg<=220)){ toast("Bitte 35–220 kg eingeben"); return; }
+    const w=state.weights.find(x=>x.date===el.dataset.v); if(!w) return;
+    w.kg=+kg.toFixed(1); p.weight=lastWeight(); ui.modal={type:"entries"}; save(); toast("Gespeichert");
+  }
+  else if(act==="w-del-ask"){ ui.confirmDel=true; }
+  else if(act==="del-cancel"){ ui.confirmDel=false; }
+  else if(act==="w-del-go"){
+    const d=ui.modal&&ui.modal.payload;
+    state.weights=state.weights.filter(x=>x.date!==d);
+    if(state.weights.length) p.weight=lastWeight();
+    ui.confirmDel=false; ui.modal={type:"entries"}; save(); toast("Eintrag gelöscht");
+  }
+  else if(act==="wo-edit"){
+    const w=state.workouts.find(x=>x.id===el.dataset.id); if(!w) return;
+    const c=JSON.parse(JSON.stringify(w));
+    c.exercises=(c.exercises||[]).map(e=>({...e, sets:(e.sets||[]).filter(s=>s.done)})).filter(e=>e.sets.length);
+    ui.woEdit=c; openModal("wo-edit"); return;
+  }
+  else if(act==="wo-del-set"){ const e=ui.woEdit.exercises[+el.dataset.e]; e.sets.splice(+el.dataset.s,1); if(!e.sets.length) ui.woEdit.exercises.splice(+el.dataset.e,1); }
+  else if(act==="wo-save"){
+    const c=ui.woEdit; if(!c) return;
+    const orig=state.workouts.find(x=>x.id===c.id); if(!orig) return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(c.date||"")||c.date>todayIso()){ toast("Bitte ein gültiges Datum wählen"); return; }
+    c.name=String(c.name||"").trim().slice(0,60)||"Training";
+    c.min=Math.max(1,Math.round(+c.min||orig.min||1)); c.seconds=c.min*60;
+    if((orig.exercises||[]).length){
+      c.sets=c.exercises.reduce((n,e)=>n+e.sets.length,0);
+      if(!c.sets){ toast("Kein Satz mehr übrig – lösch das Training stattdessen"); return; }
+      c.volume=Math.round(c.exercises.reduce((n,e)=>n+e.sets.reduce((a,s)=>a+s.kg*s.reps,0),0));
+    }
+    const oldDate=orig.date;
+    state.workouts=state.workouts.map(x=>x.id===c.id?c:x).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+    syncSport(oldDate); syncSport(c.date); if(!state.days[c.date]){ day(c.date); syncSport(c.date); }
+    ui.woEdit=null; ui.modal={type:"wo-detail",payload:c.id}; save(); toast("Gespeichert");
+  }
+  else if(act==="wo-del-ask"){ openModal("wo-del", el.dataset.id); return; }
+  else if(act==="wo-del-go"){
+    const w=state.workouts.find(x=>x.id===el.dataset.id); if(!w) return;
+    state.workouts=state.workouts.filter(x=>x.id!==w.id); syncSport(w.date);
+    ui.modal=null; save(); toast("Training gelöscht");
+  }
   else if(act==="import-pick"){ pickImport(); return; }
   else if(act==="import-go"){
     if(!ui.importData) return;
@@ -712,6 +760,9 @@ document.getElementById("app").addEventListener("input", e=>{
   }
   if(el.dataset.act==="ai-g"){ const k=+el.dataset.i, it=(ui.aiRes||[])[k]; if(it){ it.grams=Math.max(0,+el.value||0); const kc=document.getElementById("ai-k"+k), tt=document.getElementById("ai-tot"); if(kc) kc.textContent=Math.round(it.kcal*it.grams/100); if(tt) tt.textContent=ui.aiRes.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0); } }
   if(el.dataset.act==="portion-in"){ ui.portion=+el.value||0; const it=allItems().find(p=>p.id===el.dataset.id), b=document.getElementById("fmacros"), t=document.getElementById("ftable"), v=document.getElementById("amt-val"); if(it){ if(b) b.innerHTML=fMacros(it,ui.portion); if(t) t.innerHTML=fTable(it,ui.portion); } if(v) v.textContent=ui.portion||0; }
+  if(el.dataset.act==="w-kg"){ const v=+String(el.value).replace(",","."); if(v) ui.draftKg=v; }
+  if(el.dataset.act==="wo-f"&&ui.woEdit){ ui.woEdit[el.dataset.k]=el.value; }
+  if(el.dataset.act==="wo-set"&&ui.woEdit){ const st=ui.woEdit.exercises[+el.dataset.e].sets[+el.dataset.s]; st[el.dataset.f]=Math.max(0,+String(el.value).replace(",",".")||0); }
   if(el.dataset.act==="set-kg") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].kg=+el.value||0;
   if(el.dataset.act==="set-reps") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].reps=+el.value||0;
   if(el.dataset.act==="plan-name") ui.plan.name=el.value;

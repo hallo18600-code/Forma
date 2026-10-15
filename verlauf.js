@@ -178,3 +178,19 @@ function weighSheet(){
     <div class="kpi"><div><span>BMI</span><b>${bmi()}</b></div><div><span>Richtwert</span><b>${span.low}–${span.high}</b></div><div><span>Ziel</span><b>${state.profile.target}</b></div></div>
     <div class="gap"></div><button class="pill primary" data-act="save-weight">Speichern</button>`;
 }
+// Einen Wiegepunkt bearbeiten oder löschen
+function weightEditSheet(date){
+  const w=state.weights.find(x=>x.date===date);
+  if(!w) return `<h2>Eintrag</h2><p class="sub">Nicht gefunden.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  const when=date.split("-").reverse().join(".");
+  if(ui.confirmDel) return `<h2>Eintrag löschen?</h2>
+    <p class="sub">${when}: <b>${w.kg.toFixed(1)} kg</b> wird gelöscht. Das lässt sich nicht rückgängig machen.</p>
+    <div class="gap"></div><button class="pill danger" data-act="w-del-go">Ja, löschen</button>
+    <div class="gap"></div><button class="pill ghost" style="width:100%" data-act="del-cancel">Abbrechen</button>`;
+  return `<h2>Gewicht bearbeiten</h2>
+    <div class="sub">${when}</div>
+    <div class="field"><label for="w-edit-kg">Gewicht in kg</label><input id="w-edit-kg" data-act="w-kg" type="number" inputmode="decimal" step="0.1" min="35" max="220" value="${Number(ui.draftKg).toFixed(1)}"></div>
+    <div class="stepper"><button class="plus" data-act="w-edit-step" data-d="-0.1">−</button><span class="sub">0,1 kg</span><button class="plus" data-act="w-edit-step" data-d="0.1">+</button></div>
+    <div class="gap"></div><button class="pill primary" data-act="w-save" data-v="${date}">Speichern</button>
+    <div class="gap"></div><button class="pill ghost" style="width:100%;color:#d93636" data-act="w-del-ask">Eintrag löschen</button>`;
+}
