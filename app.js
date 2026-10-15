@@ -290,6 +290,34 @@ function renderDash(){
 }
 
 function dashSheet(id){ return ""; }
+// Sicherheitsabfrage vor "Alles löschen"
+function resetSheet(){
+  const ok=(ui.resetTxt||"").trim().toUpperCase()==="LÖSCHEN";
+  return `<h2>Wirklich alles löschen?</h2>
+    <p class="sub">Alle Daten auf diesem Gerät werden <b>unwiderruflich</b> gelöscht: ${state.weights.length} Wiegepunkte, ${state.workouts.length} Trainings, ${Object.keys(state.days).length} Tage mit Einträgen, dein Profil und deine Pläne. Es gibt keinen Server und keine Kopie – das lässt sich nicht rückgängig machen.</p>
+    <div class="gap"></div>
+    <p class="sub"><b>Tipp:</b> Sichere deine Daten vorher als Datei.</p>
+    <button class="pill ghost" style="width:100%" data-act="backup">⬇️ Erst Daten sichern</button>
+    <div class="gap"></div>
+    <div class="field"><label for="reset-input">Zum Bestätigen <b>LÖSCHEN</b> eintippen</label></div>
+    <input id="reset-input" class="reset-input" data-act="reset-type" value="${esc(ui.resetTxt||"")}" placeholder="LÖSCHEN" autocomplete="off" autocapitalize="characters" spellcheck="false">
+    <div class="gap"></div>
+    <button id="reset-go" class="pill danger" data-act="reset-go" ${ok?"":"disabled"}>Endgültig löschen</button>
+    <div class="gap"></div>
+    <button class="pill ghost" style="width:100%" data-act="close">Abbrechen</button>`;
+}
+// Alle Daten als JSON-Datei herunterladen
+function downloadBackup(){
+  try{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download="forma-backup-"+todayIso()+".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+    toast("Backup gespeichert");
+  }catch(e){ toast("Backup fehlgeschlagen"); }
+}
 function renderModal(){
   if(!ui.modal) return "";
   const {type,payload}=ui.modal;
@@ -314,7 +342,8 @@ function renderModal(){
   if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Später</button>`;
   if(type==="steps") inner=stepsSheet();
   if(type==="entries") inner=`<h2>Einträge</h2>${state.weights.slice().reverse().map(w=>`<div class="row space" style="padding:10px 0;border-bottom:1px solid var(--line)"><span>${labelDate(w.date)}</span><b>${w.kg.toFixed(1)} kg</b></div>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
-  if(type==="export") inner=`<h2>Lokal gespeichert</h2><p class="sub">${state.weights.length} Wiegepunkte, ${state.workouts.length} Trainings, ${Object.keys(state.days).length} Tage mit Einträgen.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  if(type==="export") inner=`<h2>Lokal gespeichert</h2><p class="sub">${state.weights.length} Wiegepunkte, ${state.workouts.length} Trainings, ${Object.keys(state.days).length} Tage mit Einträgen.</p><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="backup">⬇️ Als Datei sichern</button><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  if(type==="reset") inner=resetSheet();
   return `<div class="sheet" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
 }
 function render(){ try{ ensureRoutine(); }catch(e){}
@@ -607,12 +636,18 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="goal-weeks"){ state.profile.goalDate=addDays(todayIso(), 7*8); save(); toast("Ziel in 8 Wochen"); }
   else if(act==="affiliate") toast("Anzeige · Score bleibt gleich");
   else if(act==="export"){ openModal("export"); return; }
-  else if(act==="reset"){ try{ localStorage.removeItem(KEY); }catch(e){} state=fresh(); ui.modal=null; toast("Gelöscht"); }
+  else if(act==="reset"){ ui.resetTxt=""; openModal("reset"); return; }
+  else if(act==="backup"){ downloadBackup(); return; }
+  else if(act==="reset-go"){
+    if((ui.resetTxt||"").trim().toUpperCase()!=="LÖSCHEN") return;
+    try{ localStorage.removeItem(KEY); }catch(e){} state=fresh(); ui.resetTxt=""; ui.modal=null; toast("Alle Daten gelöscht");
+  }
   render();
 });
 document.getElementById("app").addEventListener("input", e=>{
   const el=e.target.closest("[data-act]"); if(!el) return;
   if(el.dataset.act==="input"){ state.profile[el.dataset.k]=el.value; save(); }
+  if(el.dataset.act==="reset-type"){ ui.resetTxt=el.value; const b=document.getElementById("reset-go"); if(b) b.disabled=el.value.trim().toUpperCase()!=="LÖSCHEN"; }
   if(el.dataset.act==="query"){
     ui.query=el.value; ui.scanMax=30;
     const box=document.getElementById("scan-results");
