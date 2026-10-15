@@ -31,13 +31,16 @@ function load(){
   try {
     const raw = localStorage.getItem(KEY);
     if(!raw) return fresh();
-    const s = JSON.parse(raw);
+    return normalize(JSON.parse(raw));
+  } catch(e){ return fresh(); }
+}
+// Ergänzt fehlende Felder. Wirft einen Fehler, wenn die Daten kaputt sind.
+function normalize(s){
     s.profile = Object.assign(fresh().profile, s.profile||{});
     s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
     s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
     s.date = s.date || todayIso();
     return s;
-  } catch(e){ return fresh(); }
 }
 function save(){
   const copy = JSON.parse(JSON.stringify(state));
@@ -309,14 +312,62 @@ function resetSheet(){
 // Alle Daten als JSON-Datei herunterladen
 function downloadBackup(){
   try{
-    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const file={ app:"FORMA", version:1, exported:new Date().toISOString(), data:state };
+    const blob=new Blob([JSON.stringify(file,null,2)],{type:"application/json"});
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
-    a.download="forma-backup-"+todayIso()+".json";
+    a.download="forma-daten-"+todayIso()+".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),1000);
-    toast("Backup gespeichert");
-  }catch(e){ toast("Backup fehlgeschlagen"); }
+    toast("Datei gespeichert");
+  }catch(e){ toast("Export fehlgeschlagen"); }
+}
+// Datei auswählen lassen und einlesen
+function pickImport(){
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept=".json,application/json"; inp.style.display="none";
+  inp.addEventListener("change",()=>{
+    const f=inp.files&&inp.files[0]; inp.remove(); if(!f) return;
+    if(f.size>20*1024*1024){ toast("Datei ist zu groß"); return; }
+    const r=new FileReader();
+    r.onload=()=>{
+      const data=checkImport(r.result);
+      if(!data){ toast("Ungültige Datei – keine FORMA-Daten"); return; }
+      ui.importData=data; openModal("import");
+    };
+    r.onerror=()=>toast("Datei konnte nicht gelesen werden");
+    r.readAsText(f);
+  });
+  document.body.appendChild(inp); inp.click();
+}
+// Prüft die Datei. Gibt die Daten zurück oder null, wenn sie ungültig ist.
+function checkImport(text){
+  try{
+    let d=JSON.parse(text);
+    if(d&&d.app==="FORMA"&&d.data) d=d.data;          // neues Format
+    const isObj=x=>x&&typeof x==="object"&&!Array.isArray(x);
+    if(!isObj(d)||!isObj(d.profile)) return null;
+    if(d.days!=null&&!isObj(d.days)) return null;
+    if(d.weights!=null&&!Array.isArray(d.weights)) return null;
+    if(d.workouts!=null&&!Array.isArray(d.workouts)) return null;
+    if((d.weights||[]).some(w=>!w||typeof w.date!=="string"||typeof w.kg!=="number")) return null;
+    return normalize(JSON.parse(JSON.stringify(d)));  // wirft Fehler bei kaputten Daten
+  }catch(e){ return null; }
+}
+function importSheet(){
+  const d=ui.importData; if(!d) return "";
+  const n=x=>`${x.weights.length} Wiegepunkte, ${x.workouts.length} Trainings, ${Object.keys(x.days).length} Tage`;
+  return `<h2>Daten ersetzen?</h2>
+    <p class="sub">Die Datei ist gültig.</p>
+    <div class="gap"></div>
+    <p class="sub"><b>In der Datei:</b> ${n(d)}<br><b>Jetzt auf dem Gerät:</b> ${n(state)}</p>
+    <div class="gap"></div>
+    <p class="sub">Deine aktuellen Daten werden komplett <b>ersetzt</b> und gehen verloren. Sichere sie vorher, wenn du sie behalten willst.</p>
+    <button class="pill ghost" style="width:100%" data-act="backup">⬇️ Aktuelle Daten erst exportieren</button>
+    <div class="gap"></div>
+    <button class="pill danger" data-act="import-go">Ja, Daten ersetzen</button>
+    <div class="gap"></div>
+    <button class="pill ghost" style="width:100%" data-act="close">Abbrechen</button>`;
 }
 function renderModal(){
   if(!ui.modal) return "";
@@ -342,7 +393,7 @@ function renderModal(){
   if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Später</button>`;
   if(type==="steps") inner=stepsSheet();
   if(type==="entries") inner=`<h2>Einträge</h2>${state.weights.slice().reverse().map(w=>`<div class="row space" style="padding:10px 0;border-bottom:1px solid var(--line)"><span>${labelDate(w.date)}</span><b>${w.kg.toFixed(1)} kg</b></div>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
-  if(type==="export") inner=`<h2>Lokal gespeichert</h2><p class="sub">${state.weights.length} Wiegepunkte, ${state.workouts.length} Trainings, ${Object.keys(state.days).length} Tage mit Einträgen.</p><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="backup">⬇️ Als Datei sichern</button><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  if(type==="import") inner=importSheet();
   if(type==="reset") inner=resetSheet();
   return `<div class="sheet" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
 }
@@ -635,7 +686,13 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="haut-reset"){ state.hautPlan=false; save(); }
   else if(act==="goal-weeks"){ state.profile.goalDate=addDays(todayIso(), 7*8); save(); toast("Ziel in 8 Wochen"); }
   else if(act==="affiliate") toast("Anzeige · Score bleibt gleich");
-  else if(act==="export"){ openModal("export"); return; }
+  else if(act==="import-pick"){ pickImport(); return; }
+  else if(act==="import-go"){
+    if(!ui.importData) return;
+    state=ui.importData; state.onboarded=!!state.profile.adult; state.tab="profil";
+    ui.importData=null; ui.modal=null; ui.workout=null; ui.plan=null; ui.dash=null;
+    save(); toast("Daten importiert");
+  }
   else if(act==="reset"){ ui.resetTxt=""; openModal("reset"); return; }
   else if(act==="backup"){ downloadBackup(); return; }
   else if(act==="reset-go"){

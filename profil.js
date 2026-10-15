@@ -29,7 +29,8 @@ function renderProfil(){
     <div class="section"><h2>Konto</h2></div>
     <div class="group">
       <button class="g-row" data-act="open" data-type="legal"><div class="grow"><b>Hinweise</b></div><span class="sub">›</span></button>
-      <button class="g-row" data-act="export"><div class="grow"><b>Daten anzeigen</b><div class="sub">${state.workouts.length} Trainings · ${state.weights.length} Wiegepunkte</div></div></button>
+      <button class="g-row" data-act="backup"><span class="bubble">⬇️</span><div class="grow"><b>Daten exportieren</b><div class="sub">${state.workouts.length} Trainings · ${state.weights.length} Wiegepunkte · als Datei</div></div></button>
+      <button class="g-row" data-act="import-pick"><span class="bubble">⬆️</span><div class="grow"><b>Daten importieren</b><div class="sub">Aus einer FORMA-Datei wiederherstellen</div></div></button>
       <button class="g-row" data-act="reset"><div class="grow"><b style="color:#d93636">Alles löschen</b><div class="sub">Mit Sicherheitsabfrage</div></div></button>
     </div>
   </div>`;
