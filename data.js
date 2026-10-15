@@ -243,7 +243,6 @@ Proteinpulver;Whey|Whey Protein|Proteinshake;380;75;8;5;5;0;30;;1`;
   });
   window.GENERIC_STATS={added,merged,skipped};
 })();
-{ const sk=BASE_FOODS.find(f=>f.id==="skyr"); if(sk) sk.bc="1111111111116"; }
 // Partnerlinks/Bezugsquellen erst einschalten, wenn es echte Partner gibt.
 const PARTNERS_ENABLED = false;
 const CARE = [

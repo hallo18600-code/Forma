@@ -474,7 +474,6 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="scan-view"){ stopCam(); ui.scanView=el.dataset.v; ui.camMsg=""; }
   else if(act==="cam-start"){ startCam(); return; }
   else if(act==="bc-lookup"){ const i=document.getElementById("bc-input"); bcLookup(i&&i.value); return; }
-  else if(act==="bc-test"){ bcLookup("1111111111116"); return; }
   else if(act==="more-go"){ const v=el.dataset.v; if(v==="quick") ui.scanView="quick"; else { ui.newBc=v==="bc"?"":null; ui.newBack="more"; ui.scanView="newfood"; } }
   else if(act==="quick-add"){ ensureDb(el.dataset.id); day().meals.push({uid:uid(),id:el.dataset.id,portion:100,slot:ui.addSlot||"snack"}); syncAuto(state.date); save(); toast("Hinzugefügt"); }
   else if(act==="ai-run"){ aiRun(); return; }

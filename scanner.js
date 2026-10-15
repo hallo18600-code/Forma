@@ -43,20 +43,14 @@ function aiMic(){
   r.onend=r.onerror=()=>{ ui.listening=false; render(); };
   try{ r.start(); }catch(e){ ui.listening=false; render(); }
 }
-async function aiRun(){
+// Text auswerten: läuft komplett auf dem Gerät (smartParse), ohne KI-Server.
+function aiRun(){
   const ta=document.getElementById("ai-text"); ui.aiText=(ta&&ta.value||"").trim();
   if(!ui.aiText){ toast("Beschreibe dein Essen"); return; }
-  if(!window.claude){ const r=smartParse(ui.aiText); ui.aiRes=r.items.length?r.items:null; ui.aiMiss=r.miss; ui.aiErr=r.items.length?"":'Nichts erkannt. Schreib z. B. "200 g Haferflocken, 2 Eier, ein Apfel".'; render(); return; }
-  ui.aiBusy=true; ui.aiErr=""; ui.aiRes=null; ui.aiMiss=[]; render();
-  try{
-    const sample=window.claude?await claude.use("sample"):null;
-    if(!sample) throw new Error("Die KI-Erkennung braucht einen eigenen Server und ist in dieser Version noch aus.");
-    const out=await sample.json('Du bist ein Ernährungs-Parser. Zerlege die Mahlzeitenbeschreibung in einzelne Lebensmittel und schätze realistische Gramm-Mengen (deutsche Standardportionen). Antworte NUR mit JSON: {"items":[{"name":"deutscher Name","grams":Zahl,"kcal":kcal pro 100 g,"protein":g pro 100 g,"carbs":g pro 100 g,"fat":g pro 100 g,"sugar":g pro 100 g,"processed":true oder false}]}. Beschreibung: '+JSON.stringify(ui.aiText));
-    const items=((out&&out.items)||[]).filter(i=>i&&i.name&&+i.grams>0).slice(0,12).map(i=>({name:String(i.name).slice(0,60),grams:Math.round(+i.grams),kcal:+i.kcal||0,protein:+i.protein||0,carbs:+i.carbs||0,fat:+i.fat||0,sugar:+i.sugar||0,processed:!!i.processed}));
-    if(!items.length) throw new Error("Nichts erkannt. Beschreibe es genauer.");
-    ui.aiRes=items;
-  }catch(e){ ui.aiErr=e&&e.code==="not_granted"?"Zugriff nicht erlaubt.":(e&&e.message)||"KI nicht erreichbar."; }
-  ui.aiBusy=false; render();
+  const r=smartParse(ui.aiText);
+  ui.aiRes=r.items.length?r.items:null; ui.aiMiss=r.miss;
+  ui.aiErr=r.items.length?"":'Nichts erkannt. Schreib z. B. "200 g Haferflocken, 2 Eier, ein Apfel".';
+  render();
 }
 function yHead(title,back){ return `<div class="yhead">${back?`<button class="yback" data-act="scan-view" data-v="${back}">‹</button>`:`<div class="ycount">${day().meals.filter(m=>m.slot===ui.addSlot).length}</div>`}<b>${title}</b><span></span></div>`; }
 function barcodeView(){
@@ -65,7 +59,6 @@ function barcodeView(){
     <button class="pill dark" style="width:100%" data-act="cam-start">Kamera starten</button>
     <div class="field"><label>Oder Code eingeben</label><input id="bc-input" inputmode="numeric" placeholder="EAN, 8 oder 13 Ziffern"></div>
     <button class="pill primary" style="width:100%" data-act="bc-lookup">Suchen</button>
-    <div class="gap"></div><button class="link" data-act="bc-test">Mit Testcode ausprobieren</button>
     <p class="sub">Produktdaten kommen von Open Food Facts. Fehlt ein Produkt, legst du es selbst an.</p>`;
 }
 function aiView(){
@@ -73,7 +66,7 @@ function aiView(){
   return `${yHead("Sprache/Text","list")}
     <p class="sub">Schreib oder sprich, was du gegessen hast, z. B. „200 g Haferflocken, 2 Eier, ein Apfel“. Die App erkennt Mengen und sucht die Lebensmittel in der Datenbank.</p>
     <textarea id="ai-text" class="aitext" placeholder="z. B. 2 Eier, 2 Scheiben Vollkornbrot mit Butter und ein Kaffee mit Milch">${esc(ui.aiText||"")}</textarea>
-    <div class="row" style="gap:8px">${SR?`<button class="pill ghost" data-act="ai-mic">🎤 ${ui.listening?"Hört zu…":"Sprechen"}</button>`:""}<button class="pill primary" style="flex:1" data-act="ai-run" ${ui.aiBusy?"disabled":""}>${ui.aiBusy?"Erkenne…":"Erkennen"}</button></div>
+    <div class="row" style="gap:8px">${SR?`<button class="pill ghost" data-act="ai-mic">🎤 ${ui.listening?"Hört zu…":"Sprechen"}</button>`:""}<button class="pill primary" style="flex:1" data-act="ai-run">Erkennen</button></div>
     ${ui.aiErr?`<p class="sub" style="color:var(--bad)">${esc(ui.aiErr)}</p>`:""}
     ${r?`<div class="section"><h2>Erkannt</h2><span class="sub">Gesamt <b id="ai-tot">${r.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0)}</b> kcal</span></div>${r.map((i,k)=>`<div class="yrow"><div class="grow"><b>${esc(i.name)}</b><div class="sub">${esc(i.brand||"")}${i.brand?" · ":""}<span id="ai-k${k}">${Math.round(i.kcal*i.grams/100)}</span> kcal</div></div><input class="aig" type="number" inputmode="decimal" value="${i.grams}" data-act="ai-g" data-i="${k}"><span class="sub">g</span><button class="x" data-act="ai-del" data-i="${k}">✕</button></div>`).join("")}<button class="yfertig" data-act="ai-add">Alles hinzufügen</button>`:""}
     ${(ui.aiMiss||[]).length?`<p class="sub" style="margin-top:10px">Nicht gefunden: ${ui.aiMiss.map(esc).join(", ")}. Such sie einzeln oder leg sie an.</p>`:""}`;
