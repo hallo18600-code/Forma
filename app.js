@@ -1,0 +1,645 @@
+// FORMA – Kern: Zustand, Speichern, Bewertung, Grund-Bausteine, Rendern, Events, Start.
+// Wird als letzte Datei geladen.
+
+function iso(d){
+  const x = d instanceof Date ? d : new Date(d);
+  return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");
+}
+function parseIso(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
+function addDays(s,n){ const d=parseIso(s); d.setDate(d.getDate()+n); return iso(d); }
+function todayIso(){ return iso(new Date()); }
+function weekday(s){ return ["So","Mo","Di","Mi","Do","Fr","Sa"][parseIso(s).getDay()]; }
+function weekStart(s){ const d=parseIso(s); const off=(d.getDay()+6)%7; d.setDate(d.getDate()-off); return iso(d); }
+function labelDate(s){
+  if(s===todayIso()) return "Heute";
+  if(s===addDays(todayIso(),-1)) return "Gestern";
+  return parseIso(s).toLocaleDateString("de-DE",{weekday:"short", day:"numeric", month:"short"});
+}
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function blankDay(){ return { meals:[], water:0, checks:{}, taken:{}, routine:{} }; }
+function fresh(){
+  return {
+    onboarded:false, step:null, tab:"heute", date:todayIso(),
+    profile:{ name:"", goal:"muscle", sex:"m", age:24, height:178, weight:76, activity:1.55, adult:false, target:74, reminders:true, health:false, calories:true, affiliates:true, fish:"wenig", waterTarget:8 },
+    days:{}, weights:[], workouts:[], routines:defaultRoutines(), measures:[], stack:["crea","d3"], customs:[], customEx:[], skin:{}, hautPlan:false, coach:{answers:{}, routine:[]}
+  };
+}
+let state = load();
+let ui = { modal:null, toast:null, scanMode:"text", query:"", addSlot:"breakfast", draftKg:76, portion:100, workout:null, rest:0, tick:null, wrange:"30", plan:null, planDay:0, exQuery:"", dash:null, cal:"month" };
+
+function load(){
+  try {
+    const raw = localStorage.getItem(KEY);
+    if(!raw) return fresh();
+    const s = JSON.parse(raw);
+    s.profile = Object.assign(fresh().profile, s.profile||{});
+    s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
+    s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
+    s.date = s.date || todayIso();
+    return s;
+  } catch(e){ return fresh(); }
+}
+function save(){
+  const copy = JSON.parse(JSON.stringify(state));
+  try { localStorage.setItem(KEY, JSON.stringify(copy)); } catch(e){}
+}
+function day(s){ s=s||state.date; if(!state.days[s]) state.days[s]=blankDay(); return state.days[s]; }
+function foods(){ return [...BASE_FOODS, ...state.customs]; }
+function allItems(){ return [...foods(), ...CARE, ...SUPS]; }
+function toast(m){ ui.toast=m; render(); setTimeout(()=>{ if(ui.toast===m){ ui.toast=null; render(); } }, 1600); }
+function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; render(); }
+function closeModal(){ stopCam(); ui.modal=null; render(); }
+
+function targets(){
+  const p=state.profile;
+  const bmr=10*p.weight+6.25*p.height-5*p.age+(p.sex==="m"?5:-161);
+  let kcal=Math.round(bmr*p.activity);
+  if(p.goal==="lose") kcal-=Math.min(400,Math.round(kcal*0.2));
+  if(p.goal==="muscle") kcal+=250;
+  kcal=Math.max(p.sex==="m"?1500:1200, kcal);
+  const protein=Math.round(p.weight*((p.goal==="lose"||p.goal==="muscle")?1.8:1.4));
+  return { kcal, protein, carbs:Math.round(kcal*0.4/4), fat:Math.round(kcal*0.25/9) };
+}
+function lastWeight(){ return state.weights.length ? state.weights[state.weights.length-1].kg : state.profile.weight; }
+function bmi(){ const m=state.profile.height/100; return +(lastWeight()/(m*m)).toFixed(1); }
+function bmiLabel(v){ return v<18.5?"Untergewicht":v<25?"Normalbereich":v<30?"Übergewicht":"Adipositas"; }
+function weightSpan(){ const m=state.profile.height/100; return { low:+(21*m*m).toFixed(0), high:+(24*m*m).toFixed(0) }; }
+function goalName(){ return (GOALS.find(g=>g.id===state.profile.goal)||GOALS[0]).name; }
+function showKcal(){ return state.profile.calories; }
+function kcalTxt(n){ return showKcal()? n+" kcal" : ""; }
+
+function line(item, portion){
+  const f = portion/100;
+  return {
+    kcal:Math.round((item.kcal||0)*f),
+    protein:+((item.protein||0)*f).toFixed(1),
+    carbs:+((item.carbs||0)*f).toFixed(1),
+    fat:+((item.fat||0)*f).toFixed(1)
+  };
+}
+function totals(s){
+  const d = day(s);
+  return d.meals.reduce((a,m)=>{
+    const p=foods().find(x=>x.id===m.id);
+    if(!p) return a;
+    const l=line(p, m.portion);
+    a.kcal+=l.kcal; a.protein+=l.protein; a.carbs+=l.carbs; a.fat+=l.fat;
+    return a;
+  }, {kcal:0, protein:0, carbs:0, fat:0});
+}
+function scoreClass(n){ return n>=75?"s-good":n>=50?"s-mid":"s-bad"; }
+function finish(parts){
+  const raw=parts.reduce((a,x)=>a+x[1],0);
+  const rs=parts.slice(1).filter(x=>x[1]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,2).map(([l,v])=>l+(v>0?" hilft":" kostet")+" ("+(v>0?"+":"")+v+").");
+  return { score:Math.max(8,Math.min(98,Math.round(raw))), reasons:rs.length?rs:["Neutral für dein Ziel."], parts };
+}
+function scoreFood(item){
+  const g=state.profile.goal, parts=[["Basis",62]];
+  const add=(l,v)=>{ v=Math.round(v); if(v) parts.push([l,v]); };
+  const pr=item.protein||0, su=item.sugar||0;
+  if(g==="muscle"){ add("Protein",Math.min(22,pr*.7)); add("Zucker",-su*1.2); }
+  else if(g==="lose"){ add("Protein",Math.min(12,pr*.4)); add("Zucker",-su*1.6); add("Energiedichte",-Math.max(0,(item.kcal||0)-250)/12); }
+  else if(g==="skin"){ add("Zucker",-su*2); }
+  else add("Zucker",-su);
+  if(item.processed) add("Verarbeitet",g==="skin"?-14:-8);
+  const ea=state.coach.answers.ernaehrung||{}, ha=state.coach.answers.haut||{};
+  const MEAT=["huhn","rind","salami","thunfisch","lachs"], ANI=MEAT.concat(["ei","skyr","quark","joghurt","kaese"]);
+  if(ea.stil==="Vegan"&&ANI.includes(item.id)) add("Passt nicht zu Vegan",-40);
+  else if(ea.stil==="Vegetarisch"&&MEAT.includes(item.id)) add("Passt nicht zu Vegetarisch",-40);
+  else if(ea.stil==="Wenig Fleisch"&&["rind","salami"].includes(item.id)) add("Du willst weniger Fleisch",-12);
+  if(g!=="skin"&&ha.stoert==="Unreinheiten") add("Zucker und Haut",-su*0.8);
+  add("Ballaststoffe",Math.min(10,(item.fiber||0)*1.2));
+  add("Salz",-Math.max(0,(item.salt||0)-1)*8);
+  add("Gesättigte Fette",-Math.max(0,(item.sat||0)-4)*2);
+  return finish(parts);
+}
+function scoreCare(item){
+  const typ=skinType(), ok=(item.skin||[]).includes(typ), parts=[["Basis",70],[ok?"Passt zum Hauttyp":"Anderer Hauttyp",ok?12:-8]];
+  if(item.fragrance) parts.push(["Duftstoffe",-12]);
+  if(item.alcohol) parts.push(["Alkohol",-16]);
+  if((item.actives||[]).includes("UV-Filter")) parts.push(["Lichtschutz",8]);
+  if(item.fragrance && ((state.coach.answers.haut||{}).empf==="Ja")) parts.push(["Du reagierst auf Duft",-10]);
+  return finish(parts);
+}
+function safetyNote(){
+  const p=state.profile, m=p.height/100, tb=p.target/(m*m); let msg="";
+  if(tb<18.5) msg="Dein Zielgewicht liegt im Untergewicht (BMI "+tb.toFixed(1)+"). Besprich so ein Ziel bitte mit Ärzt:in.";
+  else if(p.goal==="lose" && targets().kcal<=(p.sex==="m"?1500:1200)) msg="Dein Richtwert liegt am Mindestwert. Nicht weiter darunter gehen.";
+  return msg?`<div class="warn">${msg}</div>`:"";
+}
+function insight(){
+  const t=targets(); let days=0,sum=0;
+  for(let i=1;i<=7;i++){ const s=addDays(state.date,-i); if(state.days[s]&&state.days[s].meals.length){ days++; sum+=totals(s).protein; } }
+  if(days<3) return "";
+  const avg=Math.round(sum/days);
+  const txt=t.protein-avg>10?`Protein im Schnitt ${avg} g, Richtwert ${t.protein} g. Skyr, Ei oder Hähnchen schließen die Lücke.`:`Protein im Schnitt ${avg} g, nah am Richtwert ${t.protein} g.`;
+  return `<div class="insight"><b>Wochen-Check</b><span>${txt}</span></div>`;
+}
+function recommendStack(){
+  const p=state.profile, t=targets(), tot=totals(state.date);
+  const hasFish = p.fish==="oft" || day().meals.some(m=>m.id==="lachs");
+  const picks=[];
+  const add=(id,score,why)=>{ if(!picks.find(x=>x.id===id)) picks.push({id,score,why}); };
+  if(p.goal==="muscle" || p.activity>=1.55) add("crea",92,"Training und Kraft: Creatin ist das am klarsten belegte Pulver.");
+  if((p.goal==="muscle"||p.goal==="lose") && tot.protein < t.protein*0.55) add("whey",80,"Protein heute liegt klar unter dem Richtwert.");
+  if((p.goal==="skin"||p.goal==="energy"||p.goal==="lose") && !hasFish) add("o3",82,"Wenig Fisch — Omega-3 eher als Kollagen.");
+  if(p.goal==="energy" || !day().checks.schlaf) add("mg",74,"Abend-Magnesium, wenn der Schlaf unruhig bleibt.");
+  if(p.goal==="skin" && picks.length<3) add("col",58,"Nur Zusatz. Schlaf, LSF und Essen wirken stärker.");
+  if(picks.length<3) add("d3",78,"Solide Basis bei wenig Sonne. Dosis nicht selbst hochdrehen.");
+  return picks.slice(0,3);
+}
+function scoreSup(item){
+  const rec=recommendStack().find(x=>x.id===item.id);
+  return { score: rec?rec.score:48, reasons:[rec?rec.why:item.note, rec?"Für dich vorgeschlagen.":"Kein Kernstück für dein Profil."] };
+}
+function scored(item){
+  if(item.type==="care") return scoreCare(item);
+  if(item.type==="sup") return scoreSup(item);
+  return scoreFood(item);
+}
+function taskOn(id, s){
+  const d=day(s||state.date);
+  if(id==="essen") return d.meals.length>0;
+  if(id==="wasser") return d.water>=state.profile.waterTarget;
+  if(id==="sups") return state.stack.length>0 && state.stack.every(x=>d.taken[x]);
+  if(id==="sport") return state.workouts.some(w=>w.date===(s||state.date)) || !!d.checks.sport;
+  return !!d.checks[id];
+}
+function syncAuto(s){
+  const d=day(s);
+  d.checks.essen = d.meals.length?1:0;
+  d.checks.wasser = d.water>=state.profile.waterTarget?1:0;
+  d.checks.sups = state.stack.length && state.stack.every(x=>d.taken[x]) ? 1 : 0;
+  d.checks.sport = state.workouts.some(w=>w.date===s) || d.checks.sport ? 1 : 0;
+}
+
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+
+function glyph(name){
+  const d = {
+    scale:"M4 8h16M7 8v10h10V8M9 12h6",
+    flag:"M6 4v16M6 5h10l-2 3 2 3H6",
+    target:"M12 12m-7 0a7 7 0 1 0 14 0a7 7 0 1 0-14 0M12 12m-3 0a3 3 0 1 0 6 0",
+    drop:"M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z",
+    hair:"M8 5c2 6 2 8 0 14M12 4c2 6 2 9 0 15M16 5c2 6 2 8 0 14",
+    body:"M12 5a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM8 21l1.5-6L8 11h8l-1.5 4L16 21",
+    moon:"M16 4a8 8 0 1 0 4 12 6 6 0 0 1-4-12z",
+    cap:"M8 8h8v8a4 4 0 0 1-8 0zM7 8h10",
+    leaf:"M5 19C5 10 12 5 19 5 19 14 12 19 5 19zM8 16c2-2 5-5 8-8",
+    bowl:"M5 10h14l-1.5 8H6.5zM8 10V8a4 4 0 0 1 8 0v2",
+    fish:"M4 12c4-4 8-4 12-1 1 2 3 2 4 1-1 2-3 2-4 1-4 3-8 3-12-1z",
+    egg:"M12 4c4 2 6 6 6 9a6 6 0 0 1-12 0c0-3 2-7 6-9z",
+    bread:"M5 11c0-3 3-5 7-5s7 2 7 5v7H5zM5 13h14",
+    cup:"M7 6h8v8a4 4 0 0 1-8 0zM15 8h2a2 2 0 0 1 0 4h-2"
+  };
+  const path = d[name] || d.leaf;
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${path}"/></svg>`;
+}
+function foodGlyph(id){
+  const map = {skyr:"bowl",hafer:"bowl",banane:"leaf",ei:"egg",huhn:"leaf",reis:"bowl",salat:"leaf",lachs:"fish",brot:"bread",cola:"cup",riegel:"bread",pizza:"bread"};
+  return glyph(map[id] || "bowl");
+}
+function icon(n){
+  const d={
+    heute:"M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z",
+    coach:"M5 7h14M5 12h14M5 17h10",
+    sport:"M6 9h3v6H6zM15 9h3v6h-3zM9 11h6v2H9z",
+    verlauf:"M5 16l4-4 3 3 7-8",
+    profil:"M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zM4 20a8 8 0 0 1 16 0"
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${d[n]}"/></svg>`;
+}
+function tog(on){ return `<span class="tog ${on?"on":""}"><i></i></span>`; }
+function mealGlyph(id, color){
+  const p={
+    breakfast:"M12 3v2M8 5.2l1.2 1.6M16 5.2l-1.2 1.6M6 14a6 6 0 0 1 12 0H6zM8 18h8",
+    lunch:"M4 10h16v2a8 8 0 0 1-16 0zM8 6v4M12 5v5M16 6v4",
+    dinner:"M5 4v10a3 3 0 0 0 3 3h0M19 4c-3 3-3 7 0 10M19 14v6",
+    snack:"M12 3c4 3 6 6 6 9a6 6 0 1 1-12 0c0-3 2-6 6-9z"
+  };
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="${p[id]}"/></svg>`;
+}
+function waterGlyph(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="#2B7C9E" stroke-width="1.9" stroke-linecap="round"><path d="M8 7h8l-1 12H9L8 7zM9 7c0-3 6-3 6 0"/></svg>`; }
+function miniRing(pct, color){
+  const C=2*Math.PI*20, off=C*(1-Math.min(1,Math.max(0,pct)));
+  return `<svg class="mini" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="none" stroke="#eceef2" stroke-width="3"/>
+    <circle cx="22" cy="22" r="20" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" transform="rotate(-90 22 22)" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg>`;
+}
+function ringSvg(pct){
+  const C=2*Math.PI*46, off=C*(1-Math.min(1,Math.max(0,pct)));
+  return `<svg viewBox="0 0 118 118"><circle cx="59" cy="59" r="46" fill="none" stroke="#eef0f3" stroke-width="10"/>
+    <circle cx="59" cy="59" r="46" fill="none" stroke="#1aa35a" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg>`;
+}
+function spark(arr){
+  if(arr.length<2) return `<div class="sub">Noch zu wenig Punkte für eine Kurve.</div>`;
+  const min=Math.min(...arr)-0.4, max=Math.max(...arr)+0.4;
+  const w=320,h=64,p=6;
+  const pts=arr.map((v,i)=>`${p+i*((w-2*p)/(arr.length-1))},${h-p-((v-min)/(max-min))*(h-2*p)}`).join(" ");
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="#1aa35a" stroke-width="3" points="${pts}"/></svg>`;
+}
+
+function renderWelcome(){
+  return `<div class="screen welcome">
+    <div class="logo">forma</div>
+    <h1>Essen. Training.<br>Körper. Ein System.</h1>
+    <p class="sub">Tagebuch, Sätze, Waage. Bleibt auf diesem Gerät.</p>
+    <div style="flex:1"></div>
+    <button class="pill dark" data-act="start-onboard">Loslegen</button>
+    <div class="gap"></div>
+    <button class="pill ghost" style="width:100%" data-act="skip-demo">Mit Beispieldaten öffnen</button>
+  </div>`;
+}
+function quizStep(id){
+  const t=coachTopics().find(x=>x.id===id), a=state.coach.answers[id]||{};
+  return `<h1>${t.title}</h1><p class="sub">${t.ask} Daran richten sich Rating und Coach aus. Du kannst überspringen.</p>
+    ${coachQuiz(id).map(q=>`<div class="q"><b>${q.q}</b><div class="opts">${q.opts.map(o=>`<button class="chip ${a[q.k]===o?"on":""}" data-act="coach-answer" data-topic="${id}" data-k="${q.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}`;
+}
+function renderOnboard(){
+  const p=state.profile, t=targets();
+  let body="";
+  if(state.step===0) body=`<h1>Dein Ziel</h1><p class="sub">Steuert Score und Kalorien.</p><div class="gap"></div>${GOALS.map(g=>`<button class="choice ${p.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}`;
+  if(state.step===1) body=`<h1>Daten</h1>
+    <div class="row" style="margin:12px 0">${[["m","Mann"],["w","Frau"]].map(([v,l])=>`<button class="chip ${p.sex===v?"on":""}" data-act="set" data-k="sex" data-v="${v}">${l}</button>`).join("")}</div>
+    <div class="field"><label>Name</label><input value="${esc(p.name)}" data-act="input" data-k="name" placeholder="optional"></div>
+    ${[["age","Alter",p.age,18,80],["height","Größe cm",p.height,140,220],["weight","Gewicht kg",p.weight,40,180]].map(([k,l,v,min,max])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-1" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="1" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
+    <div class="opts">${[[1.4,"Alltag"],[1.55,"Aktiv"],[1.7,"Sehr aktiv"]].map(([id,n])=>`<button class="chip ${p.activity===id?"on":""}" data-act="set-num" data-k="activity" data-v="${id}">${n}</button>`).join("")}</div>`;
+  if(state.step>=2&&state.step<=4) body=quizStep(["haut","ernaehrung","schlaf"][state.step-2]);
+  if(state.step===5) body=`<h1>${t.kcal} kcal</h1><p class="sub">${t.protein} g Protein als Richtwert. Kein medizinisches Ziel.</p>`;
+  if(state.step===6) body=`<h1>Volljährig?</h1><p class="sub">Nicht für Minderjährige.</p><div class="gap"></div><button class="choice ${p.adult?"on":""}" data-act="set-bool"><b>Ja, ich bin 18+</b></button>`;
+  return `<div class="screen" style="background:#fff">
+    <div class="scroll"><div class="dots">${[0,1,2,3,4,5,6].map(i=>`<i class="${i===state.step?"on":""}"></i>`).join("")}</div>${body}</div>
+    <div style="padding:10px 16px 24px;display:flex;gap:8px;background:#fff">
+      <button class="pill ghost" style="width:110px" data-act="step" data-v="${Math.max(0,state.step-1)}">Zurück</button>
+      <button class="pill primary" data-act="${state.step===6?"finish":"step"}" data-v="${Math.min(6,state.step+1)}" ${state.step===6&&!p.adult?"disabled":""}>${state.step===6?"Öffnen":"Weiter"}</button>
+    </div>
+  </div>`;
+}
+function renderApp(){
+  if(ui.workout) return renderLive();
+  if(ui.plan) return renderPlan();
+  if(ui.dash) return renderDash();
+  const views={heute:renderHeute, coach:renderCoach, sport:renderSport, verlauf:renderVerlauf, profil:renderProfil};
+  return `<div class="screen">${views[state.tab]()}
+    <nav class="tabs">${[["heute","Tagebuch"],["coach","Coach"],["sport","Training"],["verlauf","Verlauf"],["profil","Profil"]].map(([id,l])=>`
+      <button class="tab ${state.tab===id?"on":""}" data-act="tab" data-v="${id}">${icon(id)}${l}</button>`).join("")}
+    </nav></div>`;
+}
+function renderDash(){
+  const body=ui.dash==="meal"?renderMealPage():ui.dash==="routine"?renderRoutineDash():ui.dash==="calendar"?renderCalendar():ui.dash==="stats"?renderStats():ui.dash==="exercises"?renderExercises():renderMeasures();
+  return `<div class="screen"><div class="scroll pad">${body}</div></div>`;
+}
+
+function dashSheet(id){ return ""; }
+function renderModal(){
+  if(!ui.modal) return "";
+  const {type,payload}=ui.modal;
+  let inner="";
+  if(type==="scan") inner=scanSheet();
+  if(type==="product") inner=productSheet(payload);
+  if(type==="area") inner=areaSheet(payload);
+  if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${t.kcal} kcal · ${t.protein} g Protein. Mifflin-St Jeor, angepasst ans Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
+  if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
+  if(type==="body") inner=`<h2>Körperdaten</h2>
+    ${[["age","Alter",state.profile.age,18,80,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,45,160,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
+    <div class="field"><label>Fisch</label></div>
+    <div class="opts">${[["wenig","Selten"],["oft","Oft"]].map(([v,l])=>`<button class="chip ${state.profile.fish===v?"on":""}" data-act="set" data-k="fish" data-v="${v}">${l}</button>`).join("")}</div>
+    <div class="gap"></div><button class="pill primary" data-act="close">Fertig</button>`;
+  if(type==="weigh") inner=weighSheet();
+  if(type==="legal") inner=`<h2>Hinweise</h2><p class="sub">Nur für Erwachsene. Richtwerte, keine medizinische Beratung. Supplements ersetzen kein Essen. Partnerlinks sind Anzeigen und ändern den Score nicht. Produktdaten teils von Open Food Facts (© Open Food Facts-Mitwirkende, ODbL 1.0). Daten bleiben im Browser dieses Geräts.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  if(type==="stack") inner=stackSheet();
+  if(type==="custom") inner=customSheet();
+  if(type==="ex"||type==="plan-ex") inner=exPicker(type==="plan-ex"?"plan":"live");
+  if(type==="ex-hist") inner=exHist(payload);
+  if(type==="wo-detail") inner=woDetail(payload);
+  if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Später</button>`;
+  if(type==="steps") inner=stepsSheet();
+  if(type==="entries") inner=`<h2>Einträge</h2>${state.weights.slice().reverse().map(w=>`<div class="row space" style="padding:10px 0;border-bottom:1px solid var(--line)"><span>${labelDate(w.date)}</span><b>${w.kg.toFixed(1)} kg</b></div>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
+  if(type==="export") inner=`<h2>Lokal gespeichert</h2><p class="sub">${state.weights.length} Wiegepunkte, ${state.workouts.length} Trainings, ${Object.keys(state.days).length} Tage mit Einträgen.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  return `<div class="sheet" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
+}
+function render(){ try{ ensureRoutine(); }catch(e){}
+  const root=document.getElementById("app");
+  let html = !state.onboarded ? (state.step==null ? renderWelcome() : renderOnboard()) : renderApp();
+  if(!state.onboarded && state.step==null) html=renderWelcome();
+  html += renderModal();
+  if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
+  // Scroll-Positionen merken, damit ein Neuaufbau (Tipp, Toast, Timer) nicht nach oben springt
+  const keep=[...root.querySelectorAll(".scroll,.sheet-card")].map(n=>n.scrollTop);
+  const view=ui.workout?"w":ui.plan?"p":ui.dash?"d:"+ui.dash:"t:"+state.tab;
+  const same=(ui._view===view)&&!!state.onboarded;
+  ui._view=view;
+  root.innerHTML = html;
+  if(same){ [...root.querySelectorAll(".scroll,.sheet-card")].forEach((n,i)=>{ if(keep[i]) n.scrollTop=keep[i]; }); }
+}
+function seedDemo(){
+  state = fresh();
+  state.onboarded=true; state.step=0;
+  state.profile.name="Alex"; state.profile.adult=true; state.profile.goal="muscle";
+  const t=todayIso();
+  state.date=t;
+  for(let i=6;i>=0;i--){
+    const s=addDays(t,-i);
+    const kg=+(76.8-i*0.12).toFixed(1);
+    state.weights.push({date:s, kg});
+    state.days[s]=blankDay();
+    if(i>0){
+      state.days[s].meals=[
+        {uid:uid(), id:"skyr", portion:200, slot:"breakfast"},
+        {uid:uid(), id:"hafer", portion:50, slot:"breakfast"},
+        {uid:uid(), id:"huhn", portion:180, slot:"lunch"},
+        {uid:uid(), id:"reis", portion:150, slot:"lunch"}
+      ];
+      state.days[s].water = i%2?8:5;
+      state.days[s].checks={pflege:1, schlaf:i%2?1:0, sport:i%3===0?1:0};
+      state.days[s].taken={crea:1, d3:i%2?1:0};
+    }
+  }
+  ["Push","Pull","Beine","Push","Pull"].forEach((name,i)=>state.workouts.push({ id:uid(), date:addDays(t,-1-i*2), name:name, min:40, volume:2000+i*120, sets:9, exercises:[] }));
+  state.profile.weight=lastWeight();
+  save();
+}
+
+document.getElementById("app").addEventListener("click", e=>{
+  const el=e.target.closest("[data-act]"); if(!el) return;
+  const act=el.dataset.act;
+  if(act==="stop"){ e.stopPropagation(); return; }
+  if((el.tagName==="INPUT"&&!["checkbox","radio","range","button"].includes(el.type))||el.tagName==="TEXTAREA") return;
+  const p=state.profile;
+  if(act==="start-onboard"){ state.step=0; }
+  else if(act==="skip-demo"){ seedDemo(); toast("Beispieldaten geladen"); }
+  else if(act==="step"){ if(state.step===0 && +el.dataset.v===0) state.step=null; else state.step=+el.dataset.v; }
+  else if(act==="set"){ p[el.dataset.k]=el.dataset.v; save(); }
+  else if(act==="set-num"){ p[el.dataset.k]=parseFloat(el.dataset.v); save(); }
+  else if(act==="set-bool"){ p.adult=true; save(); }
+  else if(act==="nudge"){ p[el.dataset.k]=Math.min(+el.dataset.max, Math.max(+el.dataset.min, +(p[el.dataset.k]+ +el.dataset.d).toFixed(1))); save(); }
+  else if(act==="finish"){
+    if(!p.adult) return;
+    state.onboarded=true; state.date=todayIso();
+    if(!state.weights.length) state.weights.push({date:todayIso(), kg:p.weight});
+    p.target = p.goal==="lose" ? Math.max(50, p.weight-4) : p.goal==="muscle" ? p.weight+2 : p.weight;
+    save();
+  }
+  else if(act==="tab"){ state.tab=el.dataset.v; ui.modal=null; save(); }
+  else if(act==="shift"){ const next=addDays(state.date, +el.dataset.d); if(next<=todayIso()){ state.date=next; save(); } }
+  else if(act==="today"){ state.date=todayIso(); save(); }
+  else if(act==="pick-day"){ state.date=el.dataset.v; save(); }
+  else if(act==="dash"){ ui.dash=el.dataset.id; ui.modal=null; }
+  else if(act==="open"){
+    if(el.dataset.slot) ui.addSlot=el.dataset.slot;
+    if(el.dataset.type==="weigh") ui.draftKg=lastWeight();
+    if(el.dataset.type==="scan"){ ui.query=""; ui.scanView="list"; }
+    if(el.dataset.type==="product") ensureDb(el.dataset.id); openModal(el.dataset.type, el.dataset.id); return;
+  }
+  else if(act==="close"){ closeModal(); return; }
+  else if(act==="scan-view"){ stopCam(); ui.scanView=el.dataset.v; ui.camMsg=""; }
+  else if(act==="cam-start"){ startCam(); return; }
+  else if(act==="bc-lookup"){ const i=document.getElementById("bc-input"); bcLookup(i&&i.value); return; }
+  else if(act==="bc-test"){ bcLookup("1111111111116"); return; }
+  else if(act==="more-go"){ const v=el.dataset.v; if(v==="quick") ui.scanView="quick"; else { ui.newBc=v==="bc"?"":null; ui.newBack="more"; ui.scanView="newfood"; } }
+  else if(act==="quick-add"){ ensureDb(el.dataset.id); day().meals.push({uid:uid(),id:el.dataset.id,portion:100,slot:ui.addSlot||"snack"}); syncAuto(state.date); save(); toast("Hinzugefügt"); }
+  else if(act==="ai-run"){ aiRun(); return; }
+  else if(act==="ai-mic"){ aiMic(); return; }
+  else if(act==="ai-add"){
+    (ui.aiRes||[]).forEach(i=>{ if(i.ref){ ensureDb(i.ref); day().meals.push({uid:uid(),id:i.ref,portion:i.grams,slot:ui.addSlot||"snack"}); return; } const it={id:"a-"+uid(),type:"custom",hidden:true,name:i.name,brand:"KI",emoji:"✨",kcal:i.kcal,protein:i.protein,carbs:i.carbs,fat:i.fat,sugar:i.sugar,processed:i.processed}; state.customs.push(it); day().meals.push({uid:uid(),id:it.id,portion:i.grams,slot:ui.addSlot||"snack"}); });
+    ui.aiRes=null; ui.aiText=""; ui.scanView="list"; syncAuto(state.date); save(); toast("Im Tagebuch");
+  }
+  else if(act==="save-quick"){
+    const g=id=>+(document.getElementById(id).value||"").replace(",",".")||0, kcal=g("q-kcal");
+    if(!kcal){ toast("Kalorien fehlen"); return; }
+    const it={id:"q-"+uid(),type:"custom",hidden:true,name:(document.getElementById("q-name").value||"").trim()||"Schnell hinzugefügt",brand:"Schnell",emoji:"⚡",kcal,protein:g("q-p"),carbs:g("q-c"),fat:g("q-f"),sugar:0,processed:false};
+    state.customs.push(it); day().meals.push({uid:uid(),id:it.id,portion:100,slot:ui.addSlot||"snack"});
+    ui.scanView="list"; syncAuto(state.date); save(); toast("Hinzugefügt");
+  }
+  else if(act==="scan-mode") ui.scanMode=el.dataset.v;
+  else if(act==="meal-open"){ ui.addSlot=el.dataset.slot; ui.dash="meal"; ui.modal=null; }
+  else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.portion=m.portion; } }
+  else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid), i=document.getElementById("portion"); if(m) m.portion=Math.max(1,+(i&&i.value||ui.portion)||m.portion); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
+  else if(act==="del-meal2"){ day().meals=day().meals.filter(x=>x.uid!==ui.editUid); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gelöscht"); }
+  else if(act==="ai-del"){ (ui.aiRes||[]).splice(+el.dataset.i,1); if(!(ui.aiRes||[]).length) ui.aiRes=null; }
+  else if(act==="steps-add"){ const i=document.getElementById("st-input"); if(i) i.value=(+i.value||0)+ +el.dataset.v; return; }
+  else if(act==="steps-save"){ const i=document.getElementById("st-input"); day().steps=Math.max(0,Math.round(+(i&&i.value)||0)); ui.modal=null; save(); toast("Gespeichert"); }
+  else if(act==="step-goal"){ state.profile.stepGoal=+el.dataset.v; save(); }
+  else if(act==="scan-more"){ ui.scanMax=(ui.scanMax||30)+30; const bx=document.getElementById("scan-results"); if(bx) bx.innerHTML=scanResults(); return; }
+  else if(act==="amt-open"||act==="amt-toggle"){
+    const a=document.querySelector(".amt"); if(!a) return;
+    const open=act==="amt-open"?true:!a.classList.contains("open");
+    a.classList.toggle("open",open); ui.amtOpen=open;
+    const i=document.getElementById("portion"); if(i){ if(open){ i.focus(); i.select(); } else i.blur(); }
+    return;
+  }
+  else if(act==="back-scan"){ ui.scanView="list"; openModal("scan"); return; }
+  else if(act==="portion-set"){ ui.portion=+el.dataset.v; }
+  else if(act==="log-food"){
+    const input=document.getElementById("portion");
+    const portion=Math.max(5, +(input&&input.value||ui.portion)||100);
+    day().meals.push({ uid:uid(), id:el.dataset.id, portion, slot:ui.addSlot });
+    syncAuto(state.date); ui.modal=null; save(); toast("Im Tagebuch");
+  }
+  else if(act==="del-meal"){ day().meals=day().meals.filter(m=>m.uid!==el.dataset.id); syncAuto(state.date); save(); }
+  else if(act==="save-custom"){
+    const name=(document.getElementById("c-name").value||"").trim();
+    if(!name){ toast("Name fehlt"); return; }
+    const item={ id:"c-"+uid(), type:"custom", name, brand:"Eigen", emoji:"🍽", kcal:+document.getElementById("c-kcal").value||0, protein:+document.getElementById("c-p").value||0, carbs:+document.getElementById("c-c").value||0, fat:+document.getElementById("c-f").value||0, sugar:0, processed:false };
+    const bcEl=document.getElementById("c-bc"); if(bcEl&&bcEl.value.trim()) item.bc=bcEl.value.replace(/\D/g,"");
+    state.customs.push(item);
+    ui.scanView="list";
+    day().meals.push({ uid:uid(), id:item.id, portion:100, slot:ui.addSlot||"snack" });
+    syncAuto(state.date); ui.modal=null; save(); toast("Angelegt");
+  }
+  else if(act==="water"){ day().water = day().water===+el.dataset.v ? +el.dataset.v-1 : +el.dataset.v; syncAuto(state.date); save(); }
+  else if(act==="sleep-adj"){ const d=day(); d.sleep=d.sleep==null?7:Math.max(0,Math.min(14,Math.round((d.sleep+ +el.dataset.v)*2)/2)); save(); }
+  else if(act==="water-add"){ day().water=Math.min(state.profile.waterTarget, day().water+1); syncAuto(state.date); save(); }
+  else if(act==="task"){
+    const id=el.dataset.id;
+    if(id==="wasser"){ state.tab="heute"; }
+    else if(id==="sups"){ openModal("stack"); return; }
+    else if(id==="sport"){ if(!taskOn("sport")){ state.tab="sport"; } else day().checks.sport=0; }
+    else if(id==="essen"){ state.tab="heute"; }
+    else day().checks[id]=day().checks[id]?0:1;
+    save();
+  }
+  else if(act==="check"){ day().checks[el.dataset.id]=1; syncAuto(state.date); ui.modal=null; save(); toast("Notiert"); }
+  else if(act==="take"){ day().taken[el.dataset.id]=day().taken[el.dataset.id]?0:1; syncAuto(state.date); save(); }
+  else if(act==="toggle-stack"){
+    const id=el.dataset.id;
+    state.stack = state.stack.includes(id) ? state.stack.filter(x=>x!==id) : state.stack.concat(id);
+    save(); toast(state.stack.includes(id)?"Im Stack":"Entfernt");
+  }
+  else if(act==="apply-stack"){ state.stack=recommendStack().map(x=>x.id); save(); toast("Stack aktualisiert"); }
+  else if(act==="coach-answer"){
+    state.coach.answers[el.dataset.topic]=state.coach.answers[el.dataset.topic]||{};
+    state.coach.answers[el.dataset.topic][el.dataset.k]=el.dataset.v; save();
+  }
+  else if(act==="coach-ready"){ save(); }
+  else if(act==="coach-reset"){ delete state.coach.answers[el.dataset.topic]; save(); }
+  else if(act==="coach-add"){
+    const topic=el.dataset.topic;
+    const advice=coachAdvice(topic);
+    state.coach.routine=state.coach.routine.filter(r=>r.topic!==topic).concat(advice.items.map((item,i)=>({id:topic+"-"+i, topic, title:item.title, detail:item.detail, product:item.product})));
+    ui.modal=null; save(); toast("In der Routine");
+  }
+  else if(act==="coach-remove"){ state.coach.routine=(state.coach.routine||[]).filter(r=>r.topic!==el.dataset.topic); ui.modal=null; save(); toast("Aus der Routine entfernt"); }
+  else if(act==="r-toggle"){ ui.rOpen=!ui.rOpen; }
+  else if(act==="c-toggle"){ ui.cOpen=!ui.cOpen; }
+  else if(act==="rhint"){ state.rHint=1; save(); }
+  else if(act==="r-pick"){ state.date=el.dataset.v; ui.rcal="day"; save(); }
+  else if(act==="rcal-mode"){ ui.rcal=el.dataset.v; ui.rOff=0; }
+  else if(act==="rcal-nav"){ ui.rOff=Math.min(0,(ui.rOff||0)+ +el.dataset.v); }
+  else if(act==="routine-add"){
+    const i=document.getElementById("r-new"), t=(i&&i.value||"").trim();
+    if(!t){ toast("Name fehlt"); return; }
+    state.coach.routine=(state.coach.routine||[]).concat([{id:"u-"+uid(),topic:"eigen",title:t.slice(0,60),detail:"",product:null}]); save();
+  }
+  else if(act==="routine-del"){ state.coach.routine=(state.coach.routine||[]).filter(r=>r.id!==el.dataset.id); save(); }
+  else if(act==="routine-check"){
+    day().routine=day().routine||{};
+    day().routine[el.dataset.id]=day().routine[el.dataset.id]?0:1;
+    save();
+  }
+  else if(act==="skin"){ state.skin[el.dataset.k]=el.dataset.v; save(); }
+  else if(act==="skin-done"){ state.hautPlan=true; save(); toast("Plan gespeichert"); }
+  else if(act==="mark-pflege"){ day().checks.pflege=1; ui.modal=null; save(); toast("Pflege notiert"); }
+  else if(act==="draft"){ ui.draftKg=Math.max(35, Math.min(220, +(ui.draftKg+ +el.dataset.d).toFixed(1))); }
+  else if(act==="save-weight"){
+    state.weights=state.weights.filter(w=>w.date!==state.date).concat({date:state.date, kg:+ui.draftKg}).sort((a,b)=>a.date<b.date?-1:1);
+    p.weight=+ui.draftKg; ui.modal=null; save(); toast("Gewicht gespeichert");
+  }
+  else if(act==="toggle"){ p[el.dataset.k]=!p[el.dataset.k]; save(); }
+  else if(act==="start-empty"){
+    ui.workout={ name:"Training", t0:Date.now(), routineId:null, exercises:[] };
+    ui.modal=null; startTick();
+  }
+  else if(act==="start-wo"){
+    const r=(state.routines||[]).find(x=>x.id===el.dataset.rid);
+    const d=r && (r.days||[]).find(x=>x.id===el.dataset.did);
+    if(!d){ toast("Trainingstag fehlt"); return; }
+    ui.workout={ name:r.name+" · "+d.name, routineId:r.id, dayId:d.id, t0:Date.now(), exercises:(d.exercises||[]).map(e=>({id:e.id, sets:e.sets.map(s=>({kg:s.kg, reps:s.reps, done:false}))})) };
+    ui.modal=null; startTick();
+  }
+  else if(act==="new-plan"){ ui.plan={ id:null, name:"", days:[{id:uid(), name:"Tag 1", exercises:[]}] }; ui.modal=null; }
+  else if(act==="edit-plan"){
+    const r=(state.routines||[]).find(x=>x.id===el.dataset.id);
+    if(!r) return;
+    ui.plan=JSON.parse(JSON.stringify(r));
+  }
+  else if(act==="cancel-plan") ui.plan=null;
+  else if(act==="save-plan"){
+    const name=(ui.plan.name||"").trim()||"Plan";
+    ui.plan.name=name;
+    if(ui.plan.id){
+      state.routines=state.routines.map(r=>r.id===ui.plan.id?ui.plan:r);
+    } else {
+      ui.plan.id=uid();
+      state.routines=state.routines.concat(ui.plan);
+    }
+    ui.plan=null; save(); toast("Plan gespeichert");
+  }
+  else if(act==="del-plan"){
+    state.routines=state.routines.filter(r=>r.id!==ui.plan.id);
+    ui.plan=null; save(); toast("Plan gelöscht");
+  }
+  else if(act==="add-day"){ ui.plan.days.push({id:uid(), name:"Tag "+(ui.plan.days.length+1), exercises:[]}); }
+  else if(act==="del-day"){ ui.plan.days.splice(+el.dataset.d,1); }
+  else if(act==="open-day-ex"){ ui.planDay=+el.dataset.d; openModal("plan-ex"); return; }
+  else if(act==="plan-add-ex"){
+    const day=ui.plan.days[ui.planDay]||ui.plan.days[0];
+    day.exercises.push({id:el.dataset.id, sets:[{kg:20,reps:8},{kg:20,reps:8},{kg:20,reps:8}]});
+    ui.modal=null;
+  }
+  else if(act==="plan-del-ex"){ ui.plan.days[+el.dataset.d].exercises.splice(+el.dataset.e,1); }
+  else if(act==="add-custom-ex"){
+    const input=document.getElementById("custom-ex");
+    const name=(input&&input.value||"").trim();
+    if(!name){ toast("Name fehlt"); return; }
+    const id="x-"+uid();
+    state.customEx=state.customEx||[];
+    state.customEx.push({id, name});
+    if(el.dataset.mode==="plan" && ui.plan){ const day=ui.plan.days[ui.planDay]||ui.plan.days[0]; day.exercises.push({id, sets:[{kg:20,reps:8},{kg:20,reps:8}]}); }
+    else if(ui.workout) ui.workout.exercises.push({id, sets:[{kg:20,reps:8,done:false}]});
+    ui.modal=null; save();
+  }
+  else if(act==="cancel-wo"){ ui.workout=null; stopTick(); }
+  else if(act==="finish-wo"){
+    const w=ui.workout;
+    const sets=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);
+    const vol=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).reduce((a,s)=>a+s.kg*s.reps,0),0);
+    if(!sets){ toast("Mindestens einen Satz abhaken"); return; }
+    state.workouts.push({ id:uid(), date:state.date, name:w.name, min:Math.max(1,Math.floor((Date.now()-w.t0)/60000)), seconds:Math.floor((Date.now()-w.t0)/1000), volume:vol, sets, exercises:w.exercises });
+    day().checks.sport=1; ui.workout=null; stopTick(); save(); toast("Training gespeichert");
+  }
+  else if(act==="toggle-set"){
+    const s=ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s];
+    s.done=!s.done;
+    if(s.done) ui.rest=90;
+  }
+  else if(act==="add-set"){ const sets=ui.workout.exercises[+el.dataset.e].sets; const last=sets[sets.length-1]||{kg:20,reps:8}; sets.push({kg:last.kg,reps:last.reps,done:false}); }
+  else if(act==="del-ex"){ ui.workout.exercises.splice(+el.dataset.e,1); }
+  else if(act==="add-ex"){ ui.workout.exercises.push({id:el.dataset.id, sets:[{kg:40,reps:8,done:false}]}); ui.modal=null; }
+  else if(act==="rest-skip") ui.rest=0;
+  else if(act==="dash-close") ui.dash=null;
+  else if(act==="cal-mode") ui.cal=el.dataset.v;
+  else if(act==="cal-day"){
+    const hits=workoutOn(el.dataset.v);
+    if(hits[0]) openModal("wo-detail", hits[0].id);
+    else toast("Kein Training an dem Tag");
+    return;
+  }
+  else if(act==="save-measure"){
+    state.measures=state.measures||[];
+    const row={date:todayIso()};
+    ["chest","waist","arm","hip","thigh"].forEach(k=>{ const n=document.getElementById("m-"+k); row[k]=n?+n.value||0:0; });
+    state.measures=state.measures.filter(m=>m.date!==todayIso()).concat(row);
+    save(); toast("Messung gespeichert");
+  }
+  else if(act==="wrange"){ ui.wrange=el.dataset.v; ui.wpick=null; }
+  else if(act==="w-pick"){ ui.wpick=el.dataset.v; }
+  else if(act==="plan-step"){
+    const key="p-"+el.dataset.id+"-"+el.dataset.i;
+    day().checks[key]=day().checks[key]?0:1;
+    if(el.dataset.id==="schlaf") day().checks.schlaf = coachPlans().schlaf.steps.every((_,i)=>day().checks["p-schlaf-"+i])?1:0;
+    if(el.dataset.id==="haut"||el.dataset.id==="haare"||el.dataset.id==="koerper"){
+      const id=el.dataset.id;
+      day().checks.pflege = coachPlans()[id].steps.every((_,i)=>day().checks["p-"+id+"-"+i])?1:day().checks.pflege;
+    }
+    save();
+  }
+  else if(act==="haut-reset"){ state.hautPlan=false; save(); }
+  else if(act==="goal-weeks"){ state.profile.goalDate=addDays(todayIso(), 7*8); save(); toast("Ziel in 8 Wochen"); }
+  else if(act==="affiliate") toast("Anzeige · Score bleibt gleich");
+  else if(act==="export"){ openModal("export"); return; }
+  else if(act==="reset"){ try{ localStorage.removeItem(KEY); }catch(e){} state=fresh(); ui.modal=null; toast("Gelöscht"); }
+  render();
+});
+document.getElementById("app").addEventListener("input", e=>{
+  const el=e.target.closest("[data-act]"); if(!el) return;
+  if(el.dataset.act==="input"){ state.profile[el.dataset.k]=el.value; save(); }
+  if(el.dataset.act==="query"){
+    ui.query=el.value; ui.scanMax=30;
+    const box=document.getElementById("scan-results");
+    if(box) box.innerHTML=scanResults(); else render();
+  }
+  if(el.dataset.act==="ai-g"){ const k=+el.dataset.i, it=(ui.aiRes||[])[k]; if(it){ it.grams=Math.max(0,+el.value||0); const kc=document.getElementById("ai-k"+k), tt=document.getElementById("ai-tot"); if(kc) kc.textContent=Math.round(it.kcal*it.grams/100); if(tt) tt.textContent=ui.aiRes.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0); } }
+  if(el.dataset.act==="portion-in"){ ui.portion=+el.value||0; const it=allItems().find(p=>p.id===el.dataset.id), b=document.getElementById("fmacros"), t=document.getElementById("ftable"), v=document.getElementById("amt-val"); if(it){ if(b) b.innerHTML=fMacros(it,ui.portion); if(t) t.innerHTML=fTable(it,ui.portion); } if(v) v.textContent=ui.portion||0; }
+  if(el.dataset.act==="set-kg") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].kg=+el.value||0;
+  if(el.dataset.act==="set-reps") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].reps=+el.value||0;
+  if(el.dataset.act==="plan-name") ui.plan.name=el.value;
+  if(el.dataset.act==="day-name") ui.plan.days[+el.dataset.d].name=el.value;
+  if(el.dataset.act==="plan-kg") ui.plan.exercises[+el.dataset.e].sets[+el.dataset.s].kg=+el.value||0;
+  if(el.dataset.act==="plan-reps") ui.plan.exercises[+el.dataset.e].sets[+el.dataset.s].reps=+el.value||0;
+  if(el.dataset.act==="ex-query"){
+    ui.exQuery=el.value; render();
+    const n=document.querySelector('input[data-act="ex-query"]');
+    if(n){ n.focus(); n.setSelectionRange(ui.exQuery.length, ui.exQuery.length); }
+  }
+});
+render();
+
+if("serviceWorker" in navigator && location.protocol.startsWith("http")) window.addEventListener("load",()=>{ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} });
+
+let swipeY=null;
+document.getElementById("app").addEventListener("touchstart",e=>{ swipeY=e.target.closest(".amt.open")?e.touches[0].clientY:null; },{passive:true});
+document.getElementById("app").addEventListener("touchend",e=>{
+  if(swipeY==null) return; const dy=e.changedTouches[0].clientY-swipeY; swipeY=null;
+  if(dy>50){ const a=document.querySelector(".amt"); if(a){ a.classList.remove("open"); ui.amtOpen=false; const i=document.getElementById("portion"); if(i) i.blur(); } }
+},{passive:true});
+loadFoodDb();

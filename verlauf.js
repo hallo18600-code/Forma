@@ -1,0 +1,180 @@
+// FORMA – Verlauf: Gewicht, Schritte, Schlaf, Maße
+function weightView(){
+  const all = state.weights.slice().sort((a,b)=>a.date<b.date?-1:1);
+  const days = ui.wrange==="7"?7:ui.wrange==="30"?30:ui.wrange==="90"?90:ui.wrange==="365"?365:9999;
+  const from = addDays(todayIso(), -days+1);
+  const ws = days>3000 ? all : all.filter(w=>w.date>=from);
+  const last = lastWeight();
+  const start = all[0] ? all[0].kg : last;
+  const startDate = all[0] ? all[0].date : todayIso();
+  const goal = +state.profile.target;
+  const span = Math.abs(goal-start) || 1;
+  const moved = start<=goal ? Math.max(0, last-start) : Math.max(0, start-last);
+  const pct = Math.max(0, Math.min(1, moved/span));
+  const dir = goal>=start ? 1 : -1;
+  const next = +(last + dir*0.5).toFixed(1);
+  const avg = ws.length ? ws.reduce((n,w)=>n+w.kg,0)/ws.length : last;
+  const C = 2*Math.PI*70;
+  const off = C*(1-pct);
+  const vals = (ws.length?ws:[{kg:last}]).map(w=>w.kg);
+  const min = Math.min(...vals, goal)-0.8, max = Math.max(...vals, goal)+0.8;
+  const W=320,H=120,pad=8;
+  const pts = vals.map((v,i)=>{
+    const x = pad + (vals.length===1? W/2 : i*((W-2*pad)/(vals.length-1)));
+    const y = H-pad - ((v-min)/(max-min))*(H-2*pad);
+    return [x,y];
+  });
+  const line = pts.map(p=>p.join(",")).join(" ");
+  const sel = (ui.wpick && ws.findIndex(w=>w.date===ui.wpick)>=0) ? ws.findIndex(w=>w.date===ui.wpick) : (ws.length? ws.length-1 : -1);
+  const selW = sel>=0 ? ws[sel] : null;
+  const hits = ws.length ? pts.map((p,i)=>{ const x0 = i===0 ? 0 : (pts[i-1][0]+p[0])/2; const x1 = i===pts.length-1 ? W : (p[0]+pts[i+1][0])/2; return `<rect x="${x0}" y="0" width="${Math.max(1,x1-x0)}" height="${H}" fill="transparent" data-act="w-pick" data-v="${ws[i].date}"/>`; }).join("") : "";
+  const dots = pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===sel?5:2.2}" fill="${i===sel?"#1aa35a":"#1aa35a"}"/>`).join("");
+  const dirTxt = (d,label)=>{ if(d===null) return `<div class="wdelta"><b>–</b><span class="sub">${label}</span></div>`; const s=d>0?"+":""; const w=d>0.05?"zugenommen":d<-0.05?"abgenommen":"unverändert"; return `<div class="wdelta"><b>${s}${d.toFixed(1)} kg</b><span class="sub">${label.replace("X",w)}</span></div>`; };
+  const weightAt = dd => { const c=all.filter(w=>w.date<=dd); return c.length? c[c.length-1].kg : null; };
+  const b30 = weightAt(addDays(todayIso(),-30)), b90 = weightAt(addDays(todayIso(),-90));
+  const d30 = (all.length && b30!==null) ? +(last-b30).toFixed(1) : null;
+  const d90 = (all.length && b90!==null) ? +(last-b90).toFixed(1) : null;
+  const picked = selW ? `<div class="row space" style="margin-top:4px"><b style="font-size:18px">${selW.kg.toFixed(1)} kg</b><span class="sub">${selW.date.split("-").reverse().join(".")}</span></div>` : `<div class="sub">Noch keine Einträge</div>`;
+  const area = pts.length ? `M${pts[0][0]},${H-pad} L${line.replace(/ /g," L")} L${pts[pts.length-1][0]},${H-pad} Z` : "";
+  const gy = H-pad - ((goal-min)/(max-min))*(H-2*pad);
+  return `<div class="card">
+    <div class="row space"><div class="bubble">⚖️</div><b>Gewicht</b><button class="link" data-act="open" data-type="entries">Einträge</button></div>
+    <div class="wgrid" style="margin-top:8px">
+      <div class="wside"><span class="sub">BMI</span><b>${bmi()}</b><span class="sub">${bmiLabel(bmi())}</span></div>
+      <div class="wring">
+        <svg viewBox="0 0 168 168">
+          <circle cx="84" cy="84" r="70" fill="none" stroke="#eef1f4" stroke-width="12"/>
+          <circle cx="84" cy="84" r="70" fill="none" stroke="#1aa35a" stroke-width="12" stroke-linecap="round" transform="rotate(-90 84 84)" stroke-dasharray="${C}" stroke-dashoffset="${off}"/>
+        </svg>
+        <div class="mid"><span class="sub">Fortschritt ${Math.round(pct*100)} %</span><b>${Number(last).toFixed(1)}</b><span class="sub">kg · ${labelDate(all.length?all[all.length-1].date:todayIso())}</span></div>
+      </div>
+      <div class="wside"><span class="sub">Weiter</span><b>${next.toFixed(1)}</b><span class="sub">kg</span></div>
+    </div>
+    <div class="row space" style="margin-top:8px">
+      <div><span class="sub">Start</span><b style="display:block">${start.toFixed(1)} kg</b><span class="sub">${startDate.split("-").reverse().join(".")}</span></div>
+      <div style="text-align:right"><span class="sub">Ziel</span><b style="display:block">${goal.toFixed(1)} kg</b><button class="link" data-act="open" data-type="goaldate">${state.profile.goalDate?state.profile.goalDate.split("-").reverse().join("."):"Datum festlegen"}</button></div>
+    </div>
+    <div class="gap"></div>
+    <button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>
+  </div>
+  <div class="gap"></div>
+  <div class="card">
+    <div class="row space"><h2>Gewichtsfortschritt</h2><span class="sub">${(last-start>=0?"+":"")+(last-start).toFixed(1)} kg</span></div>
+    <div class="seg" style="margin:12px 0">
+      ${[["7","Tage"],["30","Wochen"],["90","Monate"],["365","Jahre"]].map(([id,l])=>`<button class="${ui.wrange===id?"on":""}" data-act="wrange" data-v="${id}">${l}</button>`).join("")}
+    </div>
+    <div class="row" style="align-items:baseline;gap:8px"><b style="font-size:22px">${avg.toFixed(1)} kg</b><span class="sub">BMI ${bmi()} · Schnitt</span></div>
+    <svg class="spark" viewBox="0 0 ${W} ${H}" style="height:120px;margin-top:8px">
+      <path d="${area}" fill="#1aa35a" opacity=".12"/>
+      <line x1="8" y1="${gy}" x2="312" y2="${gy}" stroke="#1aa35a" stroke-dasharray="4 4" stroke-width="1"/>
+      <polyline fill="none" stroke="#1aa35a" stroke-width="3" points="${line}"/>
+      ${dots}${hits}
+    </svg>
+    ${picked}
+    <div class="wdeltas">${dirTxt(d30,"In 30 Tagen X")}${dirTxt(d90,"In 90 Tagen X")}</div>
+    <p class="sub">Richtwert ${weightSpan().low}–${weightSpan().high} kg. Die Linie ist der Verlauf, kein Versprechen.</p>
+  </div>`;
+}
+function dayKcal(s){
+  const meals=((state.days[s]||{}).meals)||[];
+  return meals.reduce((n,m)=>{ const food=foods().find(x=>x.id===m.id); return n+(food?line(food,m.portion).kcal:0); },0);
+}
+function stepsSheet(){
+  const goal=state.profile.stepGoal||10000, n=day().steps||0;
+  return `<h2>Schritte</h2><p class="sub">${labelDate(state.date)} · Ziel ${goal.toLocaleString("de-DE")}</p>
+    <div class="field"><label>Schritte</label><input id="st-input" type="number" inputmode="numeric" value="${n||""}" placeholder="z. B. 8500"></div>
+    <div class="row" style="gap:6px;margin:8px 0">${[500,1000,2500].map(v=>`<button class="chip" data-act="steps-add" data-v="${v}">+${v}</button>`).join("")}</div>
+    <button class="pill primary" style="width:100%" data-act="steps-save">Speichern</button>
+    <div class="sub" style="margin-top:14px">Tagesziel</div>
+    <div class="row" style="gap:6px;margin-top:6px">${[6000,8000,10000,12000].map(v=>`<button class="chip ${goal===v?"on":""}" data-act="step-goal" data-v="${v}">${v/1000}k</button>`).join("")}</div>`;
+}
+function stepsCard(){
+  const goal=state.profile.stepGoal||10000, fmt=v=>Math.round(v).toLocaleString("de-DE");
+  const sel=(state.days[state.date]||{}).steps||0, pct=Math.min(1,sel/goal);
+  const pts=Array.from({length:14},(_,i)=>addDays(state.date,i-13)).map((s,i)=>({s,i,v:(state.days[s]||{}).steps||0}));
+  const last7=pts.slice(7).filter(q=>q.v>0), avg=last7.length?last7.reduce((a,q)=>a+q.v,0)/last7.length:0;
+  const best=Math.max(0,...pts.map(q=>q.v));
+  let streak=0, d=todayIso(); const got=x=>((state.days[x]||{}).steps||0)>=goal;
+  if(!got(d)) d=addDays(d,-1); while(got(d)&&streak<400){ streak++; d=addDays(d,-1); }
+  const R=34, C=2*Math.PI*R;
+  const ring=`<svg viewBox="0 0 84 84" width="84" height="84"><circle cx="42" cy="42" r="${R}" fill="none" stroke="#e8eaee" stroke-width="9"/><circle cx="42" cy="42" r="${R}" fill="none" stroke="var(--accent)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${(C*pct).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 42 42)"/><text x="42" y="47" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1c1f">${Math.round(pct*100)}%</text></svg>`;
+  const W=300,H=120,P=16,L=18, mx=Math.max(goal*1.15,...pts.map(q=>q.v)), step=(W-2*P)/14, bw=step-5, Y=v=>H-L-(v/mx)*(H-L-8);
+  const bars=pts.map(q=>{ const h=Math.max(0,H-L-Y(q.v)), on=q.v>=goal&&q.v>0, cur=q.s===state.date, x=P+q.i*step;
+    return `<rect x="${x.toFixed(1)}" y="${Y(q.v).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="4" fill="${on?"var(--accent)":(q.v?"#b9e4cb":"#eef0f3")}" ${cur?'stroke="#14683e" stroke-width="1.5"':""}/><text x="${(x+bw/2).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="9" fill="${cur?"#14683e":"#8a8f98"}" font-weight="${cur?700:400}">${weekday(q.s)[0]}</text>`; }).join("");
+  const svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block"><line x1="${P-4}" x2="${W-P+4}" y1="${Y(goal).toFixed(1)}" y2="${Y(goal).toFixed(1)}" stroke="#c9ced6" stroke-dasharray="4 4"/><text x="${W-P+4}" y="${(Y(goal)-4).toFixed(1)}" text-anchor="end" font-size="9" fill="#8a8f98">Ziel ${fmt(goal)}</text>${bars}</svg>`;
+  const left=goal-sel;
+  return `<div class="section"><h2>Schritte</h2><span class="sub">${labelDate(state.date)}</span></div>
+  <div class="card">
+    <div class="row" style="gap:16px;align-items:center">${ring}<div class="grow"><b style="font-size:28px;letter-spacing:-.02em">${fmt(sel)}</b><div class="sub">${sel>=goal?"Ziel erreicht ✓":"noch "+fmt(left)+" bis "+fmt(goal)}</div></div></div>
+    <div style="margin-top:14px">${svg}</div>
+    <div class="kpi" style="margin-top:10px"><div><span>Ø 7 Tage</span><b>${avg?fmt(avg):"–"}</b></div><div><span>Bester Tag</span><b>${best?fmt(best):"–"}</b></div><div><span>Serie</span><b>${streak} ${streak===1?"Tag":"Tage"}</b></div></div>
+    <button class="pill primary" style="width:100%;margin-top:12px" data-act="open" data-type="steps">Schritte eintragen</button>
+  </div>`;
+}
+function sleepCard(){
+  const h=day().sleep, fmt=v=>String(v).replace(".",",")+" h";
+  const pts=Array.from({length:14},(_,i)=>addDays(state.date,i-13)).map((s,i)=>({s,i,v:(state.days[s]||{}).sleep||0}));
+  const W=300,H=120,P=16,mn=4,mx=10, X=i=>P+i*(W-2*P)/13, Y=v=>H-P-(Math.max(mn,Math.min(mx,v))-mn)/(mx-mn)*(H-2*P);
+  const tp=pts.filter(q=>q.v>0), path=tp.map((q,j)=>(j?"L":"M")+X(q.i).toFixed(1)+" "+Y(q.v).toFixed(1)).join(" ");
+  const avg=tp.length?(tp.reduce((a,q)=>a+q.v,0)/tp.length).toFixed(1).replace(".",","):"–";
+  const svg=`<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+    <line x1="${P}" x2="${W-P}" y1="${Y(7)}" y2="${Y(7)}" stroke="var(--line)" stroke-dasharray="4 4"/>
+    <text x="${W-P}" y="${Y(7)-4}" text-anchor="end" font-size="9" fill="var(--muted,#8a8f98)">7 h</text>
+    ${tp.length>1?`<path d="${path}" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`:""}
+    ${tp.map(q=>`<circle cx="${X(q.i).toFixed(1)}" cy="${Y(q.v).toFixed(1)}" r="${q.s===state.date?4.5:3}" fill="${q.s===state.date?"var(--accent)":"#fff"}" stroke="var(--accent)" stroke-width="2"/>`).join("")}
+    <text x="${P}" y="${H-2}" font-size="9" fill="var(--muted,#8a8f98)">${weekday(pts[0].s)} ${parseIso(pts[0].s).getDate()}.</text>
+    <text x="${W-P}" y="${H-2}" text-anchor="end" font-size="9" fill="var(--muted,#8a8f98)">${weekday(state.date)} ${parseIso(state.date).getDate()}.</text>
+  </svg>`;
+  return `<div class="section"><h2>Schlaf</h2><span class="sub">Ø ${avg} h · 14 Tage</span></div>
+  <div class="card">
+    <div class="row space" style="align-items:center">
+      <div><b>${labelDate(state.date)}</b><div class="sub">Wie lange hast du geschlafen?</div></div>
+      <div class="row" style="gap:10px;align-items:center">
+        <button class="pill ghost" style="width:40px;padding:0" data-act="sleep-adj" data-v="-0.5">−</button>
+        <b style="min-width:52px;text-align:center">${h==null?"–":fmt(h)}</b>
+        <button class="pill ghost" style="width:40px;padding:0" data-act="sleep-adj" data-v="0.5">+</button>
+      </div>
+    </div>
+    <div style="margin-top:10px">${tp.length?svg:`<div class="sub" style="padding:14px 0">Trag deine Stunden ein, dann erscheint hier der Verlauf.</div>`}</div>
+  </div>
+`;
+}
+function renderVerlauf(){
+  const start=weekStart(state.date);
+  const days=Array.from({length:7},(_,i)=>addDays(start,i));
+  const d=day();
+  const t=targets();
+  const kcal=dayKcal(state.date);
+  const wo=state.workouts.filter(w=>w.date===state.date);
+  const routine=state.coach.routine||[];
+  const weekDone=days.reduce((n,s)=>n+routine.filter(r=>routineOn(r.id,s)).length,0);
+  return `<div class="scroll pad">
+    <div class="topbar"><div><h1>Verlauf</h1><div class="sub">Diese Woche</div></div></div>
+    <div class="weekdays">${days.map(s=>`<button class="daydot ${s===state.date?"on":""}" data-act="pick-day" data-v="${s}"><span>${weekday(s)}</span><b>${parseIso(s).getDate()}</b></button>`).join("")}</div>
+    <div class="gap"></div>
+    ${routineBlock()}
+    ${routine.some(r=>r.topic==="schlaf")?sleepCard():""}
+    <div class="section"><h2>Gewicht</h2></div>
+    ${weightView()}
+    ${stepsCard()}
+  </div>`;
+}
+function renderMeasures(){
+  const last=state.measures[state.measures.length-1]||{};
+  const fields=[["chest","Brust"],["waist","Taille"],["arm","Arm"],["hip","Hüfte"],["thigh","Bein"]];
+  return `<div class="calhead"><button class="navd" data-act="dash-close">‹</button><h2>Messungen</h2><span></span></div>
+    <div class="card">${fields.map(([k,l])=>`<div class="field"><label>${l} cm</label><input id="m-${k}" value="${last[k]||""}"></div>`).join("")}
+      <div class="gap"></div><button class="pill primary" data-act="save-measure">Speichern</button>
+    </div>
+    <div class="section"><h2>Verlauf</h2></div>
+    ${(state.measures||[]).slice().reverse().map(m=>`<div class="card" style="margin-bottom:8px"><b>${labelDate(m.date)}</b><div class="sub">${fields.map(([k,l])=>m[k]?l+" "+m[k]:"").filter(Boolean).join(" · ")}</div></div>`).join("")||`<div class="card sub">Noch keine Messung.</div>`}`;
+}
+function weighSheet(){
+  const span=weightSpan();
+  return `<h2>Waage</h2>
+    <div class="sub">${labelDate(state.date)}</div>
+    <div style="text-align:center;padding:8px 0"><div class="bigw">${Number(ui.draftKg).toFixed(1)}</div><div class="sub">kg</div></div>
+    <div class="stepper"><button class="plus" data-act="draft" data-d="-0.1">−</button><span class="sub">0,1 kg</span><button class="plus" data-act="draft" data-d="0.1">+</button></div>
+    <div class="kpi"><div><span>BMI</span><b>${bmi()}</b></div><div><span>Richtwert</span><b>${span.low}–${span.high}</b></div><div><span>Ziel</span><b>${state.profile.target}</b></div></div>
+    <div class="gap"></div><button class="pill primary" data-act="save-weight">Speichern</button>`;
+}

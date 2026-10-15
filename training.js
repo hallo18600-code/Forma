@@ -1,0 +1,295 @@
+// FORMA – Training: Übungen, Pläne, Live-Training, Kalender, Statistik
+
+function exName(id){
+  if(EX[id]) return EX[id].name;
+  const c = (state.customEx||[]).find(x=>x.id===id);
+  return c ? c.name : "Übung";
+}
+function lastSet(id){
+  const past = [...state.workouts].reverse();
+  for(const w of past){
+    const hit = (w.exercises||[]).find(e=>e.id===id);
+    if(hit && hit.sets && hit.sets.length){
+      const s = [...hit.sets].reverse().find(x=>x.done) || hit.sets[hit.sets.length-1];
+      return s.kg+" kg × "+s.reps;
+    }
+  }
+  return "–";
+}
+function clock(t0){
+  const s=Math.max(0, Math.floor((Date.now()-t0)/1000));
+  return [Math.floor(s/3600), Math.floor((s%3600)/60), s%60].map(n=>String(n).padStart(2,"0")).join(":");
+}
+function prevSet(id, index){
+  for(const w of [...state.workouts].reverse()){
+    const hit=(w.exercises||[]).find(e=>e.id===id);
+    if(!hit) continue;
+    const done=(hit.sets||[]).filter(s=>s.done);
+    const s=done[index]||done[done.length-1];
+    if(s) return s.kg+"×"+s.reps;
+  }
+  return "–";
+}
+function renderSport(){
+  const plans=state.routines||[];
+  const list=[...state.workouts].reverse().slice(0,6);
+  const marks={stats:"📈", exercises:"🏋️", measures:"📏", calendar:"📅"};
+  const start=weekStart(todayIso());
+  const days=Array.from({length:7},(_,i)=>addDays(start,i));
+  const week=state.workouts.filter(w=>w.date>=start);
+  const vol=week.reduce((n,w)=>n+(w.volume||0),0);
+  const maxV=Math.max(1, ...days.map(s=>state.workouts.filter(w=>w.date===s).reduce((n,w)=>n+(w.volume||0),0)));
+  return `<div class="scroll pad">
+    <div class="topbar"><div><h1>Training</h1><div class="sub">Diese Woche</div></div>
+      <button class="plus dark" data-act="new-plan">+</button></div>
+    <div class="card">
+      <div class="kpi">
+        <div><span>Einheiten</span><b>${week.length}</b><span>7 Tage</span></div>
+        <div><span>Volumen</span><b>${vol}</b><span>kg</span></div>
+        <div><span>Routinen</span><b>${plans.length}</b><span>angelegt</span></div>
+      </div>
+      <div class="wbars" style="margin-top:14px">${days.map(s=>{
+        const v=state.workouts.filter(w=>w.date===s).reduce((n,w)=>n+(w.volume||0),0);
+        return `<div class="wbar ${s===todayIso()?"on":""}"><i style="height:${Math.max(6, Math.round(v/maxV*78))}px"></i><span>${weekday(s)}</span></div>`;
+      }).join("")}</div>
+    </div>
+    <div class="section"><h2>Routinen</h2><button class="link" data-act="new-plan">Neu</button></div>
+    ${plans.map(r=>`<div class="card meals" style="margin-bottom:12px">
+      <div class="row space" style="padding:8px 0"><div class="meal-name">${esc(r.name)}</div><button class="link" data-act="edit-plan" data-id="${r.id}">Bearbeiten</button></div>
+      ${(r.days||[]).map(d=>`<div class="meal-row">
+        <div class="bubble">🏋️</div>
+        <div class="grow"><div class="meal-name">${esc(d.name)}</div><div class="sub">${(d.exercises||[]).map(e=>exName(e.id)).slice(0,3).join(", ")||"Leer"}</div></div>
+        <button class="plus dark" data-act="start-wo" data-rid="${r.id}" data-did="${d.id}">›</button>
+      </div>`).join("")}
+    </div>`).join("")}
+    <button class="pill ghost" style="width:100%" data-act="start-empty">Leeres Training</button>
+    <div class="section"><h2>Dashboard</h2></div>
+    <div class="dash">
+      ${[["stats","Statistiken"],["exercises","Übungen"],["measures","Messungen"],["calendar","Kalender"]].map(([id,label])=>`<button data-act="dash" data-id="${id}"><span class="bubble">${marks[id]}</span>${label}</button>`).join("")}
+    </div>
+    <div class="section"><h2>Workouts</h2></div>
+    <div class="card meals">${list.length?list.map(w=>`<button class="meal-row" data-act="open" data-type="wo-detail" data-id="${w.id}">
+      <div class="bubble">✅</div>
+      <div class="grow"><div class="meal-name">${esc(w.name)}</div><div class="sub">${labelDate(w.date)} · ${w.min} min · ${w.sets} Sätze</div></div>
+    </button>`).join(""):`<div class="sub" style="padding:12px 0">Noch kein gespeichertes Training.</div>`}</div>
+  </div>`;
+}
+function renderPlan(){
+  const plan=ui.plan;
+  plan.days=plan.days||[];
+  return `<div class="screen" style="background:#fff">
+    <div class="scroll" style="padding-top:54px;padding-bottom:28px">
+      <div class="wo-head">
+        <button data-act="cancel-plan">✕</button><b>Routine</b>
+        <button class="pill primary" style="width:auto;height:34px;padding:0 12px;font-size:13px" data-act="save-plan">Sichern</button>
+      </div>
+      <div class="field"><label>Routine</label><input data-act="plan-name" value="${esc(plan.name)}" placeholder="Push Pull Legs"></div>
+      ${plan.days.map((d,di)=>`<div class="card" style="margin-top:12px">
+        <div class="row space"><input data-act="day-name" data-d="${di}" value="${esc(d.name)}" style="font-weight:800;border:0;background:transparent;width:140px"><button class="x" data-act="del-day" data-d="${di}">✕</button></div>
+        ${(d.exercises||[]).map((e,ei)=>`<div style="padding:8px 0;border-top:1px solid var(--line)">
+          <div class="row space"><b>${exName(e.id)}</b><button class="x" data-act="plan-del-ex" data-d="${di}" data-e="${ei}">✕</button></div>
+          <div class="sub">${e.sets.map(s=>s.kg+"×"+s.reps).join(" · ")}</div>
+        </div>`).join("")}
+        <button class="pill ghost" style="width:100%;margin-top:8px" data-act="open-day-ex" data-d="${di}">+ Übung</button>
+      </div>`).join("")}
+      <div class="gap"></div>
+      <button class="pill ghost" style="width:100%" data-act="add-day">+ Trainingstag</button>
+      ${plan.id?`<div class="gap"></div><button class="pill ghost" style="width:100%" data-act="del-plan">Routine löschen</button>`:""}
+    </div>
+  </div>`;
+}
+function renderLive(){
+  const w=ui.workout;
+  const sets=w.exercises.reduce((n,e)=>n+e.sets.length,0);
+  const done=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);
+  const vol=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).reduce((a,s)=>a+s.kg*s.reps,0),0);
+  const min=Math.max(1, Math.floor((Date.now()-w.t0)/60000));
+  return `<div class="screen" style="background:#fff">
+    <div class="scroll" style="padding-top:54px;padding-bottom:28px">
+      <div class="wo-head">
+        <button data-act="cancel-wo">✕</button>
+        <div style="text-align:center"><div class="clock">${clock(w.t0)}</div><div class="sub">${esc(w.name)}</div></div>
+        <button class="pill primary" style="width:auto;height:34px;padding:0 12px;font-size:13px" data-act="finish-wo">Fertig</button>
+      </div>
+      <div class="stats">
+        <div><b>${vol} kg</b><span>Volumen</span></div>
+        <div><b>${done}/${sets}</b><span>Sätze</span></div>
+        <div><b class="t-rest">${ui.rest||0}s</b><span>Pause</span></div>
+      </div>
+      ${ui.rest>0?`<div class="rest"><span>Pause ${ui.rest}s</span><button data-act="rest-skip" style="color:#fff">Überspringen</button></div>`:""}
+      ${w.exercises.map((e,ei)=>{
+        let n=0;
+        return `<div style="margin:14px 0 18px">
+          <div class="row space"><div><div class="ex-name">${exName(e.id)}</div><div class="sub">Zuletzt ${lastSet(e.id)}</div></div><button class="x" data-act="del-ex" data-e="${ei}">✕</button></div>
+          <table class="sets"><tr><th>SATZ</th><th>ZUVOR</th><th>KG</th><th>WDH</th><th></th></tr>
+            ${e.sets.map((s,si)=>`<tr class="${s.done?"done":""}">
+              <td>${++n}</td>
+              <td class="muted">${prevSet(e.id, si)}</td>
+              <td><input inputmode="decimal" data-act="set-kg" data-e="${ei}" data-s="${si}" value="${s.kg}"></td>
+              <td><input inputmode="numeric" data-act="set-reps" data-e="${ei}" data-s="${si}" value="${s.reps}"></td>
+              <td><button class="chk ${s.done?"on":""}" data-act="toggle-set" data-e="${ei}" data-s="${si}">${s.done?"✓":""}</button></td>
+            </tr>`).join("")}
+          </table>
+          <button class="pill ghost" style="width:100%;margin-top:8px" data-act="add-set" data-e="${ei}">+ Satz</button>
+        </div>`;
+      }).join("")}
+      <button class="pill ghost" style="width:100%" data-act="open" data-type="ex">Übung hinzufügen</button>
+    </div>
+  </div>`;
+}
+function exPicker(mode){
+  const q=(ui.exQuery||"").trim().toLowerCase();
+  const custom=state.customEx||[];
+  const list=[...Object.entries(EX).map(([id,e])=>({id, name:e.name, group:e.group})), ...custom.map(e=>({id:e.id, name:e.name, group:"Eigene"}))];
+  const found=list.filter(e=>!q || (e.name+" "+e.group).toLowerCase().includes(q));
+  const groups=[...new Set(found.map(e=>e.group))];
+  return `<h2>Übung</h2>
+    <div class="field"><input data-act="ex-query" value="${esc(ui.exQuery||"")}" placeholder="Kniebeuge, Rudern"></div>
+    <div class="row" style="margin:8px 0"><input id="custom-ex" placeholder="Eigene Übung" style="flex:1;height:42px;border:1px solid var(--line);border-radius:12px;padding:0 12px"><button class="pill ghost" data-act="add-custom-ex" data-mode="${mode}">+</button></div>
+    ${groups.map(g=>`<div class="sub" style="margin-top:8px">${g}</div>${found.filter(e=>e.group===g).map(e=>`<button class="choice" data-act="${mode==="plan"?"plan-add-ex":"add-ex"}" data-id="${e.id}"><b>${esc(e.name)}</b></button>`).join("")}`).join("")}`;
+}
+function woDetail(id){
+  const w=state.workouts.find(x=>x.id===id);
+  if(!w) return "<p>Nicht gefunden.</p>";
+  return `<h2>${esc(w.name)}</h2><p class="sub">${labelDate(w.date)} · ${w.min} min · ${w.volume} kg</p>
+    ${(w.exercises||[]).map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")}
+    <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+}
+
+function workoutOn(date){
+  return state.workouts.filter(w=>w.date===date);
+}
+function weekStreak(){
+  let n=0, cursor=weekStart(todayIso());
+  while(state.workouts.some(w=>w.date>=cursor && w.date<addDays(cursor,7))){
+    n++; cursor=addDays(cursor,-7); if(n>80) break;
+  }
+  return n;
+}
+function restDays(){
+  const start=weekStart(todayIso());
+  let n=0;
+  for(let i=0;i<7;i++){
+    const s=addDays(start,i);
+    if(s>todayIso()) break;
+    if(!workoutOn(s).length) n++;
+  }
+  return n;
+}
+function monthBlock(year, month){
+  const first=new Date(year, month, 1);
+  const label=first.toLocaleDateString("de-DE",{month:"long", year:"numeric"});
+  const pad=(first.getDay()+6)%7;
+  const count=new Date(year, month+1, 0).getDate();
+  const heads=["Mo","Di","Mi","Do","Fr","Sa","So"].map(d=>`<div class="sub">${d}</div>`).join("");
+  let cells=Array.from({length:pad},()=>`<div></div>`).join("");
+  for(let d=1;d<=count;d++){
+    const s=iso(new Date(year, month, d));
+    const hits=workoutOn(s);
+    const name=hits[0]?hits[0].name.split("·").pop().trim():"";
+    cells+=`<button class="calcell" data-act="cal-day" data-v="${s}"><div class="cdot ${hits.length?"on":""} ${s===todayIso()?"today":""}">${d}</div><div class="cname">${esc(name)}</div></button>`;
+  }
+  return `<h2 style="margin:16px 0 8px">${label}</h2><div class="calgrid">${heads}${cells}</div>`;
+}
+function renderCalendar(){
+  const now=new Date();
+  const modes=[["month","Monat"],["year","Jahr"],["multi","Verlauf"]];
+  let body="";
+  if(ui.cal==="month"){
+    body=monthBlock(now.getFullYear(), now.getMonth())+monthBlock(now.getFullYear(), now.getMonth()-1);
+  } else if(ui.cal==="year"){
+    const y=now.getFullYear();
+    body=`<h2>${y}</h2><div class="yeargrid">${Array.from({length:12},(_,m)=>{
+      const first=new Date(y,m,1), pad=(first.getDay()+6)%7, count=new Date(y,m+1,0).getDate();
+      let cells=Array.from({length:pad},()=>`<i class="sq empty"></i>`).join("");
+      for(let d=1;d<=count;d++){
+        const s=iso(new Date(y,m,d));
+        cells+=`<i class="sq ${workoutOn(s).length?"on":""}"></i>`;
+      }
+      return `<div><div class="sub" style="margin-bottom:4px">${first.toLocaleDateString("de-DE",{month:"short"})}</div><div class="mini">${cells}</div></div>`;
+    }).join("")}</div>`;
+  } else {
+    const years=[now.getFullYear(), now.getFullYear()-1];
+    body=years.map(y=>{
+      const start=new Date(y,0,1);
+      const off=(start.getDay()+6)%7;
+      const days=[];
+      for(let i=0;i<off;i++) days.push("");
+      for(let d=new Date(y,0,1); d.getFullYear()===y; d.setDate(d.getDate()+1)) days.push(iso(new Date(d)));
+      return `<h2>${y}</h2><div class="sub" style="display:flex;justify-content:space-between;margin:8px 0">Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez</div>
+        <div class="heat">${days.map(s=>`<i class="${s&&workoutOn(s).length?"on":""}"></i>`).join("")}</div>`;
+    }).join("");
+  }
+  return `<div class="calhead">
+      <button class="navd" data-act="dash-close">‹</button>
+      <div class="seg" style="flex:1;margin:0 8px">${modes.map(([id,l])=>`<button class="${ui.cal===id?"on":""}" data-act="cal-mode" data-v="${id}">${l}</button>`).join("")}</div>
+    </div>
+    <div class="card" style="display:grid;grid-template-columns:1fr 1fr;padding:0">
+      <div style="padding:12px;border-right:1px solid var(--line)"><b>${weekStreak()}-Wochen-Serie</b><div class="sub">Mindestens ein Training</div></div>
+      <div style="padding:12px"><b>${restDays()} Ruhetage</b><div class="sub">Diese Woche bisher</div></div>
+    </div>
+    ${body}`;
+}
+function renderStats(){
+  const week=state.workouts.filter(w=>w.date>=addDays(todayIso(),-6));
+  const prev=state.workouts.filter(w=>w.date>=addDays(todayIso(),-13)&&w.date<addDays(todayIso(),-6));
+  const vol=ws=>ws.reduce((n,w)=>n+(w.volume||0),0);
+  const sets=state.workouts.reduce((n,w)=>n+(w.sets||0),0);
+  const bars=Array.from({length:8},(_,i)=>{
+    const from=addDays(weekStart(todayIso()), -(7-i)*7);
+    return vol(state.workouts.filter(w=>w.date>=from && w.date<addDays(from,7)));
+  });
+  const max=Math.max(1,...bars);
+  return `<div class="calhead"><button class="navd" data-act="dash-close">‹</button><h2>Statistiken</h2><span></span></div>
+    <div class="kpi">
+      <div><span>Serie</span><b>${weekStreak()}</b><span>Wochen</span></div>
+      <div><span>Trainings</span><b>${state.workouts.length}</b><span>gesamt</span></div>
+      <div><span>Sätze</span><b>${sets}</b><span>abgehakt</span></div>
+    </div>
+    <div class="gap"></div>
+    <div class="card">
+      <div class="row space"><b>Volumen</b><span class="sub">7 Tage ${vol(week)} kg</span></div>
+      <div class="sub">Vorwoche ${vol(prev)} kg</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:72px;margin-top:10px">${bars.map(v=>`<div style="flex:1;background:var(--accent);opacity:.85;height:${Math.max(4,v/max*72)}px;border-radius:4px"></div>`).join("")}</div>
+      <div class="sub">8 Wochen, kg × Wiederholungen</div>
+    </div>`;
+}
+function renderExercises(){
+  const map={};
+  state.workouts.forEach(w=>(w.exercises||[]).forEach(e=>{
+    if(!map[e.id]) map[e.id]={last:w.date, sets:[], best:0};
+    const done=(e.sets||[]).filter(s=>s.done);
+    done.forEach(s=>{ map[e.id].best=Math.max(map[e.id].best, s.kg); });
+    if(w.date>=map[e.id].last){ map[e.id].last=w.date; map[e.id].sets=done; }
+  }));
+  const rows=Object.keys(map);
+  return `<div class="calhead"><button class="navd" data-act="dash-close">‹</button><h2>Übungen</h2><span></span></div>
+    ${rows.map(id=>{
+      const x=map[id];
+      const line=x.sets.map(s=>s.kg+"×"+s.reps).join(" · ")||lastSet(id);
+      return `<button class="card" style="width:100%;text-align:left;margin-bottom:8px" data-act="open" data-type="ex-hist" data-id="${id}">
+        <div class="row space"><b>${exName(id)}</b><span class="sub">${labelDate(x.last)}</span></div>
+        <div class="sub">Zuletzt ${line}</div>
+        <div class="sub">Bestes Gewicht ${x.best||"–"} kg</div>
+      </button>`;
+    }).join("")||`<div class="card sub">Noch keine Übung geloggt. Ein Training füllt die Liste.</div>`}`;
+}
+function exHist(id){
+  const rows=[];
+  state.workouts.forEach(w=>(w.exercises||[]).filter(e=>e.id===id).forEach(e=>{
+    rows.push({date:w.date, name:w.name, sets:(e.sets||[]).filter(s=>s.done)});
+  }));
+  return `<h2>${exName(id)}</h2>${rows.reverse().map(r=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${labelDate(r.date)}</b><div class="sub">${r.sets.map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")||"<p class=sub>Kein Verlauf.</p>"}<div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+}
+function startTick(){
+  stopTick();
+  ui.tick=setInterval(()=>{
+    const was=ui.rest>0; if(ui.rest>0) ui.rest--;
+    if(!ui.workout) return;
+    const c=document.querySelector(".clock"); if(c&&ui.workout) c.textContent=clock(ui.workout.t0);
+    if(was&&ui.rest===0){ render(); return; }
+    const pb=document.querySelector(".t-rest"); if(pb) pb.textContent=(ui.rest||0)+"s";
+    const rb=document.querySelector(".rest span"); if(rb) rb.textContent="Pause "+ui.rest+"s";
+  }, 1000);
+}
+function stopTick(){ if(ui.tick){ clearInterval(ui.tick); ui.tick=null; } }
