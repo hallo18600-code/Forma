@@ -26,11 +26,11 @@ function renderProfil(){
       <div class="g-row"><div class="grow"><b>Darstellung</b></div>
         <div class="seg seg-theme" role="radiogroup" aria-label="Darstellung">${[["light","Hell"],["dark","Dunkel"],["system","System"]].map(([v,l])=>`<button class="${(p.theme||"system")===v?"on":""}" role="radio" aria-checked="${(p.theme||"system")===v}" data-act="theme" data-v="${v}">${l}</button>`).join("")}</div></div>
       <button class="g-row" data-act="toggle" data-k="calories"><div class="grow"><b>Kalorien im Tagebuch</b></div>${tog(p.calories)}</button>
-      <button class="g-row" data-act="toggle" data-k="reminders"><div class="grow"><b>Erinnerungen</b><div class="sub">Nur Markierung, kein Push</div></div>${tog(p.reminders)}</button>
       ${PARTNERS_ENABLED?`<button class="g-row" data-act="toggle" data-k="affiliates"><div class="grow"><b>Partnerlinks</b><div class="sub">Anzeige, Score bleibt unabhängig</div></div>${tog(p.affiliates)}</button>`:""}
     </div>
     <div class="section"><h2>Konto</h2></div>
     <div class="group">
+      <button class="g-row" data-act="open" data-type="privacy"><span class="bubble">🔒</span><div class="grow"><b>Datenschutz</b><div class="sub">Deine Daten bleiben auf dem Gerät</div></div><span class="chev">›</span></button>
       <button class="g-row" data-act="open" data-type="legal"><div class="grow"><b>Hinweise</b></div><span class="chev">›</span></button>
       <button class="g-row" data-act="backup"><span class="bubble">⬇️</span><div class="grow"><b>Daten exportieren</b><div class="sub">${state.workouts.length} Trainings · ${state.weights.length} Wiegepunkte · als Datei</div></div></button>
       <button class="g-row" data-act="import-pick"><span class="bubble">⬆️</span><div class="grow"><b>Daten importieren</b><div class="sub">Aus einer gesicherten Datei wiederherstellen</div></div></button>

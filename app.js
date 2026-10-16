@@ -319,6 +319,18 @@ function renderDash(){
 }
 
 function dashSheet(id){ return ""; }
+// Datenschutz in kurzen Punkten (Apple verlangt den Text in der App)
+function privacySheet(){
+  const li=(t,d)=>`<div class="li"><b>${t}</b><div class="sub">${d}</div></div>`;
+  return `<h2>Datenschutz</h2>
+    ${li("Nur auf deinem Gerät","Profil, Essen, Training, Gewicht und Routine speichert die App nur auf diesem Gerät. Kein Konto, kein eigener Server, keine Werbung, kein Tracking.")}
+    ${li("Barcode-Suche","Fehlt ein Produkt in der eingebauten Liste, fragt die App die Barcode-Nummer bei Open Food Facts (openfoodfacts.org) ab. Gesendet wird nur die Nummer, wie bei jeder Internet-Anfrage auch deine IP-Adresse.")}
+    ${li("Kamera","Nur zum Scannen von Barcodes. Bilder werden nicht gespeichert oder gesendet.")}
+    ${li("Sprache","Nur wenn du „Sprechen“ tippst. Die Erkennung übernimmt dein Browser bzw. Handy; dessen Anbieter kann die Aufnahme dafür verarbeiten.")}
+    ${li("Scanner-Baustein","Beim ersten Start lädt die App die Barcode-Bibliothek einmal von cdn.jsdelivr.net.")}
+    ${li("Exportieren und löschen","Profil → Daten exportieren. Profil → Alles löschen entfernt alles sofort und endgültig.")}
+    <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+}
 // Sicherheitsabfrage vor "Alles löschen"
 function resetSheet(){
   const ok=(ui.resetTxt||"").trim().toUpperCase()==="LÖSCHEN";
@@ -413,6 +425,7 @@ function renderModal(){
     <div class="gap"></div><button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="weigh") inner=weighSheet();
   if(type==="legal") inner=`<h2>Hinweise</h2><p class="sub">Nur für Erwachsene. Richtwerte, keine medizinische Beratung. Supplements ersetzen kein Essen. Produktdaten teils von Open Food Facts (© Open Food Facts-Mitwirkende, ODbL 1.0). Daten bleiben im Browser dieses Geräts.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  if(type==="privacy") inner=privacySheet();
   if(type==="stack") inner=stackSheet();
   if(type==="custom") inner=customSheet();
   if(type==="ex"||type==="plan-ex") inner=exPicker(type==="plan-ex"?"plan":"live");
