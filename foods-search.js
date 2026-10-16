@@ -3,7 +3,10 @@ const BC_ICON=`<svg width="34" height="34" viewBox="0 0 34 34"><g fill="currentC
 const FOODDB={rows:[],lc:[],by:new Map(),ok:false};
 async function loadFoodDb(){
   if(!location.protocol.startsWith("http")) return;
-  try{ const r=await fetch("foods.json"); if(!r.ok) return; const j=await r.json();
+  try{ const r=await fetch("foods.json"); if(!r.ok) return;
+    // Erster Besuch (noch ohne Service Worker): Datei gleich für offline speichern, sonst fehlt sie beim ersten Offline-Start
+    if(window.caches&&!(navigator.serviceWorker&&navigator.serviceWorker.controller)){ const cp=r.clone(); caches.open("forma-data").then(c=>c.put("foods.json",cp)).catch(()=>{}); }
+    const j=await r.json();
     FOODDB.rows=j.rows||[]; FOODDB.nm=FOODDB.rows.map(x=>NORM(x[1])); FOODDB.lc=FOODDB.rows.map(x=>NORM(x[1]+" "+(x[2]||"")));
     FOODDB.rows.forEach((x,i)=>FOODDB.by.set(x[0],i)); FOODDB.ok=FOODDB.rows.length>0; if(FOODDB.ok) render();
   }catch(e){}
