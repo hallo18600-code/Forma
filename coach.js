@@ -239,12 +239,12 @@ function aussehenAdvice(a){
   } else if(lvl===0&&g==="lose"){
     items.push({title:"Nicht weiter runter", detail:"Mehr Definition kommt jetzt über Muskeln.", product:null, act:"coach-goal", v:"muscle", label:"Auf Muskelaufbau stellen"});
   }
-  if(ziel.includes("Gesicht definierter")) items.push({title:"Geduld statt Gesichtsübungen", detail:"Wie definiert ein Gesicht wirkt, hängt vor allem vom Körperfett und von Veranlagung ab.", product:null});
+  if(ziel.includes("Gesicht definierter")) items.push({title:"Mewing", detail:"Zunge flach an den Gaumen, Lippen zu, durch die Nase atmen. Beliebt für ein definierteres Profil.", product:null});
   if(ziel.includes("Weniger Bauchfett")&&items.length<3) items.push({title:"Bauchübungen verbrennen kein Bauchfett", detail:"Fett geht am ganzen Körper weg, der Bauch zuletzt.", product:null});
   if(a.bloat==="Oft"||a.bloat==="Manchmal"){
     const ab=(a.abend||[]).filter(x=>x!=="Nichts davon");
-    items.push({title:ab.length?`Abends weniger ${ab.map(x=>({"Salziges / Fast Food":"Salz","Alkohol":"Alkohol","Spät gegessen":"spätes Essen"}[x])).join(" und ")}`:"Genug schlafen und trinken", detail:"Morgens wirkt das Gesicht bei vielen dann weniger aufgedunsen.", product:null});
-    parts.push(ab.length?"abends leichter essen":"genug trinken");
+    items.push({title:"Morgens 2 Minuten Gua Sha", detail:`Sanft von der Mitte nach außen streichen. Viele nutzen es, wenn das Gesicht morgens aufgedunsen wirkt.${ab.length?` Abends weniger ${ab.map(x=>({"Salziges / Fast Food":"Salz","Alkohol":"Alkohol","Spät gegessen":"spätes Essen"}[x])).join(" und ")}.`:""}`, product:null});
+    parts.push("morgens Gua Sha");
   }
   if(ziel.includes("Mehr Muskeln")||ziel.includes("Bessere Haltung")){
     if(!lifts) items.push({title:"3× pro Woche Krafttraining", detail:`Dazu ${targets().protein} g Protein am Tag.`, product:null, act:"tab", v:"sport", label:"Zum Training"});
