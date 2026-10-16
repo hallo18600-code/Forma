@@ -164,10 +164,10 @@ function hautAdvice(a){
   const spf = sens ? "mineralischer LSF 50" : oily ? "LSF 50 Fluid" : "LSF 50";
   // Ein Wirkstoff passend zum Problem
   const act = {
-    "Unreinheiten": sens?["Niacinamid 4–5 %","abends","Beruhigt und reguliert Talg. Sanfter als Säuren."]:["BHA 2 % (Salicylsäure)","abends, Mo/Mi/Fr","Löst verstopfte Poren. Erst 3× pro Woche, nach 4 Wochen öfter, wenn die Haut es mag."],
-    "Rötung": ["Niacinamid 4–5 %","abends","Stärkt die Hautbarriere. Bleibt die Rötung über Wochen, lass es beim Hautarzt anschauen."],
-    "Wirkt stumpf": sens?null:["Vitamin-C-Serum","morgens vor dem LSF","Macht die Haut mit der Zeit ebenmäßiger. Dunkel und kühl lagern, sonst wird es braun."],
-    "Erste Fältchen": sens?null:["Retinol (max. 0,3 %)","abends, 2× pro Woche","Am besten belegter Wirkstoff gegen Fältchen. Langsam steigern. Nicht in Schwangerschaft, LSF morgens Pflicht."],
+    "Unreinheiten": sens?["Niacinamid 4–5 %","abends","Beruhigt und reguliert Talg."]:["BHA 2 % (Salicylsäure)","abends, Mo/Mi/Fr","Löst verstopfte Poren. Langsam steigern."],
+    "Rötung": ["Niacinamid 4–5 %","abends","Stärkt die Hautbarriere."],
+    "Wirkt stumpf": sens?null:["Vitamin-C-Serum","morgens vor dem LSF","Macht die Haut ebenmäßiger. Dunkel lagern."],
+    "Erste Fältchen": sens?null:["Retinol (max. 0,3 %)","abends, 2× pro Woche","Bester Wirkstoff gegen Fältchen. Nicht in der Schwangerschaft."],
     "Trockenheit": null, "Nichts Bestimmtes": null
   }[st]||null;
   const morning = dry||sens ? ["Wasser", act&&act[1].startsWith("morgens")?act[0]:null, cream, spf] : [wash, act&&act[1].startsWith("morgens")?act[0]:null, oily?null:cream, spf];
@@ -179,40 +179,40 @@ function hautAdvice(a){
   if(!has.includes("Creme")) missing.push(cream);
   if(!has.includes("Sonnencreme")) missing.push(spf);
   if(act&&!(has.includes("Serum")&&st!=="Erste Fältchen")) missing.push(act[0]);
-  if(a.sonne!=="Täglich") items.push({title:`${spf} jeden Morgen`, detail:"Schützt vor Pigmentflecken und Fältchen mehr als jedes Serum. Menge: zwei Fingerlängen für Gesicht und Hals. Draußen alle 2 Stunden nachlegen.", product:"spf"});
+  if(a.sonne!=="Täglich") items.push({title:`${spf} jeden Morgen`, detail:"Wirkt gegen Fältchen mehr als jedes Serum.", product:"spf"});
   if(act) items.push({title:`${act[0]}, ${act[1]}`, detail:act[2], product:act[0].startsWith("Niacinamid")?"nia":null});
-  else if(dry) items.push({title:"Creme auf noch feuchte Haut", detail:"Ceramide und Glycerin halten Wasser in der Haut. Kein heißes Wasser beim Waschen.", product:"cerave"});
-  if(sens&&has.includes("Serum")) items.push({title:"Serum 2 Wochen pausieren", detail:"Nur Reinigung, Creme, LSF. Wird es ruhiger, lag es am Serum.", product:null});
-  else if(missing.length>1) items.push({title:"Ein neues Produkt pro 2 Wochen", detail:`Dir fehlen noch: ${missing.join(", ")}. Nacheinander starten, dann weißt du, was du nicht verträgst.`, product:null});
-  else if(sens) items.push({title:"Ohne Duft, Alkohol und Menthol", detail:"Genau diese Stoffe reizen empfindliche Haut am häufigsten.", product:null});
-  else items.push({title:"Peeling höchstens 2× pro Woche", detail:"Öfter schwächt die Hautbarriere.", product:null});
+  else if(dry) items.push({title:"Creme auf noch feuchte Haut", detail:"Ceramide halten das Wasser in der Haut.", product:"cerave"});
+  if(sens&&has.includes("Serum")) items.push({title:"Serum 2 Wochen pausieren", detail:"Wird es ruhiger, lag es am Serum.", product:null});
+  else if(missing.length>1) items.push({title:"Ein neues Produkt pro 2 Wochen", detail:`Fehlt noch: ${missing.join(", ")}.`, product:null});
+  else if(sens) items.push({title:"Ohne Duft, Alkohol und Menthol", detail:"Die reizen empfindliche Haut am meisten.", product:null});
+  else items.push({title:"Peeling höchstens 2× pro Woche", detail:"Öfter schwächt die Haut.", product:null});
   return {lead:`Hautbild: ${typ}. Stört: ${st}.`, routine, items:items.slice(0,3)};
 }
 function haareAdvice(a){
   const st=a.stoert||"Nichts Konkretes", items=[], heat=a.hitze&&a.hitze!=="Selten", curly=a.typ==="Lockig";
   const freq = st==="Fettiger Ansatz" ? "Waschen nach Bedarf" : (st==="Trocken / Spliss"||curly) ? "2× pro Woche waschen" : "2–3× pro Woche waschen";
   const parts=[st==="Schuppen"?"Anti-Schuppen-Shampoo 2×/Woche":freq, "Conditioner nur in die Längen", heat?"Hitzeschutz bis 180 °C":null, st==="Trocken / Spliss"?"1× Woche Maske":null].filter(Boolean);
-  const routine={ title:"Haare: "+parts.join(", "), detail:curly?"Mit T-Shirt statt Frottee trocknen, nicht rubbeln.":"Shampoo nur auf die Kopfhaut, Längen bekommen nur den Schaum ab." };
-  if(st==="Fettiger Ansatz") items.push({title:"Täglich waschen ist okay", detail:"Seltener waschen trainiert die Kopfhaut nicht um. Mildes Shampoo nur am Ansatz, Conditioner nie an die Kopfhaut.", product:"shampoo"});
-  if(st==="Trocken / Spliss") items.push({title:"Spliss nur mit der Schere weg", detail:"Kein Produkt klebt gespaltene Spitzen wieder zusammen. Alle 8–12 Wochen 1 cm schneiden, dann Conditioner nach jeder Wäsche.", product:null});
-  if(st==="Schuppen") items.push({title:"Anti-Schuppen-Shampoo mit Wirkstoff", detail:"Zinkpyrithion, Ketoconazol oder Selendisulfid. 3–5 Minuten einwirken lassen. Wird es nach 4 Wochen nicht besser: Hautarzt.", product:null});
-  if(st==="Fallen viel aus") items.push({title:"Abklären lassen statt Shampoo kaufen", detail:"50–100 Haare am Tag sind normal. Bei deutlich mehr oder kahlen Stellen: Hautarzt. Oft stecken Eisenmangel, Stress oder Veranlagung dahinter.", product:null});
-  if(heat) items.push({title:"Hitzeschutz und eine Stufe runter", detail:"Nur auf handtuchtrockenes Haar, nie auf nasses. Über 180 °C bricht das Haar schneller.", product:null});
-  if(a.wasch==="Täglich"&&st!=="Fettiger Ansatz") items.push({title:"Ein Waschtag weniger", detail:"Trockenes Haar verliert bei jeder Wäsche Fett, das es schützt. Dazwischen nur mit Wasser ausspülen.", product:null});
-  if(!items.length) items.push({title:"Nichts ändern, was funktioniert", detail:"Deine Haare sind okay. Ein Shampoo, ein Conditioner reicht.", product:null});
+  const routine={ title:"Haare: "+parts.join(", "), detail:curly?"Mit T-Shirt trocknen, nicht rubbeln.":"" };
+  if(st==="Fettiger Ansatz") items.push({title:"Täglich waschen ist okay", detail:"Seltener waschen macht sie nicht weniger fettig.", product:"shampoo"});
+  if(st==="Trocken / Spliss") items.push({title:"Spliss nur mit der Schere weg", detail:"Alle 8–12 Wochen 1 cm schneiden.", product:null});
+  if(st==="Schuppen") items.push({title:"Anti-Schuppen-Shampoo mit Wirkstoff", detail:"Mit Zink oder Ketoconazol, 3–5 Min einwirken.", product:null});
+  if(st==="Fallen viel aus") items.push({title:"Abklären lassen statt Shampoo kaufen", detail:"Bis 100 Haare am Tag sind normal. Mehr: Hautarzt.", product:null});
+  if(heat) items.push({title:"Hitzeschutz und eine Stufe runter", detail:"Über 180 °C bricht das Haar schneller.", product:null});
+  if(a.wasch==="Täglich"&&st!=="Fettiger Ansatz") items.push({title:"Ein Waschtag weniger", detail:"Jede Wäsche nimmt schützendes Fett weg.", product:null});
+  if(!items.length) items.push({title:"Nichts ändern, was funktioniert", detail:"Shampoo und Conditioner reichen.", product:null});
   return {lead:`${a.typ||"Haar"}. Stört: ${st}.`, routine, items:items.slice(0,3)};
 }
 function hm(min){ min=((min%1440)+1440)%1440; return Math.floor(min/60)+":"+String(min%60).padStart(2,"0"); }
 function schlafAdvice(a){
   const wake={"Vor 6 Uhr":330,"6–7 Uhr":390,"7–8 Uhr":450,"Nach 8 Uhr":510}[a.aufzeit]||420;
   const bed=wake-480, caf=bed-480, dim=bed-60, items=[];
-  const routine={ title:`Schlaf: Kaffee bis ${hm(caf)}, ${hm(dim)} Licht runter, ${hm(bed)} ins Bett`, detail:`Wecker ${hm(wake)}, auch am Wochenende (max. 1 Stunde später).` };
-  if(a.stunden==="Unter 6") items.push({title:`Ziel: um ${hm(bed)} im Bett`, detail:"Erwachsene brauchen meist 7–9 Stunden. Lieber früher ins Bett als später aufstehen.", product:null});
-  if(a.auf==="Wechselt stark") items.push({title:"Gleiche Aufstehzeit, jeden Tag", detail:"Die feste Uhrzeit am Morgen stellt die innere Uhr. Wer am Wochenende 3 Stunden länger schläft, hat montags eine Art Jetlag.", product:null});
-  if(a.kaffee==="Oft") items.push({title:`Letzter Kaffee um ${hm(caf)}`, detail:"Koffein wirkt 5–6 Stunden nur halb so stark, ist aber noch da. Auch Cola, Energy und Schwarztee zählen.", product:null});
-  if(a.ein==="Dauert") items.push({title:"Morgens 10 Minuten Tageslicht", detail:"Licht am Morgen macht dich abends früher müde. Draußen wirkt es stärker als am Fenster.", product:null});
-  if(a.ein==="Wach in der Nacht") items.push({title:"Kühl, dunkel, keine Uhr", detail:"Schlafzimmer um 16–19 °C. Nicht auf die Uhr schauen. Alkohol am Abend macht die zweite Nachthälfte unruhiger. Hält es über 3 Monate an: ärztlich abklären.", product:null});
-  if(!items.length) items.push({title:"Dein Schlaf passt", detail:"Halte die Zeiten. Das ist schon der wichtigste Hebel.", product:null});
+  const routine={ title:`Schlaf: Kaffee bis ${hm(caf)}, ${hm(dim)} Licht runter, ${hm(bed)} ins Bett`, detail:`Wecker ${hm(wake)}, auch am Wochenende.` };
+  if(a.stunden==="Unter 6") items.push({title:`Ziel: um ${hm(bed)} im Bett`, detail:"Erwachsene brauchen 7–9 Stunden.", product:null});
+  if(a.auf==="Wechselt stark") items.push({title:"Gleiche Aufstehzeit, jeden Tag", detail:"Auch am Wochenende, max. 1 Stunde später.", product:null});
+  if(a.kaffee==="Oft") items.push({title:`Letzter Kaffee um ${hm(caf)}`, detail:"Koffein wirkt viele Stunden nach.", product:null});
+  if(a.ein==="Dauert") items.push({title:"Morgens 10 Minuten Tageslicht", detail:"Macht dich abends früher müde.", product:null});
+  if(a.ein==="Wach in der Nacht") items.push({title:"Kühl, dunkel, keine Uhr", detail:"Schlafzimmer 16–19 °C, kein Alkohol am Abend.", product:null});
+  if(!items.length) items.push({title:"Dein Schlaf passt", detail:"Halte einfach die Zeiten.", product:null});
   return {lead:`Aufstehen ${hm(wake)} → Bett ${hm(bed)}.`, routine, items:items.slice(0,3)};
 }
 // Grobe KFA-Schätzung aus BMI, Alter, Geschlecht (Deurenberg). Ungenau, nur Orientierung.
@@ -230,48 +230,47 @@ function aussehenAdvice(a){
   const lifts=["Krafttraining","Beides"].includes(state.profile.trainType);
   const est=a.kfa==="Weiß nicht"?` (grob geschätzt ca. ${kfaGuess()} %)`:"";
   if(lvl>=3||(lvl===2&&fatGoal)){
-    if(g==="lose") items.push({title:"Defizit halten, nicht verschärfen", detail:`Dein Richtwert ${de(targets().kcal)} kcal ist schon ein leichtes Minus${est}. 0,5–1 % Körpergewicht pro Woche ist ein gutes Tempo. Schneller kostet Muskeln.`, product:null});
-    else items.push({title:"Kalorien leicht runter", detail:`Für sichtbar weniger Fett${est}: ca. 400 kcal unter deinem Bedarf von ${de(kcalFor("energy"))} kcal. Neuer Richtwert ${de(kcalFor("lose"))} kcal statt ${de(targets().kcal)} kcal. Protein hoch lassen.`, product:null, act:"coach-goal", v:"lose", label:"Kalorienziel senken"});
+    if(g==="lose") items.push({title:"Defizit halten, nicht verschärfen", detail:`${de(targets().kcal)} kcal sind schon ein leichtes Minus.`, product:null});
+    else items.push({title:"Kalorien leicht runter", detail:`Neu: ${de(kcalFor("lose"))} statt ${de(targets().kcal)} kcal.`, product:null, act:"coach-goal", v:"lose", label:"Kalorienziel senken"});
     parts.push("Kalorienziel halten");
   } else if(lvl===0&&g==="lose"){
-    items.push({title:"Nicht weiter runter", detail:"Du bist schon schlank. Mehr Definition kommt jetzt über Muskeln, nicht über weniger Essen.", product:null, act:"coach-goal", v:"muscle", label:"Auf Muskelaufbau stellen"});
+    items.push({title:"Nicht weiter runter", detail:"Mehr Definition kommt jetzt über Muskeln.", product:null, act:"coach-goal", v:"muscle", label:"Auf Muskelaufbau stellen"});
   }
-  if(ziel.includes("Weniger Bauchfett")&&items.length<3) items.push({title:"Bauchübungen verbrennen kein Bauchfett", detail:"Fett geht am ganzen Körper weg, nicht gezielt an einer Stelle. Der Bauch kommt meist zuletzt. Defizit und Krafttraining sind der Weg.", product:null});
+  if(ziel.includes("Weniger Bauchfett")&&items.length<3) items.push({title:"Bauchübungen verbrennen kein Bauchfett", detail:"Fett geht am ganzen Körper weg, der Bauch zuletzt.", product:null});
   if(a.bloat==="Oft"||a.bloat==="Manchmal"){
     const ab=(a.abend||[]).filter(x=>x!=="Nichts davon");
-    items.push({title:"Morgens 2 Minuten Gua Sha", detail:`Sanft von der Mitte nach außen und zum Hals hin streichen, das schiebt Wasser ab. Ein kühles Tuch hilft ähnlich. Wirkt für ein paar Stunden. Grüner Tee am Morgen: Koffein entwässert leicht, der Effekt ist klein.${ab.length?` Der größere Hebel bei dir: abends weniger ${ab.map(x=>({"Salziges / Fast Food":"Salz","Alkohol":"Alkohol","Spät gegessen":"spätes Essen"}[x])).join(" und ")}.`:""}`, product:null});
+    items.push({title:"Morgens 2 Minuten Gua Sha", detail:`Schiebt Wasser aus dem Gesicht.${ab.length?` Abends weniger ${ab.map(x=>({"Salziges / Fast Food":"Salz","Alkohol":"Alkohol","Spät gegessen":"spätes Essen"}[x])).join(" und ")}.`:""}`, product:null});
     parts.push("morgens Gua Sha");
   }
   if(ziel.includes("Mehr Muskeln")||ziel.includes("Bessere Haltung")){
-    if(!lifts) items.push({title:"3× pro Woche Krafttraining", detail:`Muskeln formen den Körper mehr als jede Diät. Dazu ${targets().protein} g Protein am Tag.${ziel.includes("Bessere Haltung")?" Für die Haltung: Rudern und Face Pulls.":""}`, product:null, act:"tab", v:"sport", label:"Zum Training"});
-    else if(ziel.includes("Bessere Haltung")) items.push({title:"Mehr ziehen als drücken", detail:"Rudern und Face Pulls in jedes Training. Bildschirm auf Augenhöhe.", product:null});
+    if(!lifts) items.push({title:"3× pro Woche Krafttraining", detail:`Dazu ${targets().protein} g Protein am Tag.`, product:null, act:"tab", v:"sport", label:"Zum Training"});
+    else if(ziel.includes("Bessere Haltung")) items.push({title:"Mehr ziehen als drücken", detail:"Rudern und Face Pulls in jedes Training.", product:null});
     parts.push(lifts?"Training nach Plan":"3× Krafttraining");
   }
-  if(a.sitzen==="Über 8"&&items.length<3){ items.push({title:"Jede Stunde kurz aufstehen", detail:"Langes Sitzen zieht die Schultern nach vorn. Zwei Minuten gehen reichen.", product:null}); parts.push("stündlich aufstehen"); }
-  if(ziel.includes("Frischer wirken")&&items.length<3) items.push({title:"Schlaf und LSF zuerst", detail:"Augenringe und fahle Haut kommen meist von wenig Schlaf und Sonne. Schau dir dafür Schlaf und Haut an.", product:null});
-  if(ziel.includes("Gesicht definierter")&&items.length<3) items.push({title:"Kiefer-Training bringt nichts", detail:"Für Mewing und Kiefer-Gadgets gibt es keinen Beleg. Ein schmaleres Gesicht kommt über weniger Körperfett und weniger Wasser.", product:null});
+  if(a.sitzen==="Über 8"&&items.length<3){ items.push({title:"Jede Stunde kurz aufstehen", detail:"Zwei Minuten gehen reichen.", product:null}); parts.push("stündlich aufstehen"); }
+  if(ziel.includes("Frischer wirken")&&items.length<3) items.push({title:"Schlaf und LSF zuerst", detail:"Wirken stärker als jedes Produkt.", product:null});
   if(!parts.length) parts.push("Training nach Plan","Kalorienziel halten");
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
   return {lead:`${kfaTxt}. Fokus: ${ziel.length?ziel.join(", "):"–"}.`, routine:{title:"Aussehen: "+parts.slice(0,3).join(", "), detail:""}, items:items.slice(0,3)};
 }
 function gesundheitAdvice(a){
   const items=[], parts=[], veg=a.stil==="Vegan"||a.stil==="Vegetarisch", glasses=state.profile.waterTarget||8;
-  if(a.stil==="Vegan") items.push({title:"Vitamin B12 täglich", detail:"Steckt fast nur in tierischen Lebensmitteln. Bei veganer Ernährung immer ergänzen.", product:"b12"});
+  if(a.stil==="Vegan") items.push({title:"Vitamin B12 täglich", detail:"Steckt fast nur in tierischen Lebensmitteln.", product:"b12"});
   if(a.bauch==="Oft"||a.bauch==="Manchmal"){
     const lak=(a.intol||[]).includes("Laktose");
-    items.push({title:"Langsam essen, danach 10 Min gehen", detail:`Schnelles Essen und Kohlensäure bringen Luft in den Bauch. Ein kurzer Spaziergang danach hilft der Verdauung. Ballaststoffe langsam steigern, Kaugummi und Zuckerersatz (Sorbit) meiden.${lak?" Achte auf versteckte Milch.":""} Bei Schmerzen oder wenn es über Wochen bleibt: ärztlich abklären.`, product:null});
+    items.push({title:"Langsam essen, danach 10 Min gehen", detail:`Weniger Kohlensäure und Kaugummi.${lak?" Auf versteckte Milch achten.":""}`, product:null});
     parts.push("10 Min gehen nach dem Essen");
   }
-  if(a.energie==="Tief nach dem Essen"&&items.length<3){ items.push({title:"Mittags erst Protein und Gemüse", detail:"Dann die Beilage. Große Portionen Nudeln oder Brot allein machen eher müde. Ein Spaziergang danach flacht das Tief ab.", product:null}); if(!parts.length) parts.push("10 Min gehen nach dem Essen"); }
-  if(a.energie==="Ständig müde"&&items.length<3) items.push({title:"Erst Schlaf prüfen, dann Blutbild", detail:"Hält die Müdigkeit trotz genug Schlaf an, lass Eisen, Vitamin D und Schilddrüse beim Hausarzt checken. Nicht auf Verdacht hochdosiert einnehmen.", product:null});
-  if(a.wasser==="Unter 1 Liter"){ items.push({title:"Ein Glas zu jeder Mahlzeit", detail:"Gut 1,5 Liter am Tag sind ein guter Richtwert, bei Sport und Hitze mehr. Am Urin sieht man es: hellgelb passt.", product:null}); parts.push("ein Glas Wasser zu jeder Mahlzeit"); }
+  if(a.energie==="Tief nach dem Essen"&&items.length<3){ items.push({title:"Mittags erst Protein und Gemüse", detail:"Dann erst Nudeln oder Brot.", product:null}); if(!parts.length) parts.push("10 Min gehen nach dem Essen"); }
+  if(a.energie==="Ständig müde"&&items.length<3) items.push({title:"Erst Schlaf prüfen, dann Blutbild", detail:"Bleibt es so: Eisen und Vitamin D beim Arzt prüfen.", product:null});
+  if(a.wasser==="Unter 1 Liter"){ items.push({title:"Ein Glas zu jeder Mahlzeit", detail:"Ziel: mindestens 1,5 Liter am Tag.", product:null}); parts.push("ein Glas Wasser zu jeder Mahlzeit"); }
   else parts.push(`${glasses} Gläser Wasser`);
-  if(a.trink==="Täglich"&&items.length<3){ items.push({title:"Zuckergetränke ersetzen", detail:"Ein halber Liter Cola hat etwa 50 g Zucker, das ist schon das Tagesmaximum der WHO. Wasser mit Zitrone, Tee oder Zero.", product:null}); parts.push("Wasser statt Softdrink"); }
-  if(a.alk==="Mehrmals pro Woche"&&items.length<3){ items.push({title:"Feste alkoholfreie Tage", detail:"Es gibt keine Menge, die völlig risikofrei ist. Alkohol verschlechtert auch Schlaf und Haut. Starte mit 4 freien Tagen pro Woche.", product:null}); parts.push("Mo–Do kein Alkohol"); }
-  if(veg&&a.stil!=="Vegan"&&items.length<3) items.push({title:"Eisen mit Vitamin C kombinieren", detail:"Linsen oder Haferflocken plus Paprika oder Orange. So nimmt der Körper mehr Eisen auf.", product:null});
+  if(a.trink==="Täglich"&&items.length<3){ items.push({title:"Zuckergetränke ersetzen", detail:"0,5 l Cola = ca. 50 g Zucker.", product:null}); parts.push("Wasser statt Softdrink"); }
+  if(a.alk==="Mehrmals pro Woche"&&items.length<3){ items.push({title:"Feste alkoholfreie Tage", detail:"Alkohol verschlechtert Schlaf und Haut.", product:null}); parts.push("Mo–Do kein Alkohol"); }
+  if(veg&&a.stil!=="Vegan"&&items.length<3) items.push({title:"Eisen mit Vitamin C kombinieren", detail:"Linsen mit Paprika oder Orange.", product:null});
   const intol=(a.intol||[]).filter(x=>x!=="Nein, alles okay");
-  if(intol.length&&items.length<3) items.push({title:"Score warnt bei "+intol.join(", "), detail:"Erkannt wird am Namen. Bitte trotzdem die Zutatenliste prüfen.", product:null});
-  if(!items.length) items.push({title:"Läuft gut", detail:"Halte Wasser und Bewegung. Dein Essens-Score achtet auf den Rest.", product:null});
+  if(intol.length&&items.length<3) items.push({title:"Score warnt bei "+intol.join(", "), detail:"Zutatenliste trotzdem prüfen.", product:null});
+  if(!items.length) items.push({title:"Läuft gut", detail:"Wasser und Bewegung halten.", product:null});
   return {lead:`Ernährung: ${a.stil||"–"}. Energie: ${a.energie||"–"}.`, routine:{title:"Gesundheit: "+parts.slice(0,3).join(", "), detail:""}, items:items.slice(0,3)};
 }
 function coachAdvice(id){
