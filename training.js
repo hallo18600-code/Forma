@@ -1,5 +1,8 @@
 // Health Maxxing – Training: Übungen, Pläne, Live-Training, Kalender, Statistik
 
+// Wählbare Pausenzeiten in Sekunden (Auswahl liegt in state.profile.restSec)
+const REST_OPTS=[60,90,120,180];
+
 function exName(id){
   if(EX[id]) return EX[id].name;
   const c = (state.customEx||[]).find(x=>x.id===id);
@@ -115,6 +118,9 @@ function renderLive(){
         <div><b>${vol} kg</b><span>Volumen</span></div>
         <div><b>${done}/${sets}</b><span>Sätze</span></div>
         <div><b class="t-rest">${ui.rest||0}s</b><span>Pause</span></div>
+      </div>
+      <div class="rest-pick"><span class="sub">Pausenzeit</span>
+        <div class="seg grow">${REST_OPTS.map(v=>`<button class="${(state.profile.restSec||90)===v?"on":""}" data-act="rest-pick" data-v="${v}" aria-pressed="${(state.profile.restSec||90)===v}">${v} s</button>`).join("")}</div>
       </div>
       ${ui.rest>0?`<div class="rest"><span>Pause ${ui.rest}s</span><button data-act="rest-skip">Überspringen</button></div>`:""}
       ${w.exercises.map((e,ei)=>{

@@ -20,7 +20,7 @@ function blankDay(){ return { meals:[], water:0, checks:{}, taken:{}, routine:{}
 function fresh(){
   return {
     onboarded:false, step:null, tab:"heute", date:todayIso(),
-    profile:{ name:"", goal:"muscle", sex:"m", age:24, height:178, weight:76, activity:1.55, adult:false, target:74, reminders:true, health:false, calories:true, affiliates:true, fish:"wenig", waterTarget:8, theme:"system" },
+    profile:{ name:"", goal:"muscle", sex:"m", age:24, height:178, weight:76, activity:1.55, adult:false, target:74, reminders:true, health:false, calories:true, affiliates:true, fish:"wenig", waterTarget:8, theme:"system", restSec:90 },
     days:{}, weights:[], workouts:[], routines:defaultRoutines(), measures:[], stack:["crea","d3"], customs:[], customEx:[], skin:{}, hautPlan:false, coach:{answers:{}, routine:[], skipped:[]}
   };
 }
@@ -690,8 +690,9 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="toggle-set"){
     const s=ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s];
     s.done=!s.done;
-    if(s.done) ui.rest=90;
+    if(s.done) ui.rest=state.profile.restSec||90;
   }
+  else if(act==="rest-pick"){ const v=+el.dataset.v; if(REST_OPTS.includes(v)){ state.profile.restSec=v; save(); } }
   else if(act==="add-set"){ const sets=ui.workout.exercises[+el.dataset.e].sets; const last=sets[sets.length-1]||{kg:20,reps:8}; sets.push({kg:last.kg,reps:last.reps,done:false}); }
   else if(act==="del-ex"){ ui.workout.exercises.splice(+el.dataset.e,1); }
   else if(act==="add-ex"){ ui.workout.exercises.push({id:el.dataset.id, sets:[{kg:40,reps:8,done:false}]}); ui.modal=null; }
