@@ -221,9 +221,7 @@ function obClampNum(k){
 function obPick(v){
   const st=obSteps()[state.step]; if(!st||!st.opts) return;
   if(st.kind==="multi"){ st.set(toggleMulti(st.get(),v,st.none)); save(); return; }
-  st.set(v); save();
-  const cur=state.step;
-  setTimeout(()=>{ if(!state.onboarded&&state.step===cur){ obGo(1); render(); } },260);
+  st.set(v); save();   // nur auswählen – weiter geht es erst mit "Weiter"
 }
 function obNext(){
   const st=obSteps()[state.step]; if(!st) return;

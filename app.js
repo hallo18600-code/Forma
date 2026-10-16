@@ -455,7 +455,7 @@ document.getElementById("app").addEventListener("click", e=>{
   const p=state.profile;
   if(act==="start-onboard"){ state.step=0; }
   else if(act==="skip-demo"){ seedDemo(); toast("Beispieldaten geladen"); }
-  else if(act==="ob-adult"){ if(el.dataset.v==="1"){ p.adult=true; state.obMinor=false; save(); const cur=state.step; setTimeout(()=>{ if(!state.onboarded&&state.step===cur){ obGo(1); render(); } },260); } else { p.adult=false; state.obMinor=true; save(); } }
+  else if(act==="ob-adult"){ if(el.dataset.v==="1"){ p.adult=true; state.obMinor=false; } else { p.adult=false; state.obMinor=true; } save(); }
   else if(act==="ob-pick"){ obPick(el.dataset.v); }
   else if(act==="ob-next"){ obNext(); }
   else if(act==="ob-back"){ obBack(); }
