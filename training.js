@@ -58,7 +58,7 @@ function renderSport(){
       <div class="row space" style="padding:8px 0"><div class="meal-name">${esc(r.name)}</div><button class="link" data-act="edit-plan" data-id="${r.id}">Bearbeiten</button></div>
       ${(r.days||[]).map(d=>`<div class="meal-row">
         <div class="bubble">🏋️</div>
-        <div class="grow"><div class="meal-name">${esc(d.name)}</div><div class="sub">${(d.exercises||[]).map(e=>exName(e.id)).slice(0,3).join(", ")||"Leer"}</div></div>
+        <div class="grow"><div class="meal-name">${esc(d.name)}</div><div class="sub">${(d.exercises||[]).map(e=>(EX[e.id]&&EX[e.id].base)||exName(e.id)).slice(0,3).join(", ")||"Leer"}</div></div>
         <button class="plus dark" data-act="start-wo" data-rid="${r.id}" data-did="${d.id}">›</button>
       </div>`).join("")}
     </div>`).join("")}
@@ -87,7 +87,7 @@ function renderPlan(){
       ${plan.days.map((d,di)=>`<div class="card" style="margin-top:12px">
         <div class="row space"><input data-act="day-name" data-d="${di}" value="${esc(d.name)}" style="font-weight:800;border:0;background:transparent;width:140px"><button class="x" data-act="del-day" data-d="${di}">✕</button></div>
         ${(d.exercises||[]).map((e,ei)=>`<div style="padding:8px 0;border-top:1px solid var(--line)">
-          <div class="row space"><b>${exName(e.id)}</b><button class="x" data-act="plan-del-ex" data-d="${di}" data-e="${ei}">✕</button></div>
+          <div class="row space"><button class="ex-open" data-act="exi-open" data-id="${e.id}">${exThumb(e.id)}<b>${exName(e.id)}</b></button><button class="x" data-act="plan-del-ex" data-d="${di}" data-e="${ei}">✕</button></div>
           <div class="sub">${e.sets.map(s=>s.kg+"×"+s.reps).join(" · ")}</div>
         </div>`).join("")}
         <button class="pill ghost" style="width:100%;margin-top:8px" data-act="open-day-ex" data-d="${di}">+ Übung</button>
@@ -120,7 +120,7 @@ function renderLive(){
       ${w.exercises.map((e,ei)=>{
         let n=0;
         return `<div style="margin:14px 0 18px">
-          <div class="row space"><div><div class="ex-name">${exName(e.id)}</div><div class="sub">Zuletzt ${lastSet(e.id)}</div></div><button class="x" data-act="del-ex" data-e="${ei}">✕</button></div>
+          <div class="row space"><button class="ex-open" data-act="exi-open" data-id="${e.id}">${exThumb(e.id)}<span><span class="ex-name">${exName(e.id)}</span><span class="sub">Zuletzt ${lastSet(e.id)}</span></span></button><button class="x" data-act="del-ex" data-e="${ei}" aria-label="Übung entfernen">✕</button></div>
           <table class="sets"><tr><th>SATZ</th><th>ZUVOR</th><th>KG</th><th>WDH</th><th></th></tr>
             ${e.sets.map((s,si)=>`<tr class="${s.done?"done":""}">
               <td>${++n}</td>
@@ -138,15 +138,10 @@ function renderLive(){
   </div>`;
 }
 function exPicker(mode){
-  const q=(ui.exQuery||"").trim().toLowerCase();
-  const custom=state.customEx||[];
-  const list=[...Object.entries(EX).map(([id,e])=>({id, name:e.name, group:e.group})), ...custom.map(e=>({id:e.id, name:e.name, group:"Eigene"}))];
-  const found=list.filter(e=>!q || (e.name+" "+e.group).toLowerCase().includes(q));
-  const groups=[...new Set(found.map(e=>e.group))];
-  return `<h2>Übung</h2>
-    <div class="field"><input data-act="ex-query" value="${esc(ui.exQuery||"")}" placeholder="Kniebeuge, Rudern"></div>
-    <div class="row" style="margin:8px 0"><input id="custom-ex" placeholder="Eigene Übung" style="flex:1;height:42px;border:1px solid var(--line);border-radius:12px;padding:0 12px"><button class="pill ghost" data-act="add-custom-ex" data-mode="${mode}">+</button></div>
-    ${groups.map(g=>`<div class="sub" style="margin-top:8px">${g}</div>${found.filter(e=>e.group===g).map(e=>`<button class="choice" data-act="${mode==="plan"?"plan-add-ex":"add-ex"}" data-id="${e.id}"><b>${esc(e.name)}</b></button>`).join("")}`).join("")}`;
+  return `<h2>Übung hinzufügen</h2>
+    ${exFilterBar(mode)}
+    <div class="excustom"><input id="custom-ex" placeholder="Eigene Übung anlegen" aria-label="Eigene Übung"><button class="plus" data-act="add-custom-ex" data-mode="${mode}" aria-label="Eigene Übung anlegen">+</button></div>
+    <div id="exl-list">${exLibList(mode)}</div>`;
 }
 function woDetail(id){
   const w=state.workouts.find(x=>x.id===id);
@@ -283,24 +278,9 @@ function renderStats(){
     </div>`;
 }
 function renderExercises(){
-  const map={};
-  state.workouts.forEach(w=>(w.exercises||[]).forEach(e=>{
-    if(!map[e.id]) map[e.id]={last:w.date, sets:[], best:0};
-    const done=(e.sets||[]).filter(s=>s.done);
-    done.forEach(s=>{ map[e.id].best=Math.max(map[e.id].best, s.kg); });
-    if(w.date>=map[e.id].last){ map[e.id].last=w.date; map[e.id].sets=done; }
-  }));
-  const rows=Object.keys(map);
-  return `<div class="calhead"><button class="navd" data-act="dash-close">‹</button><h2>Übungen</h2><span></span></div>
-    ${rows.map(id=>{
-      const x=map[id];
-      const line=x.sets.map(s=>s.kg+"×"+s.reps).join(" · ")||lastSet(id);
-      return `<button class="card" style="width:100%;text-align:left;margin-bottom:8px" data-act="open" data-type="ex-hist" data-id="${id}">
-        <div class="row space"><b>${exName(id)}</b><span class="sub">${labelDate(x.last)}</span></div>
-        <div class="sub">Zuletzt ${line}</div>
-        <div class="sub">Bestes Gewicht ${x.best||"–"} kg</div>
-      </button>`;
-    }).join("")||`<div class="card sub">Noch keine Übung geloggt. Ein Training füllt die Liste.</div>`}`;
+  return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button><h2>Übungen</h2><span class="sub">${exAllIds().length}</span></div>
+    ${exFilterBar("dash")}
+    <div class="card exlist" id="exl-list">${exLibList("dash")}</div>`;
 }
 function exHist(id){
   const rows=[];

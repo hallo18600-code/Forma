@@ -271,24 +271,7 @@ const ROUTINES = [
   { id:"legs", name:"Beine", detail:"Kniebeuge, RDL", exercises:["sq","rdl"] },
   { id:"empty", name:"Leer", detail:"Übungen selbst wählen", exercises:[] }
 ];
-const EX = {
-  bp:{ name:"Bankdrücken", group:"Brust" },
-  ohp:{ name:"Schulterdrücken", group:"Schultern" },
-  latraise:{ name:"Seitheben", group:"Schultern" },
-  dip:{ name:"Dips", group:"Brust" },
-  row:{ name:"Langhantelrudern", group:"Rücken" },
-  lat:{ name:"Latzug", group:"Rücken" },
-  pull:{ name:"Klimmzug", group:"Rücken" },
-  face:{ name:"Face Pull", group:"Rücken" },
-  sq:{ name:"Kniebeuge", group:"Beine" },
-  rdl:{ name:"Rumänisches Kreuzheben", group:"Beine" },
-  lunge:{ name:"Ausfallschritt", group:"Beine" },
-  hip:{ name:"Hip Thrust", group:"Beine" },
-  curl:{ name:"Bizepscurl", group:"Arme" },
-  tri:{ name:"Trizepsdrücken", group:"Arme" },
-  plank:{ name:"Plank", group:"Core" },
-  crunch:{ name:"Crunch", group:"Core" }
-};
+const EX = {}; // wird in uebungen.js mit allen Übungen gefüllt
 function defaultRoutines(){
   const set = (kg, reps, n=3) => Array.from({length:n}, ()=>({kg, reps}));
   const day = (id, name, exercises) => ({id, name, exercises});

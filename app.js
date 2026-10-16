@@ -410,6 +410,7 @@ function render(){ try{ ensureRoutine(); }catch(e){}
   let html = !state.onboarded ? (state.step==null ? renderWelcome() : renderOnboard()) : renderApp();
   if(!state.onboarded && state.step==null) html=renderWelcome();
   html += renderModal();
+  if(state.onboarded) html += renderExInfo();
   if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
   // Scroll-Positionen merken, damit ein Neuaufbau (Tipp, Toast, Timer) nicht nach oben springt
   const keep=[...root.querySelectorAll(".scroll,.sheet-card")].map(n=>n.scrollTop);
@@ -418,6 +419,8 @@ function render(){ try{ ensureRoutine(); }catch(e){}
   ui._view=view;
   root.innerHTML = html;
   if(same){ [...root.querySelectorAll(".scroll,.sheet-card")].forEach((n,i)=>{ if(keep[i]) n.scrollTop=keep[i]; }); }
+  if(ui.exInfo) figKick();
+  exAfterRender();
 }
 function seedDemo(){
   state = fresh();
