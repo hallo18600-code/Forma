@@ -18,6 +18,19 @@ function toggleMulti(arr, v, none){
   if(v===none) return [v];
   return arr.filter(x=>x!==none).concat(v);
 }
+// Welche Themen im Fragebogen abgefragt werden: was unter "verbessern" gewählt wurde, plus das Hauptziel.
+// Der Rest bleibt im Coach offen und kann dort später beantwortet werden.
+const OB_AREA_TOPIC={Haut:["haut"],Haare:["haare"],Schlaf:["schlaf"],Energie:["schlaf","gesundheit"],Aussehen:["aussehen"],Gesundheit:["gesundheit"]};
+function obTopics(){
+  const p=state.profile, set=new Set();
+  (p.areas||[]).forEach(a=>(OB_AREA_TOPIC[a]||[]).forEach(t=>set.add(t)));
+  if(p.goal==="skin") set.add("haut");
+  if(p.goal==="energy") set.add("schlaf");
+  return OB_TOPICS.filter(([t])=>set.has(t));
+}
+// Ernährungsfragen, die jeder beantwortet (Score warnt sonst nicht bei Unverträglichkeiten)
+const OB_CORE=["stil","intol"];
+const OB_STEPS_BY_ACT={1.3:7000,1.4:8000,1.55:10000,1.7:12000};
 function obAns(t){ return state.coach.answers[t] || (state.coach.answers[t]={}); }
 function obProf(k){ return (state.ob||{})[k] ? state.profile[k] : undefined; }
 function obMark(k){ state.ob = state.ob||{}; state.ob[k]=1; }
@@ -43,7 +56,7 @@ function obSteps(){
     opts:GOALS.map(g=>({v:g.id,l:g.name,e:OB_GOALS[g.id][0]})), get:()=>obProf("goal"),
     set:v=>{ p.goal=v; obMark("goal"); if(!state.ob.target) p.target=obDefaultTarget(); }});
   num("target","Dein Ziel","Dein Wunschgewicht",obMinTarget(),200,0.5,"kg");
-  S.push({id:"areas",sec:"Dein Ziel",kind:"multi",q:"Was willst du noch verbessern?",
+  S.push({id:"areas",sec:"Dein Ziel",kind:"multi",q:"Was willst du noch verbessern?",sub:"Nur dazu kommen gleich ein paar Fragen.",
     opts:list([["Haut","Haut","💧"],["Haare","Haare","✂️"],["Schlaf","Schlaf","🌙"],["Energie","Energie","⚡"],["Aussehen","Aussehen","🪞"],["Gesundheit","Gesundheit","💚"],["Gewohnheiten","Gewohnheiten","✅"]]),
     get:()=>p.areas, set:v=>{ p.areas=v; }});
   S.push({id:"activity",sec:"Alltag & Training",kind:"single",req:1,q:"Wie aktiv ist dein Alltag?",
@@ -52,17 +65,21 @@ function obSteps(){
   S.push({id:"trainFreq",sec:"Alltag & Training",kind:"single",req:1,q:"Wie oft trainierst du pro Woche?",sub:"Gym, Sport, Laufen. Das fließt in deine Kalorien ein.",
     opts:list([["Gar nicht","Gar nicht","🛋️"],["1–2× pro Woche","1–2× pro Woche","🙂"],["3–4× pro Woche","3–4× pro Woche","💪"],["5× oder öfter","5× oder öfter","🔥"]]),
     get:()=>p.trainFreq, set:v=>{ p.trainFreq=v; }});
-  S.push({id:"trainType",sec:"Alltag & Training",kind:"single",q:"Welches Training?",
+  if(p.trainFreq!=="Gar nicht") S.push({id:"trainType",sec:"Alltag & Training",kind:"single",q:"Welches Training?",
     opts:list([["Krafttraining","Kraft","🏋️"],["Ausdauer","Ausdauer","🏃"],["Beides","Beides","⚡"],["Weiß ich noch nicht","Weiß ich noch nicht","🤔"]]),
     get:()=>p.trainType, set:v=>{ p.trainType=v; }});
-  S.push({id:"stepGoal",sec:"Alltag & Training",kind:"single",q:"Dein Schrittziel pro Tag",
-    opts:[6000,8000,10000,12000].map(v=>({v:String(v),l:v.toLocaleString("de-DE"),e:"👟"})),
-    get:()=>p.stepGoal?String(p.stepGoal):undefined, set:v=>{ p.stepGoal=+v; }});
-  OB_TOPICS.forEach(([t,title])=>{
-    coachQuiz(t).forEach(q=>S.push({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, none:q.none,
-      opts:q.opts.map(o=>({v:o,l:o,e:(q.emo||{})[o]})), get:()=>obAns(t)[q.k], set:v=>{ obAns(t)[q.k]=v; }}));
-    if(t==="gesundheit") S.push({id:"fish",sec:title,topic:t,opt:1,kind:"single",q:"Wie oft isst du Fisch?",
-      opts:list([["wenig","Selten","🥦"],["oft","Jede Woche","🐟"]]), get:()=>obProf("fish"), set:v=>{ p.fish=v; obMark("fish"); }});
+  // Schrittziel wird aus dem Alltag abgeleitet (änderbar im Verlauf)
+  const quizStep=(t,title,q,extra)=>S.push(Object.assign({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, none:q.none,
+      opts:q.opts.map(o=>({v:o,l:o,e:(q.emo||{})[o]})), get:()=>obAns(t)[q.k], set:v=>{ obAns(t)[q.k]=v; }},extra||{}));
+  const gq=coachQuiz("gesundheit"), veg=["Vegan","Vegetarisch"].includes(obAns("gesundheit").stil);
+  quizStep("gesundheit","Ernährung",gq.find(q=>q.k==="stil"),{opt:0,req:1,
+    set:v=>{ obAns("gesundheit").stil=v; if(["Vegan","Vegetarisch"].includes(v)){ p.fish="wenig"; obMark("fish"); } }});
+  if(!veg) S.push({id:"fish",sec:"Ernährung",kind:"single",req:1,q:"Wie oft isst du Fisch?",
+    opts:list([["wenig","Selten","🥦"],["oft","Jede Woche","🐟"]]), get:()=>obProf("fish"), set:v=>{ p.fish=v; obMark("fish"); }});
+  quizStep("gesundheit","Ernährung",gq.find(q=>q.k==="intol"),{opt:0,req:1});
+  obTopics().forEach(([t,title])=>{
+    const a=obAns(t);
+    coachQuiz(t).filter(q=>!(t==="gesundheit"&&OB_CORE.includes(q.k))&&qNeeded(q,a)).forEach(q=>quizStep(t,title,q));
   });
   S.push({id:"sups",sec:"Supplements & Routine",opt:1,kind:"multi",none:"none",q:"Nimmst du Supplements?",
     opts:SUPS.map(s=>({v:s.id,l:s.name,e:s.emoji})).concat({v:"none",l:"Nichts davon",e:"🚫"}),
@@ -155,13 +172,10 @@ function renderOnboard(){
 
 // Was der Essens-Score für diese Person besonders beachtet
 function persoTags(){
-  const A=state.coach.answers, e=A.gesundheit||{}, s=A.schlaf||{}, h=A.haut||{}, out=[goalName()];
+  const e=state.coach.answers.gesundheit||{}, out=[goalName()];
   if(e.stil&&e.stil!=="Alles") out.push(e.stil);
-  (e.fokus||[]).filter(x=>x!=="Nichts Bestimmtes").forEach(x=>out.push(x));
   (e.intol||[]).filter(x=>x!=="Nein, alles okay").forEach(x=>out.push("Ohne "+x));
-  if((e.huerde||[]).includes("Heißhunger")) out.push("Sättigung");
-  if(s.kaffee==="Oft"||(s.ein&&s.ein!=="Geht schnell")) out.push("Koffein am Abend");
-  if(h.stoert==="Unreinheiten") out.push("Zucker & Haut");
+  foodFocus().filter(x=>x!=="Nichts Bestimmtes").forEach(x=>out.push(x));
   return out;
 }
 function fullBodyPlan(){
@@ -192,14 +206,16 @@ function buildRoutine(){
 function renderObPlan(){
   const p=state.profile, t=targets(), rt=buildRoutine();
   const plan = obWantsFullBody()&&obDefaultPlans() ? "Ganzkörper A/B" : obDefaultPlans() ? "Push · Pull · Beine" : "Deine Pläne";
+  const open = OB_TOPICS.filter(([t])=>!quizDone(t)).map(x=>x[1]);
   const sups = (state.stack.length?state.stack:recommendStack().map(r=>r.id)).map(id=>(SUPS.find(x=>x.id===id)||{}).name).filter(Boolean);
   return `<div class="obp-hero">
       <div class="obp-k">${de(t.kcal)} kcal</div>
-      <div class="obp-row"><div><b>${t.protein} g</b><span>Protein</span></div><div><b>${p.waterTarget}</b><span>Gläser</span></div><div><b>${de(p.stepGoal||10000)}</b><span>Schritte</span></div></div>
+      <div class="obp-row"><div><b>${t.protein} g</b><span>Protein</span></div><div><b>${p.waterTarget}</b><span>Gläser</span></div><div><b>${de(p.stepGoal&&!p.stepAuto?p.stepGoal:OB_STEPS_BY_ACT[p.activity]||8000)}</b><span>Schritte</span></div></div>
     </div>
     ${safetyNote()}
     <div class="card obp"><h3>⭐ Dein Score achtet auf</h3><div class="opts">${persoTags().map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div></div>
     <div class="card obp"><h3>✅ Routine</h3>${rt.map(r=>`<div class="obp-li">${esc(rShort(r))}</div>`).join("")}</div>
+    ${open.length?`<p class="sub obp-note">Später im Coach: ${open.join(", ")}</p>`:""}
     <div class="obp-2">
       <div class="card obp"><h3>🏋️ Training</h3><p>${plan}</p></div>
       <div class="card obp"><h3>💊 ${state.stack.length?"Stack":"Vorschlag"}</h3><p>${sups.join(", ")}</p></div>
@@ -259,6 +275,7 @@ function obFinish(){
   state.coach.routine=buildRoutine().concat(own); state.routineSeeded=true; if(!state.rStart) state.rStart=todayIso();
   if(obDefaultPlans()&&obWantsFullBody()) state.routines=[fullBodyPlan()];
   if(first&&!state.ob.sups) state.stack=[];
+  if(!p.stepGoal||p.stepAuto){ p.stepGoal=OB_STEPS_BY_ACT[p.activity]||8000; p.stepAuto=true; }
   state.coach.skipped=OB_TOPICS.map(x=>x[0]).filter(t=>!quizDone(t));
   state.obDone=true; state.obRedo=false; state.obMinor=false;
   state.onboarded=true; state.step=null; state.date=todayIso(); state.tab="heute";

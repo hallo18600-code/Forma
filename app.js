@@ -116,6 +116,17 @@ function foodHas(item,kind){
   const words=h.split(/[^a-z0-9]+/);
   return kw.has.some(x=>x[0]==="="?words.includes(x.slice(1)):h.includes(x));
 }
+// Worauf der Score achtet, abgeleitet aus den Antworten. Score und Plan-Anzeige nutzen dieselbe Liste.
+function foodFocus(){
+  const A=state.coach.answers, e=A.gesundheit||{}, au=A.aussehen||{}, h=A.haut||{}, s=A.schlaf||{}, f=new Set(e.fokus||[]);
+  if(e.trink==="Täglich"||e.energie==="Tief nach dem Essen") f.add("Weniger Zucker");
+  if((au.abend||[]).includes("Salziges / Fast Food")||au.bloat==="Oft") f.add("Weniger Salz");
+  if((e.huerde||[]).includes("Heißhunger")||e.energie==="Ständig müde") f.add("Sättigung");
+  if(s.kaffee==="Oft"||(s.ein&&s.ein!=="Geht schnell")) f.add("Koffein am Abend");
+  if(h.stoert==="Unreinheiten"&&state.profile.goal!=="skin") f.add("Zucker & Haut");
+  return [...f];
+}
+const RED_MEAT=["rind","schwein","salami","wurst","schinken","speck","bacon","hack","doner","leberkas","steak","kalb","lamm"];
 function scoreFood(item){
   const g=state.profile.goal, parts=[["Basis",62]];
   const add=(l,v)=>{ v=Math.round(v); if(v) parts.push([l,v]); };
@@ -130,7 +141,7 @@ function scoreFood(item){
   const meat=MEAT.includes(item.id)||foodHas(item,"meat"), animal=meat||ANI.includes(item.id)||foodHas(item,"lak")||foodHas(item,"egg");
   if(ea.stil==="Vegan"&&animal) add("Passt nicht zu Vegan",-40);
   else if(ea.stil==="Vegetarisch"&&meat) add("Passt nicht zu Vegetarisch",-40);
-  const fokus=ea.fokus||[], intol=ea.intol||[], huerde=ea.huerde||[];
+  const fokus=foodFocus(), intol=ea.intol||[];
   if(fokus.includes("Weniger Zucker")) add("Dein Fokus: weniger Zucker",-su*0.8);
   if(fokus.includes("Mehr Protein")) add("Dein Fokus: mehr Protein",Math.min(10,pr*.35));
   if(fokus.includes("Weniger Fertiges")&&item.processed) add("Dein Fokus: weniger Fertiges",-8);
@@ -139,10 +150,10 @@ function scoreFood(item){
   if(intol.includes("Laktose")&&foodHas(item,"lak")) add("Kann Laktose enthalten",-25);
   if(intol.includes("Gluten")&&foodHas(item,"glu")) add("Kann Gluten enthalten",-25);
   if(intol.includes("Nüsse")&&foodHas(item,"nut")) add("Kann Nüsse enthalten",-30);
-  if(huerde.includes("Heißhunger")&&((pr>=10&&(item.kcal||0)<=250)||(item.fiber||0)>=6)) add("Viel Protein oder Ballaststoffe",6);
-  if((sa.kaffee==="Oft"||(sa.ein&&sa.ein!=="Geht schnell"))&&foodHas(item,"caf")) add("Koffein: nach 15 Uhr meiden",-4);
-  else if(ea.stil==="Wenig Fleisch"&&["rind","salami"].includes(item.id)) add("Du willst weniger Fleisch",-12);
-  if(g!=="skin"&&ha.stoert==="Unreinheiten") add("Dein Haut-Fokus: Zucker",-su*0.8);
+  if(fokus.includes("Sättigung")&&((pr>=10&&(item.kcal||0)<=250)||(item.fiber||0)>=6)) add("Viel Protein oder Ballaststoffe",6);
+  if(fokus.includes("Koffein am Abend")&&foodHas(item,"caf")) add("Koffein: nach 15 Uhr meiden",-4);
+  if(ea.stil==="Wenig Fleisch"&&(["rind","salami"].includes(item.id)||RED_MEAT.some(x=>NORM(item.name||"").includes(x)))) add("Du willst weniger Fleisch",-12);
+  if(fokus.includes("Zucker & Haut")) add("Dein Haut-Fokus: Zucker",-su*0.8);
   add("Ballaststoffe",Math.min(10,(item.fiber||0)*1.2));
   add("Salz",-Math.max(0,(item.salt||0)-1)*8);
   add("Gesättigte Fette",-Math.max(0,(item.sat||0)-4)*2);
@@ -556,7 +567,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="ai-del"){ (ui.aiRes||[]).splice(+el.dataset.i,1); if(!(ui.aiRes||[]).length) ui.aiRes=null; }
   else if(act==="steps-add"){ const i=document.getElementById("st-input"); if(i) i.value=(+i.value||0)+ +el.dataset.v; return; }
   else if(act==="steps-save"){ const i=document.getElementById("st-input"); day().steps=Math.max(0,Math.round(+(i&&i.value)||0)); ui.modal=null; save(); toast("Gespeichert"); }
-  else if(act==="step-goal"){ state.profile.stepGoal=+el.dataset.v; save(); }
+  else if(act==="step-goal"){ state.profile.stepGoal=+el.dataset.v; state.profile.stepAuto=false; save(); }
   else if(act==="scan-more"){ ui.scanMax=(ui.scanMax||30)+30; const bx=document.getElementById("scan-results"); if(bx) bx.innerHTML=scanResults(); return; }
   else if(act==="amt-open"||act==="amt-toggle"){
     const a=document.querySelector(".amt"); if(!a) return;
