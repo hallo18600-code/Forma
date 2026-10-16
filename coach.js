@@ -285,7 +285,7 @@ function routineOn(id, s){
 function topicMark(id){ return {haut:"💧", haare:"✂️", schlaf:"🌙", aussehen:"🪞", gesundheit:"💚"}[id] || "•"; }
 // Tagesbezogene Hinweise aus Ernährung, Training, Schlaf und Wasser
 function coachToday(){
-  const t=targets(), tot=totals(), d=day(), burn=burnKcal(), hints=[], isToday=state.date===todayIso();
+  const t=targets(), tot=totals(), d=day(), hints=[], isToday=state.date===todayIso();
   const wo=state.workouts.filter(w=>w.date===state.date);
   const ea=state.coach.answers.gesundheit||{}, veg=ea.stil==="Vegan"||ea.stil==="Vegetarisch";
   const food=veg?"Tofu, Linsen oder Quark":"Skyr, Ei oder Hähnchen";
@@ -293,7 +293,6 @@ function coachToday(){
   if(!d.meals.length) hints.push({e:"🍽️",t:"Noch nichts gegessen eingetragen",d:"Trag die erste Mahlzeit ein, dann passen Score und Tipps zu deinem Tag.",go:"heute"});
   else if(wo.length&&gap>15) hints.push({e:"💪",t:`Nach dem Training fehlen noch ${gap} g Protein`,d:`${food} schließen die Lücke.`,go:"heute"});
   else if(gap>t.protein*0.4) hints.push({e:"🥚",t:`Protein: ${Math.round(tot.protein)} von ${t.protein} g`,d:`${food} zur nächsten Mahlzeit.`,go:"heute"});
-  if(burn&&showKcal()) hints.push({e:"🔥",t:`Training: Ziel heute ${de(dayTarget())} kcal`,d:`+${de(burn)} kcal für ${wo.map(w=>esc(w.name)).join(", ")}. Abends nicht hungrig bleiben.`,go:"heute"});
   if(!wo.length){
     const last=[...state.workouts].filter(w=>w.date<=state.date).sort((a,b)=>a.date<b.date?1:-1)[0];
     const gapD=last?Math.round((parseIso(state.date)-parseIso(last.date))/864e5):null;

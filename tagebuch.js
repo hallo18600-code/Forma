@@ -1,6 +1,6 @@
 // Health Maxxing – Tagebuch: Heute-Ansicht, Mahlzeiten, Lebensmittel-Details
 function renderHeute(){
-  const t=targets(), tot=totals(), burn=burnKcal(), goalK=t.kcal+burn, remain=Math.max(0, goalK-tot.kcal);
+  const t=targets(), tot=totals(), goalK=t.kcal, remain=Math.max(0, goalK-tot.kcal);
   const d=day();
   return `<div class="scroll pad">
     <div class="topbar center">
@@ -12,9 +12,8 @@ function renderHeute(){
       <div class="sum">
         <div class="side"><div class="num">${showKcal()?tot.kcal.toLocaleString("de-DE"):"–"}</div><div class="lbl">Gegessen</div></div>
         <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString("de-DE"):"–"}</b><span>${showKcal()?"Übrig":"Kalorien aus"}</span></div></div>
-        <div class="side"><div class="num">${burn.toLocaleString("de-DE")}</div><div class="lbl">Training</div></div>
+        <div class="side"><div class="num">${showKcal()?goalK.toLocaleString("de-DE"):"–"}</div><div class="lbl">Ziel</div></div>
       </div>
-      ${showKcal()?`<div class="goalline">Ziel heute <b>${de(goalK)} kcal</b>${burn?` · inkl. +${de(burn)} Training`:""}</div>`:""}
       <div class="macros">
         ${[["Kohlenhydrate", tot.carbs, t.carbs, "carbs"],["Eiweiß", tot.protein, t.protein, "protein"],["Fett", tot.fat, t.fat, "fat"]].map(([name,val,goal,col])=>`<div class="mac" style="--mc:var(--c-${col})"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
       </div>
@@ -43,7 +42,7 @@ function renderHeute(){
 // "Dein Tag": Wasser, Schritte, Schlaf, Training, Routine, Supplements an einem Ort
 function dayBlock(){
   const d=day(), p=state.profile, stepGoal=p.stepGoal||10000;
-  const wo=state.workouts.filter(w=>w.date===state.date), burn=burnKcal();
+  const wo=state.workouts.filter(w=>w.date===state.date);
   const rt=rDone(state.date), sups=state.stack.filter(x=>d.taken[x]).length;
   const sl=d.sleep, slTxt=sl==null?"Noch nicht eingetragen":de(sl,1)+" h"+(sl>=7?" ✓":"");
   const checks=[d.meals.length>0, d.water>=p.waterTarget, (d.steps||0)>=stepGoal, sl!=null&&sl>=7, rt.n>0&&rt.c===rt.n, state.stack.length>0&&sups===state.stack.length];
@@ -70,7 +69,7 @@ function dayBlock(){
       </div>
       <button class="meal-row" data-act="tab" data-v="sport">
         <div class="bubble">🏋️</div>
-        <div class="grow"><div class="meal-name">Training</div><div class="sub">${wo.length?wo.map(w=>esc(w.name)+" · "+w.min+" min").join(", ")+(burn&&showKcal()?" · ca. +"+de(burn)+" kcal":""):"Heute noch keins – Ruhetag ist auch okay"}</div></div>
+        <div class="grow"><div class="meal-name">Training</div><div class="sub">${wo.length?wo.map(w=>esc(w.name)+" · "+w.min+" min").join(", "):"Heute noch keins – Ruhetag ist auch okay"}</div></div>
         ${wo.length?`<span class="tagp on">Erledigt</span>`:""}<span class="chev">›</span>
       </button>
       <button class="meal-row" data-act="dash" data-id="routine">

@@ -399,8 +399,6 @@ p { margin:var(--s-2) 0; }
 .mid { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
 .ring .mid b { font-size:var(--fs-xl); letter-spacing:-.04em; line-height:1.1; }
 .ring .mid span { font-size:var(--fs-s); color:var(--ink-2); }
-.goalline { text-align:center; font-size:var(--fs-s); color:var(--ink-2); margin-top:var(--s-1); }
-.goalline b { color:var(--ink); }
 .macros { display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--s-3); margin-top:var(--s-4); }
 .mac { text-align:center; }
 .mac b { font-size:var(--fs-s); }

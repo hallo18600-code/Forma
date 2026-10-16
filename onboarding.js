@@ -49,7 +49,7 @@ function obSteps(){
   S.push({id:"activity",sec:"Alltag & Training",kind:"single",req:1,q:"Wie aktiv ist dein Alltag?",
     opts:list([["1.3","Meist sitzend","🪑"],["1.4","Leicht aktiv","🚶"],["1.55","Aktiv","🚴"],["1.7","Sehr aktiv","🏗️"]]),
     get:()=>state.ob&&state.ob.activity?String(p.activity):undefined, set:v=>{ p.activity=+v; obMark("activity"); }});
-  S.push({id:"trainFreq",sec:"Alltag & Training",kind:"single",q:"Wie oft trainierst du?",
+  S.push({id:"trainFreq",sec:"Alltag & Training",kind:"single",req:1,q:"Wie oft trainierst du pro Woche?",sub:"Gym, Sport, Laufen. Das fließt in deine Kalorien ein.",
     opts:list([["Gar nicht","Gar nicht","🛋️"],["1–2× pro Woche","1–2× pro Woche","🙂"],["3–4× pro Woche","3–4× pro Woche","💪"],["5× oder öfter","5× oder öfter","🔥"]]),
     get:()=>p.trainFreq, set:v=>{ p.trainFreq=v; }});
   S.push({id:"trainType",sec:"Alltag & Training",kind:"single",q:"Welches Training?",
@@ -71,6 +71,9 @@ function obSteps(){
   S.push({id:"routineTime",sec:"Supplements & Routine",opt:1,kind:"single",q:"Zeit pro Tag für deine Routine?",
     opts:list([["5 Minuten","5 Minuten","⏱️"],["15 Minuten","15 Minuten","🕒"],["30 Minuten oder mehr","30 Minuten +","🗓️"]]),
     get:()=>p.routineTime, set:v=>{ p.routineTime=v; }});
+  S.push({id:"theme",sec:"Darstellung",kind:"single",q:"Hell oder dunkel?",sub:"Kannst du später im Profil ändern.",
+    opts:list([["light","Hell","☀️"],["dark","Dunkel","🌙"],["system","Wie mein Handy","📱"]]),
+    get:()=>p.theme||"system", set:v=>{ p.theme=v; applyTheme(); }});
   S.push({id:"plan",sec:"Dein Plan",kind:"plan",q:"Dein Plan"});
   return S;
 }

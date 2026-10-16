@@ -16,7 +16,7 @@ function renderProfil(){
     <div class="section"><h2>Körper</h2></div>
     <div class="group">
       <button class="g-row" data-act="open" data-type="goal"><span class="bubble">🎯</span><div class="grow"><b>Ziel</b><div class="sub">${goalName()}</div></div><span class="chev">›</span></button>
-      <button class="g-row" data-act="open" data-type="body"><span class="bubble">📏</span><div class="grow"><b>Größe & Alter</b><div class="sub">${p.height} cm · ${p.age} Jahre</div></div><span class="chev">›</span></button>
+      <button class="g-row" data-act="open" data-type="body"><span class="bubble">📏</span><div class="grow"><b>Körperdaten</b><div class="sub">${p.height} cm · ${p.age} Jahre · ${!p.trainFreq?"Training offen":p.trainFreq==="Gar nicht"?"kein Training":"Training "+p.trainFreq.replace(" pro Woche","")+"/Woche"}</div></div><span class="chev">›</span></button>
       <button class="g-row" data-act="open" data-type="weigh"><span class="bubble">⚖️</span><div class="grow"><b>Gewicht</b><div class="sub">${de(lastWeight(),1)} kg · Ziel ${de(p.target,1)} kg</div></div><span class="chev">›</span></button>
       <button class="g-row" data-act="ob-redo"><span class="bubble">📝</span><div class="grow"><b>Fragebogen</b><div class="sub">Antworten ändern, Plan neu berechnen</div></div><span class="chev">›</span></button>
       <div class="g-row"><span class="bubble">🍽️</span><div class="grow"><b>Richtwert</b><div class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein</div></div></div>

@@ -57,17 +57,17 @@ function closeModal(){ stopCam(); ui.modal=null; render(); }
 function targets(){
   const p=state.profile;
   const bmr=10*p.weight+6.25*p.height-5*p.age+(p.sex==="m"?5:-161);
-  let kcal=Math.round(bmr*p.activity);
+  let kcal=Math.round(bmr*p.activity+trainKcal(p));
   if(p.goal==="lose") kcal-=Math.min(400,Math.round(kcal*0.2));
   if(p.goal==="muscle") kcal+=250;
   kcal=Math.max(p.sex==="m"?1500:1200, kcal);
   const protein=Math.round(p.weight*((p.goal==="lose"||p.goal==="muscle")?1.8:1.4));
   return { kcal, protein, carbs:Math.round(kcal*0.4/4), fat:Math.round(kcal*0.25/9) };
 }
-// Geschätzter Verbrauch durch Training an einem Tag (grober Richtwert, ca. 5 MET)
-function burnKcal(s){ const kg=lastWeight(); return Math.round(state.workouts.filter(w=>w.date===(s||state.date)).reduce((n,w)=>n+kg*5*(w.min||0)/60,0)); }
-// Kalorien-Richtwert für einen Tag: Grundbedarf + Training
-function dayTarget(s){ return targets().kcal + burnKcal(s); }
+// Training pro Woche (aus dem Fragebogen) → Einheiten im Schnitt
+const TRAIN_PER_WEEK={"Gar nicht":0,"1–2× pro Woche":1.5,"3–4× pro Woche":3.5,"5× oder öfter":5.5};
+// Mehrbedarf pro Tag durch Training, fest im Richtwert: ca. 45 Min. mit 5 MET je Einheit, auf 7 Tage verteilt
+function trainKcal(p){ p=p||state.profile; return Math.round((TRAIN_PER_WEEK[p.trainFreq]||0)*(+p.weight||70)*5*0.75/7); }
 function lastWeight(){ return state.weights.length ? state.weights[state.weights.length-1].kg : state.profile.weight; }
 function bmi(){ const m=state.profile.height/100; return +(lastWeight()/(m*m)).toFixed(1); }
 function bmiLabel(v){ return v<18.5?"Untergewicht":v<25?"Normalbereich":v<30?"Übergewicht":"Adipositas"; }
@@ -402,10 +402,12 @@ function renderModal(){
   if(type==="scan") inner=scanSheet();
   if(type==="product") inner=productSheet(payload);
   if(type==="area") inner=areaSheet(payload);
-  if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein. Mifflin-St Jeor, angepasst ans Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
+  if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein. Berechnet aus Körper, Alltag, Training pro Woche und Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
     ${[["age","Alter",state.profile.age,18,80,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,obMinTarget(),160,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
+    <div class="field"><label>Training pro Woche</label></div>
+    <div class="opts">${[["Gar nicht","Gar nicht"],["1–2× pro Woche","1–2×"],["3–4× pro Woche","3–4×"],["5× oder öfter","5× +"]].map(([v,l])=>`<button class="chip ${state.profile.trainFreq===v?"on":""}" data-act="set" data-k="trainFreq" data-v="${v}">${l}</button>`).join("")}</div>
     <div class="field"><label>Fisch</label></div>
     <div class="opts">${[["wenig","Selten"],["oft","Oft"]].map(([v,l])=>`<button class="chip ${state.profile.fish===v?"on":""}" data-act="set" data-k="fish" data-v="${v}">${l}</button>`).join("")}</div>
     <div class="gap"></div><button class="pill primary" data-act="close">Fertig</button>`;
