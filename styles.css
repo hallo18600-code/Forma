@@ -443,7 +443,7 @@ p { margin:var(--s-2) 0; }
   position:sticky; bottom:0; width:100%; min-height:52px; margin-top:var(--s-4); padding:0 var(--s-5);
   border-radius:var(--r-full); background:var(--accent-strong); color:var(--on-accent); font-weight:700; font-size:var(--fs-m);
 }
-.sheet-card .yfertig { box-shadow:0 0 0 var(--s-3) var(--surface-sheet), 0 60px 0 var(--s-3) var(--surface-sheet); } /* deckt Inhalt darunter ab */
+.sheet-card .yfertig { box-shadow:0 0 0 var(--s-4) var(--surface-sheet), 0 60px 0 var(--s-4) var(--surface-sheet); } /* deckt Inhalt darunter ab */
 .yfertig.static { position:static; box-shadow:none; }
 .ycard { display:flex; gap:var(--s-4); align-items:center; width:100%; text-align:left; background:var(--fill-2); border-radius:var(--r-xl); padding:var(--s-4); margin-bottom:var(--s-3); }
 .ycard span { font-size:var(--icon-l); }
