@@ -247,7 +247,7 @@ Proteinpulver;Whey|Whey Protein|Proteinshake;380;75;8;5;5;0;30;;1`;
 const PARTNERS_ENABLED = false;
 const CARE = [
   { id:"cerave", type:"care", name:"Feuchtigkeitscreme", emoji:"🧴", skin:["trocken","sensibel","normal"], fragrance:false, alcohol:false, actives:["Ceramides"] },
-  { id:"nia", type:"care", name:"Niacinamid 10 %", emoji:"💧", skin:["fettig","unrein","normal"], fragrance:false, alcohol:false, actives:["Niacinamid"] },
+  { id:"nia", type:"care", name:"Niacinamid 4–5 %", emoji:"💧", skin:["fettig","unrein","normal"], fragrance:false, alcohol:false, actives:["Niacinamid"] },
   { id:"spf", type:"care", name:"Sonnencreme LSF 50", emoji:"☀️", skin:["trocken","sensibel","fettig","normal"], fragrance:false, alcohol:false, actives:["UV-Filter"] },
   { id:"toner", type:"care", name:"Gesichtswasser", emoji:"💧", skin:["fettig"], fragrance:true, alcohol:true, actives:["Menthol"] }
 ];
@@ -259,11 +259,11 @@ CARE.push(
 const SUPS = [
   { id:"crea", type:"sup", name:"Creatin Monohydrat", emoji:"⚪", dose:"5 g", when:"täglich", note:"Am klarsten belegt für Kraft." },
   { id:"whey", type:"sup", name:"Whey Isolat", emoji:"🥛", dose:"25 g", when:"nach dem Training", note:"Nur wenn Protein aus Essen fehlt." },
-  { id:"d3", type:"sup", name:"Vitamin D3", emoji:"☀️", dose:"2000 IE", when:"morgens", note:"Basis bei wenig Sonne." },
+  { id:"d3", type:"sup", name:"Vitamin D3", emoji:"☀️", dose:"800 IE (20 µg)", when:"zur Mahlzeit", note:"Basis bei wenig Sonne, v. a. Oktober bis März." },
   { id:"o3", type:"sup", name:"Omega-3", emoji:"🐟", dose:"1–2 g EPA/DHA", when:"zur Mahlzeit", note:"Sinnvoll bei wenig Fisch." },
-  { id:"mg", type:"sup", name:"Magnesium", emoji:"🌙", dose:"200–300 mg", when:"abends", note:"Kann den Schlaf ruhiger machen." },
+  { id:"mg", type:"sup", name:"Magnesium", emoji:"🌙", dose:"bis 250 mg", when:"abends", note:"Wirkung auf Schlaf nur schwach belegt." },
   { id:"b12", type:"sup", name:"Vitamin B12", emoji:"🌱", dose:"laut Packung", when:"täglich", note:"Wichtig bei veganer Ernährung." },
-  { id:"col", type:"sup", name:"Kollagen", emoji:"🧴", dose:"10 g", when:"morgens", note:"Schwächer als Schlaf, LSF, Essen." }
+  { id:"col", type:"sup", name:"Kollagen", emoji:"🧴", dose:"10 g", when:"morgens", note:"Kleine Effekte auf Hautfeuchte. Schlaf, LSF und Essen wirken stärker." }
 ];
 const ROUTINES = [
   { id:"push", name:"Push", detail:"Bankdrücken, Schulterdrücken", exercises:["bp","ohp"] },

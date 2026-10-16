@@ -25,6 +25,7 @@ function fresh(){
   };
 }
 let state = load();
+slimRoutine();
 let ui = { modal:null, toast:null, scanMode:"text", query:"", addSlot:"breakfast", draftKg:76, portion:100, workout:null, rest:0, tick:null, wrange:"30", plan:null, planDay:0, exQuery:"", dash:null, cal:"month" };
 
 function load(){
@@ -39,7 +40,7 @@ function normalize(s){
     s.profile = Object.assign(fresh().profile, s.profile||{});
     s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
     s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.coach.skipped=s.coach.skipped||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
-    s.date = s.date || todayIso(); s.ob = s.ob||{};
+    s.date = s.date || todayIso(); s.ob = s.ob||{}; migrateCoach(s);
     return s;
 }
 function save(){
@@ -124,7 +125,7 @@ function scoreFood(item){
   else if(g==="skin"){ add("Zucker",-su*2); }
   else add("Zucker",-su);
   if(item.processed) add("Verarbeitet",g==="skin"?-14:-8);
-  const ea=state.coach.answers.ernaehrung||{}, ha=state.coach.answers.haut||{}, sa=state.coach.answers.schlaf||{};
+  const ea=state.coach.answers.gesundheit||{}, ha=state.coach.answers.haut||{}, sa=state.coach.answers.schlaf||{};
   const MEAT=["huhn","rind","salami","thunfisch","lachs"], ANI=MEAT.concat(["ei","skyr","quark","joghurt","kaese"]);
   const meat=MEAT.includes(item.id)||foodHas(item,"meat"), animal=meat||ANI.includes(item.id)||foodHas(item,"lak")||foodHas(item,"egg");
   if(ea.stil==="Vegan"&&animal) add("Passt nicht zu Vegan",-40);
@@ -178,7 +179,7 @@ function recommendStack(){
   const hasFish = p.fish==="oft" || day().meals.some(m=>m.id==="lachs");
   const picks=[];
   const add=(id,score,why)=>{ if(!picks.find(x=>x.id===id)) picks.push({id,score,why}); };
-  const ea=state.coach.answers.ernaehrung||{}, sa=state.coach.answers.schlaf||{}, vegan=ea.stil==="Vegan";
+  const ea=state.coach.answers.gesundheit||{}, sa=state.coach.answers.schlaf||{}, vegan=ea.stil==="Vegan";
   const lifts=["Krafttraining","Beides"].includes(p.trainType)&&p.trainFreq&&p.trainFreq!=="Gar nicht";
   if(vegan) add("b12",90,"Vegan: B12 steckt fast nur in tierischen Lebensmitteln.");
   if(p.goal==="muscle" || p.activity>=1.55 || lifts) add("crea",92,"Training und Kraft: Creatin ist das am klarsten belegte Pulver.");
@@ -565,9 +566,11 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="coach-add"){
     const topic=el.dataset.topic;
     const advice=coachAdvice(topic);
-    state.coach.routine=state.coach.routine.filter(r=>r.topic!==topic).concat(advice.items.map((item,i)=>({id:topic+"-"+i, topic, title:item.title, detail:item.detail, product:item.product})));
+    if(!advice.routine) return;
+    state.coach.routine=state.coach.routine.filter(r=>r.topic!==topic).concat([{id:topic+"-r", topic, title:advice.routine.title, detail:advice.routine.detail, product:null}]);
     ui.modal=null; save(); toast("In der Routine");
   }
+  else if(act==="coach-goal"){ state.profile.goal=el.dataset.v; const r=(state.coach.routine||[]).find(x=>x.topic==="aussehen"); if(r) r.title=coachAdvice("aussehen").routine.title; save(); toast(`Neuer Richtwert: ${de(targets().kcal)} kcal`); }
   else if(act==="coach-remove"){ state.coach.routine=(state.coach.routine||[]).filter(r=>r.topic!==el.dataset.topic); ui.modal=null; save(); toast("Aus der Routine entfernt"); }
   else if(act==="r-toggle"){ ui.rOpen=!ui.rOpen; }
   else if(act==="c-toggle"){ ui.cOpen=!ui.cOpen; }

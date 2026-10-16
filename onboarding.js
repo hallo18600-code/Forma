@@ -10,7 +10,7 @@ const OB_FEATURES = [
   ["🍽️","Kalorientracker"],["⭐","Essensbewerter"],["🏋️","Trainingstracker"],["⚖️","Gewicht & Maße"],["💧","Hautguide"],
   ["🌙","Schlafcoach"],["✂️","Haare & Pflege"],["💊","Supplements"],["👟","Schritte & Wasser"],["✅","Routine"]
 ];
-const OB_TOPICS = [["ernaehrung","Ernährung"],["haut","Haut"],["haare","Haare"],["koerper","Körper"],["schlaf","Schlaf"]];
+const OB_TOPICS = [["gesundheit","Gesundheit"],["aussehen","Aussehen"],["haut","Haut"],["haare","Haare"],["schlaf","Schlaf"]];
 function hasVal(v){ return Array.isArray(v) ? v.length>0 : v!=null && v!==""; }
 function toggleMulti(arr, v, none){
   arr = (arr||[]).slice();
@@ -44,7 +44,7 @@ function obSteps(){
     set:v=>{ p.goal=v; obMark("goal"); if(!state.ob.target) p.target=obDefaultTarget(); }});
   num("target","Dein Ziel","Dein Wunschgewicht",obMinTarget(),200,0.5,"kg");
   S.push({id:"areas",sec:"Dein Ziel",kind:"multi",q:"Was willst du noch verbessern?",
-    opts:list([["Haut","Haut","💧"],["Haare","Haare","✂️"],["Schlaf","Schlaf","🌙"],["Energie","Energie","⚡"],["Körperpflege","Körperpflege","🧴"],["Ernährung","Ernährung","🥗"],["Gewohnheiten","Gewohnheiten","✅"]]),
+    opts:list([["Haut","Haut","💧"],["Haare","Haare","✂️"],["Schlaf","Schlaf","🌙"],["Energie","Energie","⚡"],["Aussehen","Aussehen","🪞"],["Gesundheit","Gesundheit","💚"],["Gewohnheiten","Gewohnheiten","✅"]]),
     get:()=>p.areas, set:v=>{ p.areas=v; }});
   S.push({id:"activity",sec:"Alltag & Training",kind:"single",req:1,q:"Wie aktiv ist dein Alltag?",
     opts:list([["1.3","Meist sitzend","🪑"],["1.4","Leicht aktiv","🚶"],["1.55","Aktiv","🚴"],["1.7","Sehr aktiv","🏗️"]]),
@@ -61,7 +61,7 @@ function obSteps(){
   OB_TOPICS.forEach(([t,title])=>{
     coachQuiz(t).forEach(q=>S.push({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, none:q.none,
       opts:q.opts.map(o=>({v:o,l:o,e:(q.emo||{})[o]})), get:()=>obAns(t)[q.k], set:v=>{ obAns(t)[q.k]=v; }}));
-    if(t==="ernaehrung") S.push({id:"fish",sec:title,topic:t,opt:1,kind:"single",q:"Wie oft isst du Fisch?",
+    if(t==="gesundheit") S.push({id:"fish",sec:title,topic:t,opt:1,kind:"single",q:"Wie oft isst du Fisch?",
       opts:list([["wenig","Selten","🥦"],["oft","Jede Woche","🐟"]]), get:()=>obProf("fish"), set:v=>{ p.fish=v; obMark("fish"); }});
   });
   S.push({id:"sups",sec:"Supplements & Routine",opt:1,kind:"multi",none:"none",q:"Nimmst du Supplements?",
@@ -152,7 +152,7 @@ function renderOnboard(){
 
 // Was der Essens-Score für diese Person besonders beachtet
 function persoTags(){
-  const A=state.coach.answers, e=A.ernaehrung||{}, s=A.schlaf||{}, h=A.haut||{}, out=[goalName()];
+  const A=state.coach.answers, e=A.gesundheit||{}, s=A.schlaf||{}, h=A.haut||{}, out=[goalName()];
   if(e.stil&&e.stil!=="Alles") out.push(e.stil);
   (e.fokus||[]).filter(x=>x!=="Nichts Bestimmtes").forEach(x=>out.push(x));
   (e.intol||[]).filter(x=>x!=="Nein, alles okay").forEach(x=>out.push("Ohne "+x));
@@ -172,24 +172,18 @@ function obWantsFullBody(){ return ["Gar nicht","1–2× pro Woche"].includes(st
 function obDefaultPlans(){ return JSON.stringify(state.routines)===JSON.stringify(defaultRoutines()); }
 // Tägliche Routine aus den Antworten
 function buildRoutine(){
-  const p=state.profile, A=state.coach.answers, s=A.schlaf||{}, h=A.haut||{}, e=A.ernaehrung||{}, k=A.koerper||{}, c=[];
-  const add=(id,topic,title,area)=>c.push({id:"ob-"+id, topic, title, detail:"", product:null, area});
-  if(s.stunden==="Unter 6") add("bett","schlaf","Vor 23 Uhr ins Bett","Schlaf");
-  else if(s.auf==="Wechselt stark") add("auf","schlaf","Aufstehzeit halten, auch am Wochenende","Schlaf");
-  if(s.kaffee==="Oft") add("kaffee","schlaf","Kein Kaffee nach 15 Uhr","Schlaf");
-  if(h.sonne&&h.sonne!=="Täglich") add("lsf","haut","Morgens Sonnenschutz auftragen","Haut");
-  if(h.bild) add("gesicht","haut",h.routine==="Nichts"?"Abends Gesicht reinigen und eincremen":"Abends Gesicht reinigen","Haut");
-  if(e.protein==="Eher nicht") add("protein","ernaehrung","Protein zu jeder Mahlzeit","Ernährung");
-  if(e.trink==="Täglich") add("zucker","ernaehrung","Wasser statt Zuckergetränk","Ernährung");
-  if(e.fertig==="Oft") add("kochen","ernaehrung","Eine Mahlzeit selbst kochen","Ernährung");
-  if((e.huerde||[]).includes("Heißhunger")) add("snack","ernaehrung","Protein-Snack statt Süßem","Ernährung");
-  if((e.huerde||[]).includes("Abends zu viel")) add("abend","ernaehrung","Nach dem Abendessen: Küche zu","Ernährung");
-  if(k.creme&&k.creme!=="Immer") add("creme","koerper","Nach dem Duschen eincremen","Körperpflege");
-  if(p.trainFreq==="Gar nicht") add("bewegen","eigen","10 Minuten bewegen","Energie");
-  add("wasser","eigen",e.wasser==="Unter 1 Liter"?"Zu jeder Mahlzeit ein Glas Wasser":`${p.waterTarget} Gläser Wasser trinken`,"Gewohnheiten");
-  const areas=p.areas||[];
+  const p=state.profile, A=state.coach.answers, e=A.gesundheit||{}, c=[];
+  const area={haut:"Haut",haare:"Haare",schlaf:"Schlaf",aussehen:"Aussehen",gesundheit:"Gesundheit"};
+  // Pro beantwortetem Thema genau ein Punkt, damit die Liste kurz bleibt
+  ["schlaf","haut","aussehen","gesundheit","haare"].forEach(t=>{
+    if(!Object.keys(A[t]||{}).length) return;
+    const r=coachAdvice(t).routine; if(r) c.push({id:"ob-"+t, topic:t, title:r.title, detail:r.detail, product:null, area:area[t]});
+  });
+  if(p.trainFreq==="Gar nicht") c.push({id:"ob-bewegen", topic:"eigen", title:"10 Minuten bewegen", detail:"", product:null, area:"Energie"});
+  if(!Object.keys(e).length) c.push({id:"ob-wasser", topic:"eigen", title:`${p.waterTarget} Gläser Wasser trinken`, detail:"", product:null, area:"Gewohnheiten"});
+  const areas=(p.areas||[]).map(a=>({"Körperpflege":"Aussehen","Ernährung":"Gesundheit"}[a]||a));
   c.sort((a,b)=>(areas.includes(b.area)?1:0)-(areas.includes(a.area)?1:0));
-  const max={"5 Minuten":3,"15 Minuten":5,"30 Minuten oder mehr":7}[p.routineTime]||4;
+  const max={"5 Minuten":2,"15 Minuten":4,"30 Minuten oder mehr":6}[p.routineTime]||3;
   return c.slice(0,max).map(({area,...r})=>r);
 }
 function renderObPlan(){

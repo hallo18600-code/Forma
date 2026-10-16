@@ -124,7 +124,7 @@ function foodSheet(it,sc){
       <div class="top"><div class="score ${scoreClass(sc.score)}" style="width:60px;height:60px;font-size:22px;border-radius:18px">${sc.score}</div>
         <div><b style="font-size:16px">Lebensmittelbewertung</b><div class="sub">Auf dich abgestimmt: ${esc(persoTags().slice(0,4).join(", "))}</div></div></div>
       <p class="sub" style="margin:12px 0 8px">${sc.reasons.join(" ")}</p>
-      ${((state.coach.answers.ernaehrung||{}).intol||[]).some(x=>x!=="Nein, alles okay")?`<p class="sub" style="font-size:12px;margin:0 0 8px">Erkannt nur am Namen. Bitte Zutaten prüfen.</p>`:""}
+      ${((state.coach.answers.gesundheit||{}).intol||[]).some(x=>x!=="Nein, alles okay")?`<p class="sub" style="font-size:12px;margin:0 0 8px">Erkannt nur am Namen. Bitte Zutaten prüfen.</p>`:""}
       ${(sc.parts||[]).length?`<div class="why" style="background:#fff">${sc.parts.map(([l,v],i)=>`<div><span>${l}</span><b class="${i?(v>0?"up":"dn"):""}">${i&&v>0?"+":""}${v}</b></div>`).join("")}</div>`:""}
     </div>
     <div class="sec">Nährwerte</div><div class="ftable" id="ftable">${fTable(it,g)}</div>
