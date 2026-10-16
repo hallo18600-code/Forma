@@ -39,7 +39,7 @@ function normalize(s){
     s.profile = Object.assign(fresh().profile, s.profile||{});
     s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
     s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.coach.skipped=s.coach.skipped||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
-    s.date = s.date || todayIso();
+    s.date = s.date || todayIso(); s.ob = s.ob||{};
     return s;
 }
 function save(){
@@ -100,6 +100,21 @@ function finish(parts){
   const rs=parts.slice(1).filter(x=>x[1]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,2).map(([l,v])=>l+(v>0?" hilft":" kostet")+" ("+(v>0?"+":"")+v+").");
   return { score:Math.max(8,Math.min(98,Math.round(raw))), reasons:rs.length?rs:["Neutral für dein Ziel."], parts };
 }
+// Erkennung am Produktnamen (Stichwörter). Nur ein Hinweis, keine Garantie.
+const FOOD_KW={
+  lak:{has:["milch","joghurt","jogurt","quark","kase","skyr","sahne","butter","rahm","schmand","mozzarella","pudding","kefir","molke","whey","feta","gouda","parmesan","cheese","cappuccino","=latte","=eis"],not:["laktosefrei","lactosefrei","hafermilch","sojamilch","mandelmilch","kokosmilch","reismilch","vegan","erdnussbutter","kakaobutter","mandelbutter"]},
+  glu:{has:["brot","toast","nudel","pasta","spaghetti","penne","fusilli","lasagne","pizza","weizen","dinkel","roggen","gerste","couscous","bulgur","keks","kuchen","croissant","brezel","breze","semmel","schrippe","cracker","musli","granola","hafer","zwieback","waffel","muffin","baguette","wrap","gnocchi","maultasche","spatzle","knodel","paniert","seitan","=bier"],not:["glutenfrei","reiswaffel","maiswaffel","aufstrich"]},
+  nut:{has:["nuss","mandel","cashew","pistazie","pekan","macadamia","nutella","nougat","marzipan","praline"],not:["kokos","muskat","genuss"]},
+  meat:{has:["fleisch","huhn","hahnchen","hendl","pute","truthahn","rind","schwein","kalb","lamm","salami","schinken","wurst","speck","bacon","hack","doner","kebab","gyros","chicken","beef","leberkas","frikadelle","bulette","schnitzel","steak","lachs","thunfisch","fisch","garnele","shrimp","krabbe","hering","makrele","sardine","forelle","kabeljau","surimi","gelatine"],not:["vegan","veggie","vegetar","fleischlos","flammkuchen"]},
+  egg:{has:["=ei","=eier","eier","ruhrei","spiegelei","omelett","mayonnaise","=mayo","honig"],not:["vegan"]},
+  caf:{has:["kaffee","espresso","cappuccino","cola","=latte","=energy","energydrink","=mate","matcha","schwarztee"],not:["entkoffeiniert","koffeinfrei"]}
+};
+function foodHas(item,kind){
+  const h=NORM(item.name||""), kw=FOOD_KW[kind]; if(!h||!kw) return false;
+  if(kw.not.some(x=>h.includes(x))) return false;
+  const words=h.split(/[^a-z0-9]+/);
+  return kw.has.some(x=>x[0]==="="?words.includes(x.slice(1)):h.includes(x));
+}
 function scoreFood(item){
   const g=state.profile.goal, parts=[["Basis",62]];
   const add=(l,v)=>{ v=Math.round(v); if(v) parts.push([l,v]); };
@@ -109,10 +124,22 @@ function scoreFood(item){
   else if(g==="skin"){ add("Zucker",-su*2); }
   else add("Zucker",-su);
   if(item.processed) add("Verarbeitet",g==="skin"?-14:-8);
-  const ea=state.coach.answers.ernaehrung||{}, ha=state.coach.answers.haut||{};
+  const ea=state.coach.answers.ernaehrung||{}, ha=state.coach.answers.haut||{}, sa=state.coach.answers.schlaf||{};
   const MEAT=["huhn","rind","salami","thunfisch","lachs"], ANI=MEAT.concat(["ei","skyr","quark","joghurt","kaese"]);
-  if(ea.stil==="Vegan"&&ANI.includes(item.id)) add("Passt nicht zu Vegan",-40);
-  else if(ea.stil==="Vegetarisch"&&MEAT.includes(item.id)) add("Passt nicht zu Vegetarisch",-40);
+  const meat=MEAT.includes(item.id)||foodHas(item,"meat"), animal=meat||ANI.includes(item.id)||foodHas(item,"lak")||foodHas(item,"egg");
+  if(ea.stil==="Vegan"&&animal) add("Passt nicht zu Vegan",-40);
+  else if(ea.stil==="Vegetarisch"&&meat) add("Passt nicht zu Vegetarisch",-40);
+  const fokus=ea.fokus||[], intol=ea.intol||[], huerde=ea.huerde||[];
+  if(fokus.includes("Weniger Zucker")) add("Dein Fokus: weniger Zucker",-su*0.8);
+  if(fokus.includes("Mehr Protein")) add("Dein Fokus: mehr Protein",Math.min(10,pr*.35));
+  if(fokus.includes("Weniger Fertiges")&&item.processed) add("Dein Fokus: weniger Fertiges",-8);
+  if(fokus.includes("Weniger Salz")) add("Dein Fokus: weniger Salz",-Math.max(0,(item.salt||0)-0.5)*6);
+  if(fokus.includes("Mehr Ballaststoffe")) add("Dein Fokus: Ballaststoffe",Math.min(8,item.fiber||0));
+  if(intol.includes("Laktose")&&foodHas(item,"lak")) add("Kann Laktose enthalten",-25);
+  if(intol.includes("Gluten")&&foodHas(item,"glu")) add("Kann Gluten enthalten",-25);
+  if(intol.includes("Nüsse")&&foodHas(item,"nut")) add("Kann Nüsse enthalten",-30);
+  if(huerde.includes("Heißhunger")&&((pr>=10&&(item.kcal||0)<=250)||(item.fiber||0)>=6)) add("Macht lange satt",6);
+  if((sa.kaffee==="Oft"||(sa.ein&&sa.ein!=="Geht schnell"))&&foodHas(item,"caf")) add("Koffein: nach 15 Uhr meiden",-4);
   else if(ea.stil==="Wenig Fleisch"&&["rind","salami"].includes(item.id)) add("Du willst weniger Fleisch",-12);
   if(g!=="skin"&&ha.stoert==="Unreinheiten") add("Zucker und Haut",-su*0.8);
   add("Ballaststoffe",Math.min(10,(item.fiber||0)*1.2));
@@ -125,7 +152,11 @@ function scoreCare(item){
   if(item.fragrance) parts.push(["Duftstoffe",-12]);
   if(item.alcohol) parts.push(["Alkohol",-16]);
   if((item.actives||[]).includes("UV-Filter")) parts.push(["Lichtschutz",8]);
-  if(item.fragrance && ((state.coach.answers.haut||{}).empf==="Ja")) parts.push(["Du reagierst auf Duft",-10]);
+  const ha=state.coach.answers.haut||{}, act=item.actives||[];
+  if(item.fragrance && ha.empf==="Ja") parts.push(["Du reagierst auf Duft",-10]);
+  if(ha.stoert==="Unreinheiten"&&act.includes("Niacinamid")) parts.push(["Hilft bei Unreinheiten",8]);
+  if((ha.stoert==="Rötung"||ha.bild==="Sensibel")&&item.alcohol) parts.push(["Alkohol reizt empfindliche Haut",-8]);
+  if(ha.sonne&&ha.sonne!=="Täglich"&&act.includes("UV-Filter")) parts.push(["Du brauchst mehr Sonnenschutz",6]);
   return finish(parts);
 }
 function safetyNote(){
@@ -147,11 +178,14 @@ function recommendStack(){
   const hasFish = p.fish==="oft" || day().meals.some(m=>m.id==="lachs");
   const picks=[];
   const add=(id,score,why)=>{ if(!picks.find(x=>x.id===id)) picks.push({id,score,why}); };
-  if(p.goal==="muscle" || p.activity>=1.55) add("crea",92,"Training und Kraft: Creatin ist das am klarsten belegte Pulver.");
+  const ea=state.coach.answers.ernaehrung||{}, sa=state.coach.answers.schlaf||{}, vegan=ea.stil==="Vegan";
+  const lifts=["Krafttraining","Beides"].includes(p.trainType)&&p.trainFreq&&p.trainFreq!=="Gar nicht";
+  if(vegan) add("b12",90,"Vegan: B12 steckt fast nur in tierischen Lebensmitteln.");
+  if(p.goal==="muscle" || p.activity>=1.55 || lifts) add("crea",92,"Training und Kraft: Creatin ist das am klarsten belegte Pulver.");
   const trained=state.workouts.some(w=>w.date===state.date);
-  if((p.goal==="muscle"||p.goal==="lose"||trained) && tot.protein < t.protein*0.55) add("whey",80,"Protein heute liegt klar unter dem Richtwert.");
+  if(!vegan && (p.goal==="muscle"||p.goal==="lose"||trained) && tot.protein < t.protein*0.55) add("whey",80,"Protein heute liegt klar unter dem Richtwert.");
   if((p.goal==="skin"||p.goal==="energy"||p.goal==="lose") && !hasFish) add("o3",82,"Wenig Fisch — Omega-3 eher als Kollagen.");
-  if(p.goal==="energy" || (day().sleep!=null && day().sleep<6.5) || !day().checks.schlaf) add("mg",74,"Abend-Magnesium, wenn der Schlaf unruhig bleibt.");
+  if(p.goal==="energy" || (day().sleep!=null && day().sleep<6.5) || (sa.ein&&sa.ein!=="Geht schnell") || !day().checks.schlaf) add("mg",74,"Abend-Magnesium, wenn der Schlaf unruhig bleibt.");
   if(p.goal==="skin" && picks.length<3) add("col",58,"Nur Zusatz. Schlaf, LSF und Essen wirken stärker.");
   if(picks.length<3) add("d3",78,"Solide Basis bei wenig Sonne. Dosis nicht selbst hochdrehen.");
   return picks.slice(0,3);
@@ -247,44 +281,6 @@ function spark(arr){
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="#1aa35a" stroke-width="3" points="${pts}"/></svg>`;
 }
 
-function renderWelcome(){
-  return `<div class="screen welcome">
-    <div class="logo">forma</div>
-    <h1>Essen. Training.<br>Körper. Ein System.</h1>
-    <p class="sub">Alles an einem Ort. Bleibt auf diesem Gerät.</p>
-    <div class="areas">${[["🍽️","Ernährung"],["🏋️","Training"],["⚖️","Gewicht"],["👟","Schritte"],["🌙","Schlaf"],["💧","Haut"],["✂️","Haare"],["🧴","Körper"],["💊","Supplements"],["✅","Routine"]].map(([e,l])=>`<span><i>${e}</i>${l}</span>`).join("")}</div>
-    <div style="flex:1"></div>
-    <button class="pill dark" data-act="start-onboard">Loslegen</button>
-    <div class="gap"></div>
-    <button class="pill ghost" style="width:100%" data-act="skip-demo">Mit Beispieldaten öffnen</button>
-  </div>`;
-}
-function quizStep(id){
-  const t=coachTopics().find(x=>x.id===id), a=state.coach.answers[id]||{};
-  return `<div class="optional">Optional</div><h1>${t.title}</h1><p class="sub">${t.ask} Daran richten sich Rating und Coach aus. Keine Lust gerade? Überspring es und hol es später im Coach nach.</p>
-    ${coachQuiz(id).map(q=>`<div class="q"><b>${q.q}</b><div class="opts">${q.opts.map(o=>`<button class="chip ${a[q.k]===o?"on":""}" data-act="coach-answer" data-topic="${id}" data-k="${q.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}`;
-}
-function renderOnboard(){
-  const p=state.profile, t=targets();
-  let body="";
-  if(state.step===0) body=`<h1>Dein Ziel</h1><p class="sub">Steuert Score und Kalorien.</p><div class="gap"></div>${GOALS.map(g=>`<button class="choice ${p.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}`;
-  if(state.step===1) body=`<h1>Daten</h1>
-    <div class="row" style="margin:12px 0">${[["m","Mann"],["w","Frau"]].map(([v,l])=>`<button class="chip ${p.sex===v?"on":""}" data-act="set" data-k="sex" data-v="${v}">${l}</button>`).join("")}</div>
-    <div class="field"><label>Name</label><input value="${esc(p.name)}" data-act="input" data-k="name" placeholder="optional"></div>
-    ${[["age","Alter",p.age,18,80],["height","Größe cm",p.height,140,220],["weight","Gewicht kg",p.weight,40,180]].map(([k,l,v,min,max])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-1" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="1" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
-    <div class="opts">${[[1.4,"Alltag"],[1.55,"Aktiv"],[1.7,"Sehr aktiv"]].map(([id,n])=>`<button class="chip ${p.activity===id?"on":""}" data-act="set-num" data-k="activity" data-v="${id}">${n}</button>`).join("")}</div>`;
-  if(state.step>=2&&state.step<=4) body=quizStep(["haut","ernaehrung","schlaf"][state.step-2]);
-  if(state.step===5) body=`<h1>${de(t.kcal)} kcal</h1><p class="sub">${t.protein} g Protein als Richtwert. Kein medizinisches Ziel.</p>`;
-  if(state.step===6) body=`<h1>Volljährig?</h1><p class="sub">Nicht für Minderjährige.</p><div class="gap"></div><button class="choice ${p.adult?"on":""}" data-act="set-bool"><b>Ja, ich bin 18+</b></button>`;
-  return `<div class="screen" style="background:#fff">
-    <div class="scroll"><div class="dots">${[0,1,2,3,4,5,6].map(i=>`<i class="${i===state.step?"on":""}"></i>`).join("")}</div>${body}</div>
-    ${state.step>=2&&state.step<=4?`<div style="padding:0 16px;background:#fff"><button class="pill skip" data-act="quiz-skip" data-topic="${["haut","ernaehrung","schlaf"][state.step-2]}">Überspringen · später im Coach</button></div>`:""}
-    <div style="padding:10px 16px 24px;display:flex;gap:8px;background:#fff">
-      <button class="pill ghost" style="width:110px" data-act="step" data-v="${Math.max(0,state.step-1)}">Zurück</button>
-      <button class="pill primary" data-act="${state.step===6?"finish":"step"}" data-v="${Math.min(6,state.step+1)}" ${state.step===6&&!p.adult?"disabled":""}>${state.step===6?"Öffnen":"Weiter"}</button>
-    </div>
-  </div>`;
-}
 function renderApp(){
   if(ui.workout) return renderLive();
   if(ui.plan) return renderPlan();
@@ -387,7 +383,7 @@ function renderModal(){
   if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein. Mifflin-St Jeor, angepasst ans Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
-    ${[["age","Alter",state.profile.age,18,80,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,45,160,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
+    ${[["age","Alter",state.profile.age,18,80,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,obMinTarget(),160,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
     <div class="field"><label>Fisch</label></div>
     <div class="opts">${[["wenig","Selten"],["oft","Oft"]].map(([v,l])=>`<button class="chip ${state.profile.fish===v?"on":""}" data-act="set" data-k="fish" data-v="${v}">${l}</button>`).join("")}</div>
     <div class="gap"></div><button class="pill primary" data-act="close">Fertig</button>`;
@@ -416,8 +412,8 @@ function render(){ try{ ensureRoutine(); }catch(e){}
   if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
   // Scroll-Positionen merken, damit ein Neuaufbau (Tipp, Toast, Timer) nicht nach oben springt
   const keep=[...root.querySelectorAll(".scroll,.sheet-card")].map(n=>n.scrollTop);
-  const view=ui.workout?"w":ui.plan?"p":ui.dash?"d:"+ui.dash:"t:"+state.tab;
-  const same=(ui._view===view)&&!!state.onboarded;
+  const view=!state.onboarded?"ob:"+state.step:ui.workout?"w":ui.plan?"p":ui.dash?"d:"+ui.dash:"t:"+state.tab;
+  const same=ui._view===view;
   ui._view=view;
   root.innerHTML = html;
   if(same){ [...root.querySelectorAll(".scroll,.sheet-card")].forEach((n,i)=>{ if(keep[i]) n.scrollTop=keep[i]; }); }
@@ -425,7 +421,8 @@ function render(){ try{ ensureRoutine(); }catch(e){}
 function seedDemo(){
   state = fresh();
   state.onboarded=true; state.step=0;
-  state.profile.name="Alex"; state.profile.adult=true; state.profile.goal="muscle";
+  state.profile.name="Alex"; state.profile.adult=true; state.profile.goal="muscle"; state.obDone=true;
+  Object.assign(state.profile,{trainFreq:"3–4× pro Woche", trainType:"Krafttraining", stepGoal:10000, areas:["Haut","Schlaf"], routineTime:"15 Minuten"});
   const t=todayIso();
   state.date=t;
   for(let i=6;i>=0;i--){
@@ -458,23 +455,19 @@ document.getElementById("app").addEventListener("click", e=>{
   const p=state.profile;
   if(act==="start-onboard"){ state.step=0; }
   else if(act==="skip-demo"){ seedDemo(); toast("Beispieldaten geladen"); }
-  else if(act==="quiz-skip"){
-    const sk=state.coach.skipped||(state.coach.skipped=[]);
-    if(!quizDone(el.dataset.topic)&&!sk.includes(el.dataset.topic)) sk.push(el.dataset.topic);
-    state.step=Math.min(6,state.step+1); save();
-  }
-  else if(act==="step"){ if(state.step===0 && +el.dataset.v===0) state.step=null; else state.step=+el.dataset.v; }
+  else if(act==="ob-adult"){ if(el.dataset.v==="1"){ p.adult=true; state.obMinor=false; save(); const cur=state.step; setTimeout(()=>{ if(!state.onboarded&&state.step===cur){ obGo(1); render(); } },260); } else { p.adult=false; state.obMinor=true; save(); } }
+  else if(act==="ob-pick"){ obPick(el.dataset.v); }
+  else if(act==="ob-next"){ obNext(); }
+  else if(act==="ob-back"){ obBack(); }
+  else if(act==="ob-skip"){ obSkip(); }
+  else if(act==="ob-nudge"){ obNudge(+el.dataset.d); }
+  else if(act==="ob-finish"){ obFinish(); }
+  else if(act==="ob-close"){ state.obRedo=false; state.onboarded=true; state.step=null; save(); }
+  else if(act==="ob-redo"){ state.ob=Object.assign({},state.ob,{sex:1,goal:1,activity:1,fish:1,sups:1,target:1,weight:1}); state.obRedo=true; state.onboarded=false; state.step=1; ui.modal=null; save(); }
   else if(act==="set"){ p[el.dataset.k]=el.dataset.v; save(); }
   else if(act==="set-num"){ p[el.dataset.k]=parseFloat(el.dataset.v); save(); }
   else if(act==="set-bool"){ p.adult=true; save(); }
   else if(act==="nudge"){ p[el.dataset.k]=Math.min(+el.dataset.max, Math.max(+el.dataset.min, +(p[el.dataset.k]+ +el.dataset.d).toFixed(1))); save(); }
-  else if(act==="finish"){
-    if(!p.adult) return;
-    state.onboarded=true; state.date=todayIso();
-    if(!state.weights.length) state.weights.push({date:todayIso(), kg:p.weight});
-    p.target = p.goal==="lose" ? Math.max(50, p.weight-4) : p.goal==="muscle" ? p.weight+2 : p.weight;
-    save();
-  }
   else if(act==="tab"){ state.tab=el.dataset.v; ui.modal=null; save(); }
   else if(act==="shift"){ const next=addDays(state.date, +el.dataset.d); if(next<=todayIso()){ state.date=next; save(); } }
   else if(act==="today"){ state.date=todayIso(); save(); }
@@ -563,8 +556,9 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="apply-stack"){ state.stack=recommendStack().map(x=>x.id); save(); toast("Stack aktualisiert"); }
   else if(act==="coach-answer"){
-    state.coach.answers[el.dataset.topic]=state.coach.answers[el.dataset.topic]||{};
-    state.coach.answers[el.dataset.topic][el.dataset.k]=el.dataset.v; save();
+    const A=state.coach.answers[el.dataset.topic]=state.coach.answers[el.dataset.topic]||{};
+    const qd=coachQuiz(el.dataset.topic).find(q=>q.k===el.dataset.k);
+    A[el.dataset.k]=qd&&qd.multi?toggleMulti(A[el.dataset.k],el.dataset.v,qd.none):el.dataset.v; save();
   }
   else if(act==="coach-ready"){ save(); }
   else if(act==="coach-reset"){ delete state.coach.answers[el.dataset.topic]; save(); }
@@ -765,6 +759,11 @@ document.getElementById("app").addEventListener("click", e=>{
 document.getElementById("app").addEventListener("input", e=>{
   const el=e.target.closest("[data-act]"); if(!el) return;
   if(el.dataset.act==="input"){ state.profile[el.dataset.k]=el.value; save(); }
+  if(el.dataset.act==="ob-num"){
+    const k=el.dataset.k, v=parseFloat(String(el.value).replace(",","."));
+    if(isFinite(v)){ state.profile[k]=v; obMark(k); if(k==="weight"&&!state.ob.target) state.profile.target=obDefaultTarget(); save(); }
+    const h=document.getElementById("ob-hint"); if(h) h.innerHTML=obNumHint(k);
+  }
   if(el.dataset.act==="reset-type"){ ui.resetTxt=el.value; const b=document.getElementById("reset-go"); if(b) b.disabled=el.value.trim().toUpperCase()!=="LÖSCHEN"; }
   if(el.dataset.act==="query"){
     ui.query=el.value; ui.scanMax=30;

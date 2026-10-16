@@ -262,6 +262,7 @@ const SUPS = [
   { id:"d3", type:"sup", name:"Vitamin D3", emoji:"☀️", dose:"2000 IE", when:"morgens", note:"Basis bei wenig Sonne." },
   { id:"o3", type:"sup", name:"Omega-3", emoji:"🐟", dose:"1–2 g EPA/DHA", when:"zur Mahlzeit", note:"Sinnvoll bei wenig Fisch." },
   { id:"mg", type:"sup", name:"Magnesium", emoji:"🌙", dose:"200–300 mg", when:"abends", note:"Kann den Schlaf ruhiger machen." },
+  { id:"b12", type:"sup", name:"Vitamin B12", emoji:"🌱", dose:"laut Packung", when:"täglich", note:"Wichtig bei veganer Ernährung." },
   { id:"col", type:"sup", name:"Kollagen", emoji:"🧴", dose:"10 g", when:"morgens", note:"Schwächer als Schlaf, LSF, Essen." }
 ];
 const ROUTINES = [

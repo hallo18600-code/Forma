@@ -110,10 +110,14 @@ function coachQuiz(id){
       {k:"stunden", q:"Wie viele Stunden schläfst du?", opts:["Unter 6","6–7","7–8","Über 8"]}
     ],
     ernaehrung:[
-      {k:"stil", q:"Wie isst du?", opts:["Alles","Wenig Fleisch","Vegetarisch","Vegan"]},
+      {k:"stil", q:"Wie isst du?", opts:["Alles","Wenig Fleisch","Vegetarisch","Vegan"], emo:{"Alles":"🍗","Wenig Fleisch":"🥗","Vegetarisch":"🧀","Vegan":"🌱"}},
+      {k:"fokus", q:"Worauf willst du beim Essen achten?", hint:"Mehrere möglich. Genau das bewertet dein Essens-Score dann strenger.", multi:true, none:"Nichts Bestimmtes", opts:["Weniger Zucker","Mehr Protein","Weniger Fertiges","Weniger Salz","Mehr Ballaststoffe","Nichts Bestimmtes"], emo:{"Weniger Zucker":"🍬","Mehr Protein":"🥚","Weniger Fertiges":"📦","Weniger Salz":"🧂","Mehr Ballaststoffe":"🌾"}},
       {k:"protein", q:"Kommt Protein zu jeder Mahlzeit?", opts:["Ja","Eher nicht"]},
-      {k:"fertig", q:"Fertigprodukte und Fast Food?", opts:["Oft","Manchmal","Selten"]},
-      {k:"trink", q:"Zuckergetränke?", opts:["Täglich","Manchmal","Nie"]}
+      {k:"fertig", q:"Wie oft gibt es Fertigprodukte oder Fast Food?", opts:["Oft","Manchmal","Selten"]},
+      {k:"trink", q:"Wie oft trinkst du Zuckergetränke?", opts:["Täglich","Manchmal","Nie"]},
+      {k:"huerde", q:"Was macht es dir beim Essen schwer?", multi:true, none:"Nichts davon", opts:["Heißhunger","Wenig Zeit zum Kochen","Abends zu viel","Unregelmäßig essen","Nichts davon"], emo:{"Heißhunger":"🍫","Wenig Zeit zum Kochen":"⏱️","Abends zu viel":"🌙","Unregelmäßig essen":"🔀"}},
+      {k:"intol", q:"Verträgst du etwas nicht?", hint:"Der Score warnt dich dann. Erkannt wird nur am Namen – bei Allergien immer die Zutatenliste prüfen.", multi:true, none:"Nein, alles okay", opts:["Laktose","Gluten","Nüsse","Nein, alles okay"], emo:{"Laktose":"🥛","Gluten":"🌾","Nüsse":"🥜","Nein, alles okay":"👍"}},
+      {k:"wasser", q:"Wie viel trinkst du am Tag?", opts:["Unter 1 Liter","1–2 Liter","Über 2 Liter"], emo:{"Unter 1 Liter":"🥤","1–2 Liter":"💧","Über 2 Liter":"🌊"}}
     ],
     koerper:[
       {k:"dusche", q:"Wie duscht du?", opts:["Lang und heiß","Kurz","Eher lauwarm"]},
@@ -129,10 +133,13 @@ function ernAdvice(a){
   if(a.protein==="Eher nicht") items.push({title:"Protein zu jeder Mahlzeit", detail:veg?"Tofu, Linsen, Quark.":"Skyr, Ei, Hähnchen, Thunfisch.", product:veg?"tofu":"skyr"});
   if(a.fertig==="Oft") items.push({title:"Fertigprodukte halbieren", detail:"Eine Mahlzeit am Tag selbst kochen reicht für den Start.", product:null});
   if(a.trink==="Täglich") items.push({title:"Zuckergetränke ersetzen", detail:"Wasser, Tee oder ungesüßt. Das spart schnell Kalorien.", product:null});
+  if((a.huerde||[]).includes("Heißhunger")) items.push({title:"Protein-Snack griffbereit", detail:"Skyr, Nüsse oder ein Ei halten länger satt als Süßes.", product:null});
+  const intol=(a.intol||[]).filter(x=>x!=="Nein, alles okay");
+  if(intol.length) items.push({title:"Score warnt bei "+intol.join(", "), detail:"Erkannt wird am Namen. Bitte trotzdem die Zutatenliste prüfen.", product:null});
   return {lead:`Stil: ${a.stil||"–"}.`, items:items.slice(0,4)};
 }
 function skinType(){ const b=((state.coach.answers||{}).haut||{}).bild; return {Trocken:"trocken",Fettig:"fettig",Gemischt:"normal",Sensibel:"sensibel"}[b]||state.skin.typ||"normal"; }
-function quizDone(id){ const a=(state.coach.answers||{})[id]||{}; return coachQuiz(id).every(q=>a[q.k]); }
+function quizDone(id){ const a=(state.coach.answers||{})[id]||{}; return coachQuiz(id).every(q=>hasVal(a[q.k])); }
 // Quizze aus dem Onboarding, die noch nicht fertig sind
 function openQuizzes(){ return ["haut","ernaehrung","schlaf"].filter(id=>!quizDone(id)); }
 function coachAdvice(id){
@@ -199,6 +206,8 @@ function coachToday(){
   if(isToday&&new Date().getHours()>=14&&d.water<state.profile.waterTarget/2) hints.push({e:"💧",t:`Erst ${d.water} von ${state.profile.waterTarget} Gläsern`,d:"Ein Glas jetzt, eins zur nächsten Mahlzeit.",go:"heute"});
   return hints.slice(0,3);
 }
+// Themen, die im Fragebogen als wichtig gewählt wurden, zuerst
+function coachPrio(id){ const map={Haut:"haut",Haare:"haare",Schlaf:"schlaf",Energie:"schlaf","Körperpflege":"koerper","Ernährung":"ernaehrung"}; return (state.profile.areas||[]).some(a=>map[a]===id)?1:0; }
 function renderCoach(){
   const routine = state.coach.routine||[];
   const tip = coachToday()[0];
@@ -207,13 +216,13 @@ function renderCoach(){
     ${tip?`<button class="card tipcard" data-act="tab" data-v="${tip.go}"><span class="tipk">Tipp für heute</span><b>${tip.e} ${tip.t}</b><span class="sub">${tip.d}</span></button>`:""}
     <div class="section"><h2>Deine Themen</h2></div>
     <div class="card meals">
-    ${coachTopics().map(t=>{
+    ${coachTopics().sort((a,b)=>coachPrio(b.id)-coachPrio(a.id)).map(t=>{
       const inRoutine = routine.some(r=>r.topic===t.id), done = quizDone(t.id);
       const status = inRoutine ? "In deiner Routine ✓" : done ? "Dein Vorschlag ist fertig" : "Ein paar kurze Fragen";
       return `<button class="meal-row" data-act="open" data-type="area" data-id="${t.id}">
         <div class="bubble">${topicMark(t.id)}</div>
         <div class="grow"><div class="meal-name">${t.title}</div><div class="sub">${status}</div></div>
-        ${done?"":`<span class="tagp warn">Offen</span>`}<span class="chev">›</span>
+        ${done?"":`<span class="tagp open">Offen</span>`}<span class="chev">›</span>
       </button>`;
     }).join("")}
     </div>
@@ -305,10 +314,10 @@ function areaSheet(id){
   if(!topic) return "<p>Kein Thema.</p>";
   const quiz=coachQuiz(id);
   const answers=state.coach.answers[id]||{};
-  const ready=quiz.every(q=>answers[q.k]);
+  const ready=quiz.every(q=>hasVal(answers[q.k]));
   if(!ready){
     return `<h2>${topic.title}</h2><p class="sub">${topic.ask} Ein paar Fragen, dann ein Vorschlag.</p>
-      ${quiz.map(item=>`<div class="q"><b>${item.q}</b><div class="opts">${item.opts.map(o=>`<button class="chip ${answers[item.k]===o?"on":""}" data-act="coach-answer" data-topic="${id}" data-k="${item.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}
+      ${quiz.map(item=>`<div class="q"><b>${item.q}</b>${item.multi?`<span class="sub"> · mehrere möglich</span>`:""}<div class="opts">${item.opts.map(o=>`<button class="chip ${(item.multi?(answers[item.k]||[]).includes(o):answers[item.k]===o)?"on":""}" data-act="coach-answer" data-topic="${id}" data-k="${item.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}
       <div class="gap"></div><button class="pill primary" data-act="coach-ready" data-topic="${id}" ${ready?"":"disabled"}>Vorschlag zeigen</button>`;
   }
   const advice=coachAdvice(id);

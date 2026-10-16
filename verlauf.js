@@ -153,9 +153,9 @@ function renderVerlauf(){
     <div class="weekdays">${days.map(s=>`<button class="daydot ${s===state.date?"on":""}" data-act="pick-day" data-v="${s}"><span>${weekday(s)}</span><b>${parseIso(s).getDate()}</b></button>`).join("")}</div>
     <div class="gap"></div>
     ${routineBlock()}
-    ${sleepCard()}
     <div class="section"><h2>Gewicht</h2></div>
     ${weightView()}
+    ${sleepCard()}
     ${stepsCard()}
   </div>`;
 }
