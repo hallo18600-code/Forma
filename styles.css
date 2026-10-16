@@ -415,3 +415,4 @@ body{background:radial-gradient(900px 500px at 15% -5%,#c3e3d1,transparent),#8f9
 .obp-note { margin:14px 4px 0; font-size:12px; text-align:center; }
 .obp-hero .obp-k { margin-top:0; }
 .ob-opts.two .ob-opt:not(:has(.ob-e)) b { padding-right:28px; }
+.wl-h { font-size:40px; line-height:1.06; letter-spacing:-.035em; max-width:11ch; }

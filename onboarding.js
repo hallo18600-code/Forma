@@ -80,8 +80,8 @@ function renderWelcome(){
   return `<div class="screen wlscreen">
     <div class="scroll wl">
       <div class="logo">health maxxing</div>
-      <h1 class="wl-h">Alles an dir.<br>Auf Max.</h1>
-      <p class="wl-sub">Essen, Training, Haut und Schlaf in einer App.</p>
+      <h1 class="wl-h">Alles für deine Gesundheit<br>in einer App.</h1>
+      <p class="wl-sub">Essen, Training, Haut, Schlaf und mehr.</p>
       <div class="wl-grid">${OB_FEATURES.map(([e,t])=>`<div class="wl-tile"><span>${e}</span><b>${t}</b></div>`).join("")}</div>
       <p class="wl-privacy">🔒 Deine Daten bleiben auf deinem Handy.</p>
     </div>
