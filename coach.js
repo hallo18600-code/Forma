@@ -236,6 +236,7 @@ function aussehenAdvice(a){
   } else if(lvl===0&&g==="lose"){
     items.push({title:"Nicht weiter runter", detail:"Mehr Definition kommt jetzt über Muskeln.", product:null, act:"coach-goal", v:"muscle", label:"Auf Muskelaufbau stellen"});
   }
+  if(ziel.includes("Gesicht definierter")) items.push({title:"Mewing", detail:"Richtige Zungenhaltung und Nasenatmung können Haltung und Optik verbessern.", product:null});
   if(ziel.includes("Weniger Bauchfett")&&items.length<3) items.push({title:"Bauchübungen verbrennen kein Bauchfett", detail:"Fett geht am ganzen Körper weg, der Bauch zuletzt.", product:null});
   if(a.bloat==="Oft"||a.bloat==="Manchmal"){
     const ab=(a.abend||[]).filter(x=>x!=="Nichts davon");
