@@ -139,10 +139,10 @@ function scoreFood(item){
   if(intol.includes("Laktose")&&foodHas(item,"lak")) add("Kann Laktose enthalten",-25);
   if(intol.includes("Gluten")&&foodHas(item,"glu")) add("Kann Gluten enthalten",-25);
   if(intol.includes("Nüsse")&&foodHas(item,"nut")) add("Kann Nüsse enthalten",-30);
-  if(huerde.includes("Heißhunger")&&((pr>=10&&(item.kcal||0)<=250)||(item.fiber||0)>=6)) add("Macht lange satt",6);
+  if(huerde.includes("Heißhunger")&&((pr>=10&&(item.kcal||0)<=250)||(item.fiber||0)>=6)) add("Viel Protein oder Ballaststoffe",6);
   if((sa.kaffee==="Oft"||(sa.ein&&sa.ein!=="Geht schnell"))&&foodHas(item,"caf")) add("Koffein: nach 15 Uhr meiden",-4);
   else if(ea.stil==="Wenig Fleisch"&&["rind","salami"].includes(item.id)) add("Du willst weniger Fleisch",-12);
-  if(g!=="skin"&&ha.stoert==="Unreinheiten") add("Zucker und Haut",-su*0.8);
+  if(g!=="skin"&&ha.stoert==="Unreinheiten") add("Dein Haut-Fokus: Zucker",-su*0.8);
   add("Ballaststoffe",Math.min(10,(item.fiber||0)*1.2));
   add("Salz",-Math.max(0,(item.salt||0)-1)*8);
   add("Gesättigte Fette",-Math.max(0,(item.sat||0)-4)*2);
@@ -155,7 +155,7 @@ function scoreCare(item){
   if((item.actives||[]).includes("UV-Filter")) parts.push(["Lichtschutz",8]);
   const ha=state.coach.answers.haut||{}, act=item.actives||[];
   if(item.fragrance && ha.empf==="Ja") parts.push(["Du reagierst auf Duft",-10]);
-  if(ha.stoert==="Unreinheiten"&&act.includes("Niacinamid")) parts.push(["Hilft bei Unreinheiten",8]);
+  if(ha.stoert==="Unreinheiten"&&act.includes("Niacinamid")) parts.push(["Passt zu deinem Fokus",8]);
   if((ha.stoert==="Rötung"||ha.bild==="Sensibel")&&item.alcohol) parts.push(["Alkohol reizt empfindliche Haut",-8]);
   if(ha.sonne&&ha.sonne!=="Täglich"&&act.includes("UV-Filter")) parts.push(["Du brauchst mehr Sonnenschutz",6]);
   return finish(parts);
@@ -182,12 +182,12 @@ function recommendStack(){
   const ea=state.coach.answers.gesundheit||{}, sa=state.coach.answers.schlaf||{}, vegan=ea.stil==="Vegan";
   const lifts=["Krafttraining","Beides"].includes(p.trainType)&&p.trainFreq&&p.trainFreq!=="Gar nicht";
   if(vegan) add("b12",90,"Vegan: B12 steckt fast nur in tierischen Lebensmitteln.");
-  if(p.goal==="muscle" || p.activity>=1.55 || lifts) add("crea",92,"Training und Kraft: Creatin ist das am klarsten belegte Pulver.");
+  if(p.goal==="muscle" || p.activity>=1.55 || lifts) add("crea",92,"Passt zu Krafttraining. Häufig genutzt und gut untersucht.");
   const trained=state.workouts.some(w=>w.date===state.date);
   if(!vegan && (p.goal==="muscle"||p.goal==="lose"||trained) && tot.protein < t.protein*0.55) add("whey",80,"Protein heute liegt klar unter dem Richtwert.");
-  if((p.goal==="skin"||p.goal==="energy"||p.goal==="lose") && !hasFish) add("o3",82,"Wenig Fisch — Omega-3 eher als Kollagen.");
-  if(p.goal==="energy" || (day().sleep!=null && day().sleep<6.5) || (sa.ein&&sa.ein!=="Geht schnell") || !day().checks.schlaf) add("mg",74,"Abend-Magnesium, wenn der Schlaf unruhig bleibt.");
-  if(p.goal==="skin" && picks.length<3) add("col",58,"Nur Zusatz. Schlaf, LSF und Essen wirken stärker.");
+  if((p.goal==="skin"||p.goal==="energy"||p.goal==="lose") && !hasFish) add("o3",82,"Du isst wenig Fisch.");
+  if(p.goal==="energy" || (day().sleep!=null && day().sleep<6.5) || (sa.ein&&sa.ein!=="Geht schnell") || !day().checks.schlaf) add("mg",74,"Manche nehmen es abends. Wirkung auf Schlaf kaum belegt.");
+  if(p.goal==="skin" && picks.length<3) add("col",58,"Nur Zusatz. Schlaf, LSF und Essen sind wichtiger.");
   if(picks.length<3) add("d3",78,"Solide Basis bei wenig Sonne. Dosis nicht selbst hochdrehen.");
   return picks.slice(0,3);
 }

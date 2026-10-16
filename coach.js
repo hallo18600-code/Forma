@@ -11,7 +11,7 @@ function coachPlans(){
       steps:[
         ["Morgens nur Wasser oder eine milde Reinigung", "Ein Durchgang reicht."],
         ["Creme ohne Duft, solange die Haut ruhig ist", "Ceramide oder einfache Basis."],
-        [sun, "Wirksamer als jedes Serum."],
+        [sun, "Der wichtigste Schritt am Morgen."],
         ["Abends dasselbe, kein neues Produkt testen", "Ein neues Produkt pro 2 Wochen."]
       ]
     },
@@ -66,12 +66,12 @@ function coachPlans(){
     sups: {
       title:"Supplements", icon:"cap",
       lead:"Maximal drei. Alles andere ist Regal, kein Plan.",
-      why:"Creatin ist für Kraft klar. Der Rest nur, wenn Essen oder Sonne eine Lücke lassen.",
+      why:"Supplements ersetzen kein Essen. Nur nehmen, wenn Essen oder Sonne eine Lücke lassen.",
       avoid:["Fettverbrenner","Hochdosis ohne Grund","Kollagen vor Schlaf und LSF"],
       steps:[
         ["Stack auf den Vorschlag setzen", "Ziel, Protein heute, Fisch."],
         ["Morgens D3 zur Mahlzeit, falls im Stack", "Nicht nüchtern raten."],
-        ["Creatin täglich 5 g, mit Wasser", "Nicht nur am Trainingstag."],
+        ["Mengen laut Packung", "Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären."],
         ["Abends Magnesium nur wenn Schlaf das Thema ist", "Kein Abführ-Typ."]
       ]
     }
@@ -167,10 +167,10 @@ function hautAdvice(a){
   const spf = sens ? "mineralischer LSF 50" : oily ? "LSF 50 Fluid" : "LSF 50";
   // Ein Wirkstoff passend zum Problem
   const act = {
-    "Unreinheiten": sens?["Niacinamid 4–5 %","abends","Beruhigt und reguliert Talg."]:["BHA 2 % (Salicylsäure)","abends, Mo/Mi/Fr","Löst verstopfte Poren. Langsam steigern."],
-    "Rötung": ["Niacinamid 4–5 %","abends","Stärkt die Hautbarriere."],
-    "Wirkt stumpf": sens?null:["Vitamin-C-Serum","morgens vor dem LSF","Macht die Haut ebenmäßiger. Dunkel lagern."],
-    "Erste Fältchen": sens?null:["Retinol (max. 0,3 %)","abends, 2× pro Woche","Bester Wirkstoff gegen Fältchen. Nicht in der Schwangerschaft."],
+    "Unreinheiten": sens?["Niacinamid 4–5 %","abends","Gilt als gut verträglich."]:["BHA 2 % (Salicylsäure)","abends, Mo/Mi/Fr","Häufig bei Unreinheiten genutzt. Langsam steigern."],
+    "Rötung": ["Niacinamid 4–5 %","abends","Gilt als gut verträglich. Erst an kleiner Stelle testen."],
+    "Wirkt stumpf": sens?null:["Vitamin-C-Serum","morgens vor dem LSF","Optional. Dunkel lagern."],
+    "Erste Fältchen": sens?null:["Retinol (max. 0,3 %)","abends, 2× pro Woche","Langsam starten, kann reizen. Nicht in der Schwangerschaft."],
     "Trockenheit": null, "Nichts Bestimmtes": null
   }[st]||null;
   const morning = dry||sens ? ["Wasser", act&&act[1].startsWith("morgens")?act[0]:null, cream, spf] : [wash, act&&act[1].startsWith("morgens")?act[0]:null, oily?null:cream, spf];
@@ -182,9 +182,9 @@ function hautAdvice(a){
   if(!has.includes("Creme")) missing.push(cream);
   if(!has.includes("Sonnencreme")) missing.push(spf);
   if(act&&!(has.includes("Serum")&&st!=="Erste Fältchen")) missing.push(act[0]);
-  if(a.sonne!=="Täglich") items.push({title:`${spf} jeden Morgen`, detail:"Wirkt gegen Fältchen mehr als jedes Serum.", product:"spf"});
+  if(a.sonne!=="Täglich") items.push({title:`${spf} jeden Morgen`, detail:"Sonnenschutz ist die Basis jeder Hautroutine.", product:"spf"});
   if(act) items.push({title:`${act[0]}, ${act[1]}`, detail:act[2], product:act[0].startsWith("Niacinamid")?"nia":null});
-  else if(dry) items.push({title:"Creme auf noch feuchte Haut", detail:"Ceramide halten das Wasser in der Haut.", product:"cerave"});
+  else if(dry) items.push({title:"Creme auf noch feuchte Haut", detail:"Fühlt sich für viele angenehmer an.", product:"cerave"});
   if(sens&&has.includes("Serum")) items.push({title:"Serum 2 Wochen pausieren", detail:"Wird es ruhiger, lag es am Serum.", product:null});
   else if(missing.length>1) items.push({title:"Ein neues Produkt pro 2 Wochen", detail:`Fehlt noch: ${missing.join(", ")}.`, product:null});
   else if(sens) items.push({title:"Ohne Duft, Alkohol und Menthol", detail:"Die reizen empfindliche Haut am meisten.", product:null});
@@ -198,7 +198,7 @@ function haareAdvice(a){
   const routine={ title:"Haare: "+parts.join(", "), short:"Haarpflege", detail:curly?"Mit T-Shirt trocknen, nicht rubbeln.":"" };
   if(st==="Fettiger Ansatz") items.push({title:"Täglich waschen ist okay", detail:"Seltener waschen macht sie nicht weniger fettig.", product:"shampoo"});
   if(st==="Trocken / Spliss") items.push({title:"Spliss nur mit der Schere weg", detail:"Alle 8–12 Wochen 1 cm schneiden.", product:null});
-  if(st==="Schuppen") items.push({title:"Anti-Schuppen-Shampoo mit Wirkstoff", detail:"Mit Zink oder Ketoconazol, 3–5 Min einwirken.", product:null});
+  if(st==="Schuppen") items.push({title:"Anti-Schuppen-Shampoo mit Wirkstoff", detail:"Lass dich in der Apotheke beraten. Bleiben die Schuppen: Hautarzt.", product:null});
   if(st==="Fallen viel aus") items.push({title:"Abklären lassen statt Shampoo kaufen", detail:"Bis 100 Haare am Tag sind normal. Mehr: Hautarzt.", product:null});
   if(heat) items.push({title:"Hitzeschutz und eine Stufe runter", detail:"Über 180 °C bricht das Haar schneller.", product:null});
   if(a.wasch==="Täglich"&&st!=="Fettiger Ansatz") items.push({title:"Ein Waschtag weniger", detail:"Jede Wäsche nimmt schützendes Fett weg.", product:null});
@@ -213,7 +213,7 @@ function schlafAdvice(a){
   if(a.stunden==="Unter 6") items.push({title:`Ziel: um ${hm(bed)} im Bett`, detail:"Erwachsene brauchen 7–9 Stunden.", product:null});
   if(a.auf==="Wechselt stark") items.push({title:"Gleiche Aufstehzeit, jeden Tag", detail:"Auch am Wochenende, max. 1 Stunde später.", product:null});
   if(a.kaffee==="Oft") items.push({title:`Letzter Kaffee um ${hm(caf)}`, detail:"Koffein wirkt viele Stunden nach.", product:null});
-  if(a.ein==="Dauert") items.push({title:"Morgens 10 Minuten Tageslicht", detail:"Macht dich abends früher müde.", product:null});
+  if(a.ein==="Dauert") items.push({title:"Morgens 10 Minuten Tageslicht", detail:"Hilft vielen, abends leichter müde zu werden.", product:null});
   if(a.ein==="Wach in der Nacht") items.push({title:"Kühl, dunkel, keine Uhr", detail:"Schlafzimmer 16–19 °C, kein Alkohol am Abend.", product:null});
   if(!items.length) items.push({title:"Dein Schlaf passt", detail:"Halte einfach die Zeiten.", product:null});
   return {lead:`Aufstehen ${hm(wake)} → Bett ${hm(bed)}.`, routine, items:items.slice(0,3)};
@@ -239,12 +239,12 @@ function aussehenAdvice(a){
   } else if(lvl===0&&g==="lose"){
     items.push({title:"Nicht weiter runter", detail:"Mehr Definition kommt jetzt über Muskeln.", product:null, act:"coach-goal", v:"muscle", label:"Auf Muskelaufbau stellen"});
   }
-  if(ziel.includes("Gesicht definierter")) items.push({title:"Mewing", detail:"Richtige Zungenhaltung und Nasenatmung können Haltung und Optik verbessern.", product:null});
+  if(ziel.includes("Gesicht definierter")) items.push({title:"Geduld statt Gesichtsübungen", detail:"Wie definiert ein Gesicht wirkt, hängt vor allem vom Körperfett und von Veranlagung ab.", product:null});
   if(ziel.includes("Weniger Bauchfett")&&items.length<3) items.push({title:"Bauchübungen verbrennen kein Bauchfett", detail:"Fett geht am ganzen Körper weg, der Bauch zuletzt.", product:null});
   if(a.bloat==="Oft"||a.bloat==="Manchmal"){
     const ab=(a.abend||[]).filter(x=>x!=="Nichts davon");
-    items.push({title:"Morgens 2 Minuten Gua Sha", detail:`Schiebt Wasser aus dem Gesicht.${ab.length?` Abends weniger ${ab.map(x=>({"Salziges / Fast Food":"Salz","Alkohol":"Alkohol","Spät gegessen":"spätes Essen"}[x])).join(" und ")}.`:""}`, product:null});
-    parts.push("morgens Gua Sha");
+    items.push({title:ab.length?`Abends weniger ${ab.map(x=>({"Salziges / Fast Food":"Salz","Alkohol":"Alkohol","Spät gegessen":"spätes Essen"}[x])).join(" und ")}`:"Genug schlafen und trinken", detail:"Morgens wirkt das Gesicht bei vielen dann weniger aufgedunsen.", product:null});
+    parts.push(ab.length?"abends leichter essen":"genug trinken");
   }
   if(ziel.includes("Mehr Muskeln")||ziel.includes("Bessere Haltung")){
     if(!lifts) items.push({title:"3× pro Woche Krafttraining", detail:`Dazu ${targets().protein} g Protein am Tag.`, product:null, act:"tab", v:"sport", label:"Zum Training"});
@@ -301,7 +301,7 @@ function coachToday(){
     const gapD=last?Math.round((parseIso(state.date)-parseIso(last.date))/864e5):null;
     if(gapD==null||gapD>=3) hints.push({e:"🏋️",t:last?`Seit ${gapD} Tagen kein Training`:"Noch kein Training gespeichert",d:"Eine kurze Einheit reicht. Dein Plan liegt im Training-Tab.",go:"sport"});
   }
-  if(d.sleep!=null&&d.sleep<6.5) hints.push({e:"🌙",t:`Nur ${de(d.sleep,1)} h Schlaf`,d:wo.length?"Heute früher Licht runter, damit sich der Körper erholt.":"Heute lieber moderat trainieren und abends früher Licht runter.",go:"heute"});
+  if(d.sleep!=null&&d.sleep<6.5) hints.push({e:"🌙",t:`Nur ${de(d.sleep,1)} h Schlaf`,d:wo.length?"Heute abends früher Licht runter.":"Heute lieber moderat trainieren und abends früher Licht runter.",go:"heute"});
   else if(d.sleep==null&&isToday) hints.push({e:"🌙",t:"Wie hast du geschlafen?",d:"Trag deine Stunden ein. Der Coach berücksichtigt sie dann.",go:"heute"});
   if(isToday&&new Date().getHours()>=14&&d.water<state.profile.waterTarget/2) hints.push({e:"💧",t:`Erst ${d.water} von ${state.profile.waterTarget} Gläsern`,d:"Ein Glas jetzt, eins zur nächsten Mahlzeit.",go:"heute"});
   return hints.slice(0,3);
@@ -387,7 +387,7 @@ function stackSheet(){
       <span class="chk ${d.taken[id]?"on":""}">${d.taken[id]?"✓":""}</span>
       <div class="grow"><b>${s.name}</b><div class="sub">${s.dose} · ${s.when}</div></div>
     </button>`; }).join("")||`<p class="sub">Noch nichts im Stack.</p>`}
-    <div class="gap"></div><button class="pill ghost w-full" data-act="open" data-type="area" data-id="sups">Stack bearbeiten</button>`;
+    <div class="gap"></div><button class="pill ghost w-full" data-act="open" data-type="area" data-id="sups-list">Stack bearbeiten</button><p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
 }
 function productSheet(id){
   const item=allItems().find(p=>p.id===id);
@@ -406,7 +406,7 @@ function productSheet(id){
       <div class="field"><label>Portion in g</label><input id="portion" type="number" value="${ui.portion}"></div>
       <button class="pill primary" data-act="log-food" data-id="${item.id}">Zum Tagebuch · ${labelDate(state.date)}</button>
     `:item.type==="sup"?`
-      <div class="sub">${item.dose} · ${item.when}</div><div class="gap"></div>
+      <div class="sub">Üblich: ${item.dose} · ${item.when}</div><p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p><div class="gap"></div>
       <button class="pill w-full ${inStack?"ghost":"primary"}" data-act="toggle-stack" data-id="${item.id}">${inStack?"Aus dem Stack":"In den Stack"}</button>
       ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost w-full" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}
     `:`<button class="pill ghost w-full" data-act="mark-pflege">Für Pflege merken</button>
@@ -455,7 +455,7 @@ function supsSheet(){
       <div class="score ${scoreClass(r.score)}">${r.score}</div></button>`; }).join("")}
     <div class="gap"></div><button class="pill primary" data-act="apply-stack">Vorschlag übernehmen</button>
     <div class="section"><h2>Rest</h2></div>
-    ${rest.map(p=>`<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${p.note}</div></div><div class="score ${scoreClass(scored(p).score)}">${scored(p).score}</div></button>`).join("")}`;
+    ${rest.map(p=>`<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${p.note}</div></div><div class="score ${scoreClass(scored(p).score)}">${scored(p).score}</div></button>`).join("")}<p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
 }
 function skinSheet(){
   const q=[
