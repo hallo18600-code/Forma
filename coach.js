@@ -1,4 +1,4 @@
-// FORMA – Coach: Pläne, Quiz, Routine, Produkte, Supplements, Haut
+// Health Maxxing – Coach: Pläne, Quiz, Routine, Produkte, Supplements, Haut
 function coachPlans(){
   const skin = skinType();
   const sun = state.skin.sonne === "Täglich" ? "LSF behalten, auch bei Wolken." : "LSF in den Morgen, bevor du rausgehst.";
@@ -111,12 +111,12 @@ function coachQuiz(id){
     ],
     ernaehrung:[
       {k:"stil", q:"Wie isst du?", opts:["Alles","Wenig Fleisch","Vegetarisch","Vegan"], emo:{"Alles":"🍗","Wenig Fleisch":"🥗","Vegetarisch":"🧀","Vegan":"🌱"}},
-      {k:"fokus", q:"Worauf willst du beim Essen achten?", hint:"Mehrere möglich. Genau das bewertet dein Essens-Score dann strenger.", multi:true, none:"Nichts Bestimmtes", opts:["Weniger Zucker","Mehr Protein","Weniger Fertiges","Weniger Salz","Mehr Ballaststoffe","Nichts Bestimmtes"], emo:{"Weniger Zucker":"🍬","Mehr Protein":"🥚","Weniger Fertiges":"📦","Weniger Salz":"🧂","Mehr Ballaststoffe":"🌾"}},
+      {k:"fokus", q:"Worauf willst du beim Essen achten?", multi:true, none:"Nichts Bestimmtes", opts:["Weniger Zucker","Mehr Protein","Weniger Fertiges","Weniger Salz","Mehr Ballaststoffe","Nichts Bestimmtes"], emo:{"Weniger Zucker":"🍬","Mehr Protein":"🥚","Weniger Fertiges":"📦","Weniger Salz":"🧂","Mehr Ballaststoffe":"🌾","Nichts Bestimmtes":"🤷"}},
       {k:"protein", q:"Kommt Protein zu jeder Mahlzeit?", opts:["Ja","Eher nicht"]},
-      {k:"fertig", q:"Wie oft gibt es Fertigprodukte oder Fast Food?", opts:["Oft","Manchmal","Selten"]},
+      {k:"fertig", q:"Wie oft isst du Fertiges oder Fast Food?", opts:["Oft","Manchmal","Selten"]},
       {k:"trink", q:"Wie oft trinkst du Zuckergetränke?", opts:["Täglich","Manchmal","Nie"]},
-      {k:"huerde", q:"Was macht es dir beim Essen schwer?", multi:true, none:"Nichts davon", opts:["Heißhunger","Wenig Zeit zum Kochen","Abends zu viel","Unregelmäßig essen","Nichts davon"], emo:{"Heißhunger":"🍫","Wenig Zeit zum Kochen":"⏱️","Abends zu viel":"🌙","Unregelmäßig essen":"🔀"}},
-      {k:"intol", q:"Verträgst du etwas nicht?", hint:"Der Score warnt dich dann. Erkannt wird nur am Namen – bei Allergien immer die Zutatenliste prüfen.", multi:true, none:"Nein, alles okay", opts:["Laktose","Gluten","Nüsse","Nein, alles okay"], emo:{"Laktose":"🥛","Gluten":"🌾","Nüsse":"🥜","Nein, alles okay":"👍"}},
+      {k:"huerde", q:"Was fällt dir beim Essen schwer?", multi:true, none:"Nichts davon", opts:["Heißhunger","Wenig Zeit zum Kochen","Abends zu viel","Unregelmäßig essen","Nichts davon"], emo:{"Heißhunger":"🍫","Wenig Zeit zum Kochen":"⏱️","Abends zu viel":"🌙","Unregelmäßig essen":"🔀","Nichts davon":"👍"}},
+      {k:"intol", q:"Verträgst du etwas nicht?", multi:true, none:"Nein, alles okay", opts:["Laktose","Gluten","Nüsse","Nein, alles okay"], emo:{"Laktose":"🥛","Gluten":"🌾","Nüsse":"🥜","Nein, alles okay":"👍"}},
       {k:"wasser", q:"Wie viel trinkst du am Tag?", opts:["Unter 1 Liter","1–2 Liter","Über 2 Liter"], emo:{"Unter 1 Liter":"🥤","1–2 Liter":"💧","Über 2 Liter":"🌊"}}
     ],
     koerper:[

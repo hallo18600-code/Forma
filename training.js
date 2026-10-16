@@ -1,4 +1,4 @@
-// FORMA – Training: Übungen, Pläne, Live-Training, Kalender, Statistik
+// Health Maxxing – Training: Übungen, Pläne, Live-Training, Kalender, Statistik
 
 function exName(id){
   if(EX[id]) return EX[id].name;

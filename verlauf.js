@@ -1,4 +1,4 @@
-// FORMA – Verlauf: Gewicht, Schritte, Schlaf, Maße
+// Health Maxxing – Verlauf: Gewicht, Schritte, Schlaf, Maße
 function weightView(){
   const all = state.weights.slice().sort((a,b)=>a.date<b.date?-1:1);
   const days = ui.wrange==="7"?7:ui.wrange==="30"?30:ui.wrange==="90"?90:ui.wrange==="365"?365:9999;

@@ -1,4 +1,4 @@
-// FORMA – Kern: Zustand, Speichern, Bewertung, Grund-Bausteine, Rendern, Events, Start.
+// Health Maxxing – Kern: Zustand, Speichern, Bewertung, Grund-Bausteine, Rendern, Events, Start.
 // Wird als letzte Datei geladen.
 
 function iso(d){
@@ -316,11 +316,11 @@ function resetSheet(){
 // Alle Daten als JSON-Datei herunterladen
 function downloadBackup(){
   try{
-    const file={ app:"FORMA", version:1, exported:new Date().toISOString(), data:state };
+    const file={ app:"Health Maxxing", version:1, exported:new Date().toISOString(), data:state };
     const blob=new Blob([JSON.stringify(file,null,2)],{type:"application/json"});
     const a=document.createElement("a");
     a.href=URL.createObjectURL(blob);
-    a.download="forma-daten-"+todayIso()+".json";
+    a.download="health-maxxing-daten-"+todayIso()+".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(a.href),1000);
     toast("Datei gespeichert");
@@ -336,7 +336,7 @@ function pickImport(){
     const r=new FileReader();
     r.onload=()=>{
       const data=checkImport(r.result);
-      if(!data){ toast("Ungültige Datei – keine FORMA-Daten"); return; }
+      if(!data){ toast("Ungültige Datei – keine Health-Maxxing-Daten"); return; }
       ui.importData=data; openModal("import");
     };
     r.onerror=()=>toast("Datei konnte nicht gelesen werden");
@@ -348,7 +348,7 @@ function pickImport(){
 function checkImport(text){
   try{
     let d=JSON.parse(text);
-    if(d&&d.app==="FORMA"&&d.data) d=d.data;          // neues Format
+    if(d&&(d.app==="Health Maxxing"||d.app==="FORMA")&&d.data) d=d.data;          // neues Format (auch alte FORMA-Dateien)
     const isObj=x=>x&&typeof x==="object"&&!Array.isArray(x);
     if(!isObj(d)||!isObj(d.profile)) return null;
     if(d.days!=null&&!isObj(d.days)) return null;

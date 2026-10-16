@@ -1,4 +1,4 @@
-// FORMA – Grunddaten: Ziele, Lebensmittel, Pflege, Supplements, Übungen, Aufgaben
+// Health Maxxing – Grunddaten: Ziele, Lebensmittel, Pflege, Supplements, Übungen, Aufgaben
 // NORM wird schon beim Laden dieser Datei gebraucht (Liste der Standard-Lebensmittel)
 function NORM(t){ return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/ae/g,"a").replace(/oe/g,"o").replace(/ue/g,"u"); }
 const KEY = "forma-app-v1";

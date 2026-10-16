@@ -1,4 +1,4 @@
-// FORMA – Barcode-Scanner, Kamera, KI-Eingabe und Scan-Ansichten
+// Health Maxxing – Barcode-Scanner, Kamera, KI-Eingabe und Scan-Ansichten
 const cam={s:null,t:null,r:null};
 function stopCam(){ if(cam.t){ clearInterval(cam.t); cam.t=null; } if(cam.r){ try{ cam.r.reset(); }catch(e){} cam.r=null; } if(cam.s){ cam.s.getTracks().forEach(t=>t.stop()); cam.s=null; } }
 async function startCam(){
