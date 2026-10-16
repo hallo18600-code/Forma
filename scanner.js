@@ -56,9 +56,9 @@ function yHead(title,back){ return `<div class="yhead">${back?`<button class="yb
 function barcodeView(){
   return `${yHead("Barcode","list")}
     <div class="bcbox"><video id="bc-video" playsinline muted></video><div class="bcframe"></div>${ui.camMsg?`<p class="bcmsg">${ui.camMsg}</p>`:""}</div>
-    <button class="pill dark" style="width:100%" data-act="cam-start">Kamera starten</button>
+    <button class="pill dark w-full" data-act="cam-start">Kamera starten</button>
     <div class="field"><label>Oder Code eingeben</label><input id="bc-input" inputmode="numeric" placeholder="EAN, 8 oder 13 Ziffern"></div>
-    <button class="pill primary" style="width:100%" data-act="bc-lookup">Suchen</button>
+    <button class="pill primary w-full" data-act="bc-lookup">Suchen</button>
     <p class="sub">Produktdaten kommen von Open Food Facts. Fehlt ein Produkt, legst du es selbst an.</p>`;
 }
 function aiView(){
@@ -66,10 +66,10 @@ function aiView(){
   return `${yHead("Sprache/Text","list")}
     <p class="sub">Schreib oder sprich, was du gegessen hast, z. B. „200 g Haferflocken, 2 Eier, ein Apfel“. Die App erkennt Mengen und sucht die Lebensmittel in der Datenbank.</p>
     <textarea id="ai-text" class="aitext" placeholder="z. B. 2 Eier, 2 Scheiben Vollkornbrot mit Butter und ein Kaffee mit Milch">${esc(ui.aiText||"")}</textarea>
-    <div class="row" style="gap:8px">${SR?`<button class="pill ghost" data-act="ai-mic">🎤 ${ui.listening?"Hört zu…":"Sprechen"}</button>`:""}<button class="pill primary" style="flex:1" data-act="ai-run">Erkennen</button></div>
-    ${ui.aiErr?`<p class="sub" style="color:var(--bad)">${esc(ui.aiErr)}</p>`:""}
-    ${r?`<div class="section"><h2>Erkannt</h2><span class="sub">Gesamt <b id="ai-tot">${r.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0)}</b> kcal</span></div>${r.map((i,k)=>`<div class="yrow"><div class="grow"><b>${esc(i.name)}</b><div class="sub">${esc(i.brand||"")}${i.brand?" · ":""}<span id="ai-k${k}">${Math.round(i.kcal*i.grams/100)}</span> kcal</div></div><input class="aig" type="number" inputmode="decimal" value="${i.grams}" data-act="ai-g" data-i="${k}"><span class="sub">g</span><button class="x" data-act="ai-del" data-i="${k}">✕</button></div>`).join("")}<button class="yfertig" data-act="ai-add">Alles hinzufügen</button>`:""}
-    ${(ui.aiMiss||[]).length?`<p class="sub" style="margin-top:10px">Nicht gefunden: ${ui.aiMiss.map(esc).join(", ")}. Such sie einzeln oder leg sie an.</p>`:""}`;
+    <div class="row">${SR?`<button class="pill ghost" data-act="ai-mic">🎤 ${ui.listening?"Hört zu…":"Sprechen"}</button>`:""}<button class="pill primary grow" data-act="ai-run">Erkennen</button></div>
+    ${ui.aiErr?`<p class="sub t-bad">${esc(ui.aiErr)}</p>`:""}
+    ${r?`<div class="section"><h2>Erkannt</h2><span class="sub">Gesamt <b id="ai-tot">${r.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0)}</b> kcal</span></div>${r.map((i,k)=>`<div class="yrow"><div class="grow"><b>${esc(i.name)}</b><div class="sub">${esc(i.brand||"")}${i.brand?" · ":""}<span id="ai-k${k}">${Math.round(i.kcal*i.grams/100)}</span> kcal</div></div><input class="aig" aria-label="Gramm" type="number" inputmode="decimal" value="${i.grams}" data-act="ai-g" data-i="${k}"><span class="sub">g</span><button class="x" data-act="ai-del" data-i="${k}" aria-label="Entfernen">✕</button></div>`).join("")}<button class="yfertig" data-act="ai-add">Alles hinzufügen</button>`:""}
+    ${(ui.aiMiss||[]).length?`<p class="sub mt-3">Nicht gefunden: ${ui.aiMiss.map(esc).join(", ")}. Such sie einzeln oder leg sie an.</p>`:""}`;
 }
 function moreView(){
   return `${yHead("Was möchtest du erstellen?","list")}
@@ -96,10 +96,10 @@ function scanResults(){
   const q=ui.query.trim().toLowerCase(), mode="text";
   const pool=mode==="care"?CARE:mode==="sup"?SUPS:foods().filter(p=>!p.hidden);
   const ts=qTokens(q), found0=(q?rankSort(pool.filter(p=>{ const x=hay(p); return ts.every(w=>x.includes(w)); }),q):pool).slice(0,12);
-  let found=found0, more=""; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const lim=ui.scanMax||30, ids=new Set(found0.map(p=>p.id)), d=dbSearch(q,lim); found=found0.concat(d.filter(p=>!ids.has(p.id))); if(d.length>=lim) more=`<button class="pill ghost" style="width:100%;margin-top:12px" data-act="scan-more">Mehr anzeigen</button>`; }
-  const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}">+</button>`:""}</div>`; };
-  const hint=(mode==="text"&&q.length>=2&&!FOODDB.ok)?`<p class="sub" style="padding:8px 0">Produktdatenbank nicht geladen (foods.json fehlt oder lädt noch). Es werden nur Basis-Einträge durchsucht.</p>`:"";
-  return hint+(found.map(row).join("")||`<p class="sub" style="padding:14px 0">Nichts gefunden.</p><button class="pill ghost" style="width:100%" data-act="more-go" data-v="nobc">Eigenes Lebensmittel anlegen</button>`)+more;
+  let found=found0, more=""; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const lim=ui.scanMax||30, ids=new Set(found0.map(p=>p.id)), d=dbSearch(q,lim); found=found0.concat(d.filter(p=>!ids.has(p.id))); if(d.length>=lim) more=`<button class="pill ghost w-full mt-3" data-act="scan-more">Mehr anzeigen</button>`; }
+  const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button>`:""}</div>`; };
+  const hint=(mode==="text"&&q.length>=2&&!FOODDB.ok)?`<p class="sub">Produktdatenbank nicht geladen (foods.json fehlt oder lädt noch). Es werden nur Basis-Einträge durchsucht.</p>`:"";
+  return hint+(found.map(row).join("")||`<p class="sub li">Nichts gefunden.</p><button class="pill ghost w-full" data-act="more-go" data-v="nobc">Eigenes Lebensmittel anlegen</button>`)+more;
 }
 function scanSheet(){
   const v=ui.scanView||"list", slot=SLOTS.find(s=>s.id===ui.addSlot), title=slot?slot.name:"Suche";
@@ -113,6 +113,6 @@ function scanSheet(){
     <div class="ytiles"><button class="ytile" data-act="scan-view" data-v="barcode"><i>${BC_ICON}</i>Barcode</button><button class="ytile" data-act="scan-view" data-v="ai"><i>💬</i>Sprache/Text</button><button class="ytile" data-act="scan-view" data-v="more"><i>⋯</i>Mehr</button></div>
     <div class="field ysearch"><input value="${esc(ui.query)}" data-act="query" placeholder="${slot?"Was hattest du zum "+slot.name+"?":"Suchen"}"></div>
     <div id="scan-results">${scanResults()}</div>
-    <p class="sub" style="font-size:11px;margin-top:10px">Produktdaten: Open Food Facts (ODbL)</p>
+    <p class="sub mt-3">Produktdaten: Open Food Facts (ODbL)</p>
     <button class="yfertig" data-act="close">Fertig</button>`;
 }

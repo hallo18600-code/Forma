@@ -1,18 +1,28 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#12a05a">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Health Maxxing">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" type="image/png" href="icon-192.png">
-<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js" defer></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Health Maxxing</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#f3f4f6">
+  <meta name="color-scheme" content="light dark">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Health Maxxing">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <script>
+    // Hell oder dunkel schon vor dem ersten Bild setzen (kein weißes Aufblitzen)
+    try {
+      var p = (JSON.parse(localStorage.getItem("forma-app-v1")) || {}).profile || {};
+      var t = p.theme || "system";
+      if (t === "system") t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js" defer></script>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>

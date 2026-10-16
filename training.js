@@ -41,28 +41,28 @@ function renderSport(){
   const maxV=Math.max(1, ...days.map(s=>state.workouts.filter(w=>w.date===s).reduce((n,w)=>n+(w.volume||0),0)));
   return `<div class="scroll pad">
     <div class="topbar"><div><h1>Training</h1><div class="sub">Diese Woche</div></div>
-      <button class="plus dark" data-act="new-plan">+</button></div>
+      <button class="plus dark" data-act="new-plan" aria-label="Neue Routine">+</button></div>
     <div class="card">
       <div class="kpi">
         <div><span>Einheiten</span><b>${week.length}</b><span>7 Tage</span></div>
         <div><span>Volumen</span><b>${de(vol)}</b><span>kg</span></div>
         <div><span>Routinen</span><b>${plans.length}</b><span>angelegt</span></div>
       </div>
-      <div class="wbars" style="margin-top:14px">${days.map(s=>{
+      <div class="wbars">${days.map(s=>{
         const v=state.workouts.filter(w=>w.date===s).reduce((n,w)=>n+(w.volume||0),0);
         return `<div class="wbar ${v?"has":""} ${s===todayIso()?"on":""}"><i style="height:${Math.max(6, Math.round(v/maxV*78))}px"></i><span>${weekday(s)}</span></div>`;
       }).join("")}</div>
     </div>
     <div class="section"><h2>Routinen</h2><button class="link" data-act="new-plan">Neu</button></div>
-    ${plans.map(r=>`<div class="card meals" style="margin-bottom:12px">
-      <div class="row space" style="padding:8px 0"><div class="meal-name">${esc(r.name)}</div><button class="link" data-act="edit-plan" data-id="${r.id}">Bearbeiten</button></div>
+    ${plans.map(r=>`<div class="card meals mb-3">
+      <div class="row space py-2"><div class="meal-name">${esc(r.name)}</div><button class="link" data-act="edit-plan" data-id="${r.id}">Bearbeiten</button></div>
       ${(r.days||[]).map(d=>`<div class="meal-row">
         <div class="bubble">🏋️</div>
         <div class="grow"><div class="meal-name">${esc(d.name)}</div><div class="sub">${(d.exercises||[]).map(e=>(EX[e.id]&&EX[e.id].base)||exName(e.id)).slice(0,3).join(", ")||"Leer"}</div></div>
-        <button class="plus dark" data-act="start-wo" data-rid="${r.id}" data-did="${d.id}">›</button>
+        <button class="plus dark" data-act="start-wo" data-rid="${r.id}" data-did="${d.id}" aria-label="${esc(d.name)} starten">›</button>
       </div>`).join("")}
     </div>`).join("")}
-    <button class="pill ghost" style="width:100%" data-act="start-empty">Leeres Training</button>
+    <button class="pill ghost w-full" data-act="start-empty">Leeres Training</button>
     <div class="section"><h2>Dashboard</h2></div>
     <div class="dash">
       ${[["stats","Statistiken"],["exercises","Übungen"],["measures","Messungen"],["calendar","Kalender"]].map(([id,label])=>`<button data-act="dash" data-id="${id}"><span class="bubble">${marks[id]}</span>${label}</button>`).join("")}
@@ -71,30 +71,30 @@ function renderSport(){
     <div class="card meals">${list.length?list.map(w=>`<button class="meal-row" data-act="open" data-type="wo-detail" data-id="${w.id}">
       <div class="bubble">✅</div>
       <div class="grow"><div class="meal-name">${esc(w.name)}</div><div class="sub">${labelDate(w.date)} · ${w.min} min · ${w.sets} Sätze</div></div>
-    </button>`).join(""):`<div class="sub" style="padding:12px 0">Noch kein gespeichertes Training.</div>`}</div>
+    </button>`).join(""):`<div class="sub li">Noch kein gespeichertes Training.</div>`}</div>
   </div>`;
 }
 function renderPlan(){
   const plan=ui.plan;
   plan.days=plan.days||[];
-  return `<div class="screen" style="background:#fff">
-    <div class="scroll" style="padding-top:54px;padding-bottom:28px">
+  return `<div class="screen plain">
+    <div class="scroll full">
       <div class="wo-head">
-        <button data-act="cancel-plan">✕</button><b>Routine</b>
-        <button class="pill primary" style="width:auto;height:34px;padding:0 12px;font-size:13px" data-act="save-plan">Sichern</button>
+        <button class="x" data-act="cancel-plan" aria-label="Abbrechen">✕</button><b>Routine</b>
+        <button class="pill primary sm" data-act="save-plan">Sichern</button>
       </div>
       <div class="field"><label>Routine</label><input data-act="plan-name" value="${esc(plan.name)}" placeholder="Push Pull Legs"></div>
-      ${plan.days.map((d,di)=>`<div class="card" style="margin-top:12px">
-        <div class="row space"><input data-act="day-name" data-d="${di}" value="${esc(d.name)}" style="font-weight:800;border:0;background:transparent;width:140px"><button class="x" data-act="del-day" data-d="${di}">✕</button></div>
-        ${(d.exercises||[]).map((e,ei)=>`<div style="padding:8px 0;border-top:1px solid var(--line)">
-          <div class="row space"><button class="ex-open" data-act="exi-open" data-id="${e.id}">${exThumb(e.id)}<b>${exName(e.id)}</b></button><button class="x" data-act="plan-del-ex" data-d="${di}" data-e="${ei}">✕</button></div>
+      ${plan.days.map((d,di)=>`<div class="card plan-day">
+        <div class="row space"><input class="input-plain grow" data-act="day-name" data-d="${di}" value="${esc(d.name)}" aria-label="Name des Trainingstags"><button class="x" data-act="del-day" data-d="${di}" aria-label="Trainingstag löschen">✕</button></div>
+        ${(d.exercises||[]).map((e,ei)=>`<div class="plan-ex">
+          <div class="row space"><button class="ex-open" data-act="exi-open" data-id="${e.id}">${exThumb(e.id)}<b>${exName(e.id)}</b></button><button class="x" data-act="plan-del-ex" data-d="${di}" data-e="${ei}" aria-label="Übung entfernen">✕</button></div>
           <div class="sub">${e.sets.map(s=>s.kg+"×"+s.reps).join(" · ")}</div>
         </div>`).join("")}
-        <button class="pill ghost" style="width:100%;margin-top:8px" data-act="open-day-ex" data-d="${di}">+ Übung</button>
+        <button class="pill ghost w-full mt-2" data-act="open-day-ex" data-d="${di}">+ Übung</button>
       </div>`).join("")}
       <div class="gap"></div>
-      <button class="pill ghost" style="width:100%" data-act="add-day">+ Trainingstag</button>
-      ${plan.id?`<div class="gap"></div><button class="pill ghost" style="width:100%" data-act="del-plan">Routine löschen</button>`:""}
+      <button class="pill ghost w-full" data-act="add-day">+ Trainingstag</button>
+      ${plan.id?`<div class="gap"></div><button class="pill ghost w-full" data-act="del-plan">Routine löschen</button>`:""}
     </div>
   </div>`;
 }
@@ -104,22 +104,22 @@ function renderLive(){
   const done=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);
   const vol=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).reduce((a,s)=>a+s.kg*s.reps,0),0);
   const min=Math.max(1, Math.floor((Date.now()-w.t0)/60000));
-  return `<div class="screen" style="background:#fff">
-    <div class="scroll" style="padding-top:54px;padding-bottom:28px">
+  return `<div class="screen plain">
+    <div class="scroll full">
       <div class="wo-head">
-        <button data-act="cancel-wo">✕</button>
-        <div style="text-align:center"><div class="clock">${clock(w.t0)}</div><div class="sub">${esc(w.name)}</div></div>
-        <button class="pill primary" style="width:auto;height:34px;padding:0 12px;font-size:13px" data-act="finish-wo">Fertig</button>
+        <button class="x" data-act="cancel-wo" aria-label="Training abbrechen">✕</button>
+        <div class="t-c"><div class="clock">${clock(w.t0)}</div><div class="sub">${esc(w.name)}</div></div>
+        <button class="pill primary sm" data-act="finish-wo">Fertig</button>
       </div>
       <div class="stats">
         <div><b>${vol} kg</b><span>Volumen</span></div>
         <div><b>${done}/${sets}</b><span>Sätze</span></div>
         <div><b class="t-rest">${ui.rest||0}s</b><span>Pause</span></div>
       </div>
-      ${ui.rest>0?`<div class="rest"><span>Pause ${ui.rest}s</span><button data-act="rest-skip" style="color:#fff">Überspringen</button></div>`:""}
+      ${ui.rest>0?`<div class="rest"><span>Pause ${ui.rest}s</span><button data-act="rest-skip">Überspringen</button></div>`:""}
       ${w.exercises.map((e,ei)=>{
         let n=0;
-        return `<div style="margin:14px 0 18px">
+        return `<div class="wo-ex">
           <div class="row space"><button class="ex-open" data-act="exi-open" data-id="${e.id}">${exThumb(e.id)}<span><span class="ex-name">${exName(e.id)}</span><span class="sub">Zuletzt ${lastSet(e.id)}</span></span></button><button class="x" data-act="del-ex" data-e="${ei}" aria-label="Übung entfernen">✕</button></div>
           <table class="sets"><tr><th>SATZ</th><th>ZUVOR</th><th>KG</th><th>WDH</th><th></th></tr>
             ${e.sets.map((s,si)=>`<tr class="${s.done?"done":""}">
@@ -130,10 +130,10 @@ function renderLive(){
               <td><button class="chk ${s.done?"on":""}" data-act="toggle-set" data-e="${ei}" data-s="${si}">${s.done?"✓":""}</button></td>
             </tr>`).join("")}
           </table>
-          <button class="pill ghost" style="width:100%;margin-top:8px" data-act="add-set" data-e="${ei}">+ Satz</button>
+          <button class="pill ghost w-full mt-2" data-act="add-set" data-e="${ei}">+ Satz</button>
         </div>`;
       }).join("")}
-      <button class="pill ghost" style="width:100%" data-act="open" data-type="ex">Übung hinzufügen</button>
+      <button class="pill ghost w-full" data-act="open" data-type="ex">Übung hinzufügen</button>
     </div>
   </div>`;
 }
@@ -147,34 +147,34 @@ function woDetail(id){
   const w=state.workouts.find(x=>x.id===id);
   if(!w) return "<p>Nicht gefunden.</p>";
   return `<h2>${esc(w.name)}</h2><p class="sub">${labelDate(w.date)} · ${w.min} min · ${de(w.volume)} kg</p>
-    ${(w.exercises||[]).map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")}
+    ${(w.exercises||[]).map(e=>`<div class="li"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")}
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>
-    <div class="gap"></div><div class="row" style="gap:8px"><button class="pill ghost" style="flex:1" data-act="wo-edit" data-id="${w.id}">Bearbeiten</button><button class="pill ghost" style="flex:1;color:#d93636" data-act="wo-del-ask" data-id="${w.id}">Löschen</button></div>`;
+    <div class="gap"></div><div class="row"><button class="pill ghost grow" data-act="wo-edit" data-id="${w.id}">Bearbeiten</button><button class="pill ghost grow t-bad" data-act="wo-del-ask" data-id="${w.id}">Löschen</button></div>`;
 }
 // Gespeichertes Training bearbeiten (Kopie liegt in ui.woEdit, erst "Speichern" ändert die Daten)
 function woEditSheet(){
   const w=ui.woEdit; if(!w) return "";
-  const inp='style="width:64px;height:36px;border:1px solid var(--line);border-radius:10px;padding:0 8px"';
+  const inp='class="inp-s"';
   return `<h2>Training bearbeiten</h2>
     <div class="field"><label for="wo-name">Name</label><input id="wo-name" data-act="wo-f" data-k="name" value="${esc(w.name)}"></div>
     <div class="field"><label for="wo-date">Datum</label><input id="wo-date" type="date" data-act="wo-f" data-k="date" max="${todayIso()}" value="${w.date}"></div>
     <div class="field"><label for="wo-min">Dauer in Minuten</label><input id="wo-min" type="number" inputmode="numeric" min="1" data-act="wo-f" data-k="min" value="${w.min}"></div>
-    ${w.exercises.map((e,ei)=>`<div style="padding:10px 0;border-top:1px solid var(--line)">
+    ${w.exercises.map((e,ei)=>`<div class="plan-ex">
       <b>${exName(e.id)}</b>
-      ${e.sets.map((st,si)=>`<div class="row" style="gap:8px;margin-top:6px;align-items:center"><span class="sub" style="width:44px">Satz ${si+1}</span>
+      ${e.sets.map((st,si)=>`<div class="row mt-2"><span class="sub set-lbl">Satz ${si+1}</span>
         <input ${inp} type="number" inputmode="decimal" data-act="wo-set" data-f="kg" data-e="${ei}" data-s="${si}" value="${st.kg}" aria-label="kg"><span class="sub">kg ×</span>
         <input ${inp} type="number" inputmode="numeric" data-act="wo-set" data-f="reps" data-e="${ei}" data-s="${si}" value="${st.reps}" aria-label="Wiederholungen"><span class="sub">Wdh.</span>
         <button class="x" data-act="wo-del-set" data-e="${ei}" data-s="${si}" aria-label="Satz entfernen">✕</button></div>`).join("")}
     </div>`).join("")}
     <div class="gap"></div><button class="pill primary" data-act="wo-save">Speichern</button>
-    <div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Abbrechen</button>`;
+    <div class="gap"></div><button class="pill ghost w-full" data-act="close">Abbrechen</button>`;
 }
 function woDelSheet(id){
   const w=state.workouts.find(x=>x.id===id); if(!w) return "";
   return `<h2>Training löschen?</h2>
     <p class="sub"><b>${esc(w.name)}</b> vom ${w.date.split("-").reverse().join(".")} (${w.sets} ${w.sets===1?"Satz":"Sätze"}) wird gelöscht. Das lässt sich nicht rückgängig machen.</p>
     <div class="gap"></div><button class="pill danger" data-act="wo-del-go" data-id="${w.id}">Ja, löschen</button>
-    <div class="gap"></div><button class="pill ghost" style="width:100%" data-act="open" data-type="wo-detail" data-id="${w.id}">Abbrechen</button>`;
+    <div class="gap"></div><button class="pill ghost w-full" data-act="open" data-type="wo-detail" data-id="${w.id}">Abbrechen</button>`;
 }
 // Haken "Sport" am Tag passend setzen, nachdem Trainings geändert wurden
 function syncSport(date){ if(state.days[date]) state.days[date].checks.sport = state.workouts.some(w=>w.date===date)?1:0; }
@@ -212,7 +212,7 @@ function monthBlock(year, month){
     const name=hits[0]?hits[0].name.split("·").pop().trim():"";
     cells+=`<button class="calcell" data-act="cal-day" data-v="${s}"><div class="cdot ${hits.length?"on":""} ${s===todayIso()?"today":""}">${d}</div><div class="cname">${esc(name)}</div></button>`;
   }
-  return `<h2 style="margin:16px 0 8px">${label}</h2><div class="calgrid">${heads}${cells}</div>`;
+  return `<h2 class="month-h">${label}</h2><div class="calgrid">${heads}${cells}</div>`;
 }
 function renderCalendar(){
   const now=new Date();
@@ -229,7 +229,7 @@ function renderCalendar(){
         const s=iso(new Date(y,m,d));
         cells+=`<i class="sq ${workoutOn(s).length?"on":""}"></i>`;
       }
-      return `<div><div class="sub" style="margin-bottom:4px">${first.toLocaleDateString("de-DE",{month:"short"})}</div><div class="mini">${cells}</div></div>`;
+      return `<div><div class="sub mb-1">${first.toLocaleDateString("de-DE",{month:"short"})}</div><div class="mini">${cells}</div></div>`;
     }).join("")}</div>`;
   } else {
     const years=[now.getFullYear(), now.getFullYear()-1];
@@ -239,17 +239,17 @@ function renderCalendar(){
       const days=[];
       for(let i=0;i<off;i++) days.push("");
       for(let d=new Date(y,0,1); d.getFullYear()===y; d.setDate(d.getDate()+1)) days.push(iso(new Date(d)));
-      return `<h2>${y}</h2><div class="sub" style="display:flex;justify-content:space-between;margin:8px 0">Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez</div>
+      return `<h2>${y}</h2><div class="sub months">Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez</div>
         <div class="heat">${days.map(s=>`<i class="${s&&workoutOn(s).length?"on":""}"></i>`).join("")}</div>`;
     }).join("");
   }
   return `<div class="calhead">
-      <button class="navd" data-act="dash-close">‹</button>
-      <div class="seg" style="flex:1;margin:0 8px">${modes.map(([id,l])=>`<button class="${ui.cal===id?"on":""}" data-act="cal-mode" data-v="${id}">${l}</button>`).join("")}</div>
+      <button class="navd" data-act="dash-close" aria-label="Zurück">‹</button>
+      <div class="seg grow">${modes.map(([id,l])=>`<button class="${ui.cal===id?"on":""}" data-act="cal-mode" data-v="${id}">${l}</button>`).join("")}</div>
     </div>
-    <div class="card" style="display:grid;grid-template-columns:1fr 1fr;padding:0">
-      <div style="padding:12px;border-right:1px solid var(--line)"><b>${weekStreak()}-Wochen-Serie</b><div class="sub">Mindestens ein Training</div></div>
-      <div style="padding:12px"><b>${restDays()} Ruhetage</b><div class="sub">Diese Woche bisher</div></div>
+    <div class="card split">
+      <div><b>${weekStreak()}-Wochen-Serie</b><div class="sub">Mindestens ein Training</div></div>
+      <div><b>${restDays()} Ruhetage</b><div class="sub">Diese Woche bisher</div></div>
     </div>
     ${body}`;
 }
@@ -263,7 +263,7 @@ function renderStats(){
     return vol(state.workouts.filter(w=>w.date>=from && w.date<addDays(from,7)));
   });
   const max=Math.max(1,...bars);
-  return `<div class="calhead"><button class="navd" data-act="dash-close">‹</button><h2>Statistiken</h2><span></span></div>
+  return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button><h2>Statistiken</h2><span class="tap-sp"></span></div>
     <div class="kpi">
       <div><span>Serie</span><b>${weekStreak()}</b><span>Wochen</span></div>
       <div><span>Trainings</span><b>${state.workouts.length}</b><span>gesamt</span></div>
@@ -273,7 +273,7 @@ function renderStats(){
     <div class="card">
       <div class="row space"><b>Volumen</b><span class="sub">7 Tage ${vol(week)} kg</span></div>
       <div class="sub">Vorwoche ${vol(prev)} kg</div>
-      <div style="display:flex;align-items:flex-end;gap:6px;height:72px;margin-top:10px">${bars.map(v=>`<div style="flex:1;background:var(--accent);opacity:.85;height:${Math.max(4,v/max*72)}px;border-radius:4px"></div>`).join("")}</div>
+      <div class="vbars">${bars.map(v=>`<i style="height:${Math.max(4,v/max*72)}px"></i>`).join("")}</div>
       <div class="sub">8 Wochen, kg × Wiederholungen</div>
     </div>`;
 }
@@ -287,7 +287,7 @@ function exHist(id){
   state.workouts.forEach(w=>(w.exercises||[]).filter(e=>e.id===id).forEach(e=>{
     rows.push({date:w.date, name:w.name, sets:(e.sets||[]).filter(s=>s.done)});
   }));
-  return `<h2>${exName(id)}</h2>${rows.reverse().map(r=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${labelDate(r.date)}</b><div class="sub">${r.sets.map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")||"<p class=sub>Kein Verlauf.</p>"}<div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  return `<h2>${exName(id)}</h2>${rows.reverse().map(r=>`<div class="li"><b>${labelDate(r.date)}</b><div class="sub">${r.sets.map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")||"<p class=sub>Kein Verlauf.</p>"}<div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
 }
 function startTick(){
   stopTick();

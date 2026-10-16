@@ -5,7 +5,12 @@
 const FIG = (() => {
   const L = { torso:30, neck:3.5, head:6.5, ua:17, fa:16, th:23, sh:22, ft:7 };
   const R = Math.PI/180;
-  const C = { body:"#c3cbd4", far:"#e0e5ea", prim:"#f26b3a", sec:"#f8b89c", prop:"#b9c1c9", dark:"#3f454c", ground:"#e3e7eb" };
+  // Farben kommen aus styles.css (--fig-*, --mus-*), damit Hell und Dunkel passen
+  const C = { get body(){ return tc("fig-body"); }, get far(){ return tc("fig-far"); }, get prim(){ return tc("mus-p"); }, get sec(){ return tc("mus-s"); },
+              get prop(){ return tc("fig-prop"); }, get dark(){ return tc("fig-dark"); }, get ground(){ return tc("fig-ground"); } };
+  // Feste Farben in den Geräte-Daten unten → passende Variable
+  const HEX = { "#8d969f":"fig-prop-2", "#d3d9df":"fig-prop-3", "#eceff2":"fig-pad", "#8b949d":"fig-plate", "#9aa3ac":"fig-cable" };
+  const themed = s => s.replace(/#[0-9a-f]{6}\b/gi, h => HEX[h.toLowerCase()] ? tc(HEX[h.toLowerCase()]) : h);
   // Winkel: 0 = nach unten, 90 = nach vorne (rechts), 180 = nach oben, -90 = nach hinten (links)
   const dir = a => [Math.sin(a*R), Math.cos(a*R)];
   const add = (p,a,l) => { const d=dir(a); return [p[0]+d[0]*l, p[1]+d[1]*l]; };
@@ -218,7 +223,7 @@ const FIG = (() => {
     const g=pat.ground==null?113:pat.ground;
     let s=g?`<line x1="4" y1="${g}" x2="116" y2="${g}" stroke="${C.ground}" stroke-width="1.6" stroke-linecap="round"/>`:"";
     s+=pat.view==="front" ? drawFront(J, mus, ex.eq, pat) : drawSide(J, mus, ex.eq, pat);
-    return s;
+    return themed(s);
   }
   // Fertiges SVG. anim = true → wird laufend bewegt (siehe figTick)
   function svg(ex, opt){

@@ -324,7 +324,7 @@ function renderCoach(){
       </button>`;
     }).join("")}
     </div>
-    <p class="sub" style="text-align:center;margin:14px 8px 0">Vorschläge kannst du in deine Routine übernehmen. Abhaken geht im Tagebuch unter „Dein Tag“.</p>
+    <p class="sub note">Vorschläge kannst du in deine Routine übernehmen. Abhaken geht im Tagebuch unter „Dein Tag“.</p>
   </div>`;
 }
 function starterRoutine(){ return [["u-s1","Wasser trinken (2 Liter)"],["u-s2","10 Minuten bewegen"],["u-s3","Gesicht reinigen und Sonnenschutz"],["u-s4","Vor 23 Uhr ins Bett"]].map(([id,title])=>({id,topic:"eigen",title,detail:"",product:null})); }
@@ -336,7 +336,7 @@ function routineBlock(){
   const rt=state.coach.routine||[], wk=weekStart(state.date), t=rDone(state.date), open=!!ui.rOpen&&rt.length>0;
   const when=state.date===todayIso()?"heute":labelDate(state.date);
   const list=open?`<div class="rlist">${rt.map(r=>{ const on=routineOn(r.id,state.date); return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><div class="grow"><b>${esc(r.title)}</b>${r.detail?`<div class="sub">${esc(r.detail)}</div>`:""}</div></button></div>`; }).join("")}
-      <button class="link" data-act="dash" data-id="routine" style="margin-top:10px">Kalender, Serie &amp; eigene Punkte ›</button></div>`:"";
+      <button class="link mt-3" data-act="dash" data-id="routine">Kalender, Serie &amp; eigene Punkte ›</button></div>`:"";
   return `<div class="card rprev"><button class="rhead" data-act="${rt.length?"r-toggle":"dash"}" ${rt.length?"":'data-id="routine"'}><div class="row space"><b>Routine${rStreak()>=3?` <span class="rfire">🔥 ${rStreak()}</span>`:""}</b><span class="sub">${rt.length?t.c+"/"+t.n+" "+when+" "+(open?"▴":"▾"):"Anlegen ›"}</span></div></button>
     <div class="rweek">${Array.from({length:7},(_,i)=>addDays(wk,i)).map(s=>`<i class="rd ${rState(s)} ${s===todayIso()?"today":""}">${weekday(s)}</i>`).join("")}</div>${list}</div>`;
 }
@@ -345,7 +345,7 @@ function rMonth(y,mo){
   const heads=["Mo","Di","Mi","Do","Fr","Sa","So"].map(d=>`<div class="sub">${d}</div>`).join("");
   let cells="<div></div>".repeat(pad);
   for(let d=1;d<=count;d++){ const s=iso(new Date(y,mo,d)), r=rDone(s); cells+=`<button class="calcell" data-act="r-pick" data-v="${s}"><div class="cdot ${rState(s)} ${s===todayIso()?"today":""}">${d}</div><div class="cname">${r.c?r.c+"/"+r.n:""}</div></button>`; }
-  return `<h2 style="margin:16px 0 8px">${first.toLocaleDateString("de-DE",{month:"long",year:"numeric"})}</h2><div class="calgrid">${heads}${cells}</div>`;
+  return `<h2 class="month-h">${first.toLocaleDateString("de-DE",{month:"long",year:"numeric"})}</h2><div class="calgrid">${heads}${cells}</div>`;
 }
 function renderRoutineDash(){
   const m=ui.rcal||"day", now=new Date(), rt=state.coach.routine||[], tdy=rDone(todayIso());
@@ -353,24 +353,24 @@ function renderRoutineDash(){
   let body="";
   if(m==="day"){
     const n=rDone(state.date);
-    body=`${state.rHint?"":`<div class="insight" style="margin-bottom:4px"><b>Was ist das?</b><span>Das ist deine Basis-Routine als Beispiel. Hake ab, was du heute geschafft hast. Ändere oder lösche Einträge und füge eigene hinzu. Schaffst du alle, wächst deine Serie. Ein Tag ohne Haken wird rot.</span><button class="link" data-act="rhint" style="text-align:left;margin-top:4px">Verstanden</button></div>`}
-    <h2 style="margin:16px 0 8px">${labelDate(state.date)}${rt.length?` · ${n.c}/${n.n}`:""}</h2><div class="card">
-      ${rt.map(r=>{ const on=routineOn(r.id,state.date); return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><b>${esc(r.title)}</b></button><button class="x" data-act="routine-del" data-id="${r.id}">✕</button></div>`; }).join("")||`<p class="sub" style="padding:6px 0">Noch keine Routine. Leg unten deine erste an.</p>`}
-      <div class="row" style="gap:8px;margin-top:14px"><input id="r-new" placeholder="Eigene Routine, z. B. 10 Min lesen" style="flex:1;min-width:0;border:1.5px solid var(--line);border-radius:14px;padding:11px 12px;font:inherit"><button class="pill dark" data-act="routine-add" style="width:auto;padding:0 18px">+</button></div></div>`;
+    body=`${state.rHint?"":`<div class="insight"><b>Was ist das?</b><span>Das ist deine Basis-Routine als Beispiel. Hake ab, was du heute geschafft hast. Ändere oder lösche Einträge und füge eigene hinzu. Schaffst du alle, wächst deine Serie. Ein Tag ohne Haken wird rot.</span><button class="link mt-1 self-start" data-act="rhint">Verstanden</button></div>`}
+    <h2 class="month-h">${labelDate(state.date)}${rt.length?` · ${n.c}/${n.n}`:""}</h2><div class="card">
+      ${rt.map(r=>{ const on=routineOn(r.id,state.date); return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><b>${esc(r.title)}</b></button><button class="x" data-act="routine-del" data-id="${r.id}" aria-label="Routine-Punkt löschen">✕</button></div>`; }).join("")||`<p class="sub">Noch keine Routine. Leg unten deine erste an.</p>`}
+      <div class="row mt-4"><input id="r-new" class="input grow" placeholder="Eigene Routine, z. B. 10 Min lesen" aria-label="Eigene Routine"><button class="plus dark" data-act="routine-add" aria-label="Routine-Punkt hinzufügen">+</button></div></div>`;
   } else if(m==="month") body=rMonth(now.getFullYear(),now.getMonth())+rMonth(now.getFullYear(),now.getMonth()-1);
   else { const y=now.getFullYear();
-    body=`<h2 style="margin:16px 0 8px">${y}</h2><div class="yeargrid">${Array.from({length:12},(_,mo)=>{
+    body=`<h2 class="month-h">${y}</h2><div class="yeargrid">${Array.from({length:12},(_,mo)=>{
       const first=new Date(y,mo,1), pad=(first.getDay()+6)%7, count=new Date(y,mo+1,0).getDate();
       let cells=Array.from({length:pad},()=>`<i class="sq empty"></i>`).join("");
       for(let d=1;d<=count;d++) cells+=`<i class="sq ${rState(iso(new Date(y,mo,d)))}"></i>`;
-      return `<div><div class="sub" style="margin-bottom:4px">${first.toLocaleDateString("de-DE",{month:"short"})}</div><div class="mini">${cells}</div></div>`;
+      return `<div><div class="sub mb-1">${first.toLocaleDateString("de-DE",{month:"short"})}</div><div class="mini">${cells}</div></div>`;
     }).join("")}</div>`; }
-  return `<div class="calhead"><button class="navd" data-act="dash-close">‹</button>
-    <div class="seg" style="flex:1;margin:0 8px">${modes.map(([id,l])=>`<button class="${m===id?"on":""}" data-act="rcal-mode" data-v="${id}">${l}</button>`).join("")}</div></div>
-    <div class="card" style="display:grid;grid-template-columns:1fr 1fr;padding:0">
-      <div style="padding:12px;border-right:1px solid var(--line)"><b>${rStreak()}-Tage-Serie${rStreak()>=3?" 🔥":""}</b><div class="sub">Alle Routinen erledigt</div></div>
-      <div style="padding:12px"><b>${tdy.c}/${tdy.n} heute</b><div class="sub">Erledigt</div></div></div>
-    <div class="sub" style="margin-top:14px">Grün: alle erledigt · Hellgrün: teilweise · Rot: verpasst</div>
+  return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button>
+    <div class="seg grow">${modes.map(([id,l])=>`<button class="${m===id?"on":""}" data-act="rcal-mode" data-v="${id}">${l}</button>`).join("")}</div></div>
+    <div class="card split">
+      <div><b>${rStreak()}-Tage-Serie${rStreak()>=3?" 🔥":""}</b><div class="sub">Alle Routinen erledigt</div></div>
+      <div><b>${tdy.c}/${tdy.n} heute</b><div class="sub">Erledigt</div></div></div>
+    <div class="sub mt-4">Grün: alle erledigt · Hellgrün: teilweise · Rot: verpasst</div>
     ${body}`;
 }
 function stackSheet(){
@@ -380,7 +380,7 @@ function stackSheet(){
       <span class="chk ${d.taken[id]?"on":""}">${d.taken[id]?"✓":""}</span>
       <div class="grow"><b>${s.name}</b><div class="sub">${s.dose} · ${s.when}</div></div>
     </button>`; }).join("")||`<p class="sub">Noch nichts im Stack.</p>`}
-    <div class="gap"></div><button class="pill ghost" style="width:100%" data-act="open" data-type="area" data-id="sups">Stack bearbeiten</button>`;
+    <div class="gap"></div><button class="pill ghost w-full" data-act="open" data-type="area" data-id="sups">Stack bearbeiten</button>`;
 }
 function productSheet(id){
   const item=allItems().find(p=>p.id===id);
@@ -388,11 +388,11 @@ function productSheet(id){
   const sc=scored(item);
   if(item.type==="food"||item.type==="custom") return foodSheet(item,sc);
   const inStack=item.type==="sup" && state.stack.includes(item.id);
-  return `<div class="row" style="gap:12px">
-      <div class="score ${scoreClass(sc.score)}" style="width:56px;height:56px;font-size:20px;border-radius:16px">${sc.score}</div>
+  return `<div class="row gap-3">
+      <div class="score lg ${scoreClass(sc.score)}">${sc.score}</div>
       <div><div class="sub">${item.brand||""}</div><h2>${esc(item.name)}</h2><div class="sub">${goalName()}</div></div>
     </div>
-    <p class="sub" style="margin:12px 0">${sc.reasons.join(" ")}</p>
+    <p class="sub my-3">${sc.reasons.join(" ")}</p>
     ${(sc.parts||[]).length?`<div class="why">${sc.parts.map(([l,v],i)=>`<div><span>${l}</span><b class="${i?(v>0?"up":"dn"):""}">${i&&v>0?"+":""}${v}</b></div>`).join("")}</div>`:""}
     ${item.type==="food"||item.type==="custom"?`
       <div class="sub">${item.kcal} kcal · ${item.protein} g Protein / 100 g</div>
@@ -400,10 +400,10 @@ function productSheet(id){
       <button class="pill primary" data-act="log-food" data-id="${item.id}">Zum Tagebuch · ${labelDate(state.date)}</button>
     `:item.type==="sup"?`
       <div class="sub">${item.dose} · ${item.when}</div><div class="gap"></div>
-      <button class="pill ${inStack?"ghost":"primary"}" style="width:100%" data-act="toggle-stack" data-id="${item.id}">${inStack?"Aus dem Stack":"In den Stack"}</button>
-      ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost" style="width:100%" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}
-    `:`<button class="pill ghost" style="width:100%" data-act="mark-pflege">Für Pflege merken</button>
-      ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost" style="width:100%" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}`}
+      <button class="pill w-full ${inStack?"ghost":"primary"}" data-act="toggle-stack" data-id="${item.id}">${inStack?"Aus dem Stack":"In den Stack"}</button>
+      ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost w-full" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}
+    `:`<button class="pill ghost w-full" data-act="mark-pflege">Für Pflege merken</button>
+      ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost w-full" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}`}
   `;
 }
 function areaSheet(id){
@@ -422,20 +422,20 @@ function areaSheet(id){
   const products=[...new Set(advice.items.map(i=>i.product).filter(Boolean))];
   const r=advice.routine, inRt=(state.coach.routine||[]).some(x=>x.topic===id);
   return `<h2>${topic.title}</h2><p class="sub">${advice.lead}</p>
-    ${r?`<div class="insight" style="margin:12px 0 4px"><b>Dein Routine-Punkt</b><span><b>${esc(r.title)}</b>${r.detail?`<br>${esc(r.detail)}`:""}</span></div>`:""}
+    ${r?`<div class="insight"><b>Dein Routine-Punkt</b><span><b>${esc(r.title)}</b>${r.detail?`<br>${esc(r.detail)}`:""}</span></div>`:""}
     <div class="section"><h2>Worauf es bei dir ankommt</h2></div>
-    ${advice.items.map(i=>`<div style="padding:10px 0;border-bottom:1px solid var(--line)"><b>${i.title}</b><div class="sub">${i.detail}</div>${i.act?`<button class="pill ghost" style="width:100%;margin-top:8px" data-act="${i.act}" data-v="${i.v}">${i.label}</button>`:""}</div>`).join("")}
+    ${advice.items.map(i=>`<div class="li"><b>${i.title}</b><div class="sub">${i.detail}</div>${i.act?`<button class="pill ghost w-full mt-2" data-act="${i.act}" data-v="${i.v}">${i.label}</button>`:""}</div>`).join("")}
     ${products.length?`<div class="section"><h2>Dazu passen</h2></div>${products.map(pid=>{
       const item=allItems().find(x=>x.id===pid); if(!item) return "";
       return `<button class="food" data-act="open" data-type="product" data-id="${pid}"><div class="thumb">${item.emoji||""}</div><div class="grow"><b>${item.name}</b><div class="sub">${item.brand||""}</div></div></button>`;
     }).join("")}`:""}
     <div class="gap"></div>
     ${inRt
-      ?`<button class="pill ghost" style="width:100%" data-act="coach-remove" data-topic="${id}">Aus der Routine entfernen</button>`
+      ?`<button class="pill ghost w-full" data-act="coach-remove" data-topic="${id}">Aus der Routine entfernen</button>`
       :r?`<button class="pill primary" data-act="coach-add" data-topic="${id}">Als 1 Punkt in die Routine</button>`:""}
     <div class="gap"></div>
-    <button class="pill ghost" style="width:100%" data-act="coach-reset" data-topic="${id}">Antworten ändern</button>
-    <p class="sub" style="font-size:12px;margin-top:12px">Allgemeine Tipps, kein ärztlicher Rat.</p>`;
+    <button class="pill ghost w-full" data-act="coach-reset" data-topic="${id}">Antworten ändern</button>
+    <p class="sub mt-3">Allgemeine Tipps, kein ärztlicher Rat.</p>`;
 }
 function planBody(id){ return areaSheet(id); }
 function supsSheet(){

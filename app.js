@@ -20,7 +20,7 @@ function blankDay(){ return { meals:[], water:0, checks:{}, taken:{}, routine:{}
 function fresh(){
   return {
     onboarded:false, step:null, tab:"heute", date:todayIso(),
-    profile:{ name:"", goal:"muscle", sex:"m", age:24, height:178, weight:76, activity:1.55, adult:false, target:74, reminders:true, health:false, calories:true, affiliates:true, fish:"wenig", waterTarget:8 },
+    profile:{ name:"", goal:"muscle", sex:"m", age:24, height:178, weight:76, activity:1.55, adult:false, target:74, reminders:true, health:false, calories:true, affiliates:true, fish:"wenig", waterTarget:8, theme:"system" },
     days:{}, weights:[], workouts:[], routines:defaultRoutines(), measures:[], stack:["crea","d3"], customs:[], customEx:[], skin:{}, hautPlan:false, coach:{answers:{}, routine:[], skipped:[]}
   };
 }
@@ -263,23 +263,44 @@ function mealGlyph(id, color){
   };
   return `<svg viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="${p[id]}"/></svg>`;
 }
-function waterGlyph(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="#2B7C9E" stroke-width="1.9" stroke-linecap="round"><path d="M8 7h8l-1 12H9L8 7zM9 7c0-3 6-3 6 0"/></svg>`; }
+function waterGlyph(){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M8 7h8l-1 12H9L8 7zM9 7c0-3 6-3 6 0"/></svg>`; }
 function miniRing(pct, color){
   const C=2*Math.PI*20, off=C*(1-Math.min(1,Math.max(0,pct)));
-  return `<svg class="mini" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="none" stroke="#eceef2" stroke-width="3"/>
+  return `<svg class="mini" viewBox="0 0 44 44"><circle cx="22" cy="22" r="20" fill="none" stroke="${tc("track")}" stroke-width="3"/>
     <circle cx="22" cy="22" r="20" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" transform="rotate(-90 22 22)" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg>`;
 }
 function ringSvg(pct){
   const C=2*Math.PI*46, off=C*(1-Math.min(1,Math.max(0,pct)));
-  return `<svg viewBox="0 0 118 118"><circle cx="59" cy="59" r="46" fill="none" stroke="#eef0f3" stroke-width="10"/>
-    <circle cx="59" cy="59" r="46" fill="none" stroke="#1aa35a" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg>`;
+  return `<svg viewBox="0 0 118 118"><circle cx="59" cy="59" r="46" fill="none" stroke="${tc("track")}" stroke-width="10"/>
+    <circle cx="59" cy="59" r="46" fill="none" stroke="${tc("accent")}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg>`;
 }
 function spark(arr){
   if(arr.length<2) return `<div class="sub">Noch zu wenig Punkte für eine Kurve.</div>`;
   const min=Math.min(...arr)-0.4, max=Math.max(...arr)+0.4;
   const w=320,h=64,p=6;
   const pts=arr.map((v,i)=>`${p+i*((w-2*p)/(arr.length-1))},${h-p-((v-min)/(max-min))*(h-2*p)}`).join(" ");
-  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="#1aa35a" stroke-width="3" points="${pts}"/></svg>`;
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline fill="none" stroke="${tc("accent")}" stroke-width="3" points="${pts}"/></svg>`;
+}
+
+// ---------- Darstellung: Hell / Dunkel / System ----------
+// Farben stehen in styles.css. tc("accent") liest den aktuellen Wert, z. B. für SVG-Grafiken.
+const darkMQ = window.matchMedia ? matchMedia("(prefers-color-scheme: dark)") : null;
+let TC = {};
+function tc(name){
+  if(!(name in TC)) TC[name]=getComputedStyle(document.documentElement).getPropertyValue("--"+name).trim();
+  return TC[name];
+}
+function applyTheme(){
+  const t=state.profile.theme||"system";
+  const dark=t==="dark"||(t==="system"&&!!darkMQ&&darkMQ.matches);
+  document.documentElement.dataset.theme=dark?"dark":"light";
+  TC={};
+  if(typeof exThumbCache!=="undefined") Object.keys(exThumbCache).forEach(k=>delete exThumbCache[k]);
+  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute("content", tc("bg"));
+}
+if(darkMQ){
+  const onSys=()=>{ if((state.profile.theme||"system")==="system"){ applyTheme(); render(); } };
+  if(darkMQ.addEventListener) darkMQ.addEventListener("change", onSys); else if(darkMQ.addListener) darkMQ.addListener(onSys);
 }
 
 function renderApp(){
@@ -305,14 +326,14 @@ function resetSheet(){
     <p class="sub">Alle Daten auf diesem Gerät werden <b>unwiderruflich</b> gelöscht: ${state.weights.length} Wiegepunkte, ${state.workouts.length} Trainings, ${Object.keys(state.days).length} Tage mit Einträgen, dein Profil und deine Pläne. Es gibt keinen Server und keine Kopie – das lässt sich nicht rückgängig machen.</p>
     <div class="gap"></div>
     <p class="sub"><b>Tipp:</b> Sichere deine Daten vorher als Datei.</p>
-    <button class="pill ghost" style="width:100%" data-act="backup">⬇️ Erst Daten sichern</button>
+    <button class="pill ghost w-full" data-act="backup">⬇️ Erst Daten sichern</button>
     <div class="gap"></div>
     <div class="field"><label for="reset-input">Zum Bestätigen <b>LÖSCHEN</b> eintippen</label></div>
     <input id="reset-input" class="reset-input" data-act="reset-type" value="${esc(ui.resetTxt||"")}" placeholder="LÖSCHEN" autocomplete="off" autocapitalize="characters" spellcheck="false">
     <div class="gap"></div>
     <button id="reset-go" class="pill danger" data-act="reset-go" ${ok?"":"disabled"}>Endgültig löschen</button>
     <div class="gap"></div>
-    <button class="pill ghost" style="width:100%" data-act="close">Abbrechen</button>`;
+    <button class="pill ghost w-full" data-act="close">Abbrechen</button>`;
 }
 // Alle Daten als JSON-Datei herunterladen
 function downloadBackup(){
@@ -368,11 +389,11 @@ function importSheet(){
     <p class="sub"><b>In der Datei:</b> ${n(d)}<br><b>Jetzt auf dem Gerät:</b> ${n(state)}</p>
     <div class="gap"></div>
     <p class="sub">Deine aktuellen Daten werden komplett <b>ersetzt</b> und gehen verloren. Sichere sie vorher, wenn du sie behalten willst.</p>
-    <button class="pill ghost" style="width:100%" data-act="backup">⬇️ Aktuelle Daten erst exportieren</button>
+    <button class="pill ghost w-full" data-act="backup">⬇️ Aktuelle Daten erst exportieren</button>
     <div class="gap"></div>
     <button class="pill danger" data-act="import-go">Ja, Daten ersetzen</button>
     <div class="gap"></div>
-    <button class="pill ghost" style="width:100%" data-act="close">Abbrechen</button>`;
+    <button class="pill ghost w-full" data-act="close">Abbrechen</button>`;
 }
 function renderModal(){
   if(!ui.modal) return "";
@@ -395,9 +416,9 @@ function renderModal(){
   if(type==="ex"||type==="plan-ex") inner=exPicker(type==="plan-ex"?"plan":"live");
   if(type==="ex-hist") inner=exHist(payload);
   if(type==="wo-detail") inner=woDetail(payload);
-  if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Später</button>`;
+  if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost w-full" data-act="close">Später</button>`;
   if(type==="steps") inner=stepsSheet();
-  if(type==="entries") inner=`<h2>Einträge</h2><p class="sub">Tippe auf einen Eintrag, um ihn zu ändern oder zu löschen.</p>${state.weights.slice().reverse().map(w=>`<button class="row space" style="width:100%;padding:10px 0;border-bottom:1px solid var(--line)" data-act="w-edit" data-v="${w.date}"><span>${labelDate(w.date)}</span><span><b>${de(w.kg,1)} kg</b> <span class="sub">›</span></span></button>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
+  if(type==="entries") inner=`<h2>Einträge</h2><p class="sub">Tippe auf einen Eintrag, um ihn zu ändern oder zu löschen.</p>${state.weights.slice().reverse().map(w=>`<button class="row space li-btn" data-act="w-edit" data-v="${w.date}"><span>${labelDate(w.date)}</span><span><b>${de(w.kg,1)} kg</b> <span class="sub">›</span></span></button>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
   if(type==="w-edit") inner=weightEditSheet(payload);
   if(type==="wo-edit") inner=woEditSheet();
   if(type==="wo-del") inner=woDelSheet(payload);
@@ -601,6 +622,7 @@ document.getElementById("app").addEventListener("click", e=>{
     p.weight=+ui.draftKg; ui.modal=null; save(); toast("Gewicht gespeichert");
   }
   else if(act==="toggle"){ p[el.dataset.k]=!p[el.dataset.k]; save(); }
+  else if(act==="theme"){ p.theme=el.dataset.v; save(); applyTheme(); }
   else if(act==="start-empty"){
     ui.workout={ name:"Training", t0:Date.now(), routineId:null, exercises:[] };
     ui.modal=null; startTick();
@@ -752,13 +774,13 @@ document.getElementById("app").addEventListener("click", e=>{
     if(!ui.importData) return;
     state=ui.importData; state.onboarded=!!state.profile.adult; state.tab="profil";
     ui.importData=null; ui.modal=null; ui.workout=null; ui.plan=null; ui.dash=null;
-    save(); toast("Daten importiert");
+    save(); applyTheme(); toast("Daten importiert");
   }
   else if(act==="reset"){ ui.resetTxt=""; openModal("reset"); return; }
   else if(act==="backup"){ downloadBackup(); return; }
   else if(act==="reset-go"){
     if((ui.resetTxt||"").trim().toUpperCase()!=="LÖSCHEN") return;
-    try{ localStorage.removeItem(KEY); }catch(e){} state=fresh(); ui.resetTxt=""; ui.modal=null; toast("Alle Daten gelöscht");
+    try{ localStorage.removeItem(KEY); }catch(e){} state=fresh(); ui.resetTxt=""; ui.modal=null; applyTheme(); toast("Alle Daten gelöscht");
   }
   render();
 });
@@ -793,6 +815,7 @@ document.getElementById("app").addEventListener("input", e=>{
     if(n){ n.focus(); n.setSelectionRange(ui.exQuery.length, ui.exQuery.length); }
   }
 });
+applyTheme();
 render();
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")) window.addEventListener("load",()=>{ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} });

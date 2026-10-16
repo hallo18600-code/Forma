@@ -187,7 +187,7 @@ function exLibList(mode){
     if(!q) return true;
     return (x.name+" "+x.group+" "+musLabel(x.primary)+" "+musLabel(x.secondary)).toLowerCase().includes(q);
   });
-  if(!ids.length) return `<div class="sub" style="padding:18px 2px">Keine Übung gefunden. Du kannst sie oben als eigene Übung anlegen.</div>`;
+  if(!ids.length) return `<div class="sub li">Keine Übung gefunden. Du kannst sie oben als eigene Übung anlegen.</div>`;
   const add=mode==="plan"?"plan-add-ex":"add-ex";
   const row=id=>{
     const x=exInfoOf(id), last=lastSet(id);
@@ -229,7 +229,7 @@ function exChart(id){
   const head=(v,d)=>`<div class="exc-top"><div><b class="exc-val">${v}</b> <span class="exc-date">${d}</span></div></div>`;
   let body;
   if(!data.length){
-    body=head("–","")+`<div class="sub" style="padding:40px 0;text-align:center">Kein Training in diesem Zeitraum.</div>`;
+    body=head("–","")+`<div class="sub t-c py-10">Kein Training in diesem Zeitraum.</div>`;
   } else {
     const W=330, H=176, pl=38, pr=12, pt=14, pb=24;
     const vals=data.map(s=>s[m]);
@@ -248,13 +248,13 @@ function exChart(id){
     const area=`M${xs[0].toFixed(1)},${H-pb} L${pts.replace(/ /g," L")} L${xs[xs.length-1].toFixed(1)},${H-pb} Z`;
     body=head(`${kgTxt(vals[sel])} ${unit}`, dShort(data[sel].date))+
     `<svg class="exc-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Verlauf ${unit}">
-      <defs><linearGradient id="excg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#12a05a" stop-opacity=".18"/><stop offset="1" stop-color="#12a05a" stop-opacity="0"/></linearGradient></defs>
-      ${ticks.map(v=>{ const y=pt+(1-v/top)*(H-pt-pb); return `<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="#eef0f3"/><text x="${pl-6}" y="${y+4}" text-anchor="end" class="exc-ax">${kgTxt(v)}</text>`; }).join("")}
+      <defs><linearGradient id="excg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="${tc("accent")}" stop-opacity=".18"/><stop offset="1" stop-color="${tc("accent")}" stop-opacity="0"/></linearGradient></defs>
+      ${ticks.map(v=>{ const y=pt+(1-v/top)*(H-pt-pb); return `<line x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}" stroke="${tc("line")}"/><text x="${pl-6}" y="${y+4}" text-anchor="end" class="exc-ax">${kgTxt(v)}</text>`; }).join("")}
       ${xl.map(i=>`<text x="${xs[i]}" y="${H-6}" text-anchor="${i===0&&data.length>1?"start":i===data.length-1&&data.length>1?"end":"middle"}" class="exc-ax">${dShort(data[i].date)}</text>`).join("")}
-      ${data.length>1?`<path d="${area}" fill="url(#excg)"/><polyline points="${pts}" fill="none" stroke="#12a05a" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`:""}
-      <line x1="${xs[sel]}" x2="${xs[sel]}" y1="${pt-4}" y2="${H-pb}" stroke="#12a05a" stroke-opacity=".35" stroke-dasharray="3 3"/>
-      ${xs.map((x,i)=>`<circle cx="${x}" cy="${ys[i]}" r="${i===sel?5.5:3.2}" fill="${i===sel?"#fff":"#12a05a"}" stroke="#12a05a" stroke-width="${i===sel?3:0}"/>`).join("")}
-      ${xs.map((x,i)=>`<circle cx="${x}" cy="${ys[i]}" r="13" fill="transparent" data-act="exi-pt" data-i="${i}" style="cursor:pointer"/>`).join("")}
+      ${data.length>1?`<path d="${area}" fill="url(#excg)"/><polyline points="${pts}" fill="none" stroke="${tc("accent")}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`:""}
+      <line x1="${xs[sel]}" x2="${xs[sel]}" y1="${pt-4}" y2="${H-pb}" stroke="${tc("accent")}" stroke-opacity=".35" stroke-dasharray="3 3"/>
+      ${xs.map((x,i)=>`<circle cx="${x}" cy="${ys[i]}" r="${i===sel?5.5:3.2}" fill="${i===sel?tc("surface"):tc("accent")}" stroke="${tc("accent")}" stroke-width="${i===sel?3:0}"/>`).join("")}
+      ${xs.map((x,i)=>`<circle cx="${x}" cy="${ys[i]}" r="13" fill="transparent" data-act="exi-pt" data-i="${i}" class="hit"/>`).join("")}
     </svg>`;
   }
   return `<div class="exc">
