@@ -6,7 +6,7 @@ const REST_OPTS=[60,90,120,180];
 function exName(id){
   if(EX[id]) return EX[id].name;
   const c = (state.customEx||[]).find(x=>x.id===id);
-  return c ? c.name : "Übung";
+  return c ? esc(c.name) : "Übung";   // eigener Name: als Text ausgeben, nie als HTML
 }
 function lastSet(id){
   const past = [...state.workouts].reverse();

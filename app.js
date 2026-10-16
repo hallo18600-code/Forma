@@ -389,8 +389,18 @@ function checkImport(text){
     if(d.weights!=null&&!Array.isArray(d.weights)) return null;
     if(d.workouts!=null&&!Array.isArray(d.workouts)) return null;
     if((d.weights||[]).some(w=>!w||typeof w.date!=="string"||typeof w.kg!=="number")) return null;
-    return normalize(JSON.parse(JSON.stringify(d)));  // wirft Fehler bei kaputten Daten
+    return cleanIds(normalize(JSON.parse(JSON.stringify(d))));  // wirft Fehler bei kaputten Daten
   }catch(e){ return null; }
+}
+// IDs aus fremden Dateien landen in HTML-Attributen: nur Buchstaben, Ziffern, - und _ erlauben
+function cleanIds(d){
+  const c=x=>x==null?x:String(x).replace(/[^\w-]/g,""), each=(a,f)=>(Array.isArray(a)?a:[]).forEach(x=>{ if(x&&typeof x==="object") f(x); });
+  each(d.workouts,w=>{ w.id=c(w.id); each(w.exercises,e=>e.id=c(e.id)); });
+  each(d.routines,r=>{ r.id=c(r.id); each(r.days,x=>{ x.id=c(x.id); each(x.exercises,e=>e.id=c(e.id)); }); });
+  each(d.coach&&d.coach.routine,r=>{ r.id=c(r.id); r.topic=c(r.topic); });
+  each(d.customs,x=>x.id=c(x.id)); each(d.customEx,x=>x.id=c(x.id)); d.stack=(d.stack||[]).map(c);
+  Object.values(d.days||{}).forEach(day=>each(day&&day.meals,m=>{ m.uid=c(m.uid); m.id=c(m.id); }));
+  return d;
 }
 function importSheet(){
   const d=ui.importData; if(!d) return "";
@@ -532,9 +542,9 @@ document.getElementById("app").addEventListener("click", e=>{
     ui.aiRes=null; ui.aiText=""; ui.scanView="list"; syncAuto(state.date); save(); toast("Im Tagebuch");
   }
   else if(act==="save-quick"){
-    const g=id=>+(document.getElementById(id).value||"").replace(",",".")||0, kcal=g("q-kcal");
+    const g=id=>Math.max(0,+(document.getElementById(id).value||"").replace(",",".")||0), kcal=g("q-kcal");
     if(!kcal){ toast("Kalorien fehlen"); return; }
-    const it={id:"q-"+uid(),type:"custom",hidden:true,name:(document.getElementById("q-name").value||"").trim()||"Schnell hinzugefügt",brand:"Schnell",emoji:"⚡",kcal,protein:g("q-p"),carbs:g("q-c"),fat:g("q-f"),sugar:0,processed:false};
+    const it={id:"q-"+uid(),type:"custom",hidden:true,name:(document.getElementById("q-name").value||"").trim().slice(0,70)||"Schnell hinzugefügt",brand:"Schnell",emoji:"⚡",kcal,protein:g("q-p"),carbs:g("q-c"),fat:g("q-f"),sugar:0,processed:false};
     state.customs.push(it); day().meals.push({uid:uid(),id:it.id,portion:100,slot:ui.addSlot||"snack"});
     ui.scanView="list"; syncAuto(state.date); save(); toast("Hinzugefügt");
   }
@@ -565,9 +575,10 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="del-meal"){ day().meals=day().meals.filter(m=>m.uid!==el.dataset.id); syncAuto(state.date); save(); }
   else if(act==="save-custom"){
-    const name=(document.getElementById("c-name").value||"").trim();
+    const name=(document.getElementById("c-name").value||"").trim().slice(0,70);
     if(!name){ toast("Name fehlt"); return; }
-    const item={ id:"c-"+uid(), type:"custom", name, brand:"Eigen", emoji:"🍽", kcal:+document.getElementById("c-kcal").value||0, protein:+document.getElementById("c-p").value||0, carbs:+document.getElementById("c-c").value||0, fat:+document.getElementById("c-f").value||0, sugar:0, processed:false };
+    const num=id=>Math.max(0,+String(document.getElementById(id).value||"").replace(",",".")||0);   // keine negativen Werte
+    const item={ id:"c-"+uid(), type:"custom", name, brand:"Eigen", emoji:"🍽", kcal:num("c-kcal"), protein:num("c-p"), carbs:num("c-c"), fat:num("c-f"), sugar:0, processed:false };
     const bcEl=document.getElementById("c-bc"); if(bcEl&&bcEl.value.trim()) item.bc=bcEl.value.replace(/\D/g,"");
     state.customs.push(item);
     ui.scanView="list";

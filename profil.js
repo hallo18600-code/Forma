@@ -4,7 +4,7 @@ function renderProfil(){
   return `<div class="scroll pad">
     <div class="topbar"><div><h1>Profil</h1><div class="sub">Gespeichert auf diesem Gerät</div></div></div>
     <div class="card">
-      <div class="row"><div class="avatar">${(p.name||"F").slice(0,1).toUpperCase()}</div>
+      <div class="row"><div class="avatar">${esc((p.name||"F").slice(0,1).toUpperCase())}</div>
         <div class="grow"><h2>${esc(p.name||"Ohne Name")}</h2><div class="sub">${goalName()}</div></div></div>
       <div class="kpi">
         <div><span>Gewicht</span><b>${de(lastWeight(),1)}</b><span>kg</span></div>
