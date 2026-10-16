@@ -223,6 +223,7 @@ function obPick(v){
 function obNext(){
   const st=obSteps()[state.step]; if(!st) return;
   if(st.kind==="adult"&&!state.profile.adult) return;
+  if(st.kind==="adult"&&state.demoNext){ seedDemo(); toast("Beispieldaten geladen"); return; }   // kam über "Mit Beispieldaten ansehen"
   if(st.kind==="num") obClampNum(st.k);
   if(st.req&&!hasVal(st.get())) return;
   obGo(1);
@@ -242,7 +243,7 @@ function obSkip(){
 function obBack(){
   const st=obSteps()[state.step];
   if(st&&st.kind==="num") obClampNum(st.k);
-  if(!state.step) state.step=null; else obGo(-1);
+  if(!state.step){ state.step=null; state.demoNext=false; } else obGo(-1);
   save();
 }
 function obFinish(){
