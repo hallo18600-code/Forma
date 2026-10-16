@@ -21,7 +21,7 @@ function fresh(){
   return {
     onboarded:false, step:null, tab:"heute", date:todayIso(),
     profile:{ name:"", goal:"muscle", sex:"m", age:24, height:178, weight:76, activity:1.55, adult:false, target:74, reminders:true, health:false, calories:true, affiliates:true, fish:"wenig", waterTarget:8 },
-    days:{}, weights:[], workouts:[], routines:defaultRoutines(), measures:[], stack:["crea","d3"], customs:[], customEx:[], skin:{}, hautPlan:false, coach:{answers:{}, routine:[]}
+    days:{}, weights:[], workouts:[], routines:defaultRoutines(), measures:[], stack:["crea","d3"], customs:[], customEx:[], skin:{}, hautPlan:false, coach:{answers:{}, routine:[], skipped:[]}
   };
 }
 let state = load();
@@ -38,7 +38,7 @@ function load(){
 function normalize(s){
     s.profile = Object.assign(fresh().profile, s.profile||{});
     s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
-    s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
+    s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.coach.skipped=s.coach.skipped||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
     s.date = s.date || todayIso();
     return s;
 }
@@ -261,7 +261,7 @@ function renderWelcome(){
 }
 function quizStep(id){
   const t=coachTopics().find(x=>x.id===id), a=state.coach.answers[id]||{};
-  return `<h1>${t.title}</h1><p class="sub">${t.ask} Daran richten sich Rating und Coach aus. Du kannst überspringen.</p>
+  return `<div class="optional">Optional</div><h1>${t.title}</h1><p class="sub">${t.ask} Daran richten sich Rating und Coach aus. Keine Lust gerade? Überspring es und hol es später im Coach nach.</p>
     ${coachQuiz(id).map(q=>`<div class="q"><b>${q.q}</b><div class="opts">${q.opts.map(o=>`<button class="chip ${a[q.k]===o?"on":""}" data-act="coach-answer" data-topic="${id}" data-k="${q.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}`;
 }
 function renderOnboard(){
@@ -278,6 +278,7 @@ function renderOnboard(){
   if(state.step===6) body=`<h1>Volljährig?</h1><p class="sub">Nicht für Minderjährige.</p><div class="gap"></div><button class="choice ${p.adult?"on":""}" data-act="set-bool"><b>Ja, ich bin 18+</b></button>`;
   return `<div class="screen" style="background:#fff">
     <div class="scroll"><div class="dots">${[0,1,2,3,4,5,6].map(i=>`<i class="${i===state.step?"on":""}"></i>`).join("")}</div>${body}</div>
+    ${state.step>=2&&state.step<=4?`<div style="padding:0 16px;background:#fff"><button class="pill skip" data-act="quiz-skip" data-topic="${["haut","ernaehrung","schlaf"][state.step-2]}">Überspringen · später im Coach</button></div>`:""}
     <div style="padding:10px 16px 24px;display:flex;gap:8px;background:#fff">
       <button class="pill ghost" style="width:110px" data-act="step" data-v="${Math.max(0,state.step-1)}">Zurück</button>
       <button class="pill primary" data-act="${state.step===6?"finish":"step"}" data-v="${Math.min(6,state.step+1)}" ${state.step===6&&!p.adult?"disabled":""}>${state.step===6?"Öffnen":"Weiter"}</button>
@@ -457,6 +458,11 @@ document.getElementById("app").addEventListener("click", e=>{
   const p=state.profile;
   if(act==="start-onboard"){ state.step=0; }
   else if(act==="skip-demo"){ seedDemo(); toast("Beispieldaten geladen"); }
+  else if(act==="quiz-skip"){
+    const sk=state.coach.skipped||(state.coach.skipped=[]);
+    if(!quizDone(el.dataset.topic)&&!sk.includes(el.dataset.topic)) sk.push(el.dataset.topic);
+    state.step=Math.min(6,state.step+1); save();
+  }
   else if(act==="step"){ if(state.step===0 && +el.dataset.v===0) state.step=null; else state.step=+el.dataset.v; }
   else if(act==="set"){ p[el.dataset.k]=el.dataset.v; save(); }
   else if(act==="set-num"){ p[el.dataset.k]=parseFloat(el.dataset.v); save(); }

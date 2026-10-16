@@ -132,6 +132,9 @@ function ernAdvice(a){
   return {lead:`Stil: ${a.stil||"–"}.`, items:items.slice(0,4)};
 }
 function skinType(){ const b=((state.coach.answers||{}).haut||{}).bild; return {Trocken:"trocken",Fettig:"fettig",Gemischt:"normal",Sensibel:"sensibel"}[b]||state.skin.typ||"normal"; }
+function quizDone(id){ const a=(state.coach.answers||{})[id]||{}; return coachQuiz(id).every(q=>a[q.k]); }
+// Quizze aus dem Onboarding, die noch nicht fertig sind
+function openQuizzes(){ return ["haut","ernaehrung","schlaf"].filter(id=>!quizDone(id)); }
 function coachAdvice(id){
   const a = (state.coach.answers||{})[id]||{};
   if(id==="ernaehrung") return ernAdvice(a);
@@ -209,6 +212,7 @@ function renderCoach(){
         <div><span>Heute</span><b>${done}${routine.length?"/"+routine.length:""}</b><span>erledigt</span></div>
       </div>
     </div>
+    ${openQuizzes().length?`<div class="card nachholen"><b>Fragen nachholen</b><div class="sub" style="margin:3px 0 10px">Je ca. 30 Sekunden. Danach passen Score und Tipps besser zu dir.</div><div class="opts">${openQuizzes().map(id=>{ const t=coachTopics().find(x=>x.id===id); return `<button class="chip" data-act="open" data-type="area" data-id="${id}">${topicMark(id)} ${t.title}</button>`; }).join("")}</div></div>`:""}
     ${today.length?`<div class="section"><h2>Heute für dich</h2></div><div class="card meals">${today.map(h=>`<button class="meal-row" data-act="tab" data-v="${h.go}"><div class="bubble">${h.e}</div><div class="grow"><div class="meal-name" style="font-size:15px">${h.t}</div><div class="sub">${h.d}</div></div><span class="chev">›</span></button>`).join("")}</div>`:""}
     ${insight()}
     <div class="gap"></div>
@@ -224,7 +228,7 @@ function renderCoach(){
       return `<button class="meal-row" data-act="open" data-type="area" data-id="${t.id}">
         <div class="bubble">${topicMark(t.id)}</div>
         <div class="grow"><div class="meal-name">${t.title}</div><div class="sub">${t.ask}</div></div>
-        ${inRoutine?`<span class="tagp on">In der Routine</span>`:answered?`<span class="tagp">Vorschlag bereit</span>`:""}<span class="chev">›</span>
+        ${inRoutine?`<span class="tagp on">In der Routine</span>`:quizDone(t.id)?`<span class="tagp">Vorschlag bereit</span>`:(state.coach.skipped||[]).includes(t.id)?`<span class="tagp warn">Übersprungen</span>`:answered?`<span class="tagp">Angefangen</span>`:""}<span class="chev">›</span>
       </button>`;
     }).join("")}
     </div>

@@ -312,3 +312,7 @@ body{background:radial-gradient(900px 500px at 15% -5%,#c3e3d1,transparent),#8f9
 .tabfade { position:absolute; left:0; right:0; bottom:0; height:120px; background:linear-gradient(to bottom, rgba(243,244,246,0), var(--bg) 60%); pointer-events:none; z-index:7; }
 .goalline { text-align:center; font-size:12px; color:var(--muted); margin-top:4px; }
 .goalline b { color:var(--ink); }
+.pill.skip { width:100%; height:46px; background:#fff; border:1.5px solid #d5dbe1; color:var(--ink); font-size:15px; }
+.optional { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:99px; margin-bottom:8px; }
+.nachholen { margin-top:12px; border:1.5px dashed #cfe9da; }
+.tagp.warn { color:#a3610c; background:#fff3e2; }
