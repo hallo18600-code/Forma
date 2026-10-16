@@ -155,6 +155,9 @@ function slimRoutine(){
   save();
 }
 const cjoin=(arr)=>arr.filter(Boolean).join(" → ");
+const cap=t=>t?t[0].toUpperCase()+t.slice(1):"";
+// Kurzer Name für die Routine-Liste (Details stehen im Coach-Thema)
+function rShort(r){ if(["haut","haare","schlaf","aussehen","gesundheit"].includes(r.topic)){ try{ const x=coachAdvice(r.topic).routine; if(x&&x.short) return x.short; }catch(e){} } return r.title; }
 function hautAdvice(a){
   const has=(a.hab||[]), typ=a.bild||"Normal", st=a.stoert||"Nichts Bestimmtes";
   const sens=typ==="Sensibel"||a.empf==="Ja"||st==="Rötung";
@@ -173,7 +176,7 @@ function hautAdvice(a){
   const morning = dry||sens ? ["Wasser", act&&act[1].startsWith("morgens")?act[0]:null, cream, spf] : [wash, act&&act[1].startsWith("morgens")?act[0]:null, oily?null:cream, spf];
   const evening = [wash, act&&act[1].startsWith("abends")?act[0].split(" (")[0]+(act[1].includes("Mo/")?" (Mo/Mi/Fr)":act[1].includes("2×")?" (2×/Woche)":""):null, cream];
   const names=[...new Set([wash, act&&act[0].split(" (")[0], cream, spf])].filter(Boolean);
-  const routine={ title:"Gesicht: "+names.join(", "), detail:`Morgens: ${cjoin(morning)}. Abends: ${cjoin(evening)}.` };
+  const routine={ title:"Gesicht: "+names.join(", "), short:"Gesichtspflege", detail:`Morgens: ${cjoin(morning)}. Abends: ${cjoin(evening)}.` };
   const items=[], missing=[];
   if(!has.includes("Waschgel")) missing.push(wash);
   if(!has.includes("Creme")) missing.push(cream);
@@ -192,7 +195,7 @@ function haareAdvice(a){
   const st=a.stoert||"Nichts Konkretes", items=[], heat=a.hitze&&a.hitze!=="Selten", curly=a.typ==="Lockig";
   const freq = st==="Fettiger Ansatz" ? "Waschen nach Bedarf" : (st==="Trocken / Spliss"||curly) ? "2× pro Woche waschen" : "2–3× pro Woche waschen";
   const parts=[st==="Schuppen"?"Anti-Schuppen-Shampoo 2×/Woche":freq, "Conditioner nur in die Längen", heat?"Hitzeschutz bis 180 °C":null, st==="Trocken / Spliss"?"1× Woche Maske":null].filter(Boolean);
-  const routine={ title:"Haare: "+parts.join(", "), detail:curly?"Mit T-Shirt trocknen, nicht rubbeln.":"" };
+  const routine={ title:"Haare: "+parts.join(", "), short:"Haarpflege", detail:curly?"Mit T-Shirt trocknen, nicht rubbeln.":"" };
   if(st==="Fettiger Ansatz") items.push({title:"Täglich waschen ist okay", detail:"Seltener waschen macht sie nicht weniger fettig.", product:"shampoo"});
   if(st==="Trocken / Spliss") items.push({title:"Spliss nur mit der Schere weg", detail:"Alle 8–12 Wochen 1 cm schneiden.", product:null});
   if(st==="Schuppen") items.push({title:"Anti-Schuppen-Shampoo mit Wirkstoff", detail:"Mit Zink oder Ketoconazol, 3–5 Min einwirken.", product:null});
@@ -206,7 +209,7 @@ function hm(min){ min=((min%1440)+1440)%1440; return Math.floor(min/60)+":"+Stri
 function schlafAdvice(a){
   const wake={"Vor 6 Uhr":330,"6–7 Uhr":390,"7–8 Uhr":450,"Nach 8 Uhr":510}[a.aufzeit]||420;
   const bed=wake-480, caf=bed-480, dim=bed-60, items=[];
-  const routine={ title:`Schlaf: Kaffee bis ${hm(caf)}, ${hm(dim)} Licht runter, ${hm(bed)} ins Bett`, detail:`Wecker ${hm(wake)}, auch am Wochenende.` };
+  const routine={ title:`Schlaf: Kaffee bis ${hm(caf)}, ${hm(dim)} Licht runter, ${hm(bed)} ins Bett`, short:`Um ${hm(bed)} ins Bett`, detail:`Wecker ${hm(wake)}, auch am Wochenende.` };
   if(a.stunden==="Unter 6") items.push({title:`Ziel: um ${hm(bed)} im Bett`, detail:"Erwachsene brauchen 7–9 Stunden.", product:null});
   if(a.auf==="Wechselt stark") items.push({title:"Gleiche Aufstehzeit, jeden Tag", detail:"Auch am Wochenende, max. 1 Stunde später.", product:null});
   if(a.kaffee==="Oft") items.push({title:`Letzter Kaffee um ${hm(caf)}`, detail:"Koffein wirkt viele Stunden nach.", product:null});
@@ -252,7 +255,7 @@ function aussehenAdvice(a){
   if(ziel.includes("Frischer wirken")&&items.length<3) items.push({title:"Schlaf und LSF zuerst", detail:"Wirken stärker als jedes Produkt.", product:null});
   if(!parts.length) parts.push("Training nach Plan","Kalorienziel halten");
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
-  return {lead:`${kfaTxt}. Fokus: ${ziel.length?ziel.join(", "):"–"}.`, routine:{title:"Aussehen: "+parts.slice(0,3).join(", "), detail:""}, items:items.slice(0,3)};
+  return {lead:`${kfaTxt}. Fokus: ${ziel.length?ziel.join(", "):"–"}.`, routine:{title:"Aussehen: "+parts.slice(0,3).join(", "), short:cap(parts[0]), detail:""}, items:items.slice(0,3)};
 }
 function gesundheitAdvice(a){
   const items=[], parts=[], veg=a.stil==="Vegan"||a.stil==="Vegetarisch", glasses=state.profile.waterTarget||8;
@@ -272,7 +275,7 @@ function gesundheitAdvice(a){
   const intol=(a.intol||[]).filter(x=>x!=="Nein, alles okay");
   if(intol.length&&items.length<3) items.push({title:"Score warnt bei "+intol.join(", "), detail:"Zutatenliste trotzdem prüfen.", product:null});
   if(!items.length) items.push({title:"Läuft gut", detail:"Wasser und Bewegung halten.", product:null});
-  return {lead:`Ernährung: ${a.stil||"–"}. Energie: ${a.energie||"–"}.`, routine:{title:"Gesundheit: "+parts.slice(0,3).join(", "), detail:""}, items:items.slice(0,3)};
+  return {lead:`Ernährung: ${a.stil||"–"}. Energie: ${a.energie||"–"}.`, routine:{title:"Gesundheit: "+parts.slice(0,3).join(", "), short:cap(parts[0]), detail:""}, items:items.slice(0,3)};
 }
 function coachAdvice(id){
   const a = (state.coach.answers||{})[id]||{};
@@ -331,10 +334,15 @@ function ensureRoutine(){ if(!state.routineSeeded){ state.routineSeeded=true; if
 function rDone(s){ const rt=state.coach.routine||[]; return {c:rt.filter(r=>routineOn(r.id,s)).length, n:rt.length}; }
 function rState(s){ const x=rDone(s); if(!x.n) return ""; if(x.c===x.n) return "on"; if(x.c) return "part"; const st=state.rStart||(state.rStart=todayIso()); return (s<todayIso()&&s>=st)?"miss":""; }
 function rStreak(){ let n=0, s=todayIso(); if(!(state.coach.routine||[]).length) return 0; if(rState(s)!=="on") s=addDays(s,-1); while(rState(s)==="on"&&n<400){ n++; s=addDays(s,-1); } return n; }
+// Eine Zeile der Routine: Haken + kurzer Name. › öffnet die Details im Coach, ✕ löscht (nur auf der Routine-Seite).
+function rRow(r,del){
+  const on=routineOn(r.id,state.date), coach=coachTopics().some(t=>t.id===r.topic);
+  return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><span class="grow">${topicMark(r.topic)!=="•"?topicMark(r.topic)+" ":""}<b>${esc(rShort(r))}</b></span></button>${coach?`<button class="x" data-act="open" data-type="area" data-id="${r.topic}" aria-label="Details">›</button>`:""}${del?`<button class="x" data-act="routine-del" data-id="${r.id}" aria-label="Routine-Punkt löschen">✕</button>`:""}</div>`;
+}
 function routineBlock(){
   const rt=state.coach.routine||[], wk=weekStart(state.date), t=rDone(state.date), open=!!ui.rOpen&&rt.length>0;
   const when=state.date===todayIso()?"heute":labelDate(state.date);
-  const list=open?`<div class="rlist">${rt.map(r=>{ const on=routineOn(r.id,state.date); return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><div class="grow"><b>${esc(r.title)}</b>${r.detail?`<div class="sub">${esc(r.detail)}</div>`:""}</div></button></div>`; }).join("")}
+  const list=open?`<div class="rlist">${rt.map(r=>rRow(r,false)).join("")}
       <button class="link mt-3" data-act="dash" data-id="routine">Kalender, Serie &amp; eigene Punkte ›</button></div>`:"";
   return `<div class="card rprev"><button class="rhead" data-act="${rt.length?"r-toggle":"dash"}" ${rt.length?"":'data-id="routine"'}><div class="row space"><b>Routine${rStreak()>=3?` <span class="rfire">🔥 ${rStreak()}</span>`:""}</b><span class="sub">${rt.length?t.c+"/"+t.n+" "+when+" "+(open?"▴":"▾"):"Anlegen ›"}</span></div></button>
     <div class="rweek">${Array.from({length:7},(_,i)=>addDays(wk,i)).map(s=>`<i class="rd ${rState(s)} ${s===todayIso()?"today":""}">${weekday(s)}</i>`).join("")}</div>${list}</div>`;
@@ -352,9 +360,9 @@ function renderRoutineDash(){
   let body="";
   if(m==="day"){
     const n=rDone(state.date);
-    body=`${state.rHint?"":`<div class="insight"><b>Was ist das?</b><span>Das ist deine Basis-Routine als Beispiel. Hake ab, was du heute geschafft hast. Ändere oder lösche Einträge und füge eigene hinzu. Schaffst du alle, wächst deine Serie. Ein Tag ohne Haken wird rot.</span><button class="link mt-1 self-start" data-act="rhint">Verstanden</button></div>`}
+    body=`${state.rHint?"":`<div class="insight"><b>Was ist das?</b><span>Hake ab, was du heute geschafft hast. Alles erledigt = Serie +1.</span><button class="link mt-1 self-start" data-act="rhint">Verstanden</button></div>`}
     <h2 class="month-h">${labelDate(state.date)}${rt.length?` · ${n.c}/${n.n}`:""}</h2><div class="card">
-      ${rt.map(r=>{ const on=routineOn(r.id,state.date); return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><b>${esc(r.title)}</b></button><button class="x" data-act="routine-del" data-id="${r.id}" aria-label="Routine-Punkt löschen">✕</button></div>`; }).join("")||`<p class="sub">Noch keine Routine. Leg unten deine erste an.</p>`}
+      ${rt.map(r=>rRow(r,true)).join("")||`<p class="sub">Noch keine Routine. Leg unten deine erste an.</p>`}
       <div class="row mt-4"><input id="r-new" class="input grow" placeholder="Eigene Routine, z. B. 10 Min lesen" aria-label="Eigene Routine"><button class="plus dark" data-act="routine-add" aria-label="Routine-Punkt hinzufügen">+</button></div></div>`;
   } else if(m==="month") body=rMonth(now.getFullYear(),now.getMonth())+rMonth(now.getFullYear(),now.getMonth()-1);
   else { const y=now.getFullYear();
