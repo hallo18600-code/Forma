@@ -663,7 +663,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="open-day-ex"){ ui.planDay=+el.dataset.d; openModal("plan-ex"); return; }
   else if(act==="plan-add-ex"){
     const day=ui.plan.days[ui.planDay]||ui.plan.days[0];
-    day.exercises.push({id:el.dataset.id, sets:[{kg:20,reps:8},{kg:20,reps:8},{kg:20,reps:8}]});
+    day.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 3)});
     ui.modal=null;
   }
   else if(act==="plan-del-ex"){ ui.plan.days[+el.dataset.d].exercises.splice(+el.dataset.e,1); }
@@ -695,7 +695,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="rest-pick"){ const v=+el.dataset.v; if(REST_OPTS.includes(v)){ state.profile.restSec=v; save(); } }
   else if(act==="add-set"){ const sets=ui.workout.exercises[+el.dataset.e].sets; const last=sets[sets.length-1]||{kg:20,reps:8}; sets.push({kg:last.kg,reps:last.reps,done:false}); }
   else if(act==="del-ex"){ ui.workout.exercises.splice(+el.dataset.e,1); }
-  else if(act==="add-ex"){ ui.workout.exercises.push({id:el.dataset.id, sets:[{kg:40,reps:8,done:false}]}); ui.modal=null; }
+  else if(act==="add-ex"){ ui.workout.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 1).map(s=>({...s, done:false}))}); ui.modal=null; }
   else if(act==="rest-skip") ui.rest=0;
   else if(act==="dash-close") ui.dash=null;
   else if(act==="cal-mode") ui.cal=el.dataset.v;
