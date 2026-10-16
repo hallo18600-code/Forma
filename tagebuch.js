@@ -1,8 +1,7 @@
 // FORMA – Tagebuch: Heute-Ansicht, Mahlzeiten, Lebensmittel-Details
 function renderHeute(){
-  const t=targets(), tot=totals(), remain=Math.max(0, t.kcal-tot.kcal);
+  const t=targets(), tot=totals(), burn=burnKcal(), goalK=t.kcal+burn, remain=Math.max(0, goalK-tot.kcal);
   const d=day();
-  const burn=state.workouts.filter(w=>w.date===state.date).reduce((n,w)=>n+(w.min||0)*6,0);
   return `<div class="scroll pad">
     <div class="topbar">
       <button class="navd" data-act="shift" data-d="-1">‹</button>
@@ -12,9 +11,10 @@ function renderHeute(){
     <div class="card">
       <div class="sum">
         <div class="side"><div class="num">${showKcal()?tot.kcal.toLocaleString("de-DE"):"–"}</div><div class="lbl">Gegessen</div></div>
-        <div class="ring">${ringSvg(t.kcal?tot.kcal/t.kcal:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString("de-DE"):"–"}</b><span>${showKcal()?"Übrig":"Kalorien aus"}</span></div></div>
-        <div class="side"><div class="num">${burn.toLocaleString("de-DE")}</div><div class="lbl">Verbrannt</div></div>
+        <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString("de-DE"):"–"}</b><span>${showKcal()?"Übrig":"Kalorien aus"}</span></div></div>
+        <div class="side"><div class="num">${burn.toLocaleString("de-DE")}</div><div class="lbl">Training</div></div>
       </div>
+      ${showKcal()?`<div class="goalline">Ziel heute <b>${de(goalK)} kcal</b>${burn?` · inkl. +${de(burn)} Training`:""}</div>`:""}
       <div class="macros">
         ${[["Kohlenhydrate", tot.carbs, t.carbs, "#f0a33a"],["Eiweiß", tot.protein, t.protein, "#1aa35a"],["Fett", tot.fat, t.fat, "#4a8fd8"]].map(([name,val,goal,col])=>`<div class="mac" style="--mc:${col}"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
       </div>
@@ -24,7 +24,7 @@ function renderHeute(){
       ${SLOTS.map(slot=>{
         const items=d.meals.filter(m=>m.slot===slot.id);
         const k=items.reduce((n,m)=>{ const p=foods().find(x=>x.id===m.id); return n+(p?line(p,m.portion).kcal:0); },0);
-        const goal=Math.round(t.kcal*slot.share);
+        const goal=Math.round(goalK*slot.share);
         const marks={breakfast:"☕", lunch:"🍝", dinner:"🥗", snack:"🍎"};
         return `<div class="meal-row">
           <div class="bubble">${marks[slot.id]}</div>
@@ -37,21 +37,53 @@ function renderHeute(){
         </div>`;
       }).join("")}
     </div>
-    <div class="section"><h2>Wasser &amp; Schritte</h2></div>
+    ${dayBlock()}
+  </div>`;
+}
+// "Dein Tag": Wasser, Schritte, Schlaf, Training, Routine, Supplements an einem Ort
+function dayBlock(){
+  const d=day(), p=state.profile, stepGoal=p.stepGoal||10000;
+  const wo=state.workouts.filter(w=>w.date===state.date), burn=burnKcal();
+  const rt=rDone(state.date), sups=state.stack.filter(x=>d.taken[x]).length;
+  const sl=d.sleep, slTxt=sl==null?"Noch nicht eingetragen":de(sl,1)+" h"+(sl>=7?" ✓":"");
+  const checks=[d.meals.length>0, d.water>=p.waterTarget, (d.steps||0)>=stepGoal, sl!=null&&sl>=7, rt.n>0&&rt.c===rt.n, state.stack.length>0&&sups===state.stack.length];
+  const done=checks.filter(Boolean).length;
+  const bar=pct=>`<div class="mbar"><i style="width:${Math.min(100,Math.max(0,pct*100))}%"></i></div>`;
+  return `<div class="section"><h2>Dein Tag</h2><span class="sub">${done}/${checks.length} erledigt</span></div>
     <div class="card meals">
       <div class="meal-row">
         <div class="bubble">💧</div>
-        <div class="grow"><div class="meal-name">Wasser</div><div class="sub">${d.water} / ${state.profile.waterTarget} Gläser</div><div class="glasses">${Array.from({length:state.profile.waterTarget},(_,i)=>`<i class="${i<d.water?"on":""}"></i>`).join("")}</div></div>
+        <div class="grow"><div class="meal-name">Wasser</div><div class="sub">${d.water} / ${p.waterTarget} Gläser</div><div class="glasses">${Array.from({length:p.waterTarget},(_,i)=>`<i class="${i<d.water?"on":""}"></i>`).join("")}</div></div>
         <div class="row" style="gap:8px"><button class="plus" data-act="water-sub" aria-label="Ein Glas weniger" ${d.water>0?"":"disabled"}>−</button>
         <button class="plus dark" data-act="water-add" aria-label="Ein Glas mehr">+</button></div>
       </div>
       <div class="meal-row">
         <div class="bubble">👟</div>
-        <div class="grow"><div class="meal-name">Schritte</div><div class="sub">${(d.steps||0).toLocaleString("de-DE")} / ${(state.profile.stepGoal||10000).toLocaleString("de-DE")}</div><div class="mbar"><i style="width:${Math.min(100,(d.steps||0)/(state.profile.stepGoal||10000)*100)}%"></i></div></div>
-        <button class="plus dark" data-act="open" data-type="steps">+</button>
+        <div class="grow"><div class="meal-name">Schritte</div><div class="sub">${(d.steps||0).toLocaleString("de-DE")} / ${stepGoal.toLocaleString("de-DE")}</div>${bar((d.steps||0)/stepGoal)}</div>
+        <button class="plus dark" data-act="open" data-type="steps" aria-label="Schritte eintragen">+</button>
       </div>
-    </div>
-  </div>`;
+      <div class="meal-row">
+        <div class="bubble">🌙</div>
+        <div class="grow"><div class="meal-name">Schlaf</div><div class="sub">${slTxt}</div>${sl!=null?bar(sl/8):""}</div>
+        <div class="row" style="gap:8px"><button class="plus" data-act="sleep-adj" data-v="-0.5" aria-label="Eine halbe Stunde weniger">−</button>
+        <button class="plus dark" data-act="sleep-adj" data-v="0.5" aria-label="Eine halbe Stunde mehr">+</button></div>
+      </div>
+      <button class="meal-row" data-act="tab" data-v="sport">
+        <div class="bubble">🏋️</div>
+        <div class="grow"><div class="meal-name">Training</div><div class="sub">${wo.length?wo.map(w=>esc(w.name)+" · "+w.min+" min").join(", ")+(burn&&showKcal()?" · ca. +"+de(burn)+" kcal":""):"Heute noch keins – Ruhetag ist auch okay"}</div></div>
+        ${wo.length?`<span class="tagp on">Erledigt</span>`:""}<span class="chev">›</span>
+      </button>
+      <button class="meal-row" data-act="dash" data-id="routine">
+        <div class="bubble">✅</div>
+        <div class="grow"><div class="meal-name">Routine${rStreak()>=3?` <span class="rfire">🔥 ${rStreak()}</span>`:""}</div><div class="sub">${rt.n?rt.c+" / "+rt.n+" erledigt":"Noch keine Routine"}</div>${rt.n?bar(rt.c/rt.n):""}</div>
+        <span class="chev">›</span>
+      </button>
+      <button class="meal-row" data-act="open" data-type="${state.stack.length?"stack":"area"}" data-id="sups-list">
+        <div class="bubble">💊</div>
+        <div class="grow"><div class="meal-name">Supplements</div><div class="sub">${state.stack.length?sups+" / "+state.stack.length+" genommen":"Noch kein Stack – Vorschlag ansehen"}</div>${state.stack.length?bar(sups/state.stack.length):""}</div>
+        <span class="chev">›</span>
+      </button>
+    </div>`;
 }
 function renderMealPage(){
   const slot=SLOTS.find(x=>x.id===ui.addSlot)||SLOTS[0], d=day();

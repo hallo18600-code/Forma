@@ -63,6 +63,10 @@ function targets(){
   const protein=Math.round(p.weight*((p.goal==="lose"||p.goal==="muscle")?1.8:1.4));
   return { kcal, protein, carbs:Math.round(kcal*0.4/4), fat:Math.round(kcal*0.25/9) };
 }
+// Geschätzter Verbrauch durch Training an einem Tag (grober Richtwert, ca. 5 MET)
+function burnKcal(s){ const kg=lastWeight(); return Math.round(state.workouts.filter(w=>w.date===(s||state.date)).reduce((n,w)=>n+kg*5*(w.min||0)/60,0)); }
+// Kalorien-Richtwert für einen Tag: Grundbedarf + Training
+function dayTarget(s){ return targets().kcal + burnKcal(s); }
 function lastWeight(){ return state.weights.length ? state.weights[state.weights.length-1].kg : state.profile.weight; }
 function bmi(){ const m=state.profile.height/100; return +(lastWeight()/(m*m)).toFixed(1); }
 function bmiLabel(v){ return v<18.5?"Untergewicht":v<25?"Normalbereich":v<30?"Übergewicht":"Adipositas"; }
@@ -144,9 +148,10 @@ function recommendStack(){
   const picks=[];
   const add=(id,score,why)=>{ if(!picks.find(x=>x.id===id)) picks.push({id,score,why}); };
   if(p.goal==="muscle" || p.activity>=1.55) add("crea",92,"Training und Kraft: Creatin ist das am klarsten belegte Pulver.");
-  if((p.goal==="muscle"||p.goal==="lose") && tot.protein < t.protein*0.55) add("whey",80,"Protein heute liegt klar unter dem Richtwert.");
+  const trained=state.workouts.some(w=>w.date===state.date);
+  if((p.goal==="muscle"||p.goal==="lose"||trained) && tot.protein < t.protein*0.55) add("whey",80,"Protein heute liegt klar unter dem Richtwert.");
   if((p.goal==="skin"||p.goal==="energy"||p.goal==="lose") && !hasFish) add("o3",82,"Wenig Fisch — Omega-3 eher als Kollagen.");
-  if(p.goal==="energy" || !day().checks.schlaf) add("mg",74,"Abend-Magnesium, wenn der Schlaf unruhig bleibt.");
+  if(p.goal==="energy" || (day().sleep!=null && day().sleep<6.5) || !day().checks.schlaf) add("mg",74,"Abend-Magnesium, wenn der Schlaf unruhig bleibt.");
   if(p.goal==="skin" && picks.length<3) add("col",58,"Nur Zusatz. Schlaf, LSF und Essen wirken stärker.");
   if(picks.length<3) add("d3",78,"Solide Basis bei wenig Sonne. Dosis nicht selbst hochdrehen.");
   return picks.slice(0,3);

@@ -175,8 +175,30 @@ function routineOn(id, s){
   return !!(d.routine && d.routine[id]);
 }
 function topicMark(id){ return {haut:"💧", haare:"✂️", schlaf:"🌙", koerper:"🧴", ernaehrung:"🥗"}[id] || "•"; }
+// Tagesbezogene Hinweise aus Ernährung, Training, Schlaf und Wasser
+function coachToday(){
+  const t=targets(), tot=totals(), d=day(), burn=burnKcal(), hints=[], isToday=state.date===todayIso();
+  const wo=state.workouts.filter(w=>w.date===state.date);
+  const ea=state.coach.answers.ernaehrung||{}, veg=ea.stil==="Vegan"||ea.stil==="Vegetarisch";
+  const food=veg?"Tofu, Linsen oder Quark":"Skyr, Ei oder Hähnchen";
+  const gap=Math.round(t.protein-tot.protein);
+  if(!d.meals.length) hints.push({e:"🍽️",t:"Noch nichts gegessen eingetragen",d:"Trag die erste Mahlzeit ein, dann passen Score und Tipps zu deinem Tag.",go:"heute"});
+  else if(wo.length&&gap>15) hints.push({e:"💪",t:`Nach dem Training fehlen noch ${gap} g Protein`,d:`${food} schließen die Lücke.`,go:"heute"});
+  else if(gap>t.protein*0.4) hints.push({e:"🥚",t:`Protein: ${Math.round(tot.protein)} von ${t.protein} g`,d:`${food} zur nächsten Mahlzeit.`,go:"heute"});
+  if(burn&&showKcal()) hints.push({e:"🔥",t:`Training: Ziel heute ${de(dayTarget())} kcal`,d:`+${de(burn)} kcal für ${wo.map(w=>esc(w.name)).join(", ")}. Abends nicht hungrig bleiben.`,go:"heute"});
+  if(!wo.length){
+    const last=[...state.workouts].filter(w=>w.date<=state.date).sort((a,b)=>a.date<b.date?1:-1)[0];
+    const gapD=last?Math.round((parseIso(state.date)-parseIso(last.date))/864e5):null;
+    if(gapD==null||gapD>=3) hints.push({e:"🏋️",t:last?`Seit ${gapD} Tagen kein Training`:"Noch kein Training gespeichert",d:"Eine kurze Einheit reicht. Dein Plan liegt im Training-Tab.",go:"sport"});
+  }
+  if(d.sleep!=null&&d.sleep<6.5) hints.push({e:"🌙",t:`Nur ${de(d.sleep,1)} h Schlaf`,d:wo.length?"Heute früher Licht runter, damit sich der Körper erholt.":"Heute lieber moderat trainieren und abends früher Licht runter.",go:"heute"});
+  else if(d.sleep==null&&isToday) hints.push({e:"🌙",t:"Wie hast du geschlafen?",d:"Trag deine Stunden ein. Der Coach berücksichtigt sie dann.",go:"heute"});
+  if(isToday&&new Date().getHours()>=14&&d.water<state.profile.waterTarget/2) hints.push({e:"💧",t:`Erst ${d.water} von ${state.profile.waterTarget} Gläsern`,d:"Ein Glas jetzt, eins zur nächsten Mahlzeit.",go:"heute"});
+  return hints.slice(0,3);
+}
 function renderCoach(){
   const routine = state.coach.routine||[];
+  const today = coachToday();
   const done = routine.filter(r=>routineOn(r.id)).length;
   return `<div class="scroll pad">
     <div class="topbar"><div><h1>Coach</h1><div class="sub">Dein Vorschlag</div></div></div>
@@ -187,6 +209,8 @@ function renderCoach(){
         <div><span>Heute</span><b>${done}${routine.length?"/"+routine.length:""}</b><span>erledigt</span></div>
       </div>
     </div>
+    ${today.length?`<div class="section"><h2>Heute für dich</h2></div><div class="card meals">${today.map(h=>`<button class="meal-row" data-act="tab" data-v="${h.go}"><div class="bubble">${h.e}</div><div class="grow"><div class="meal-name" style="font-size:15px">${h.t}</div><div class="sub">${h.d}</div></div><span class="chev">›</span></button>`).join("")}</div>`:""}
+    ${insight()}
     <div class="gap"></div>
     ${routine.length?`<div class="card rcoach">
       <button class="rhead" data-act="c-toggle"><div class="row space"><b>Routine</b><span class="sub">${done}/${routine.length} heute ${ui.cOpen?"▴":"▾"}</span></div></button>
