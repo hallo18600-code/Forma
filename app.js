@@ -98,8 +98,8 @@ function totals(s){
 function scoreClass(n){ return n>=75?"s-good":n>=50?"s-mid":"s-bad"; }
 function finish(parts){
   const raw=parts.reduce((a,x)=>a+x[1],0);
-  const rs=parts.slice(1).filter(x=>x[1]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,2).map(([l,v])=>l+(v>0?" hilft":" kostet")+" ("+(v>0?"+":"")+v+").");
-  return { score:Math.max(8,Math.min(98,Math.round(raw))), reasons:rs.length?rs:["Neutral für dein Ziel."], parts };
+  const ps=parts.slice(1).filter(x=>x[1]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));
+  return { score:Math.max(8,Math.min(98,Math.round(raw))), good:ps.filter(x=>x[1]>0).map(x=>x[0]).slice(0,3), bad:ps.filter(x=>x[1]<0).map(x=>x[0]).slice(0,3), reasons:[] };
 }
 // Erkennung am Produktnamen (Stichwörter). Nur ein Hinweis, keine Garantie.
 const FOOD_KW={
@@ -127,38 +127,7 @@ function foodFocus(){
   return [...f];
 }
 const RED_MEAT=["rind","schwein","salami","wurst","schinken","speck","bacon","hack","doner","leberkas","steak","kalb","lamm"];
-function scoreFood(item){
-  const g=state.profile.goal, parts=[["Basis",62]];
-  const add=(l,v)=>{ v=Math.round(v); if(v) parts.push([l,v]); };
-  const pr=item.protein||0, su=item.sugar||0;
-  if(g==="muscle"){ add("Protein",Math.min(22,pr*.7)); add("Zucker",-su*1.2); }
-  else if(g==="lose"){ add("Protein",Math.min(12,pr*.4)); add("Zucker",-su*1.6); add("Energiedichte",-Math.max(0,(item.kcal||0)-250)/12); }
-  else if(g==="skin"){ add("Zucker",-su*2); }
-  else add("Zucker",-su);
-  if(item.processed) add("Verarbeitet",g==="skin"?-14:-8);
-  const ea=state.coach.answers.gesundheit||{}, ha=state.coach.answers.haut||{}, sa=state.coach.answers.schlaf||{};
-  const MEAT=["huhn","rind","salami","thunfisch","lachs"], ANI=MEAT.concat(["ei","skyr","quark","joghurt","kaese"]);
-  const meat=MEAT.includes(item.id)||foodHas(item,"meat"), animal=meat||ANI.includes(item.id)||foodHas(item,"lak")||foodHas(item,"egg");
-  if(ea.stil==="Vegan"&&animal) add("Passt nicht zu Vegan",-40);
-  else if(ea.stil==="Vegetarisch"&&meat) add("Passt nicht zu Vegetarisch",-40);
-  const fokus=foodFocus(), intol=ea.intol||[];
-  if(fokus.includes("Weniger Zucker")) add("Dein Fokus: weniger Zucker",-su*0.8);
-  if(fokus.includes("Mehr Protein")) add("Dein Fokus: mehr Protein",Math.min(10,pr*.35));
-  if(fokus.includes("Weniger Fertiges")&&item.processed) add("Dein Fokus: weniger Fertiges",-8);
-  if(fokus.includes("Weniger Salz")) add("Dein Fokus: weniger Salz",-Math.max(0,(item.salt||0)-0.5)*6);
-  if(fokus.includes("Mehr Ballaststoffe")) add("Dein Fokus: Ballaststoffe",Math.min(8,item.fiber||0));
-  if(intol.includes("Laktose")&&foodHas(item,"lak")) add("Kann Laktose enthalten",-25);
-  if(intol.includes("Gluten")&&foodHas(item,"glu")) add("Kann Gluten enthalten",-25);
-  if(intol.includes("Nüsse")&&foodHas(item,"nut")) add("Kann Nüsse enthalten",-30);
-  if(fokus.includes("Sättigung")&&((pr>=10&&(item.kcal||0)<=250)||(item.fiber||0)>=6)) add("Viel Protein oder Ballaststoffe",6);
-  if(fokus.includes("Koffein am Abend")&&foodHas(item,"caf")) add("Koffein: nach 15 Uhr meiden",-4);
-  if(ea.stil==="Wenig Fleisch"&&(["rind","salami"].includes(item.id)||RED_MEAT.some(x=>NORM(item.name||"").includes(x)))) add("Du willst weniger Fleisch",-12);
-  if(fokus.includes("Zucker & Haut")) add("Dein Haut-Fokus: Zucker",-su*0.8);
-  add("Ballaststoffe",Math.min(10,(item.fiber||0)*1.2));
-  add("Salz",-Math.max(0,(item.salt||0)-1)*8);
-  add("Gesättigte Fette",-Math.max(0,(item.sat||0)-4)*2);
-  return finish(parts);
-}
+// scoreFood steht in bewertung.js
 function scoreCare(item){
   const typ=skinType(), ok=(item.skin||[]).includes(typ), parts=[["Basis",70],[ok?"Passt zum Hauttyp":"Anderer Hauttyp",ok?12:-8]];
   if(item.fragrance) parts.push(["Duftstoffe",-12]);

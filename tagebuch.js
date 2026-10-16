@@ -121,10 +121,9 @@ function foodSheet(it,sc){
     <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
     <div class="frate">
       <div class="top"><div class="score lg ${scoreClass(sc.score)}">${sc.score}</div>
-        <div><b>Lebensmittelbewertung</b><div class="sub">Auf dich abgestimmt: ${esc(persoTags().slice(0,4).join(", "))}</div></div></div>
-      <p class="sub">${sc.reasons.join(" ")}</p>
+        <div><b>Bewertung · ${esc(goalName())}</b><div class="sub">Naturbelassen gedacht, auf dich abgestimmt</div></div></div>
+      ${rateList(sc)}
       ${((state.coach.answers.gesundheit||{}).intol||[]).some(x=>x!=="Nein, alles okay")?`<p class="sub">Erkannt nur am Namen. Bitte Zutaten prüfen.</p>`:""}
-      ${(sc.parts||[]).length?`<div class="why">${sc.parts.map(([l,v],i)=>`<div><span>${l}</span><b class="${i?(v>0?"up":"dn"):""}">${i&&v>0?"+":""}${v}</b></div>`).join("")}</div>`:""}
     </div>
     <div class="sec">Nährwerte</div><div class="ftable" id="ftable">${fTable(it,g)}</div>
     <p class="sub">${src}</p>

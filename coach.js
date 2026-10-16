@@ -419,8 +419,7 @@ function productSheet(id){
       <div class="score lg ${scoreClass(sc.score)}">${sc.score}</div>
       <div><div class="sub">${item.brand||""}</div><h2>${esc(item.name)}</h2><div class="sub">${goalName()}</div></div>
     </div>
-    <p class="sub my-3">${sc.reasons.join(" ")}</p>
-    ${(sc.parts||[]).length?`<div class="why">${sc.parts.map(([l,v],i)=>`<div><span>${l}</span><b class="${i?(v>0?"up":"dn"):""}">${i&&v>0?"+":""}${v}</b></div>`).join("")}</div>`:""}
+    <div class="my-3">${rateList(sc)}</div>
     ${item.type==="food"||item.type==="custom"?`
       <div class="sub">${item.kcal} kcal · ${item.protein} g Protein / 100 g</div>
       <div class="field"><label>Portion in g</label><input id="portion" type="number" value="${ui.portion}"></div>

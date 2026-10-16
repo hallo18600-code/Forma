@@ -462,6 +462,10 @@ p { margin:var(--s-2) 0; }
 .fmacros b { display:block; font-size:var(--fs-m); }
 .fmacros span { font-size:var(--fs-s); color:var(--ink-2); }
 .frate { margin:var(--s-4) 0; padding:var(--s-4); border-radius:var(--r-xl); background:var(--fill-2); }
+.rpc { display:flex; flex-direction:column; gap:6px; margin-top:var(--s-3); }
+.rpc > div { display:flex; gap:var(--s-2); align-items:flex-start; font-size:var(--fs-s); line-height:1.35; }
+.rpc i { font-style:normal; font-weight:700; width:16px; flex:none; text-align:center; }
+.rpc .rp i { color:var(--accent-text); } .rpc .rc i { color:var(--bad-text); }
 .frate .top { display:flex; gap:var(--s-4); align-items:center; }
 .sec { font-weight:700; margin:var(--s-5) 0 var(--s-2); }
 .ftable .frow { display:flex; justify-content:space-between; gap:var(--s-3); padding:var(--s-3) 0; border-bottom:1px solid var(--line); font-size:var(--fs-m); }
