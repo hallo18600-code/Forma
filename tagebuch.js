@@ -6,7 +6,7 @@ function renderHeute(){
   return `<div class="scroll pad">
     <div class="topbar">
       <button class="navd" data-act="shift" data-d="-1">‹</button>
-      <div style="text-align:center"><h1 style="font-size:22px">${labelDate(state.date)}</h1><div class="sub">${goalName()}${state.date!==todayIso()?` · <button class="link" data-act="today">zurück</button>`:""}</div></div>
+      <div style="text-align:center"><h1 style="font-size:22px">${labelDate(state.date)}</h1><div class="sub">${state.date===todayIso()?parseIso(state.date).toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"short"})+" · ":""}${goalName()}${state.date!==todayIso()?` · <button class="link" data-act="today">zurück</button>`:""}</div></div>
       <button class="navd" data-act="shift" data-d="1" ${state.date>=todayIso()?"disabled":""}>›</button>
     </div>
     <div class="card">
@@ -16,7 +16,7 @@ function renderHeute(){
         <div class="side"><div class="num">${burn.toLocaleString("de-DE")}</div><div class="lbl">Verbrannt</div></div>
       </div>
       <div class="macros">
-        ${[["Kohlenhydrate", tot.carbs, t.carbs],["Eiweiß", tot.protein, t.protein],["Fett", tot.fat, t.fat]].map(([name,val,goal])=>`<div class="mac"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
+        ${[["Kohlenhydrate", tot.carbs, t.carbs, "#f0a33a"],["Eiweiß", tot.protein, t.protein, "#1aa35a"],["Fett", tot.fat, t.fat, "#4a8fd8"]].map(([name,val,goal,col])=>`<div class="mac" style="--mc:${col}"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
       </div>
     </div>
     <div class="section"><h2>Ernährung</h2><button class="link" data-act="open" data-type="custom">Mehr</button></div>
@@ -29,8 +29,9 @@ function renderHeute(){
         return `<div class="meal-row">
           <div class="bubble">${marks[slot.id]}</div>
           <button class="grow" style="text-align:left" data-act="meal-open" data-slot="${slot.id}">
-            <div class="meal-name">${slot.name} →</div>
+            <div class="meal-name">${slot.name} <span class="chev">›</span></div>
             <div class="sub">${showKcal()?k.toLocaleString("de-DE")+" / "+goal.toLocaleString("de-DE")+" kcal":items.length+" Einträge"}</div>
+            ${showKcal()?`<div class="mbar"><i style="width:${Math.min(100,goal?k/goal*100:0)}%"></i></div>`:""}
           </button>
           <button class="plus dark" data-act="open" data-type="scan" data-slot="${slot.id}">+</button>
         </div>`;
@@ -40,13 +41,13 @@ function renderHeute(){
     <div class="card meals">
       <div class="meal-row">
         <div class="bubble">💧</div>
-        <div class="grow"><div class="meal-name">Wasser</div><div class="sub">${d.water} / ${state.profile.waterTarget} Gläser</div></div>
+        <div class="grow"><div class="meal-name">Wasser</div><div class="sub">${d.water} / ${state.profile.waterTarget} Gläser</div><div class="glasses">${Array.from({length:state.profile.waterTarget},(_,i)=>`<i class="${i<d.water?"on":""}"></i>`).join("")}</div></div>
         <div class="row" style="gap:8px"><button class="plus" data-act="water-sub" aria-label="Ein Glas weniger" ${d.water>0?"":"disabled"}>−</button>
         <button class="plus dark" data-act="water-add" aria-label="Ein Glas mehr">+</button></div>
       </div>
       <div class="meal-row">
         <div class="bubble">👟</div>
-        <div class="grow"><div class="meal-name">Schritte</div><div class="sub">${(d.steps||0).toLocaleString("de-DE")} / ${(state.profile.stepGoal||10000).toLocaleString("de-DE")}</div></div>
+        <div class="grow"><div class="meal-name">Schritte</div><div class="sub">${(d.steps||0).toLocaleString("de-DE")} / ${(state.profile.stepGoal||10000).toLocaleString("de-DE")}</div><div class="mbar"><i style="width:${Math.min(100,(d.steps||0)/(state.profile.stepGoal||10000)*100)}%"></i></div></div>
         <button class="plus dark" data-act="open" data-type="steps">+</button>
       </div>
     </div>

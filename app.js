@@ -126,7 +126,7 @@ function scoreCare(item){
 }
 function safetyNote(){
   const p=state.profile, m=p.height/100, tb=p.target/(m*m); let msg="";
-  if(tb<18.5) msg="Dein Zielgewicht liegt im Untergewicht (BMI "+tb.toFixed(1)+"). Besprich so ein Ziel bitte mit Ärzt:in.";
+  if(tb<18.5) msg="Dein Zielgewicht liegt im Untergewicht (BMI "+de(tb,1)+"). Besprich so ein Ziel bitte mit Ärzt:in.";
   else if(p.goal==="lose" && targets().kcal<=(p.sex==="m"?1500:1200)) msg="Dein Richtwert liegt am Mindestwert. Nicht weiter darunter gehen.";
   return msg?`<div class="warn">${msg}</div>`:"";
 }
@@ -176,6 +176,7 @@ function syncAuto(s){
   d.checks.sport = state.workouts.some(w=>w.date===s) || d.checks.sport ? 1 : 0;
 }
 
+function de(v,d){ d=d||0; return Number(v||0).toLocaleString("de-DE",{minimumFractionDigits:d,maximumFractionDigits:d}); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 function glyph(name){
@@ -245,7 +246,8 @@ function renderWelcome(){
   return `<div class="screen welcome">
     <div class="logo">forma</div>
     <h1>Essen. Training.<br>Körper. Ein System.</h1>
-    <p class="sub">Tagebuch, Sätze, Waage. Bleibt auf diesem Gerät.</p>
+    <p class="sub">Alles an einem Ort. Bleibt auf diesem Gerät.</p>
+    <div class="areas">${[["🍽️","Ernährung"],["🏋️","Training"],["⚖️","Gewicht"],["👟","Schritte"],["🌙","Schlaf"],["💧","Haut"],["✂️","Haare"],["🧴","Körper"],["💊","Supplements"],["✅","Routine"]].map(([e,l])=>`<span><i>${e}</i>${l}</span>`).join("")}</div>
     <div style="flex:1"></div>
     <button class="pill dark" data-act="start-onboard">Loslegen</button>
     <div class="gap"></div>
@@ -267,7 +269,7 @@ function renderOnboard(){
     ${[["age","Alter",p.age,18,80],["height","Größe cm",p.height,140,220],["weight","Gewicht kg",p.weight,40,180]].map(([k,l,v,min,max])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-1" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="1" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
     <div class="opts">${[[1.4,"Alltag"],[1.55,"Aktiv"],[1.7,"Sehr aktiv"]].map(([id,n])=>`<button class="chip ${p.activity===id?"on":""}" data-act="set-num" data-k="activity" data-v="${id}">${n}</button>`).join("")}</div>`;
   if(state.step>=2&&state.step<=4) body=quizStep(["haut","ernaehrung","schlaf"][state.step-2]);
-  if(state.step===5) body=`<h1>${t.kcal} kcal</h1><p class="sub">${t.protein} g Protein als Richtwert. Kein medizinisches Ziel.</p>`;
+  if(state.step===5) body=`<h1>${de(t.kcal)} kcal</h1><p class="sub">${t.protein} g Protein als Richtwert. Kein medizinisches Ziel.</p>`;
   if(state.step===6) body=`<h1>Volljährig?</h1><p class="sub">Nicht für Minderjährige.</p><div class="gap"></div><button class="choice ${p.adult?"on":""}" data-act="set-bool"><b>Ja, ich bin 18+</b></button>`;
   return `<div class="screen" style="background:#fff">
     <div class="scroll"><div class="dots">${[0,1,2,3,4,5,6].map(i=>`<i class="${i===state.step?"on":""}"></i>`).join("")}</div>${body}</div>
@@ -283,7 +285,7 @@ function renderApp(){
   if(ui.dash) return renderDash();
   const views={heute:renderHeute, coach:renderCoach, sport:renderSport, verlauf:renderVerlauf, profil:renderProfil};
   return `<div class="screen">${views[state.tab]()}
-    <nav class="tabs">${[["heute","Tagebuch"],["coach","Coach"],["sport","Training"],["verlauf","Verlauf"],["profil","Profil"]].map(([id,l])=>`
+    <div class="tabfade"></div><nav class="tabs">${[["heute","Tagebuch"],["coach","Coach"],["sport","Training"],["verlauf","Verlauf"],["profil","Profil"]].map(([id,l])=>`
       <button class="tab ${state.tab===id?"on":""}" data-act="tab" data-v="${id}">${icon(id)}${l}</button>`).join("")}
     </nav></div>`;
 }
@@ -376,7 +378,7 @@ function renderModal(){
   if(type==="scan") inner=scanSheet();
   if(type==="product") inner=productSheet(payload);
   if(type==="area") inner=areaSheet(payload);
-  if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${t.kcal} kcal · ${t.protein} g Protein. Mifflin-St Jeor, angepasst ans Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
+  if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein. Mifflin-St Jeor, angepasst ans Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
     ${[["age","Alter",state.profile.age,18,80,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,45,160,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
@@ -392,7 +394,7 @@ function renderModal(){
   if(type==="wo-detail") inner=woDetail(payload);
   if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost" style="width:100%" data-act="close">Später</button>`;
   if(type==="steps") inner=stepsSheet();
-  if(type==="entries") inner=`<h2>Einträge</h2><p class="sub">Tippe auf einen Eintrag, um ihn zu ändern oder zu löschen.</p>${state.weights.slice().reverse().map(w=>`<button class="row space" style="width:100%;padding:10px 0;border-bottom:1px solid var(--line)" data-act="w-edit" data-v="${w.date}"><span>${labelDate(w.date)}</span><span><b>${w.kg.toFixed(1)} kg</b> <span class="sub">›</span></span></button>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
+  if(type==="entries") inner=`<h2>Einträge</h2><p class="sub">Tippe auf einen Eintrag, um ihn zu ändern oder zu löschen.</p>${state.weights.slice().reverse().map(w=>`<button class="row space" style="width:100%;padding:10px 0;border-bottom:1px solid var(--line)" data-act="w-edit" data-v="${w.date}"><span>${labelDate(w.date)}</span><span><b>${de(w.kg,1)} kg</b> <span class="sub">›</span></span></button>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
   if(type==="w-edit") inner=weightEditSheet(payload);
   if(type==="wo-edit") inner=woEditSheet();
   if(type==="wo-del") inner=woDelSheet(payload);

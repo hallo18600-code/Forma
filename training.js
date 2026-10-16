@@ -45,12 +45,12 @@ function renderSport(){
     <div class="card">
       <div class="kpi">
         <div><span>Einheiten</span><b>${week.length}</b><span>7 Tage</span></div>
-        <div><span>Volumen</span><b>${vol}</b><span>kg</span></div>
+        <div><span>Volumen</span><b>${de(vol)}</b><span>kg</span></div>
         <div><span>Routinen</span><b>${plans.length}</b><span>angelegt</span></div>
       </div>
       <div class="wbars" style="margin-top:14px">${days.map(s=>{
         const v=state.workouts.filter(w=>w.date===s).reduce((n,w)=>n+(w.volume||0),0);
-        return `<div class="wbar ${s===todayIso()?"on":""}"><i style="height:${Math.max(6, Math.round(v/maxV*78))}px"></i><span>${weekday(s)}</span></div>`;
+        return `<div class="wbar ${v?"has":""} ${s===todayIso()?"on":""}"><i style="height:${Math.max(6, Math.round(v/maxV*78))}px"></i><span>${weekday(s)}</span></div>`;
       }).join("")}</div>
     </div>
     <div class="section"><h2>Routinen</h2><button class="link" data-act="new-plan">Neu</button></div>
@@ -151,7 +151,7 @@ function exPicker(mode){
 function woDetail(id){
   const w=state.workouts.find(x=>x.id===id);
   if(!w) return "<p>Nicht gefunden.</p>";
-  return `<h2>${esc(w.name)}</h2><p class="sub">${labelDate(w.date)} · ${w.min} min · ${w.volume} kg</p>
+  return `<h2>${esc(w.name)}</h2><p class="sub">${labelDate(w.date)} · ${w.min} min · ${de(w.volume)} kg</p>
     ${(w.exercises||[]).map(e=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")}
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>
     <div class="gap"></div><div class="row" style="gap:8px"><button class="pill ghost" style="flex:1" data-act="wo-edit" data-id="${w.id}">Bearbeiten</button><button class="pill ghost" style="flex:1;color:#d93636" data-act="wo-del-ask" data-id="${w.id}">Löschen</button></div>`;

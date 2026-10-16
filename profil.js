@@ -7,9 +7,9 @@ function renderProfil(){
       <div class="row" style="gap:12px"><div class="avatar">${(p.name||"F").slice(0,1).toUpperCase()}</div>
         <div class="grow"><h2>${esc(p.name||"Ohne Name")}</h2><div class="sub">${goalName()}</div></div></div>
       <div class="kpi">
-        <div><span>Gewicht</span><b>${Number(lastWeight()).toFixed(1)}</b><span>kg</span></div>
-        <div><span>Ziel</span><b>${p.target}</b><span>kg</span></div>
-        <div><span>Richtwert</span><b>${t.kcal}</b><span>kcal</span></div>
+        <div><span>Gewicht</span><b>${de(lastWeight(),1)}</b><span>kg</span></div>
+        <div><span>Ziel</span><b>${de(p.target,1)}</b><span>kg</span></div>
+        <div><span>Richtwert</span><b>${de(t.kcal)}</b><span>kcal</span></div>
       </div>
     </div>
     ${safetyNote()}
@@ -17,8 +17,8 @@ function renderProfil(){
     <div class="group">
       <button class="g-row" data-act="open" data-type="goal"><span class="bubble">🎯</span><div class="grow"><b>Ziel</b><div class="sub">${goalName()}</div></div><span class="sub">›</span></button>
       <button class="g-row" data-act="open" data-type="body"><span class="bubble">📏</span><div class="grow"><b>Größe & Alter</b><div class="sub">${p.height} cm · ${p.age} Jahre</div></div><span class="sub">›</span></button>
-      <button class="g-row" data-act="open" data-type="weigh"><span class="bubble">⚖️</span><div class="grow"><b>Gewicht</b><div class="sub">${Number(lastWeight()).toFixed(1)} kg · Ziel ${p.target} kg</div></div><span class="sub">›</span></button>
-      <div class="g-row"><span class="bubble">🍽️</span><div class="grow"><b>Richtwert</b><div class="sub">${t.kcal} kcal · ${t.protein} g Protein</div></div></div>
+      <button class="g-row" data-act="open" data-type="weigh"><span class="bubble">⚖️</span><div class="grow"><b>Gewicht</b><div class="sub">${de(lastWeight(),1)} kg · Ziel ${de(p.target,1)} kg</div></div><span class="sub">›</span></button>
+      <div class="g-row"><span class="bubble">🍽️</span><div class="grow"><b>Richtwert</b><div class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein</div></div></div>
     </div>
     <div class="section"><h2>App</h2></div>
     <div class="group">

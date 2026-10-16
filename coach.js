@@ -125,7 +125,7 @@ function coachQuiz(id){
 }
 function ernAdvice(a){
   const g=state.profile.goal, t=targets(), veg=a.stil==="Vegan"||a.stil==="Vegetarisch", items=[];
-  items.push({title:`Richtwert ${t.kcal} kcal, ${t.protein} g Protein`, detail:{muscle:"Moderater Überschuss, Protein bei jeder Mahlzeit.",lose:"Moderates Defizit, Protein hoch halten.",skin:"Zucker und Verarbeitetes runter.",energy:"Regelmäßig essen, nicht stark kürzen."}[g], product:null});
+  items.push({title:`Richtwert ${de(t.kcal)} kcal, ${t.protein} g Protein`, detail:{muscle:"Moderater Überschuss, Protein bei jeder Mahlzeit.",lose:"Moderates Defizit, Protein hoch halten.",skin:"Zucker und Verarbeitetes runter.",energy:"Regelmäßig essen, nicht stark kürzen."}[g], product:null});
   if(a.protein==="Eher nicht") items.push({title:"Protein zu jeder Mahlzeit", detail:veg?"Tofu, Linsen, Quark.":"Skyr, Ei, Hähnchen, Thunfisch.", product:veg?"tofu":"skyr"});
   if(a.fertig==="Oft") items.push({title:"Fertigprodukte halbieren", detail:"Eine Mahlzeit am Tag selbst kochen reicht für den Start.", product:null});
   if(a.trink==="Täglich") items.push({title:"Zuckergetränke ersetzen", detail:"Wasser, Tee oder ungesüßt. Das spart schnell Kalorien.", product:null});
@@ -199,7 +199,8 @@ function renderCoach(){
       const inRoutine = routine.some(r=>r.topic===t.id);
       return `<button class="meal-row" data-act="open" data-type="area" data-id="${t.id}">
         <div class="bubble">${topicMark(t.id)}</div>
-        <div class="grow"><div class="meal-name">${t.title} →</div><div class="sub">${inRoutine?"In der Routine":answered?"Vorschlag bereit":t.ask}</div></div>
+        <div class="grow"><div class="meal-name">${t.title}</div><div class="sub">${t.ask}</div></div>
+        ${inRoutine?`<span class="tagp on">In der Routine</span>`:answered?`<span class="tagp">Vorschlag bereit</span>`:""}<span class="chev">›</span>
       </button>`;
     }).join("")}
     </div>

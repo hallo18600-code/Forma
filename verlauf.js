@@ -29,41 +29,41 @@ function weightView(){
   const selW = sel>=0 ? ws[sel] : null;
   const hits = ws.length ? pts.map((p,i)=>{ const x0 = i===0 ? 0 : (pts[i-1][0]+p[0])/2; const x1 = i===pts.length-1 ? W : (p[0]+pts[i+1][0])/2; return `<rect x="${x0}" y="0" width="${Math.max(1,x1-x0)}" height="${H}" fill="transparent" data-act="w-pick" data-v="${ws[i].date}"/>`; }).join("") : "";
   const dots = pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===sel?5:2.2}" fill="${i===sel?"#1aa35a":"#1aa35a"}"/>`).join("");
-  const dirTxt = (d,label)=>{ if(d===null) return `<div class="wdelta"><b>–</b><span class="sub">${label}</span></div>`; const s=d>0?"+":""; const w=d>0.05?"zugenommen":d<-0.05?"abgenommen":"unverändert"; return `<div class="wdelta"><b>${s}${d.toFixed(1)} kg</b><span class="sub">${label.replace("X",w)}</span></div>`; };
+  const dirTxt = (d,label)=>{ if(d===null) return `<div class="wdelta"><b>–</b><span class="sub">${label}</span></div>`; const s=d>0?"+":""; const w=d>0.05?"zugenommen":d<-0.05?"abgenommen":"unverändert"; return `<div class="wdelta"><b>${s}${de(d,1)} kg</b><span class="sub">${label.replace("X",w)}</span></div>`; };
   const weightAt = dd => { const c=all.filter(w=>w.date<=dd); return c.length? c[c.length-1].kg : null; };
   const b30 = weightAt(addDays(todayIso(),-30)), b90 = weightAt(addDays(todayIso(),-90));
   const d30 = (all.length && b30!==null) ? +(last-b30).toFixed(1) : null;
   const d90 = (all.length && b90!==null) ? +(last-b90).toFixed(1) : null;
-  const picked = selW ? `<div class="row space" style="margin-top:4px"><b style="font-size:18px">${selW.kg.toFixed(1)} kg</b><span class="sub">${selW.date.split("-").reverse().join(".")}</span></div>` : `<div class="sub">Noch keine Einträge</div>`;
+  const picked = selW ? `<div class="row space" style="margin-top:4px"><b style="font-size:18px">${de(selW.kg,1)} kg</b><span class="sub">${selW.date.split("-").reverse().join(".")}</span></div>` : `<div class="sub">Noch keine Einträge</div>`;
   const area = pts.length ? `M${pts[0][0]},${H-pad} L${line.replace(/ /g," L")} L${pts[pts.length-1][0]},${H-pad} Z` : "";
   const gy = H-pad - ((goal-min)/(max-min))*(H-2*pad);
   return `<div class="card">
     <div class="row space"><div class="bubble">⚖️</div><b>Gewicht</b><button class="link" data-act="open" data-type="entries">Einträge</button></div>
     <div class="wgrid" style="margin-top:8px">
-      <div class="wside"><span class="sub">BMI</span><b>${bmi()}</b><span class="sub">${bmiLabel(bmi())}</span></div>
+      <div class="wside"><span class="sub">BMI</span><b>${de(bmi(),1)}</b><span class="sub">${bmiLabel(bmi())}</span></div>
       <div class="wring">
         <svg viewBox="0 0 168 168">
           <circle cx="84" cy="84" r="70" fill="none" stroke="#eef1f4" stroke-width="12"/>
           <circle cx="84" cy="84" r="70" fill="none" stroke="#1aa35a" stroke-width="12" stroke-linecap="round" transform="rotate(-90 84 84)" stroke-dasharray="${C}" stroke-dashoffset="${off}"/>
         </svg>
-        <div class="mid"><span class="sub">Fortschritt ${Math.round(pct*100)} %</span><b>${Number(last).toFixed(1)}</b><span class="sub">kg · ${labelDate(all.length?all[all.length-1].date:todayIso())}</span></div>
+        <div class="mid"><span class="sub">Fortschritt ${Math.round(pct*100)} %</span><b>${de(last,1)}</b><span class="sub">kg · ${labelDate(all.length?all[all.length-1].date:todayIso())}</span></div>
       </div>
-      <div class="wside"><span class="sub">Weiter</span><b>${next.toFixed(1)}</b><span class="sub">kg</span></div>
+      <div class="wside"><span class="sub">Weiter</span><b>${de(next,1)}</b><span class="sub">kg</span></div>
     </div>
     <div class="row space" style="margin-top:8px">
-      <div><span class="sub">Start</span><b style="display:block">${start.toFixed(1)} kg</b><span class="sub">${startDate.split("-").reverse().join(".")}</span></div>
-      <div style="text-align:right"><span class="sub">Ziel</span><b style="display:block">${goal.toFixed(1)} kg</b><button class="link" data-act="open" data-type="goaldate">${state.profile.goalDate?state.profile.goalDate.split("-").reverse().join("."):"Datum festlegen"}</button></div>
+      <div><span class="sub">Start</span><b style="display:block">${de(start,1)} kg</b><span class="sub">${startDate.split("-").reverse().join(".")}</span></div>
+      <div style="text-align:right"><span class="sub">Ziel</span><b style="display:block">${de(goal,1)} kg</b><button class="link" data-act="open" data-type="goaldate">${state.profile.goalDate?state.profile.goalDate.split("-").reverse().join("."):"Datum festlegen"}</button></div>
     </div>
     <div class="gap"></div>
     <button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>
   </div>
   <div class="gap"></div>
   <div class="card">
-    <div class="row space"><h2>Gewichtsfortschritt</h2><span class="sub">${(last-start>=0?"+":"")+(last-start).toFixed(1)} kg</span></div>
+    <div class="row space"><h2>Gewichtsfortschritt</h2><span class="sub">${(last-start>=0?"+":"")+de(last-start,1)} kg</span></div>
     <div class="seg" style="margin:12px 0">
       ${[["7","Tage"],["30","Wochen"],["90","Monate"],["365","Jahre"]].map(([id,l])=>`<button class="${ui.wrange===id?"on":""}" data-act="wrange" data-v="${id}">${l}</button>`).join("")}
     </div>
-    <div class="row" style="align-items:baseline;gap:8px"><b style="font-size:22px">${avg.toFixed(1)} kg</b><span class="sub">BMI ${bmi()} · Schnitt</span></div>
+    <div class="row" style="align-items:baseline;gap:8px"><b style="font-size:22px">${de(avg,1)} kg</b><span class="sub">BMI ${de(bmi(),1)} · Schnitt</span></div>
     <svg class="spark" viewBox="0 0 ${W} ${H}" style="height:120px;margin-top:8px">
       <path d="${area}" fill="#1aa35a" opacity=".12"/>
       <line x1="8" y1="${gy}" x2="312" y2="${gy}" stroke="#1aa35a" stroke-dasharray="4 4" stroke-width="1"/>
@@ -173,9 +173,9 @@ function weighSheet(){
   const span=weightSpan();
   return `<h2>Waage</h2>
     <div class="sub">${labelDate(state.date)}</div>
-    <div style="text-align:center;padding:8px 0"><div class="bigw">${Number(ui.draftKg).toFixed(1)}</div><div class="sub">kg</div></div>
+    <div style="text-align:center;padding:8px 0"><div class="bigw">${de(ui.draftKg,1)}</div><div class="sub">kg</div></div>
     <div class="stepper"><button class="plus" data-act="draft" data-d="-0.1">−</button><span class="sub">0,1 kg</span><button class="plus" data-act="draft" data-d="0.1">+</button></div>
-    <div class="kpi"><div><span>BMI</span><b>${bmi()}</b></div><div><span>Richtwert</span><b>${span.low}–${span.high}</b></div><div><span>Ziel</span><b>${state.profile.target}</b></div></div>
+    <div class="kpi"><div><span>BMI</span><b>${de(bmi(),1)}</b></div><div><span>Richtwert</span><b>${span.low}–${span.high}</b></div><div><span>Ziel</span><b>${state.profile.target}</b></div></div>
     <div class="gap"></div><button class="pill primary" data-act="save-weight">Speichern</button>`;
 }
 // Einen Wiegepunkt bearbeiten oder löschen
@@ -184,7 +184,7 @@ function weightEditSheet(date){
   if(!w) return `<h2>Eintrag</h2><p class="sub">Nicht gefunden.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
   const when=date.split("-").reverse().join(".");
   if(ui.confirmDel) return `<h2>Eintrag löschen?</h2>
-    <p class="sub">${when}: <b>${w.kg.toFixed(1)} kg</b> wird gelöscht. Das lässt sich nicht rückgängig machen.</p>
+    <p class="sub">${when}: <b>${de(w.kg,1)} kg</b> wird gelöscht. Das lässt sich nicht rückgängig machen.</p>
     <div class="gap"></div><button class="pill danger" data-act="w-del-go">Ja, löschen</button>
     <div class="gap"></div><button class="pill ghost" style="width:100%" data-act="del-cancel">Abbrechen</button>`;
   return `<h2>Gewicht bearbeiten</h2>
