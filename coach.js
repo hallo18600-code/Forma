@@ -201,37 +201,23 @@ function coachToday(){
 }
 function renderCoach(){
   const routine = state.coach.routine||[];
-  const today = coachToday();
-  const done = routine.filter(r=>routineOn(r.id)).length;
+  const tip = coachToday()[0];
   return `<div class="scroll pad">
-    <div class="topbar"><div><h1>Coach</h1><div class="sub">Dein Vorschlag</div></div></div>
-    <div class="card">
-      <div class="kpi">
-        <div><span>Themen</span><b>${coachTopics().filter(t=>state.coach.answers[t.id]).length}</b><span>beantwortet</span></div>
-        <div><span>Routine</span><b>${routine.length}</b><span>Punkte</span></div>
-        <div><span>Heute</span><b>${done}${routine.length?"/"+routine.length:""}</b><span>erledigt</span></div>
-      </div>
-    </div>
-    ${openQuizzes().length?`<div class="card nachholen"><b>Fragen nachholen</b><div class="sub" style="margin:3px 0 10px">Je ca. 30 Sekunden. Danach passen Score und Tipps besser zu dir.</div><div class="opts">${openQuizzes().map(id=>{ const t=coachTopics().find(x=>x.id===id); return `<button class="chip" data-act="open" data-type="area" data-id="${id}">${topicMark(id)} ${t.title}</button>`; }).join("")}</div></div>`:""}
-    ${today.length?`<div class="section"><h2>Heute für dich</h2></div><div class="card meals">${today.map(h=>`<button class="meal-row" data-act="tab" data-v="${h.go}"><div class="bubble">${h.e}</div><div class="grow"><div class="meal-name" style="font-size:15px">${h.t}</div><div class="sub">${h.d}</div></div><span class="chev">›</span></button>`).join("")}</div>`:""}
-    ${insight()}
-    <div class="gap"></div>
-    ${routine.length?`<div class="card rcoach">
-      <button class="rhead" data-act="c-toggle"><div class="row space"><b>Routine</b><span class="sub">${done}/${routine.length} heute ${ui.cOpen?"▴":"▾"}</span></div></button>
-      ${ui.cOpen?`<div class="rlist">${routine.map(r=>`<button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${routineOn(r.id)?"on":""}">${routineOn(r.id)?"✓":""}</span><div class="grow"><b>${esc(r.title)}</b>${r.detail?`<div class="sub">${esc(r.detail)}</div>`:""}</div></button>`).join("")}</div>`:""}
-    </div>`:`<div class="card"><b>Noch keine Routine</b><div class="sub" style="margin-top:4px">Thema wählen, Fragen beantworten, Vorschlag in die Routine einbauen.</div></div>`}
-    <div class="section"><h2>Themen</h2></div>
+    <div class="topbar"><div><h1>Coach</h1><div class="sub">Ein paar Fragen, dann ein einfacher Plan</div></div></div>
+    ${tip?`<button class="card tipcard" data-act="tab" data-v="${tip.go}"><span class="tipk">Tipp für heute</span><b>${tip.e} ${tip.t}</b><span class="sub">${tip.d}</span></button>`:""}
+    <div class="section"><h2>Deine Themen</h2></div>
     <div class="card meals">
     ${coachTopics().map(t=>{
-      const answered = state.coach.answers[t.id];
-      const inRoutine = routine.some(r=>r.topic===t.id);
+      const inRoutine = routine.some(r=>r.topic===t.id), done = quizDone(t.id);
+      const status = inRoutine ? "In deiner Routine ✓" : done ? "Dein Vorschlag ist fertig" : "Ein paar kurze Fragen";
       return `<button class="meal-row" data-act="open" data-type="area" data-id="${t.id}">
         <div class="bubble">${topicMark(t.id)}</div>
-        <div class="grow"><div class="meal-name">${t.title}</div><div class="sub">${t.ask}</div></div>
-        ${inRoutine?`<span class="tagp on">In der Routine</span>`:quizDone(t.id)?`<span class="tagp">Vorschlag bereit</span>`:(state.coach.skipped||[]).includes(t.id)?`<span class="tagp warn">Übersprungen</span>`:answered?`<span class="tagp">Angefangen</span>`:""}<span class="chev">›</span>
+        <div class="grow"><div class="meal-name">${t.title}</div><div class="sub">${status}</div></div>
+        ${done?"":`<span class="tagp warn">Offen</span>`}<span class="chev">›</span>
       </button>`;
     }).join("")}
     </div>
+    <p class="sub" style="text-align:center;margin:14px 8px 0">Vorschläge kannst du in deine Routine übernehmen. Abhaken geht im Tagebuch unter „Dein Tag“.</p>
   </div>`;
 }
 function starterRoutine(){ return [["u-s1","Wasser trinken (2 Liter)"],["u-s2","10 Minuten bewegen"],["u-s3","Gesicht reinigen und Sonnenschutz"],["u-s4","Vor 23 Uhr ins Bett"]].map(([id,title])=>({id,topic:"eigen",title,detail:"",product:null})); }

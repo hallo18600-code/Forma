@@ -316,3 +316,7 @@ body{background:radial-gradient(900px 500px at 15% -5%,#c3e3d1,transparent),#8f9
 .optional { display:inline-block; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); background:var(--accent-soft); padding:4px 9px; border-radius:99px; margin-bottom:8px; }
 .nachholen { margin-top:12px; border:1.5px dashed #cfe9da; }
 .tagp.warn { color:#a3610c; background:#fff3e2; }
+.tipcard { display:flex; flex-direction:column; gap:4px; width:100%; text-align:left; background:var(--accent-soft); }
+.tipcard b { font-size:16px; color:#14683e; }
+.tipcard .sub { color:#3b7a55; }
+.tipk { font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent); }
