@@ -140,20 +140,24 @@ input::placeholder, textarea::placeholder { color:var(--ink-3); }
 :focus-visible { outline:none; box-shadow:var(--focus); }
 b, strong { font-weight:700; }
 
-/* Handy-Rahmen nur am Computer (breiter als 480 px) */
+/* Handy-Rahmen nur als Vorschau im Computer-Browser (Klasse "frame" setzt index.html).
+   Auf iPad, im Home-Bildschirm-Modus und in der App gibt es keinen Rahmen. */
 .stage { min-height:100%; display:flex; align-items:center; justify-content:center; }
 .phone, .wrap { width:100vw; height:100dvh; }
 .wrap { background:var(--bg); overflow:hidden; position:relative; display:flex; flex-direction:column; }
 .notch { display:none; }
 #app { flex:1; min-height:0; display:flex; flex-direction:column; }
+/* Breite Bildschirme ohne Rahmen (iPad): Inhalt mittig, nicht endlos breit */
+@media (min-width:640px) {
+  html:not(.frame) .wrap { max-width:640px; margin:0 auto; }
+}
 @media (min-width:481px) {
-  /* Am Computer einen iPhone-Rand nachstellen (nur Vorschau, nicht in der App) */
-  :root { --safe-t:40px; --safe-b:0px; --safe-l:0px; --safe-r:0px; }
-  body { background:radial-gradient(900px 500px at 15% -5%,var(--desk-1),transparent),var(--desk-2); }
-  .stage { padding:var(--s-6) var(--s-3); }
-  .phone { width:390px; height:844px; background:var(--frame); border-radius:48px; padding:var(--s-3); box-shadow:0 40px 90px rgba(10,20,30,.4), inset 0 0 0 2px var(--frame-edge); }
-  .wrap { width:auto; height:100%; border-radius:36px; }
-  .notch { display:block; position:absolute; top:var(--s-2); left:50%; transform:translateX(-50%); width:124px; height:28px; background:var(--frame); border-radius:var(--r-xl); z-index:30; }
+  html.frame { --safe-t:40px; --safe-b:0px; --safe-l:0px; --safe-r:0px; }
+  html.frame body { background:radial-gradient(900px 500px at 15% -5%,var(--desk-1),transparent),var(--desk-2); }
+  html.frame .stage { padding:var(--s-6) var(--s-3); }
+  html.frame .phone { width:390px; height:844px; background:var(--frame); border-radius:48px; padding:var(--s-3); box-shadow:0 40px 90px rgba(10,20,30,.4), inset 0 0 0 2px var(--frame-edge); }
+  html.frame .wrap { width:auto; height:100%; border-radius:36px; max-width:none; margin:0; }
+  html.frame .notch { display:block; position:absolute; top:var(--s-2); left:50%; transform:translateX(-50%); width:124px; height:28px; background:var(--frame); border-radius:var(--r-xl); z-index:30; }
 }
 
 /* ---------- 4a. Layout ---------- */
