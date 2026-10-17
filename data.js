@@ -254,7 +254,12 @@ const CARE = [
 CARE.push(
   {id:"cleanser",type:"care",name:"Mildes Reinigungsgel",emoji:"🧼",skin:["fettig","unrein","normal","sensibel"],fragrance:false,alcohol:false,actives:[]},
   {id:"shampoo",type:"care",name:"Mildes Shampoo",emoji:"🚿",skin:["normal","sensibel","trocken"],fragrance:false,alcohol:false,actives:[]},
-  {id:"duft",type:"care",name:"Duschgel parfümiert",emoji:"🧴",skin:["normal"],fragrance:true,alcohol:false,actives:[]}
+  {id:"duft",type:"care",name:"Duschgel parfümiert",emoji:"🧴",skin:["normal"],fragrance:true,alcohol:false,actives:[]},
+  {id:"azelain",type:"care",name:"Azelainsäure 10–20 %",emoji:"🧪",skin:["fettig","unrein","sensibel","normal","trocken"],fragrance:false,alcohol:false,actives:["Azelainsäure"]},
+  {id:"bha",type:"care",name:"BHA 2 % (Salicylsäure)",emoji:"🫧",skin:["fettig","unrein","normal"],fragrance:false,alcohol:false,actives:["Salicylsäure"]},
+  {id:"zink",type:"care",name:"Zinksalbe (nur punktuell)",emoji:"⚪",skin:["fettig","unrein","normal","sensibel","trocken"],fragrance:false,alcohol:false,actives:["Zinkoxid"]},
+  {id:"retinol",type:"care",name:"Retinol 0,2–0,3 %",emoji:"🌙",skin:["normal","trocken","fettig"],fragrance:false,alcohol:false,actives:["Retinol"]},
+  {id:"vitc",type:"care",name:"Vitamin-C-Serum",emoji:"🍊",skin:["normal","trocken","fettig"],fragrance:false,alcohol:false,actives:["Vitamin C"]}
 );
 const SUPS = [
   { id:"crea", type:"sup", name:"Creatin Monohydrat", emoji:"⚪", dose:"5 g", when:"täglich", note:"Häufig beim Krafttraining genutzt." },

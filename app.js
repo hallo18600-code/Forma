@@ -135,7 +135,9 @@ function scoreCare(item){
   if((item.actives||[]).includes("UV-Filter")) parts.push(["Lichtschutz",8]);
   const ha=state.coach.answers.haut||{}, act=item.actives||[];
   if(item.fragrance && ha.empf==="Ja") parts.push(["Du reagierst auf Duft",-10]);
-  if(ha.stoert==="Unreinheiten"&&act.includes("Niacinamid")) parts.push(["Passt zu deinem Fokus",8]);
+  const focus={"Unreinheiten":["Niacinamid","Azelainsäure","Salicylsäure","Zinkoxid"],"Glänzt / große Poren":["Niacinamid","Salicylsäure"],"Rötung":["Azelainsäure","Ceramides"],"Trockenheit":["Ceramides"],"Pigmentflecken":["Vitamin C","Azelainsäure","Niacinamid","UV-Filter"],"Wirkt stumpf":["Vitamin C","Niacinamid"],"Erste Fältchen":["Retinol","Vitamin C","UV-Filter"]}[ha.stoert]||[];
+  if(focus.some(x=>act.includes(x))) parts.push(["Passt zu deinem Fokus",8]);
+  if((ha.bild==="Sensibel"||ha.empf==="Ja")&&(act.includes("Retinol")||act.includes("Salicylsäure"))) parts.push(["Langsam einschleichen, kann reizen",-6]);
   if((ha.stoert==="Rötung"||ha.bild==="Sensibel")&&item.alcohol) parts.push(["Alkohol reizt empfindliche Haut",-8]);
   if(ha.sonne&&ha.sonne!=="Täglich"&&act.includes("UV-Filter")) parts.push(["Du brauchst mehr Sonnenschutz",6]);
   return finish(parts);
