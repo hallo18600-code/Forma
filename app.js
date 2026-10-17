@@ -183,22 +183,24 @@ function supScore(id,goal){
   const winter=[9,10,11,0,1,2].includes(new Date().getMonth());
   let sc=R.g[gi]; const good=[...R.good], bad=[...R.bad]; let why="";
   if(id==="crea"&&lifts){ sc+=3; why="Passt zu deinem Krafttraining. Sehr gut untersucht."; }
-  if(id==="whey"){ if(vegan){ sc-=25; bad.unshift("Enthält Milch: für Veganer nicht geeignet"); } else if(lowProt){ sc+=3; why="Protein heute liegt noch unter dem Richtwert."; } else { sc-=6; bad.unshift("Dein Protein passt heute schon"); } }
+  const notes=[];
+  if(id==="whey"&&vegan) notes.push("Enthält Milch – passt nicht zu deiner veganen Ernährung");
+  if(id==="whey"){ if(lowProt){ sc+=3; why="Protein heute liegt noch unter dem Richtwert."; } else { sc-=6; bad.unshift("Dein Protein passt heute schon"); } }
   if(id==="d3"&&winter){ sc+=3; why="Gerade jetzt (Oktober bis März) gibt es wenig Sonne."; }
   if(id==="o3"){ if(hasFish){ sc-=8; bad.unshift("Du isst schon oft Fisch"); } else { sc+=2; why="Du isst wenig Fisch."; } }
   if(id==="mg"&&((day().sleep!=null&&day().sleep<6.5)||(sa.ein&&sa.ein!=="Geht schnell"))){ sc+=3; why="Viele nehmen es abends, wenn der Schlaf hakt."; }
   if(id==="b12"){ if(vegan){ sc=97; why="Vegan: B12 steckt fast nur in tierischen Lebensmitteln."; } else bad.push("Mit Fleisch, Ei und Milch meist genug"); }
   if(id==="col"&&g==="skin") why="Beliebt für Haut und Look.";
-  return {score:Math.max(40,Math.min(99,Math.round(sc))), good, bad, why:why||R.good[0]+"."};
+  return {score:Math.max(40,Math.min(99,Math.round(sc))), good, bad, notes, why:why||R.good[0]+"."};
 }
 function supAllGoals(id){ const o={}; ["muscle","lose","skin","energy"].forEach(g=>o[g]=supScore(id,g).score); return o; }
 // Vorschlag: die 3 am besten passenden für dein Ziel und Profil
 function recommendStack(){
-  return SUPS.map(x=>({id:x.id,...supScore(x.id)})).sort((a,b)=>b.score-a.score).slice(0,3);
+  return SUPS.map(x=>({id:x.id,...supScore(x.id)})).filter(x=>!x.notes.length).sort((a,b)=>b.score-a.score).slice(0,3);
 }
 function scoreSup(item){
   const r=supScore(item.id);
-  return { score:r.score, good:r.good, bad:r.bad, reasons:[r.why] };
+  return { score:r.score, good:r.good, bad:r.bad, notes:r.notes, reasons:[r.why] };
 }
 function scored(item){
   if(item.type==="care") return scoreCare(item);

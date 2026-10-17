@@ -766,6 +766,7 @@ function supSheet(item,sc){
     </div>
     ${sc.good.length?`<div class="fcard"><b class="fcard-t">Pros</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
     ${sc.bad.length?`<div class="fcard"><b class="fcard-t">Cons</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
+    ${(sc.notes||[]).length?`<div class="fcard fhint"><b class="fcard-t">Hinweis</b><ul class="fpc">${list(sc.notes,"n")}</ul><p class="sub">Ändert die Bewertung nicht.</p></div>`:""}
     <p class="sub fnote">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>
     <button class="pill w-full ${inStack?"ghost":"primary"}" data-act="toggle-stack" data-id="${item.id}">${inStack?"Aus dem Stack":"In den Stack"}</button>
     ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost w-full" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}`;

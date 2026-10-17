@@ -436,41 +436,15 @@ function scoreFood(item,goal){
   const plant=["ersatz","plantmilk","soy"].includes(id);
   const meat=!plant&&(MEATC.includes(id)||foodHas(item,"meat")), animal=meat||!plant&&(ANIC.includes(id)||foodHas(item,"lak")||foodHas(item,"egg"));
   const P=(v,t)=>{ v=Math.round(v); if(!v) return; score+=v; (v>0?good:bad)(t,50+Math.abs(v)); };
-  let cap=98;
-  if(ea.stil==="Vegan"&&animal){ P(-40,"Passt nicht zu vegan"); cap=15; }
-  else if(ea.stil==="Vegetarisch"&&meat){ P(-40,"Passt nicht zu vegetarisch"); cap=15; }
-  // Diät aus dem Fragebogen
-  // "Sauber": wenig verarbeitet und ohne zugesetzten Zucker (kein Bonus für Fruchtjoghurt & Co.)
-  const clean=!heavy&&(nova?nova<=2:!item.processed)&&!(su>=8&&!R_FRUITY.includes(id));
-  const diet=rDiet(), D=(v,t)=>{ v=Math.round(v); if(!v) return; score+=v; (v>0?good:bad)(t,30+Math.abs(v)); };
-  const PRIMAL_OK=["poultry","redmeat","organ","broth","fattyfish","leanfish","egg","fruit","berries","vitc","banana","honey","goodfat","butter","coconut","avocado","skinveg","veg","sweetpotato","potato","kefir","cheese"];
-  if(diet==="Primal"){
-    if(["soy","ersatz","plantmilk","legume","wholewheat","refined","seedoil","margarine"].includes(id)) D(-6,"Passt nicht zu deiner Primal-Ernährung");
-    else if(PRIMAL_OK.includes(id)&&clean) D(3,"Passt zu deiner Primal-Ernährung");
-  } else if(diet==="Whole Foods"){
-    if(heavy) D(-7,"Stark verarbeitet – passt nicht zu Whole Foods");
-    else if(["legume","wholewheat","pseudograin","oats"].includes(id)&&clean) D(6,"Vollwertig – passt zu Whole Foods");
-    else if(cat&&cat.w&&clean) D(3,"Unverarbeitet – passt zu Whole Foods");
-    else if(!heavy&&nova===3) D(-2,"Etwas verarbeitet");
-  } else if(diet==="Ausgewogen"){
-    if(["legume","wholewheat","pseudograin"].includes(id)) D(6,"Gehört zu einer ausgewogenen Ernährung");
-    if(id==="soy") D(6,"Gute pflanzliche Abwechslung");
-  } else if(diet==="Vegan"||diet==="Vegetarisch"){
-    if(id==="soy") D(12,"Pflanzliches Protein – wichtig für dich");
-    if(id==="legume") D(8,"Pflanzliches Protein & Eisen – wichtig für dich");
-    if(id==="plantmilk"&&diet==="Vegan") D(6,"Milch-Alternative für dich");
-    if(id==="ersatz") D(4,"Fleisch-Alternative für dich");
-  }
-  // "Nicht primal" ist nur ein Minus, wenn jemand primal/ohne Vorgabe isst
-  if(!["Primal","Nichts Bestimmtes"].includes(diet)){
-    const drop=/nicht primal|soja, nicht naturbelassen|verarbeitetes soja|enthält soja/i;
-    for(let i=cons.length-1;i>=0;i--) if(drop.test(cons[i].t)) cons.splice(i,1);
-    if(["Vegan","Vegetarisch","Ausgewogen"].includes(diet)&&id==="soy") score+=6; // Soja-Abzug aus der Primal-Sicht zurücknehmen
-  }
+  // Die Zahl sagt nur: wie gesund + wie gut fürs Ziel. Ernährungsform und Vorlieben ändern sie NICHT,
+  // sie erscheinen nur als neutraler Hinweis unter der Bewertung.
+  const cap=98, notes=[], NOTE=t=>{ if(!notes.includes(t)) notes.push(t); };
+  if(ea.stil==="Vegan"&&animal) NOTE("Tierisch – passt nicht zu deiner veganen Ernährung");
+  else if(ea.stil==="Vegetarisch"&&meat) NOTE("Enthält Fleisch oder Fisch – passt nicht zu deiner vegetarischen Ernährung");
   // Was die Person meiden will
   const meiden=(ea.meiden||[]).filter(x=>x!=="Nichts");
-  const M=(v,t)=>P(v,t);
-  if(meiden.includes("Zucker")&&su>=8&&!R_FRUITY.includes(id)) M(-Math.min(18,6+su*0.3),"Du willst Zucker meiden");
+  const M=(v,t)=>NOTE(t);
+  if(meiden.includes("Zucker")&&su>=8&&!R_FRUITY.includes(id)) M(0,"Viel Zucker – du willst Zucker meiden");
   if(meiden.includes("Milchprodukte")&&(["protdairy","kefir","dairy","cheese","butter","whey","coffeemilk"].includes(id)||foodHas(item,"lak"))&&!plant) M(-22,"Du willst Milchprodukte meiden");
   if(meiden.includes("Gluten")&&glu0(id,item,h)) M(-22,"Du willst Gluten meiden");
   if(meiden.includes("Soja")&&(["soy","ersatz"].includes(id)||/(soja|\bsoy\b|tofu|tempeh)/.test(h))) M(-22,"Du willst Soja meiden");
@@ -510,7 +484,7 @@ function scoreFood(item,goal){
   if(fokus.includes("Mehr Ballaststoffe")&&fi>=4) P(Math.min(6,fi*0.6),"Ballaststoffe – dein Fokus");
   if(fokus.includes("Sättigung")&&((pr>=10&&kc<=250)||fi>=6)) P(5,"Macht lange satt");
   if(fokus.includes("Koffein am Abend")&&foodHas(item,"caf")) P(-4,"Koffein: nach 15 Uhr meiden");
-  return rateOut(Math.min(cap,score),pros,cons);
+  const out=rateOut(Math.min(cap,score),pros,cons); out.notes=notes; return out;
 }
 // Typische Nährwert-Bewertung je Art (Median aus 100.000 Produkten), Reihenfolge: Muskeln, Abnehmen, Haut, Energie
 const R_MED={_0:[22,39,74,10],_1:[48,42,84,31],_2:[0,-28,73,0],_3:[29,44,82,14],_4:[9,29,67,4],alcohol:[0,50,85,0],avocado:[10,47,100,28],banana:[10,50,51,11],berries:[7,54,49,3],broth:[35,81,85,8],butter:[1,-17,95,15],cereal:[29,13,65,23],cheese:[56,35,82,14],chips:[25,13,84,18],coconut:[6,40,95,17],coffee:[33,36,85,21],coffeemilk:[16,58,50,5],dairy:[19,52,79,6],darkchoc:[17,-6,91,25],driedfruit:[-34,-17,-23,-47],egg:[58,62,95,30],ersatz:[46,53,88,22],fastfood:[46,46,85,28],fattyfish:[75,61,95,30],fermentedveg:[9,68,85,10],fruit:[3,50,45,1],goodfat:[0,-28,95,15],honey:[-59,-37,-50,-60],juice:[2,52,45,1],kefir:[17,66,85,6],leanfish:[85,76,85,15],legume:[58,56,94,35],margarine:[1,-15,73,0],mixedmeal:[32,52,83,16],nectar:[1,50,42,0],nuts:[38,4,100,37],oats:[50,39,85,45],organ:[43,40,95,25],peanut:[43,9,93,25],plantmilk:[7,60,67,6],potato:[31,58,85,26],poultry:[87,76,85,15],processedmeat:[49,42,81,13],protdairy:[78,78,85,15],proteinbar:[78,49,85,23],pseudograin:[55,34,88,48],readymeal:[35,49,82,19],redmeat:[75,63,95,30],refined:[53,37,83,43],rice:[46,26,76,38],ricecake:[43,18,73,34],sauce:[9,35,75,5],seedoil:[0,-28,73,0],skinveg:[10,65,65,8],softdrink:[0,51,44,0],soy:[64,67,86,18],spice:[30,53,85,12],sugar:[-42,-17,-31,-57],sweetpotato:[24,52,75,18],sweets:[-3,-11,36,-14],tea:[0,52,48,0],veg:[11,64,82,7],vegjuice:[5,63,53,5],vitc:[1,55,46,0],water:[33,54,85,18],whey:[90,46,85,16],wholewheat:[56,42,97,54]};

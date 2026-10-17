@@ -137,6 +137,7 @@ function foodSheet(it,sc){
     </div>
     ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Pros</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
     ${(sc.bad||[]).length?`<div class="fcard"><b class="fcard-t">Cons</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
+    ${(sc.notes||[]).length?`<div class="fcard fhint"><b class="fcard-t">Hinweis</b><ul class="fpc">${list(sc.notes,"n")}</ul><p class="sub">Ändert die Bewertung nicht. Die zeigt nur, wie gesund es ist und wie gut es zu deinem Ziel passt.</p></div>`:""}
     ${intol?`<p class="sub fnote">Unverträglichkeiten erkennt die App nur am Namen. Bitte Zutaten prüfen.</p>`:""}
     <div class="fcard"><b class="fcard-t">Makros <span class="sub">· <span id="fgram">${g}</span> g</span></b>
       <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
