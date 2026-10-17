@@ -746,3 +746,18 @@ svg.chart { width:100%; height:auto; display:block; }
 .pweek div { display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0; border-radius:var(--r-m); background:var(--fill); font-size:11px; color:var(--ink-3); }
 .pweek div b { font-size:11px; font-weight:700; }
 .pweek div.on { background:var(--accent-soft); color:var(--on-accent-soft); }
+/* Coach: ruhige Liste – jeder Punkt eine Zeile, Details per Antippen */
+.tips { margin-top:var(--s-3); }
+.tipgrp { margin:var(--s-4) 0 var(--s-1); font-size:var(--fs-s); font-weight:700; color:var(--ink-3); }
+details.tip { border-bottom:1px solid var(--line); }
+details.tip summary { list-style:none; display:flex; align-items:center; gap:var(--s-3); min-height:52px; cursor:pointer; font-weight:600; }
+details.tip summary::-webkit-details-marker { display:none; }
+details.tip .ti { flex:none; width:32px; height:32px; display:grid; place-items:center; border-radius:50%; background:var(--fill); font-size:16px; }
+details.tip .tmeta { color:var(--ink-3); font-size:var(--fs-s); font-weight:500; white-space:nowrap; }
+details.tip .chev { transition:transform .2s; }
+details.tip[open] .chev { transform:rotate(90deg); }
+.tip-more { display:flex; flex-direction:column; gap:4px; padding:0 0 var(--s-3) 44px; font-size:var(--fs-s); color:var(--ink-2); }
+.tip-more b { color:var(--ink); font-weight:600; }
+.tip-more .link { align-self:flex-start; margin-top:2px; }
+.steps { margin:0; padding-left:1.2em; display:flex; flex-direction:column; gap:2px; }
+.steps.plain { list-style:none; padding-left:0; }

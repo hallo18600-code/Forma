@@ -391,7 +391,7 @@ function schlafAdvice(a){
   if(a.morgen==="Gerädert"&&(a.stunden==="7–8"||a.stunden==="Über 8"))
     g.push([tip(null,"Schnarchen? Ärztlich abklären","Genug Stunden, trotzdem gerädert: oft Atemaussetzer.",{must:1})]);
   if(a.stunden==="Unter 6"||a.stunden==="6–7")
-    g.push([tip(`Bett ${hm(bed)}`,`Um ${hm(bed)} ins Bett`,"Ziel 7–9 h. Jede Woche 15 Min früher.")]);
+    g.push([tip(`Bett ${hm(bed)}`,`Um ${hm(bed)} ins Bett`,"Ziel 7–9 h. Jede Woche 15 Min früher.",{s:"Früher ins Bett"})]);
   if(a.ein==="Dauert") g.push([tip("Morgenlicht","10 Min Tageslicht nach dem Aufstehen","Stellt die innere Uhr."),
     tip("20-Min-Regel","Nach 20 Min wach: kurz aufstehen","Bett bleibt zum Schlafen, nicht Grübeln.")]);
   if(a.ein==="Wach in der Nacht") g.push([tip("16–19 °C","Schlafzimmer auf 16–19 °C","Kühl schläft man durch."),
@@ -403,7 +403,8 @@ function schlafAdvice(a){
   if(a.auf==="Wechselt stark") g.push([tip("Feste Weckzeit",`Wochenende spätestens ${hm(wake+60)} aufstehen`,"Ausschlafen wirkt wie Mini-Jetlag.")]);
   let items=pickTips(g,3);
   if(!items.length) items=[tip(null,"Dein Schlaf passt","Zeiten halten.")];
-  const routine=sumRoutine("Schlaf",items,`⏰ ${hm(wake)}   ☕ bis ${hm(caf)}   💡 ${hm(dim)}   🛏️ ${hm(bed)}`,null);
+  const routine=sumRoutine("Schlaf",items,"",null);
+  routine.times=[["⏰","Aufstehen",hm(wake)],["☕","Letzter Kaffee",hm(caf)],["💡","Licht runter",hm(dim)],["🛏️","Ins Bett",hm(bed)]];
   if(!routine.short.includes("Bett")){ routine.short=[`Bett ${hm(bed)}`].concat(routine.short?routine.short.split(" · "):[]).slice(0,4).join(" · "); routine.title="Schlaf: "+routine.short; }
   return {lead:`Aufstehen ${hm(wake)} → Bett ${hm(bed)}`, routine, items};
 }
@@ -448,17 +449,17 @@ const PLAN_INFO={
   home:{name:"Zuhause Ganzkörper", freq:"3×/Woche", why:"Ohne Geräte, nur Körpergewicht.", week:["A","","B","","A","",""]}
 };
 // Muskelaufbau als EIN kompakter Kasten statt 5 einzelner Tipps (gleiche Infos, eine Zeile pro Punkt)
-function muskelBox(a,lvl,g,fatGoal,prot,lifts){
+function muskelTips(a,lvl,g,fatGoal,prot,lifts){
   const pid=muskelPlanId(a,lifts), P=PLAN_INFO[pid], have=(state.routines||[]).some(r=>r.id===pid);
   const gym=a.gym||"", beginner=gym==="Gym, Anfänger"||gym==="Noch gar nicht";
-  const surplus=lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal;
-  return {title:"💪 Muskelaufbau", sub:P.why, rows:[
-    ["🏋️",`${P.name}, ${P.freq}`, have?"tab":"coach-plan", have?"sport":pid, have?"Öffnen":"Übernehmen"],
-    ["📈",gym==="Zuhause"?"Jede Woche mehr Wdh. oder schwerere Variante":beginner?"Erst Technik, dann jede Woche +1 Wdh.":"Progressive Overload: +1 Wdh. oder +2,5 kg/Woche"],
-    ["🍗",`${prot} g Protein am Tag${surplus?`, ${de(kcalFor("muscle"))} kcal (+250)`:""}`, surplus?"coach-goal":null, "muscle", "Ziel setzen"],
-    ["🍌","Vorm Training: Reiswaffeln mit Honig oder Banane"],
-    ["💊","Kreatin 3–5 g täglich, Whey wenn Protein fehlt","coach-sups","","Stack"]
-  ]};
+  const surplus=lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal, G={grp:"Training"};
+  return [
+    tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why,Object.assign({s:P.name,e:"🏋️"},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
+    tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wdh. oder schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche +1 Wdh.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈"},G)),
+    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+250): Muskeln statt Fett.`:"1,6–2,2 g pro kg holen das Maximum raus.",Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
+    tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher","Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
+    tip("Kreatin","3–5 g Kreatin täglich","Bestuntersucht für Kraft. Fehlt Protein beim Essen: Whey.",Object.assign({e:"💊"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
+  ];
 }
 function aussehenAdvice(a){
   const ziel=a.ziel||[], lvl=kfaLevel(a), g=state.profile.goal, t=targets(), p=state.profile;
@@ -490,13 +491,14 @@ function aussehenAdvice(a){
   if(!ziel.length) groups.unshift([cal]);
   // Frisur passend zur Gesichtsform: immer zuerst, zählt zu den max. 4 Tipps
   const cut=haarSchnitt(a.form, a.laenge);
-  const box=ziel.includes("Mehr Muskeln")?muskelBox(a,lvl,g,fatGoal,prot,lifts):null;
-  let items=pickTips(groups,box?(cut?2:3):cut?3:4);   // mit Muskel-Kasten weniger Einzeltipps
-  if(!items.length&&!box) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
+  const mus=ziel.includes("Mehr Muskeln")?muskelTips(a,lvl,g,fatGoal,prot,lifts):[];
+  let items=pickTips(groups,mus.length?(cut?2:3):cut?3:4);   // mit Muskel-Tipps weniger andere
+  if(!items.length&&!mus.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
   if(cut) items.unshift(cut);
+  if(mus.length){ items.forEach(i=>i.grp=i.grp||"Look & Körper"); items=mus.concat(items); }
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
-  return {lead:`${kfaTxt} · ${ziel.length?ziel.join(", "):"kein Fokus"}`, box,
-    routine:sumRoutine("Aussehen",items,"","Training nach Plan",box?["Training nach Plan","Protein + Kreatin"]:[]), items};
+  return {lead:`${kfaTxt} · ${ziel.length?ziel.join(", "):"kein Fokus"}`,
+    routine:sumRoutine("Aussehen",items,"","Training nach Plan"), items};
 }
 
 // ---------- Gesundheit ----------
@@ -685,28 +687,50 @@ function areaSheet(id){
   }
   const advice=coachAdvice(id);
   const r=advice.routine, inRt=(state.coach.routine||[]).some(x=>x.topic===id);
-  // Kompakter Ablauf: Haut = morgens/abends, Schlaf = Uhrzeiten. Andere Themen: die Tipps reichen.
-  const plan=r&&r.am?`<div class="rplan"><span>☀️</span><b>${esc(r.am.join(" · "))}</b><span>🌙</span><b>${esc(r.pm.join(" · "))}</b></div>`
-    :r&&r.detail?`<div class="rplan one"><b>${esc(r.detail)}</b></div>`:"";
-  const row=i=>{
-    const body=`<div class="grow"><b>${esc(i.title)}</b>${i.detail?`<div class="sub">„${esc(i.detail)}“</div>`:""}</div>`;
-    const prod=i.product&&allItems().some(x=>x.id===i.product);
-    return prod?`<button class="li li-tap" data-act="open" data-type="product" data-id="${i.product}">${body}<span class="chev">›</span></button>`
-      :`<div class="li">${body}${i.act?`<button class="link mt-2 self-start" data-act="${i.act}" data-v="${i.v}">${i.label} ›</button>`:""}</div>`;
-  };
-  const bx=advice.box;
-  const box=bx?`<div class="mbox"><div class="mbox-h"><b>${bx.title}</b><span class="sub">${esc(bx.sub)}</span></div>
-    ${bx.rows.map(([e,t,act,v,l])=>`<div class="mbrow"><span>${e}</span><span class="grow">${esc(t)}${act?` <button class="link" data-act="${act}" data-v="${v}">${l} ›</button>`:""}</span></div>`).join("")}</div>`:"";
+  // Jeder Punkt = eine kurze Zeile. Antippen klappt die Details auf (gleiche Infos, viel ruhiger).
+  const fold=(e,label,meta,more)=>`<details class="tip"><summary><span class="ti">${e}</span><span class="grow">${esc(label)}</span>${meta?`<span class="tmeta">${esc(meta)}</span>`:""}<span class="chev">›</span></summary><div class="tip-more">${more}</div></details>`;
+  const rows=[];
+  if(r&&r.am){
+    const steps=l=>`<ol class="steps">${l.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`;
+    rows.push(fold("☀️","Morgens",r.am.length+" Schritte",steps(r.am)), fold("🌙","Abends",r.pm.length+" Schritte",steps(r.pm)));
+  }
+  if(r&&r.times) rows.push(fold("🕒","Dein Zeitplan","",`<ol class="steps plain">${r.times.map(([e,l,t])=>`<li>${e} ${l} <b>${t}</b></li>`).join("")}</ol>`));
+  let grp="";
+  advice.items.forEach(i=>{
+    if(i.grp&&i.grp!==grp){ grp=i.grp; rows.push(`<div class="tipgrp">${esc(grp)}</div>`); }
+    const label=tipLabel(i), prod=i.product&&allItems().some(x=>x.id===i.product);
+    const more=`${label!==i.title?`<b>${esc(i.title)}</b>`:""}${i.detail?`<span>„${esc(i.detail)}“</span>`:""}`
+      +(i.act?`<button class="link" data-act="${i.act}" data-v="${i.v}">${i.label} ›</button>`:prod?`<button class="link" data-act="open" data-type="product" data-id="${i.product}">Produkt ansehen ›</button>`:"");
+    rows.push(fold(i.e||tipIcon(i,id),label,"",more));
+  });
+  if(advice.note) rows.push(fold("⚠️",/arzt/i.test(advice.note)?"Wann zum Arzt":"Wichtig","",`<span>${esc(advice.note)}</span>`));
   return `<h2>${topic.title}</h2><p class="sub">${esc(advice.lead)}</p>
-    ${plan}${box}
-    ${advice.items.length?`<div class="section"><h2>${bx?"Außerdem":"Deine Tipps"}</h2></div>`:""}
-    ${advice.items.map(row).join("")}
-    ${advice.note?`<p class="sub mt-3">⚠️ ${esc(advice.note)}</p>`:""}
+    <div class="tips">${rows.join("")}</div>
     <div class="gap"></div>
     ${inRt
       ?`<button class="pill ghost w-full" data-act="coach-remove" data-topic="${id}">Aus der Routine entfernen</button>`
       :r?`<button class="pill primary" data-act="coach-add" data-topic="${id}">In die Routine</button>`:""}
     <div class="row space mt-4"><button class="link" data-act="coach-reset" data-topic="${id}">Antworten ändern</button><span class="sub">Kein ärztlicher Rat</span></div>`;
+}
+// Kurzer Zeilen-Name: eigener Kurzname, sonst Routine-Kürzel, sonst Teil vor „:“, sonst der Tipp selbst
+const TIP_SHORT={"Testweise ohne Kohlensäure, Kaugummi, Süßstoff":"Bläh-Auslöser meiden","Neues einzeln testen, 2 Wochen Abstand":"Neues einzeln testen",
+  "Bauchübungen allein reichen nicht":"Kein gezieltes Bauchfett","Wächst meist in 3–6 Monaten nach":"Geduld: 3–6 Monate","Nachts nicht auf die Uhr schauen":"Keine Uhr nachts",
+  "Hitze, Alkohol, Scharfes meiden":"Auslöser meiden","Reinigung, Creme, LSF reichen":"Basis reicht","Schnarchen? Ärztlich abklären":"Schnarchen abklären",
+  "Lauwarm waschen, kühl föhnen":"Lauwarm waschen","Lauwarm waschen, abtupfen":"Lauwarm waschen","LSF als Fluid statt Creme":"LSF-Fluid","Hyaluron auf feuchte Haut":"Hyaluron",
+  "Leichte Creme, keine Öle":"Keine Öle","Alle 8–12 Wochen 1 cm ab":"Spitzen schneiden","3–5 Min einwirken lassen":"Einwirken lassen","Nach 4 Wochen: 1×/Woche weiter":"Dranbleiben",
+  "Vor glutenfrei: Zöliakie-Test":"Zöliakie-Test","Bis dahin mild waschen":"Mild waschen"};
+function tipLabel(i){ return i.s||i.k||TIP_SHORT[i.title]||(i.title.includes(": ")?i.title.split(": ")[0]:i.title); }
+// Icon je Tipp, damit man die Liste schnell überfliegt
+function tipIcon(i,topic){
+  const t=(i.k||"")+" "+i.title;
+  const M=[[/arzt|Blutbild|Zöliakie|Schnarchen/i,"🩺"],[/Handy/,"📵"],[/keine Öle/,"🧴"],[/licht/i,"🌤️"],[/Waschen,/,"💇"],[/Kohlensäure/,"🫧"],[/Nur 3 Produkte|einzeln|Reinigung, Creme/,"🧴"],[/16–19|Uhr schauen/,"🌡️"],[/Sport/,"🏃"],[/20 Min wach/,"🛏️"],
+    [/Wecker|Wochenende/,"⏰"],[/ausdrücken/,"🚫"],[/Schuppen|Ketoconazol/,"🧪"],[/Zink/,"⚪"],[/LSF/,"☀️"],[/Hitze, Alkohol/,"🌶️"],[/Jodsalz/,"🧂"],[/B12|Eisen/,"💊"],
+    [/Azelain|BHA|Niacinamid|Retinol|Vitamin C|Milchsäure|Minoxidil/,"🧪"],[/Hyaluron/,"💧"],[/Kopfhaut|Trockenshampoo|Haar|Shampoo|Conditioner|Maske|Öl|Locken|Hitzeschutz|föhnen|Waschtag|einwirken/,"💇"],
+    [/Creme|Ceramid|Urea|Panthenol|Wasser,|nur Wasser|waschen/,"🧴"],[/Spitzen|Schnitt/,"✂️"],[/Mewing/,"👅"],[/Gua Sha/,"🪨"],[/Kaffee|Koffein/,"☕"],
+    [/Licht|raus/,"🌤️"],[/Bett|Schlaf|schlafen/,"🛏️"],[/Handy/,"📵"],[/To-do/,"📝"],[/Kraft|Training|ziehen|Muskeln/,"💪"],[/Brust|dehnen/,"🧘"],
+    [/Schritte|gehen|aufstehen/,"🚶"],[/kcal|Kalorien|Defizit|abnehmen|Bauch/i,"🔥"],[/Protein|Gemüse/,"🍗"],[/Wasser|Glas|Sprudel/,"💧"],[/alkohol/i,"🍷"],
+    [/Salz|Kopf beim/,"🧂"],[/Laktose/,"🥛"],[/Langsam|langsam/,"🍽️"],[/Unverarbeitet|Läuft gut/,"🥦"],[/Monaten|Dranbleiben|weiter/,"⏳"]];
+  const m=M.find(([re])=>re.test(t)); return m?m[1]:topicMark(topic);
 }
 function planBody(id){ return areaSheet(id); }
 function supsSheet(){
