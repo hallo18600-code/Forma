@@ -145,7 +145,7 @@ function foodSheet(it,sc){
     <p class="sub fnote">${src}</p>
     <div class="amt ${ui.amtOpen?"open":""}">
       <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>
-      <button class="amt-compact" id="amt-compact" data-act="amt-open">${amtCompact(it)}</button>
+      <div class="amt-compact" id="amt-compact">${amtCompact(it)}</div>
       <div class="amt-body" id="amt-body">${amtBody(it)}</div>
       ${ui.editUid?`<button class="yfertig static" data-act="save-meal">Speichern</button><button class="pill w-full t-bad" data-act="del-meal2">Eintrag löschen</button>`:`<button class="yfertig static" data-act="log-food" data-id="${it.id}">Hinzufügen</button>`}
     </div>`;

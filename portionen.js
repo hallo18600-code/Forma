@@ -205,7 +205,7 @@ function amtTxt(p,m){
 function amtInit(it){
   const key=it.id+"|"+(ui.editUid||"");
   if(ui.amtFor===key) return;
-  ui.amtFor=key;
+  ui.amtFor=key; ui.lastUnit=null; ui.lastQty=null;
   const us=unitsFor(it), m=ui.editUid&&day().meals.find(x=>x.uid===ui.editUid);
   if(m){
     const u=m.u&&us.find(x=>x.k===m.u);
@@ -216,10 +216,17 @@ function amtInit(it){
   else { ui.unit="g"; ui.qty=null; ui.portion=100; }
 }
 function amtUnit(it){ const us=unitsFor(it); return us.find(x=>x.k===ui.unit)||us[us.length-1]; }
+// Zugeklappte Leiste: Menge auf einen Blick, Umschalter Einheit ↔ Gramm, bei Gramm direkt eintippen
+const CHEV_DOWN='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9.5l6 6 6-6"/></svg>';
+function amtAlt(it){ const us=unitsFor(it); return us.find(x=>x.k===ui.lastUnit)||us.find(x=>x.d)||us[0]; }
 function amtCompact(it){
-  const us=unitsFor(it), u=amtUnit(it), g=Math.round(ui.portion||0), kc=Math.round((it.kcal||0)*g/100), gu=gName(us,null,true);
-  const main=u.k==="g"?`${g} ${gu}`:`${qtyTxt(ui.qty||1)} ${uName(u.k,ui.qty||1)}`;
-  return `<i class="amt-ci">${pIcon(u.ic)}</i><b id="amt-val" class="notr">${esc(main)}</b><span class="notr">${u.k==="g"?"":`${g} ${gu} · `}${kc} kcal</span><em>⌄</em>`;
+  const us=unitsFor(it), u=amtUnit(it), g=Math.round(ui.portion||0), kc=Math.round((it.kcal||0)*g/100), gu=gName(us,null,true), isG=u.k==="g";
+  const alt=isG?amtAlt(it):u;
+  const main=isG
+    ? `<label class="amt-main"><i class="amt-ci">${pIcon(u.ic)}</i><span class="amt-txt"><span class="amt-in"><input id="portion-c" type="number" inputmode="decimal" value="${g}" data-act="portion-in" data-id="${it.id}" aria-label="Menge"><em class="notr">${gu}</em></span><span class="amt-sum notr" id="amt-sum">${kc} kcal</span></span></label>`
+    : `<button class="amt-main" data-act="amt-open"><i class="amt-ci">${pIcon(u.ic)}</i><span class="amt-txt"><b id="amt-val" class="notr">${esc(qtyTxt(ui.qty||1)+" "+uName(u.k,ui.qty||1))}</b><span class="amt-sum notr" id="amt-sum">${g} ${gu} · ${kc} kcal</span></span></button>`;
+  const seg=alt&&alt.k!=="g"?`<div class="amt-seg notr" role="group" aria-label="Einheit"><button class="${isG?"":"on"}" data-act="amt-mode" data-v="unit" data-id="${it.id}" aria-pressed="${!isG}">${esc(uName(alt.k,1,true))}</button><button class="${isG?"on":""}" data-act="amt-mode" data-v="g" data-id="${it.id}" aria-pressed="${isG}">${esc(gu)}</button></div>`:"";
+  return `${main}${seg}<button class="amt-chev" data-act="amt-open" aria-label="Mehr Einheiten">${CHEV_DOWN}</button>`;
 }
 function amtBody(it,pop){
   const us=unitsFor(it), u=amtUnit(it), g=Math.round(ui.portion||0), kc=Math.round((it.kcal||0)*g/100), gu=gName(us,null,true);
@@ -235,17 +242,21 @@ function amtBody(it,pop){
         <button class="qbtn plus" data-act="qty" data-v="1" data-id="${it.id}" aria-label="Mehr">+</button>
       </div>
       <div class="qsum notr"><span>≈ ${g} ${gu}</span><span class="k">${kc} kcal</span></div>`;
-  return `<b class="amt-t">Wie viel?</b><div class="units">${cards}</div>${pick}<p class="sub">Nach unten wischen, um Bewertung und Nährwerte zu sehen.</p>`;
+  return `<div class="amt-head"><b class="amt-t">Wie viel?</b><button class="amt-x" data-act="amt-toggle" aria-label="Zuklappen">${CHEV_DOWN}</button></div><div class="units">${cards}</div>${pick}`;
 }
 // Nach Änderung der Menge: nur die betroffenen Teile neu zeichnen (Blatt bleibt offen, kein Springen)
 function amtRefresh(it,pop){
   const b=document.getElementById("amt-body"); if(b){ const sx=(b.querySelector(".units")||{}).scrollLeft||0; b.innerHTML=amtBody(it,pop); const un=b.querySelector(".units"); if(un) un.scrollLeft=sx; trDom(b); }
+  const c=document.getElementById("amt-compact"); if(c){ c.innerHTML=amtCompact(it); trDom(c); }
   amtSync(it);
 }
+// Nur Zahlen nachziehen (das Feld, in dem gerade getippt wird, bleibt unangetastet)
 function amtSync(it){
-  const g=ui.portion||0, set=(id,h)=>{ const e=document.getElementById(id); if(e){ e.innerHTML=h; trDom(e); } };
-  set("fmacros",fMacros(it,g)); set("ftable",fTable(it,g));
-  const fg=document.getElementById("fgram"); if(fg) fg.textContent=Math.round(g);
-  set("amt-compact",amtCompact(it));
-  if(ui.unit==="g"){ const s=document.querySelector(".famt span"); if(s) s.textContent=gName(unitsFor(it)); }
+  const us=unitsFor(it), u=amtUnit(it), g=Math.round(ui.portion||0), kc=Math.round((it.kcal||0)*g/100), gu=gName(us,null,true);
+  const set=(id,h)=>{ const e=document.getElementById(id); if(e){ e.innerHTML=h; trDom(e); } };
+  set("fmacros",fMacros(it,ui.portion||0)); set("ftable",fTable(it,ui.portion||0));
+  const txt=(id,t)=>{ const e=document.getElementById(id); if(e) e.textContent=t; };
+  txt("fgram",g); txt("amt-sum",u.k==="g"?`${kc} kcal`:`${g} ${gu} · ${kc} kcal`);
+  if(u.k!=="g") txt("amt-val",`${qtyTxt(ui.qty||1)} ${uName(u.k,ui.qty||1)}`);
+  ["portion","portion-c"].forEach(id=>{ const i=document.getElementById(id); if(i&&i!==document.activeElement) i.value=g; });
 }

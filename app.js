@@ -54,7 +54,7 @@ function toast(m){ ui.toast=m; render(); setTimeout(()=>{ if(ui.toast===m){ ui.t
 function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; ui.amtFor=null; render(); }
 // Menge für einen Tagebuch-Eintrag: Gramm plus (falls gewählt) Einheit und Anzahl
 function amtEntry(){
-  const i=ui.unit==="g"&&document.getElementById("portion"), g=Math.max(1,Math.round(+(i?String(i.value).replace(",","."):ui.portion)||ui.portion||100));
+  const g=Math.max(1,Math.round(+ui.portion||100));
   return ui.unit&&ui.unit!=="g"?{portion:g,u:ui.unit,q:ui.qty||1}:{portion:g};
 }
 function closeModal(){ stopCam(); ui.modal=null; render(); }
@@ -558,14 +558,20 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="back-scan"){ ui.scanView="list"; openModal("scan"); return; }
   else if(act==="portion-set"){ ui.unit="g"; ui.qty=null; ui.portion=+el.dataset.v; const it=allItems().find(p=>p.id===(ui.modal&&ui.modal.payload)); if(it){ amtRefresh(it); return; } }
+  else if(act==="amt-mode"){
+    // Umschalter in der zugeklappten Leiste: Einheit ↔ Gramm
+    const it=allItems().find(p=>p.id===el.dataset.id); if(!it) return;
+    if(el.dataset.v==="g"){ if(ui.unit!=="g"){ ui.lastUnit=ui.unit; ui.lastQty=ui.qty; ui.unit="g"; ui.qty=null; } }
+    else if(ui.unit==="g"){ const u=amtAlt(it); ui.unit=u.k; ui.qty=ui.lastUnit===u.k&&ui.lastQty?ui.lastQty:1; ui.portion=Math.round(u.g*ui.qty); }
+    amtRefresh(it); return;
+  }
   else if(act==="unit-set"||act==="qty"){
     const it=allItems().find(p=>p.id===el.dataset.id); if(!it) return;
     const us=unitsFor(it);
     if(act==="unit-set"){
       const u=us.find(x=>x.k===el.dataset.k); if(!u) return;
-      ui.unit=u.k;
-      if(u.k==="g"){ ui.qty=null; ui.portion=Math.round(ui.portion||100); }
-      else { ui.qty=1; ui.portion=u.g; }
+      if(u.k==="g"){ if(ui.unit!=="g"){ ui.lastUnit=ui.unit; ui.lastQty=ui.qty; } ui.unit="g"; ui.qty=null; ui.portion=Math.round(ui.portion||100); }
+      else { ui.unit=u.k; ui.qty=1; ui.portion=u.g; }
     } else {
       const u=us.find(x=>x.k===ui.unit); if(!u) return;
       // halbe Schritte (½ Teller), bei kleinen Einheiten (Stückchen, Bonbon) ganze
