@@ -25,16 +25,22 @@ function weightView(){
     return [x,y];
   });
   const line = pts.map(p=>p.join(",")).join(" ");
-  const sel = (ui.wpick && ws.findIndex(w=>w.date===ui.wpick)>=0) ? ws.findIndex(w=>w.date===ui.wpick) : (ws.length? ws.length-1 : -1);
+  const sel = ui.wpick ? ws.findIndex(w=>w.date===ui.wpick) : -1;
   const selW = sel>=0 ? ws[sel] : null;
   const hits = ws.length ? pts.map((p,i)=>{ const x0 = i===0 ? 0 : (pts[i-1][0]+p[0])/2; const x1 = i===pts.length-1 ? W : (p[0]+pts[i+1][0])/2; return `<rect x="${x0}" y="0" width="${Math.max(1,x1-x0)}" height="${H}" fill="transparent" data-act="w-pick" data-v="${ws[i].date}"/>`; }).join("") : "";
-  const dots = pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===sel?5:2.2}" fill="${tc("accent")}"/>`).join("");
+  const dots = pts.map((p,i)=>i===sel ? "" : `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="${tc("accent")}"/>`).join("");
+  // Ausgewählter Eintrag: senkrechte Linie + hohler Punkt (wie ein "Fadenkreuz")
+  const selMark = (selW && pts[sel]) ? `<line x1="${pts[sel][0]}" y1="0" x2="${pts[sel][0]}" y2="${H}" stroke="${tc("accent")}" stroke-width="1.5"/><circle cx="${pts[sel][0]}" cy="${pts[sel][1]}" r="6" fill="${tc("surface")}" stroke="${tc("accent")}" stroke-width="3"/>` : "";
   const dirTxt = (d,label)=>{ if(d===null) return `<div class="wdelta"><b>–</b><span class="sub">${label}</span></div>`; const s=d>0?"+":""; const w=d>0.05?"zugenommen":d<-0.05?"abgenommen":"unverändert"; return `<div class="wdelta"><b>${s}${de(d,1)} kg</b><span class="sub">${label.replace("X",w)}</span></div>`; };
   const weightAt = dd => { const c=all.filter(w=>w.date<=dd); return c.length? c[c.length-1].kg : null; };
   const b30 = weightAt(addDays(todayIso(),-30)), b90 = weightAt(addDays(todayIso(),-90));
   const d30 = (all.length && b30!==null) ? +(last-b30).toFixed(1) : null;
   const d90 = (all.length && b90!==null) ? +(last-b90).toFixed(1) : null;
-  const picked = selW ? `<div class="row space mt-1"><b class="t-l">${de(selW.kg,1)} kg</b><span class="sub">${selW.date.split("-").reverse().join(".")}</span></div>` : `<div class="sub">Noch keine Einträge</div>`;
+  const picked = ws.length ? "" : `<div class="sub">Noch keine Einträge</div>`;
+  const hm = state.profile.height/100;
+  const head = selW
+    ? `<div class="row baseline"><b class="t-l">${de(selW.kg,1)} kg</b><span class="sub">BMI ${de(selW.kg/(hm*hm),1)} · <b style="color:var(--accent)">${selW.date.split("-").reverse().join(".")}</b></span></div>`
+    : `<div class="row baseline"><b class="t-l">${de(avg,1)} kg</b><span class="sub">BMI ${de(bmi(),1)} · Schnitt</span></div>`;
   const area = pts.length ? `M${pts[0][0]},${H-pad} L${line.replace(/ /g," L")} L${pts[pts.length-1][0]},${H-pad} Z` : "";
   const gy = H-pad - ((goal-min)/(max-min))*(H-2*pad);
   return `<div class="card">
@@ -63,12 +69,12 @@ function weightView(){
     <div class="seg my-3">
       ${[["7","Tage"],["30","Wochen"],["90","Monate"],["365","Jahre"]].map(([id,l])=>`<button class="${ui.wrange===id?"on":""}" data-act="wrange" data-v="${id}">${l}</button>`).join("")}
     </div>
-    <div class="row baseline"><b class="t-l">${de(avg,1)} kg</b><span class="sub">BMI ${de(bmi(),1)} · Schnitt</span></div>
+    ${head}
     <svg class="spark tall" viewBox="0 0 ${W} ${H}">
       <path d="${area}" fill="${tc("accent")}" opacity=".12"/>
       <line x1="8" y1="${gy}" x2="312" y2="${gy}" stroke="${tc("accent")}" stroke-dasharray="4 4" stroke-width="1"/>
       <polyline fill="none" stroke="${tc("accent")}" stroke-width="3" points="${line}"/>
-      ${dots}${hits}
+      ${dots}${selMark}${hits}
     </svg>
     ${picked}
     <div class="wdeltas">${dirTxt(d30,"In 30 Tagen X")}${dirTxt(d90,"In 90 Tagen X")}</div>

@@ -733,7 +733,7 @@ document.getElementById("app").addEventListener("click", e=>{
     save(); toast("Messung gespeichert");
   }
   else if(act==="wrange"){ ui.wrange=el.dataset.v; ui.wpick=null; }
-  else if(act==="w-pick"){ ui.wpick=el.dataset.v; }
+  else if(act==="w-pick"){ ui.wpick = ui.wpick===el.dataset.v ? null : el.dataset.v; }
   else if(act==="plan-step"){
     const key="p-"+el.dataset.id+"-"+el.dataset.i;
     day().checks[key]=day().checks[key]?0:1;
