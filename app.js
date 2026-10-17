@@ -13,7 +13,7 @@ function weekStart(s){ const d=parseIso(s); const off=(d.getDay()+6)%7; d.setDat
 function labelDate(s){
   if(s===todayIso()) return "Heute";
   if(s===addDays(todayIso(),-1)) return "Gestern";
-  return parseIso(s).toLocaleDateString("de-DE",{weekday:"short", day:"numeric", month:"short"});
+  return parseIso(s).toLocaleDateString(LOC,{weekday:"short", day:"numeric", month:"short"});
 }
 function uid(){ return Math.random().toString(36).slice(2,9); }
 function blankDay(){ return { meals:[], water:0, checks:{}, taken:{}, routine:{} }; }
@@ -198,7 +198,7 @@ function syncAuto(s){
   d.checks.sport = state.workouts.some(w=>w.date===s) || d.checks.sport ? 1 : 0;
 }
 
-function de(v,d){ d=d||0; return Number(v||0).toLocaleString("de-DE",{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function de(v,d){ d=d||0; return Number(v||0).toLocaleString(LOC,{minimumFractionDigits:d,maximumFractionDigits:d}); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 function glyph(name){
@@ -406,6 +406,7 @@ function renderModal(){
   if(type==="scan") inner=scanSheet();
   if(type==="product") inner=productSheet(payload);
   if(type==="area") inner=areaSheet(payload);
+  if(type==="lang") inner=`<h2>Sprache</h2><div class="group mt-3">${Object.keys(LANGS).map(k=>`<button class="g-row" data-act="set-lang" data-v="${k}"><div class="grow notr"><b>${LANGS[k]}</b></div>${k===LANG?"✓":""}</button>`).join("")}</div>`;
   if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein. Berechnet aus Körper, Alltag, Training pro Woche und Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
   if(type==="pref") inner=prefSheet(payload);
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
@@ -642,6 +643,7 @@ document.getElementById("app").addEventListener("click", e=>{
     p.weight=+ui.draftKg; ui.modal=null; save(); toast("Gewicht gespeichert");
   }
   else if(act==="toggle"){ p[el.dataset.k]=!p[el.dataset.k]; save(); }
+  else if(act==="set-lang"){ p.lang=el.dataset.v; save(); location.reload(); return; }
   else if(act==="theme"){ p.theme=el.dataset.v; save(); applyTheme(); }
   else if(act==="start-empty"){
     ui.workout={ name:"Training", t0:Date.now(), routineId:null, exercises:[] };

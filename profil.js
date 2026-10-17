@@ -29,6 +29,7 @@ function renderProfil(){
     <div class="group">
       <div class="g-row"><div class="grow"><b>Darstellung</b></div>
         <div class="seg seg-theme" role="radiogroup" aria-label="Darstellung">${[["light","Hell"],["dark","Dunkel"],["system","System"]].map(([v,l])=>`<button class="${(p.theme||"system")===v?"on":""}" role="radio" aria-checked="${(p.theme||"system")===v}" data-act="theme" data-v="${v}">${l}</button>`).join("")}</div></div>
+      <button class="g-row" data-act="open" data-type="lang"><div class="grow"><b>Sprache</b></div><span class="sub notr">${LANGS[LANG]}</span><span class="chev">›</span></button>
       <button class="g-row" data-act="toggle" data-k="calories"><div class="grow"><b>Kalorien im Tagebuch</b></div>${tog(p.calories)}</button>
       ${PARTNERS_ENABLED?`<button class="g-row" data-act="toggle" data-k="affiliates"><div class="grow"><b>Partnerlinks</b><div class="sub">Anzeige, Score bleibt unabhängig</div></div>${tog(p.affiliates)}</button>`:""}
     </div>

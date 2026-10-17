@@ -236,7 +236,7 @@ function restDays(){
 }
 function monthBlock(year, month){
   const first=new Date(year, month, 1);
-  const label=first.toLocaleDateString("de-DE",{month:"long", year:"numeric"});
+  const label=first.toLocaleDateString(LOC,{month:"long", year:"numeric"});
   const pad=(first.getDay()+6)%7;
   const count=new Date(year, month+1, 0).getDate();
   const heads=["Mo","Di","Mi","Do","Fr","Sa","So"].map(d=>`<div class="sub">${d}</div>`).join("");
@@ -264,7 +264,7 @@ function renderCalendar(){
         const s=iso(new Date(y,m,d));
         cells+=`<i class="sq ${workoutOn(s).length?"on":""}"></i>`;
       }
-      return `<div><div class="sub mb-1">${first.toLocaleDateString("de-DE",{month:"short"})}</div><div class="mini">${cells}</div></div>`;
+      return `<div><div class="sub mb-1">${first.toLocaleDateString(LOC,{month:"short"})}</div><div class="mini">${cells}</div></div>`;
     }).join("")}</div>`;
   } else {
     const years=[now.getFullYear(), now.getFullYear()-1];

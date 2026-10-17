@@ -172,7 +172,7 @@ function exSessions(id){
   return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
 }
 const kgTxt=v=>de(v, v%1?1:0);
-function dShort(s){ return parseIso(s).toLocaleDateString("de-DE",{day:"numeric", month:"short"}); }
+function dShort(s){ return parseIso(s).toLocaleDateString(LOC,{day:"numeric", month:"short"}); }
 
 // ---------- Liste (Dashboard, Auswahl im Training, Routine) ----------
 function exAllIds(){

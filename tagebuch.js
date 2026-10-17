@@ -5,14 +5,14 @@ function renderHeute(){
   return `<div class="scroll pad">
     <div class="topbar center">
       <button class="navd" data-act="shift" data-d="-1" aria-label="Tag zurück">‹</button>
-      <div class="t-c"><h1 class="t-l">${labelDate(state.date)}</h1><div class="sub">${state.date===todayIso()?parseIso(state.date).toLocaleDateString("de-DE",{weekday:"short",day:"numeric",month:"short"})+" · ":""}${goalName()}${state.date!==todayIso()?` · <button class="link" data-act="today">zurück</button>`:""}</div></div>
+      <div class="t-c"><h1 class="t-l">${labelDate(state.date)}</h1><div class="sub">${state.date===todayIso()?parseIso(state.date).toLocaleDateString(LOC,{weekday:"short",day:"numeric",month:"short"})+" · ":""}${goalName()}${state.date!==todayIso()?` · <button class="link" data-act="today">zurück</button>`:""}</div></div>
       <button class="navd" data-act="shift" data-d="1" aria-label="Tag vor" ${state.date>=todayIso()?"disabled":""}>›</button>
     </div>
     <div class="card">
       <div class="sum">
-        <div class="side"><div class="num">${showKcal()?tot.kcal.toLocaleString("de-DE"):"–"}</div><div class="lbl">Gegessen</div></div>
-        <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString("de-DE"):"–"}</b><span>${showKcal()?"Übrig":"Kalorien aus"}</span></div></div>
-        <div class="side"><div class="num">${showKcal()?goalK.toLocaleString("de-DE"):"–"}</div><div class="lbl">Ziel</div></div>
+        <div class="side"><div class="num">${showKcal()?tot.kcal.toLocaleString(LOC):"–"}</div><div class="lbl">Gegessen</div></div>
+        <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString(LOC):"–"}</b><span>${showKcal()?"Übrig":"Kalorien aus"}</span></div></div>
+        <div class="side"><div class="num">${showKcal()?goalK.toLocaleString(LOC):"–"}</div><div class="lbl">Ziel</div></div>
       </div>
       <div class="macros">
         ${[["Kohlenhydrate", tot.carbs, t.carbs, "carbs"],["Eiweiß", tot.protein, t.protein, "protein"],["Fett", tot.fat, t.fat, "fat"]].map(([name,val,goal,col])=>`<div class="mac" style="--mc:var(--c-${col})"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
@@ -29,7 +29,7 @@ function renderHeute(){
           <div class="bubble">${marks[slot.id]}</div>
           <button class="grow" data-act="meal-open" data-slot="${slot.id}">
             <div class="meal-name">${slot.name} <span class="chev">›</span></div>
-            <div class="sub">${showKcal()?k.toLocaleString("de-DE")+" / "+goal.toLocaleString("de-DE")+" kcal":items.length+" Einträge"}</div>
+            <div class="sub">${showKcal()?k.toLocaleString(LOC)+" / "+goal.toLocaleString(LOC)+" kcal":items.length+" Einträge"}</div>
             ${showKcal()?`<div class="mbar"><i style="width:${Math.min(100,goal?k/goal*100:0)}%"></i></div>`:""}
           </button>
           <button class="plus dark" data-act="open" data-type="scan" data-slot="${slot.id}" aria-label="${slot.name}: Essen hinzufügen">+</button>
@@ -58,7 +58,7 @@ function dayBlock(){
       </div>
       <div class="meal-row">
         <div class="bubble">👟</div>
-        <div class="grow"><div class="meal-name">Schritte</div><div class="sub">${(d.steps||0).toLocaleString("de-DE")} / ${stepGoal.toLocaleString("de-DE")}</div>${bar((d.steps||0)/stepGoal)}</div>
+        <div class="grow"><div class="meal-name">Schritte</div><div class="sub">${(d.steps||0).toLocaleString(LOC)} / ${stepGoal.toLocaleString(LOC)}</div>${bar((d.steps||0)/stepGoal)}</div>
         <button class="plus dark" data-act="open" data-type="steps" aria-label="Schritte eintragen">+</button>
       </div>
       <div class="meal-row">
@@ -92,7 +92,7 @@ function renderMealPage(){
   const marks={breakfast:"☕",lunch:"🍝",dinner:"🥗",snack:"🍎"};
   return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button><b>${slot.name}</b></div>
     <div class="mealhero s-${slot.id}"><span>${marks[slot.id]}</span></div>
-    <div class="mgrid"><div><b>${tot.kcal.toLocaleString("de-DE")} kcal</b><span>Kalorien</span></div><div><b>${f(tot.carbs)}</b><span>Kohlenhydrate</span></div><div><b>${f(tot.protein)}</b><span>Eiweiß</span></div><div><b>${f(tot.fat)}</b><span>Fett</span></div></div>
+    <div class="mgrid"><div><b>${tot.kcal.toLocaleString(LOC)} kcal</b><span>Kalorien</span></div><div><b>${f(tot.carbs)}</b><span>Kohlenhydrate</span></div><div><b>${f(tot.protein)}</b><span>Eiweiß</span></div><div><b>${f(tot.fat)}</b><span>Fett</span></div></div>
     ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}${m.portion} g</div></div><span>${line(p,m.portion).kcal} kcal</span><i>›</i></button>`).join("")||`<p class="sub li">Noch nichts eingetragen.</p>`}
     <button class="yfertig" data-act="open" data-type="scan" data-slot="${slot.id}">Mehr hinzufügen</button>`;
 }

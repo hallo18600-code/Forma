@@ -38,7 +38,7 @@ async function bcLookup(code){
 function aiMic(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition; if(!SR) return;
   const ta=document.getElementById("ai-text"); if(ta) ui.aiText=ta.value;
-  const r=new SR(); r.lang="de-DE"; ui.listening=true; render();
+  const r=new SR(); r.lang=LOC; ui.listening=true; render();
   r.onresult=e=>{ ui.aiText=((ui.aiText||"")+" "+e.results[0][0].transcript).trim(); };
   r.onend=r.onerror=()=>{ ui.listening=false; render(); };
   try{ r.start(); }catch(e){ ui.listening=false; render(); }

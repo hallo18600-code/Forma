@@ -81,7 +81,7 @@ function dayKcal(s){
 }
 function stepsSheet(){
   const goal=state.profile.stepGoal||10000, n=day().steps||0;
-  return `<h2>Schritte</h2><p class="sub">${labelDate(state.date)} · Ziel ${goal.toLocaleString("de-DE")}</p>
+  return `<h2>Schritte</h2><p class="sub">${labelDate(state.date)} · Ziel ${goal.toLocaleString(LOC)}</p>
     <div class="field"><label>Schritte</label><input id="st-input" type="number" inputmode="numeric" value="${n||""}" placeholder="z. B. 8500"></div>
     <div class="opts">${[500,1000,2500].map(v=>`<button class="chip" data-act="steps-add" data-v="${v}">+${v}</button>`).join("")}</div>
     <button class="pill primary w-full" data-act="steps-save">Speichern</button>
@@ -89,7 +89,7 @@ function stepsSheet(){
     <div class="opts">${[6000,8000,10000,12000].map(v=>`<button class="chip ${goal===v?"on":""}" data-act="step-goal" data-v="${v}">${v/1000}k</button>`).join("")}</div>`;
 }
 function stepsCard(){
-  const goal=state.profile.stepGoal||10000, fmt=v=>Math.round(v).toLocaleString("de-DE");
+  const goal=state.profile.stepGoal||10000, fmt=v=>Math.round(v).toLocaleString(LOC);
   const sel=(state.days[state.date]||{}).steps||0, pct=Math.min(1,sel/goal);
   const pts=Array.from({length:14},(_,i)=>addDays(state.date,i-13)).map((s,i)=>({s,i,v:(state.days[s]||{}).steps||0}));
   const last7=pts.slice(7).filter(q=>q.v>0), avg=last7.length?last7.reduce((a,q)=>a+q.v,0)/last7.length:0;

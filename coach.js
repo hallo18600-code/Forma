@@ -318,7 +318,7 @@ function hautAdvice(a){
   const lead=list.map(st=>st==="Unreinheiten"?(a.art||st):st==="Rötung"?(a.rot||st):st).join(" + ");
   // Mehrere „…: Hautarzt.“-Hinweise zu einem Satz zusammenfassen
   const doc=notes.filter(x=>/: Hautarzt\.$/.test(x)).map(x=>x.replace(/: Hautarzt\.$/,""));
-  if(doc.length>1) notes=notes.filter(x=>!/: Hautarzt\.$/.test(x)).concat(`Hautarzt, wenn: ${doc.map((x,i)=>i?x[0].toLowerCase()+x.slice(1):x).join(" oder ")}.`);
+  if(doc.length>1) notes=notes.filter(x=>!/: Hautarzt\.$/.test(x)).concat(`Hautarzt, wenn: ${doc.join(" · ")}`);
   return {lead:`Hautbild ${typ.toLowerCase()} · ${lead}`, routine, items, note:notes.slice(0,2).join(" ")};
 }
 
@@ -617,7 +617,7 @@ function rMonth(y,mo){
   const heads=["Mo","Di","Mi","Do","Fr","Sa","So"].map(d=>`<div class="sub">${d}</div>`).join("");
   let cells="<div></div>".repeat(pad);
   for(let d=1;d<=count;d++){ const s=iso(new Date(y,mo,d)), r=rDone(s); cells+=`<button class="calcell" data-act="r-pick" data-v="${s}"><div class="cdot ${rState(s)} ${s===todayIso()?"today":""}">${d}</div><div class="cname">${r.c?r.c+"/"+r.n:""}</div></button>`; }
-  return `<h2 class="month-h">${first.toLocaleDateString("de-DE",{month:"long",year:"numeric"})}</h2><div class="calgrid">${heads}${cells}</div>`;
+  return `<h2 class="month-h">${first.toLocaleDateString(LOC,{month:"long",year:"numeric"})}</h2><div class="calgrid">${heads}${cells}</div>`;
 }
 function renderRoutineDash(){
   const m=ui.rcal||"day", now=new Date(), rt=state.coach.routine||[], tdy=rDone(todayIso());
@@ -635,7 +635,7 @@ function renderRoutineDash(){
       const first=new Date(y,mo,1), pad=(first.getDay()+6)%7, count=new Date(y,mo+1,0).getDate();
       let cells=Array.from({length:pad},()=>`<i class="sq empty"></i>`).join("");
       for(let d=1;d<=count;d++) cells+=`<i class="sq ${rState(iso(new Date(y,mo,d)))}"></i>`;
-      return `<div><div class="sub mb-1">${first.toLocaleDateString("de-DE",{month:"short"})}</div><div class="mini">${cells}</div></div>`;
+      return `<div><div class="sub mb-1">${first.toLocaleDateString(LOC,{month:"short"})}</div><div class="mini">${cells}</div></div>`;
     }).join("")}</div>`; }
   return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button>
     <div class="seg grow">${modes.map(([id,l])=>`<button class="${m===id?"on":""}" data-act="rcal-mode" data-v="${id}">${l}</button>`).join("")}</div></div>
@@ -696,7 +696,7 @@ function areaSheet(id){
   const rows=[];
   if(r&&r.am){
     const steps=l=>`<ol class="steps">${l.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>`;
-    rows.push(fold("☀️","Morgens",r.am.length+" Schritte",steps(r.am)), fold("🌙","Abends",r.pm.length+" Schritte",steps(r.pm)));
+    rows.push(fold("☀️","Morgens","in "+r.am.length+" Schritten",steps(r.am)), fold("🌙","Abends","in "+r.pm.length+" Schritten",steps(r.pm)));
   }
   if(r&&r.times) rows.push(fold("🕒","Dein Zeitplan","",`<ol class="steps plain">${r.times.map(([e,l,t])=>`<li>${e} ${l} <b>${t}</b></li>`).join("")}</ol>`));
   let grp="";

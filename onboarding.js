@@ -104,7 +104,7 @@ function obSteps(){
 function renderWelcome(){
   return `<div class="screen wlscreen">
     <div class="scroll wl">
-      <div class="logo">health maxxing</div>
+      <div class="row space"><div class="logo">health maxxing</div><button class="chip notr" data-act="open" data-type="lang" aria-label="Sprache">🌐 ${LANG.toUpperCase()}</button></div>
       <h1 class="wl-h">Alles für deine Gesundheit<br>in einer App.</h1>
       <p class="wl-sub">Essen, Training, Haut, Schlaf und mehr.</p>
       <div class="wl-grid">${OB_FEATURES.map(([e,t])=>`<div class="wl-tile"><span>${e}</span><b>${t}</b></div>`).join("")}</div>
