@@ -309,7 +309,7 @@ function hautAdvice(a){
   const lead=list.map(st=>st==="Unreinheiten"?(a.art||st):st==="Rötung"?(a.rot||st):st).join(" + ");
   // Mehrere „…: Hautarzt.“-Hinweise zu einem Satz zusammenfassen
   const doc=notes.filter(x=>/: Hautarzt\.$/.test(x)).map(x=>x.replace(/: Hautarzt\.$/,""));
-  if(doc.length>1) notes=notes.filter(x=>!/: Hautarzt\.$/.test(x)).concat(`Hautarzt, wenn: ${doc.join(" oder ")}.`);
+  if(doc.length>1) notes=notes.filter(x=>!/: Hautarzt\.$/.test(x)).concat(`Hautarzt, wenn: ${doc.map((x,i)=>i?x[0].toLowerCase()+x.slice(1):x).join(" oder ")}.`);
   return {lead:`Hautbild ${typ.toLowerCase()} · ${lead}`, routine, items, note:notes.slice(0,2).join(" ")};
 }
 
