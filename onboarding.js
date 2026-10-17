@@ -12,11 +12,13 @@ const OB_FEATURES = [
 ];
 const OB_TOPICS = [["gesundheit","Gesundheit"],["aussehen","Aussehen"],["haut","Haut"],["haare","Haare"],["schlaf","Schlaf"]];
 function hasVal(v){ return Array.isArray(v) ? v.length>0 : v!=null && v!==""; }
-function toggleMulti(arr, v, none){
-  arr = (arr||[]).slice();
+// pick = höchstens so viele Antworten; bei mehr fällt die älteste raus
+function toggleMulti(arr, v, none, pick){
+  arr = [].concat(arr||[]);
   if(arr.includes(v)) return arr.filter(x=>x!==v);
   if(v===none) return [v];
-  return arr.filter(x=>x!==none).concat(v);
+  const out=arr.filter(x=>x!==none).concat(v);
+  return pick&&out.length>pick?out.slice(-pick):out;
 }
 // Welche Themen im Fragebogen abgefragt werden: was unter "verbessern" gewählt wurde, plus das Hauptziel.
 // Der Rest bleibt im Coach offen und kann dort später beantwortet werden.
@@ -69,7 +71,7 @@ function obSteps(){
     opts:list([["Krafttraining","Kraft","🏋️"],["Ausdauer","Ausdauer","🏃"],["Beides","Beides","⚡"],["Weiß ich noch nicht","Weiß ich noch nicht","🤔"]]),
     get:()=>p.trainType, set:v=>{ p.trainType=v; }});
   // Schrittziel wird aus dem Alltag abgeleitet (änderbar im Verlauf)
-  const quizStep=(t,title,q,extra)=>S.push(Object.assign({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, none:q.none,
+  const quizStep=(t,title,q,extra)=>S.push(Object.assign({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, none:q.none, pick:q.pick,
       opts:q.opts.map(o=>({v:o,l:o,e:(q.emo||{})[o]})), get:()=>obAns(t)[q.k], set:v=>{ obAns(t)[q.k]=v; }},extra||{}));
   const gq=coachQuiz("gesundheit"), veg=["Vegan","Vegetarisch"].includes(obAns("gesundheit").stil);
   quizStep("gesundheit","Ernährung",gq.find(q=>q.k==="stil"),{opt:0,req:1,
@@ -145,7 +147,7 @@ function renderOnboard(){
       </div><div class="ob-hint" id="ob-hint">${obNumHint(st.k)}</div>`;
   } else if(st.kind==="single"||st.kind==="multi"){
     const cur=st.get(), multi=st.kind==="multi";
-    body=`${multi?`<div class="ob-multi">Mehrere möglich</div>`:""}<div class="ob-opts ${st.opts.length>5?"two":""}">${st.opts.map(o=>obOpt(o, multi?(cur||[]).includes(o.v):cur===o.v, multi)).join("")}</div>`;
+    body=`${multi?`<div class="ob-multi">${st.pick?`Bis zu ${st.pick} auswählen`:"Mehrere möglich"}</div>`:""}<div class="ob-opts ${st.opts.length>5?"two":""}">${st.opts.map(o=>obOpt(o, multi?(cur||[]).includes(o.v):cur===o.v, multi)).join("")}</div>`;
     if(st.req) can=hasVal(cur);
   } else if(st.kind==="plan"){
     body=renderObPlan();
@@ -233,7 +235,7 @@ function obClampNum(k){
 }
 function obPick(v){
   const st=obSteps()[state.step]; if(!st||!st.opts) return;
-  if(st.kind==="multi"){ st.set(toggleMulti(st.get(),v,st.none)); save(); return; }
+  if(st.kind==="multi"){ st.set(toggleMulti(st.get(),v,st.none,st.pick)); save(); return; }
   st.set(v); save();   // nur auswählen – weiter geht es erst mit "Weiter"
 }
 function obNext(){

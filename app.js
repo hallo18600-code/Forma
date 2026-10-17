@@ -123,7 +123,7 @@ function foodFocus(){
   if((au.abend||[]).includes("Salziges / Fast Food")||au.bloat==="Oft") f.add("Weniger Salz");
   if((e.huerde||[]).includes("Heißhunger")||e.energie==="Ständig müde") f.add("Sättigung");
   if(s.kaffee==="Oft"||(s.ein&&s.ein!=="Geht schnell")) f.add("Koffein am Abend");
-  if(h.stoert==="Unreinheiten"&&state.profile.goal!=="skin") f.add("Zucker & Haut");
+  if([].concat(h.stoert||[]).includes("Unreinheiten")&&state.profile.goal!=="skin") f.add("Zucker & Haut");
   return [...f];
 }
 const RED_MEAT=["rind","schwein","salami","wurst","schinken","speck","bacon","hack","doner","leberkas","steak","kalb","lamm"];
@@ -135,10 +135,10 @@ function scoreCare(item){
   if((item.actives||[]).includes("UV-Filter")) parts.push(["Lichtschutz",8]);
   const ha=state.coach.answers.haut||{}, act=item.actives||[];
   if(item.fragrance && ha.empf==="Ja") parts.push(["Du reagierst auf Duft",-10]);
-  const focus={"Unreinheiten":["Niacinamid","Azelainsäure","Salicylsäure","Zinkoxid"],"Glänzt / große Poren":["Niacinamid","Salicylsäure"],"Rötung":["Azelainsäure","Ceramides"],"Trockenheit":["Ceramides"],"Pigmentflecken":["Vitamin C","Azelainsäure","Niacinamid","UV-Filter"],"Wirkt stumpf":["Vitamin C","Niacinamid"],"Erste Fältchen":["Retinol","Vitamin C","UV-Filter"]}[ha.stoert]||[];
+  const FOC={"Unreinheiten":["Niacinamid","Azelainsäure","Salicylsäure","Zinkoxid"],"Glänzt / große Poren":["Niacinamid","Salicylsäure"],"Rötung":["Azelainsäure","Ceramides"],"Trockenheit":["Ceramides"],"Pigmentflecken":["Vitamin C","Azelainsäure","Niacinamid","UV-Filter"],"Wirkt stumpf":["Vitamin C","Niacinamid"],"Erste Fältchen":["Retinol","Vitamin C","UV-Filter"]}; const focus=[].concat(ha.stoert||[]).flatMap(x=>FOC[x]||[]);
   if(focus.some(x=>act.includes(x))) parts.push(["Passt zu deinem Fokus",8]);
   if((ha.bild==="Sensibel"||ha.empf==="Ja")&&(act.includes("Retinol")||act.includes("Salicylsäure"))) parts.push(["Langsam einschleichen, kann reizen",-6]);
-  if((ha.stoert==="Rötung"||ha.bild==="Sensibel")&&item.alcohol) parts.push(["Alkohol reizt empfindliche Haut",-8]);
+  if(([].concat(ha.stoert||[]).includes("Rötung")||ha.bild==="Sensibel")&&item.alcohol) parts.push(["Alkohol reizt empfindliche Haut",-8]);
   if(ha.sonne&&ha.sonne!=="Täglich"&&act.includes("UV-Filter")) parts.push(["Du brauchst mehr Sonnenschutz",6]);
   return finish(parts);
 }
@@ -591,7 +591,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="coach-answer"){
     const A=state.coach.answers[el.dataset.topic]=state.coach.answers[el.dataset.topic]||{};
     const qd=coachQuiz(el.dataset.topic).find(q=>q.k===el.dataset.k);
-    A[el.dataset.k]=qd&&qd.multi?toggleMulti(A[el.dataset.k],el.dataset.v,qd.none):el.dataset.v; save();
+    A[el.dataset.k]=qd&&qd.multi?toggleMulti(A[el.dataset.k],el.dataset.v,qd.none,qd.pick):el.dataset.v; save();
   }
   else if(act==="coach-ready"){ save(); }
   else if(act==="coach-reset"){ delete state.coach.answers[el.dataset.topic]; save(); }

@@ -94,10 +94,9 @@ function coachQuiz(id){
   const q = {
     haut:[
       {k:"bild", q:"Wie fühlt sich die Haut an?", opts:["Trocken","Fettig","Gemischt","Normal","Sensibel"]},
-      {k:"stoert", q:"Was stört dich am meisten?", opts:["Unreinheiten","Glänzt / große Poren","Rötung","Trockenheit","Pigmentflecken","Wirkt stumpf","Erste Fältchen","Nichts Bestimmtes"]},
-      {k:"art", q:"Welche Unreinheiten?", opts:["Mitesser","Entzündete Pickel","Tiefe, schmerzhafte Knoten","Rote/braune Male"], emo:{"Mitesser":"⚫","Entzündete Pickel":"🔴","Tiefe, schmerzhafte Knoten":"⚠️","Rote/braune Male":"🟤"}, skip:a=>a.stoert!=="Unreinheiten"},
-      {k:"rot", q:"Wie zeigt sich die Rötung?", opts:["Brennt / spannt schnell","Wangen & Nase, oft mit Pickelchen","Schuppig an Nase / Brauen"], skip:a=>a.stoert!=="Rötung"},
-      {k:"hab", q:"Was hast du schon?", multi:true, none:"Nichts davon", opts:["Waschgel","Creme","Sonnencreme","Serum","Nichts davon"]},
+      {k:"stoert", q:"Was stört dich am meisten?", multi:true, pick:2, none:"Nichts Bestimmtes", opts:["Unreinheiten","Glänzt / große Poren","Rötung","Trockenheit","Pigmentflecken","Wirkt stumpf","Erste Fältchen","Nichts Bestimmtes"]},
+      {k:"art", q:"Welche Unreinheiten?", opts:["Mitesser","Entzündete Pickel","Tiefe, schmerzhafte Knoten","Rote/braune Male"], emo:{"Mitesser":"⚫","Entzündete Pickel":"🔴","Tiefe, schmerzhafte Knoten":"⚠️","Rote/braune Male":"🟤"}, skip:a=>![].concat(a.stoert||[]).includes("Unreinheiten")},
+      {k:"rot", q:"Wie zeigt sich die Rötung?", opts:["Brennt / spannt schnell","Wangen & Nase, oft mit Pickelchen","Schuppig an Nase / Brauen"], skip:a=>![].concat(a.stoert||[]).includes("Rötung")},
       {k:"sonne", q:"Wie oft trägst du Sonnenschutz?", opts:["Täglich","Manchmal","Selten"]},
       {k:"empf", q:"Reagiert die Haut auf Duft oder neue Produkte?", opts:["Ja","Nein","Weiß nicht"], skip:a=>a.bild==="Sensibel"}
     ],
@@ -193,114 +192,125 @@ function sumRoutine(label,items,detail,fallback,extra){
 }
 
 // ---------- Haut ----------
-function hautAdvice(a){
-  const typ=a.bild||"Normal", st=a.stoert||"Nichts Bestimmtes", has=a.hab||[], w=state.profile.sex==="w";
-  const sens=typ==="Sensibel"||a.empf==="Ja", dry=typ==="Trocken", oily=typ==="Fettig", mixed=typ==="Gemischt";
-  const slow=sens||dry; // empfindliche/trockene Haut: Wirkstoffe langsamer einschleichen
-  let wash=dry||sens?"Reinigungsmilch":"Reinigungsgel";
-  let cream=dry?"Ceramid-Creme":oily?"Gel-Fluid":sens?"Panthenol-Creme":"leichte Creme";
-  let spf=sens?"Mineral-LSF 50":oily||mixed?"LSF 50 Fluid":"LSF 50";
-  const am=[], pm=[], spot=[]; let items=[], note="", photo=false; // photo = Wirkstoff macht sonnenempfindlicher
-  const n=slow?"2×":"3×";
-  const lsf=(d)=>tip("LSF 50",`${spf} jeden Morgen`,d||"Größter Schutz vor Hautalterung.",{product:"spf"});
-  const bha=()=>tip("BHA 2 %",`BHA 2 % abends, ${n}/Woche`,"Löst Talg in der Pore. Langsam steigern.",{product:"bha"});
+// Bis zu 2 Probleme. Jedes Problem liefert eigene Tipps + Schritte, danach wird zusammengeführt.
+function hautList(a){ const s=[].concat(a.stoert||[]).filter(x=>x&&x!=="Nichts Bestimmtes"); return s.length?s.slice(0,2):["Nichts Bestimmtes"]; }
+function hautProblem(st,a,c){
+  const {slow,sens,w}=c, n=slow?"2×":"3×", P={items:[],am:[],pm:[],spot:[],note:"",photo:false};
+  const lsf=(d)=>tip("LSF 50","LSF 50 jeden Morgen",d,{product:"spf"});
+  const bha=()=>tip("BHA 2 %",`BHA 2 % abends, ${n}/Woche`,"Löst Talg in der Pore.",{product:"bha"});
   const nia=(when,d)=>tip("Niacinamid",`Niacinamid 4–5 % ${when}`,d,{product:"nia"});
   const aze=(pct,d)=>tip("Azelainsäure",`Azelainsäure ${pct} abends${slow?", jeden 2. Tag":""}`,d,{product:"azelain"});
-
   if(st==="Unreinheiten"){
     const art=a.art||"Entzündete Pickel";
     if(art==="Mitesser"){
-      items=[bha(), nia("morgens","Weniger Talg, weniger Mitesser."), tip(null,"Nicht ausdrücken","Weitet die Pore, entzündet sich.")];
-      pm.push(`BHA (${n}/Wo.)`); am.push("Niacinamid"); photo=true;
-      note="Wirkt nach 6–12 Wochen. Sonst: Hautarzt.";
+      P.items=[bha(), nia("morgens","Weniger Talg, weniger Mitesser."), tip(null,"Nicht ausdrücken","Weitet die Pore.")];
+      P.pm.push("BHA"); P.am.push("Niacinamid"); P.photo=true; P.note="Wirkt nach 6–12 Wochen, sonst Hautarzt.";
     } else if(art==="Tiefe, schmerzhafte Knoten"){
-      items=[tip(null,"Zum Hautarzt","Knoten machen Narben. Braucht Rezept-Mittel.",{must:1}),
-        aze("10–20 %","Bis dahin: beruhigt, verstopft nichts."),
-        tip(null,"Nie ausdrücken","Sitzen zu tief, gibt Narben.",{must:1})];
-      pm.push("Azelainsäure");
+      P.items=[tip(null,"Zum Hautarzt","Knoten machen Narben, brauchen Rezept-Mittel.",{must:1}),
+        aze("10–20 %","Überbrückt bis zum Termin."), tip(null,"Nie ausdrücken","Gibt Narben.",{must:1})];
+      P.pm.push("Azelainsäure");
     } else if(art==="Rote/braune Male"){
-      items=[lsf("UV macht Male dunkler."), aze("10–20 %","Hellt Male auf, stoppt neue Pickel."), nia("morgens","Bremst neue Verfärbung.")];
-      am.push("Niacinamid"); pm.push("Azelainsäure");
-      note="Male verblassen in 3–6 Monaten.";
+      P.items=[lsf("UV macht Male dunkler."), aze("10–20 %","Hellt Male auf."), nia("morgens","Bremst neue Verfärbung.")];
+      P.am.push("Niacinamid"); P.pm.push("Azelainsäure"); P.note="Male verblassen in 3–6 Monaten.";
     } else {
-      items=[aze(sens?"10 %":"10–20 %","Gegen Bakterien und Entzündung. Kribbeln anfangs normal."),
-        tip("Zink punktuell","Zinksalbe nur auf entzündete Pickel","Trocknet aus. Flächig verstopft sie Poren.",{product:"zink"}),
-        tip(null,"Nicht ausdrücken","Gibt Male und tiefere Entzündung.")];
-      pm.push("Azelainsäure"); spot.push("Zink auf Pickel");
-      note="Nach 8–12 Wochen keine Besserung: Hautarzt.";
+      P.items=[aze(sens?"10 %":"10–20 %","Gegen Bakterien und Entzündung."),
+        tip("Zink punktuell","Zinksalbe nur auf entzündete Pickel","Flächig verstopft sie Poren.",{product:"zink"}),
+        tip(null,"Nicht ausdrücken","Gibt Male.")];
+      P.pm.push("Azelainsäure"); P.spot.push("Zink auf Pickel"); P.note="Nach 8–12 Wochen nicht besser: Hautarzt.";
     }
   } else if(st==="Glänzt / große Poren"){
-    spf="LSF 50 Fluid";
-    items=[nia("morgens + abends","Weniger Talg, Poren wirken kleiner."), bha(),
-      tip("Mattes LSF-Fluid","LSF als Fluid statt Creme","Mattiert, ohne zu fetten.",{product:"spf"})];
-    am.push("Niacinamid"); pm.push("Niacinamid",`BHA (${n}/Wo.)`); photo=true;
-    note="Poren schrumpfen nicht, wirken aber kleiner.";
+    P.spf="LSF-Fluid";
+    P.items=[nia("morgens + abends","Weniger Glanz, Poren wirken kleiner."), bha(), tip(null,"LSF als Fluid statt Creme","Mattiert.")];
+    P.am.push("Niacinamid"); P.pm.push("Niacinamid","BHA"); P.photo=true;
   } else if(st==="Rötung"){
     const rot=a.rot||"Brennt / spannt schnell";
     if(rot==="Wangen & Nase, oft mit Pickelchen"){
-      spf="Mineral-LSF 50"; wash="Reinigungsmilch"; cream="Panthenol-Creme";
-      items=[tip("Azelainsäure",`Azelainsäure 10–15 % abends${slow?", jeden 2. Tag":""}`,"Gegen Rötung und Pickelchen.",{product:"azelain"}),
-        tip(null,"Hitze, Alkohol, Scharfes meiden","Typische Auslöser für Schübe."),
-        lsf("Sonne ist Auslöser Nr. 1.")];
-      pm.push("Azelainsäure");
-      note="Klingt nach Rosazea. Hautarzt hat stärkere Mittel (z. B. 15 %).";
+      P.spf="Mineral-LSF"; P.wash="Waschmilch"; P.cream="Panthenol-Creme";
+      P.items=[tip("Azelainsäure",`Azelainsäure 10–15 % abends${slow?", jeden 2. Tag":""}`,"Gegen Rötung und Pickelchen.",{product:"azelain"}),
+        tip(null,"Hitze, Alkohol, Scharfes meiden","Typische Auslöser."), lsf("Sonne ist Auslöser Nr. 1.")];
+      P.pm.push("Azelainsäure"); P.note="Klingt nach Rosazea: Hautarzt hat stärkere Mittel.";
     } else if(rot==="Schuppig an Nase / Brauen"){
-      cream="leichte Creme ohne Öle";
-      items=[tip("Anti-Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche drauf","Ketoconazol/Zink. 3 Min, dann abwaschen."),
-        tip(null,"Leichte Creme, keine Öle","Fett füttert den Hefepilz dahinter."),
-        tip(null,"Kopfhaut mitbehandeln","Oft dieselbe Ursache.")];
-      spot.push("Schuppen-Maske (2×/Wo.)");
-      note="Kommt in Schüben. Breitet es sich aus: Hautarzt.";
+      P.cream="Creme ohne Öle";
+      P.items=[tip("Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche drauf","Ketoconazol/Zink, 3 Min, abwaschen."),
+        tip(null,"Leichte Creme, keine Öle","Fett füttert den Hefepilz."), tip(null,"Kopfhaut mitbehandeln","Oft dieselbe Ursache.")];
+      P.spot.push("Schuppen-Maske 2×/Wo."); P.note="Breitet es sich aus: Hautarzt.";
     } else {
-      wash="Reinigungsmilch"; cream="Ceramid-Creme"; spf="Mineral-LSF 50";
-      items=[tip("Nur 3 Produkte","2 Wochen: nur Reinigung, Creme, LSF","Die Barriere braucht Ruhe."),
+      P.calm=true; P.wash="Waschmilch"; P.cream="Ceramid-Creme"; P.spf="Mineral-LSF";
+      P.items=[tip("Nur 3 Produkte","2 Wochen nur Reinigung, Creme, LSF","Die Barriere braucht Ruhe."),
         tip("Ceramide","Creme mit Ceramiden + Panthenol","Repariert die Barriere.",{product:"cerave"}),
         tip(null,"Lauwarm waschen, abtupfen","Hitze und Reiben reizen.")];
-      note="Bis es ruhig ist: keine Säuren, kein Retinol, kein Duft.";
     }
   } else if(st==="Trockenheit"){
-    wash="Reinigungsmilch"; cream="Ceramid-Creme";
-    items=[tip("Ceramide","Ceramid-Creme auf feuchte Haut","Hält das Wasser in der Haut.",{product:"cerave"}),
-      sens?tip("Panthenol","Abends Panthenol-Creme","Beruhigt und spendet Feuchtigkeit."):tip("Urea 5 %","Abends Creme mit 5 % Urea","Bindet Feuchtigkeit, glättet."),
-      tip(null,"Morgens nur Wasser","Jedes Waschen nimmt Fett weg.")];
-    pm.push(sens?"Panthenol-Creme":"Urea-Creme");
-    note="Rot, schuppig, juckt: Hautarzt (Ekzem?).";
+    P.wash="Waschmilch"; P.cream="Ceramid-Creme"; P.pmCream=sens?"Panthenol-Creme":"Urea-Creme 5 %";
+    P.items=[tip("Ceramide","Ceramid-Creme auf feuchte Haut","Hält das Wasser in der Haut.",{product:"cerave"}),
+      sens?tip("Panthenol","Abends Panthenol-Creme","Beruhigt, spendet Feuchtigkeit."):tip("Urea 5 %","Abends Creme mit 5 % Urea","Bindet Feuchtigkeit."),
+      tip(null,"Morgens nur Wasser","Waschen nimmt Fett weg.")];
+    P.note="Rot, schuppig, juckt: Hautarzt.";
   } else if(st==="Pigmentflecken"){
-    spf=sens?"getönter Mineral-LSF 50":"getönter LSF 50";
-    items=[tip("Getönter LSF 50",`${cap(spf)}, mittags nachcremen`,"Blockt auch sichtbares Licht.",{product:"spf"}),
-      sens?nia("morgens","Bremst neue Verfärbung."):tip("Vitamin C","Vitamin-C-Serum morgens","Hellt auf, stärkt den LSF.",{product:"vitc"}),
+    P.spf="getönter LSF";
+    P.items=[tip("Getönter LSF","Getönter LSF 50, mittags nachcremen","Blockt auch sichtbares Licht.",{product:"spf"}),
+      sens?nia("morgens","Bremst neue Verfärbung."):tip("Vitamin C","Vitamin-C-Serum morgens","Hellt auf.",{product:"vitc"}),
       aze("10–20 %","Hemmt die Farbstoffbildung.")];
-    am.push(sens?"Niacinamid":"Vitamin C"); pm.push("Azelainsäure");
-    note="Fleck wächst oder verändert sich: Hautarzt.";
+    P.am.push(sens?"Niacinamid":"Vitamin C"); P.pm.push("Azelainsäure"); P.note="Fleck wächst/verändert sich: Hautarzt.";
   } else if(st==="Wirkt stumpf"){
-    items=[sens?nia("morgens","Gleicht den Teint aus."):tip("Vitamin C","Vitamin-C-Serum morgens","Mehr Glow, schützt vor Radikalen.",{product:"vitc"}),
+    P.items=[sens?nia("morgens","Gleicht den Teint aus."):tip("Vitamin C","Vitamin-C-Serum morgens","Mehr Glow.",{product:"vitc"}),
       tip("Milchsäure",`Milchsäure 5–10 % abends, ${sens?"1×":"2×"}/Woche`,"Löst abgestorbene Schüppchen."),
-      tip(null,"Hyaluron auf feuchte Haut","Pralle Haut wirkt frischer.")];
-    am.push(sens?"Niacinamid":"Vitamin C"); pm.push(`Milchsäure (${sens?"1×":"2×"}/Wo.)`); photo=true;
+      tip(null,"Hyaluron auf feuchte Haut","Wirkt praller.")];
+    P.am.push(sens?"Niacinamid":"Vitamin C"); P.pm.push("Milchsäure"); P.photo=true;
   } else if(st==="Erste Fältchen"){
-    items=[sens?tip("Retinol","Retinol 0,1–0,2 %: Creme, Retinol, Creme","Sandwich reizt weniger. Langsam steigern.",{product:"retinol"})
+    P.items=[sens?tip("Retinol","Retinol 0,1–0,2 %: Creme, Retinol, Creme","Sandwich reizt weniger.",{product:"retinol"})
                :tip("Retinol","Retinol 0,2–0,3 % abends, 2×/Woche","Bester Wirkstoff gegen Fältchen.",{product:"retinol"}),
       lsf("UV macht die meiste Hautalterung."),
       sens?nia("morgens","Macht Retinol verträglicher."):tip("Vitamin C","Vitamin-C-Serum morgens","Fördert Kollagen.",{product:"vitc"})];
-    pm.push(sens?"Retinol (Sandwich)":"Retinol (2×/Wo.)"); am.push(sens?"Niacinamid":"Vitamin C"); photo=true;
-    note=(w?"Kein Retinol in Schwangerschaft/Stillzeit. ":"")+"Nie am selben Abend wie Säuren.";
+    P.pm.push("Retinol"); P.am.push(sens?"Niacinamid":"Vitamin C"); P.photo=true;
+    P.note=w?"Kein Retinol in Schwangerschaft/Stillzeit.":"";
   } else {
-    items=[tip(null,"Reinigung, Creme, LSF reichen","Gesunde Haut braucht keine 10 Schritte."),
-      tip(null,"Neues einzeln, 2 Wochen Abstand","So merkst du, was reizt.")];
+    P.items=[tip(null,"Reinigung, Creme, LSF reichen","Gesunde Haut braucht keine 10 Schritte."),
+      tip(null,"Neues einzeln testen, 2 Wochen Abstand","So merkst du, was reizt.")];
   }
+  return P;
+}
+function hautAdvice(a){
+  const typ=a.bild||"Normal", w=state.profile.sex==="w";
+  const sens=typ==="Sensibel"||a.empf==="Ja", dry=typ==="Trocken", oily=typ==="Fettig", mixed=typ==="Gemischt", slow=sens||dry;
+  const list=hautList(a), Ps=list.map(st=>hautProblem(st,a,{slow,sens,w}));
+  const calm=Ps.find(p=>p.calm);
+  const pick=(f,def)=>{ const p=Ps.find(x=>x[f]); return p?p[f]:def; };
+  const wash=pick("wash",dry||sens?"Waschmilch":"Waschgel");
+  const cream=pick("cream",dry?"Ceramid-Creme":oily?"Gel-Fluid":sens?"Panthenol-Creme":"Creme");
+  const spf=Ps.some(p=>p.spf==="getönter LSF")?(sens||calm?"getönter Mineral-LSF":"getönter LSF"):pick("spf",sens?"Mineral-LSF":oily||mixed?"LSF-Fluid":"LSF 50");
+  let items, notes=[];
+  if(calm){
+    // Gereizte Haut zuerst beruhigen, Wirkstoffe für das zweite Problem erst danach
+    items=calm.items.slice();
+    const later=Ps.filter(p=>p!==calm).flatMap(p=>p.items.filter(i=>i.product&&i.k&&!/LSF|Ceramide/.test(i.k)).map(i=>i.k));
+    notes.push(later.length?`Erst wenn es ruhig ist (ca. 2 Wochen): ${[...new Set(later)].join(", ")}.`:"Bis es ruhig ist: keine Säuren, kein Retinol, kein Duft.");
+  } else {
+    items=pickTips(Ps.map(p=>p.items), list.length>1?4:3);
+    notes=Ps.map(p=>p.note).filter(Boolean);
+  }
+  const am=calm?[]:[...new Set(Ps.flatMap(p=>p.am))], pm=calm?[]:[...new Set(Ps.flatMap(p=>p.pm))], spot=calm?[]:[...new Set(Ps.flatMap(p=>p.spot))];
+  // Retinol nie am selben Abend wie Säuren
+  const acid=pm.find(x=>/BHA|Milchsäure/.test(x));
+  if(pm.includes("Retinol")&&acid){ pm.splice(pm.indexOf("Retinol"),1,`Retinol / ${acid} im Wechsel`); pm.splice(pm.indexOf(acid),1); notes.unshift("Retinol und Säure nie am selben Abend."); }
   // Kein täglicher LSF → LSF-Tipp hat Vorrang vor einem weniger wichtigen Tipp
-  if(a.sonne!=="Täglich"&&!items.some(i=>i.k==="LSF 50"||i.k==="Getönter LSF 50")){
-    const t=lsf(photo?"Dein Wirkstoff macht sonnenempfindlich.":"Wichtigster Schritt jeder Routine.");
+  const photo=!calm&&Ps.some(p=>p.photo);
+  if(a.sonne!=="Täglich"&&!items.some(i=>/LSF/.test(i.k||""))){
+    const t=tip("LSF 50",`${cap(spf)} jeden Morgen`,photo?"Dein Wirkstoff macht sonnenempfindlich.":"Wichtigster Schritt jeder Routine.",{product:"spf"});
     let i=-1; items.forEach((x,j)=>{ if(!x.k&&!x.must) i=j; });
     if(items.length<3) items.push(t); else if(i>=0) items[i]=t; else items[items.length-1]=t;
   }
-  const morning=[dry||sens?"Wasser":wash, ...am, oily?null:cream, spf];
-  const evening=[wash, ...pm, cream, ...spot];
-  const newOnes=items.map(i=>i.k).filter(k=>k&&!/LSF|Ceramide|Nur 3|Panthenol/.test(k)).map(k=>({"Zink punktuell":"Zinksalbe","Anti-Schuppen-Maske":"Anti-Schuppen-Shampoo"}[k]||k));
-  const missing=[...new Set([!has.includes("Waschgel")&&wash, !has.includes("Creme")&&cream, !has.includes("Sonnencreme")&&spf, ...(has.includes("Serum")?[]:newOnes)].filter(Boolean))];
-  const routine=sumRoutine("Haut",items,"",null,["LSF 50"]);
-  routine.am=morning.filter(Boolean); routine.pm=evening.filter(Boolean);
-  return {lead:`Hautbild ${typ.toLowerCase()} · ${st==="Unreinheiten"?(a.art||st):st==="Rötung"?(a.rot||st):st}`, routine, items:items.slice(0,3), note, missing};
+  const pmCream=pick("pmCream",cream);
+  const morning=[dry||sens?"Wasser":wash, ...am, oily?null:cream, spf].filter(Boolean);
+  const evening=[wash, ...pm, pmCream, ...spot].filter(Boolean);
+  const hasLsfKey=items.some(i=>/LSF/.test(i.k||""));
+  const routine=sumRoutine("Haut",items,"",null,hasLsfKey?[]:["LSF"]);
+  routine.am=morning; routine.pm=evening;
+  const lead=list.map(st=>st==="Unreinheiten"?(a.art||st):st==="Rötung"?(a.rot||st):st).join(" + ");
+  // Mehrere „…: Hautarzt.“-Hinweise zu einem Satz zusammenfassen
+  const doc=notes.filter(x=>/: Hautarzt\.$/.test(x)).map(x=>x.replace(/: Hautarzt\.$/,""));
+  if(doc.length>1) notes=notes.filter(x=>!/: Hautarzt\.$/.test(x)).concat(`Hautarzt, wenn: ${doc.join(" oder ")}.`);
+  return {lead:`Hautbild ${typ.toLowerCase()} · ${lead}`, routine, items, note:notes.slice(0,2).join(" ")};
 }
 
 // ---------- Haare ----------
@@ -390,7 +400,7 @@ function schlafAdvice(a){
   if(a.auf==="Wechselt stark") g.push([tip("Feste Weckzeit",`Wochenende spätestens ${hm(wake+60)} aufstehen`,"Ausschlafen wirkt wie Mini-Jetlag.")]);
   let items=pickTips(g,3);
   if(!items.length) items=[tip(null,"Dein Schlaf passt","Zeiten halten.")];
-  const routine=sumRoutine("Schlaf",items,`⏰ ${hm(wake)} · ☕ bis ${hm(caf)} · 💡 ${hm(dim)} · 🛏️ ${hm(bed)}`,null);
+  const routine=sumRoutine("Schlaf",items,`⏰ ${hm(wake)}   ☕ bis ${hm(caf)}   💡 ${hm(dim)}   🛏️ ${hm(bed)}`,null);
   if(!routine.short.includes("Bett")){ routine.short=[`Bett ${hm(bed)}`].concat(routine.short?routine.short.split(" · "):[]).slice(0,4).join(" · "); routine.title="Schlaf: "+routine.short; }
   return {lead:`Aufstehen ${hm(wake)} → Bett ${hm(bed)}`, routine, items};
 }
@@ -611,33 +621,31 @@ function areaSheet(id){
   const ready=quizDone(id);
   if(!ready){
     return `<h2>${topic.title}</h2><p class="sub">${topic.ask}</p>
-      ${quiz.filter(item=>qNeeded(item,answers)).map(item=>`<div class="q"><b>${item.q}</b>${item.multi?`<span class="sub"> · mehrere möglich</span>`:""}<div class="opts">${item.opts.map(o=>`<button class="chip ${(item.multi?(answers[item.k]||[]).includes(o):answers[item.k]===o)?"on":""}" data-act="coach-answer" data-topic="${id}" data-k="${item.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}
+      ${quiz.filter(item=>qNeeded(item,answers)).map(item=>`<div class="q"><b>${item.q}</b>${item.multi?`<span class="sub"> · ${item.pick?"bis zu "+item.pick:"mehrere möglich"}</span>`:""}<div class="opts">${item.opts.map(o=>`<button class="chip ${(item.multi?(answers[item.k]||[]).includes(o):answers[item.k]===o)?"on":""}" data-act="coach-answer" data-topic="${id}" data-k="${item.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}
       <div class="gap"></div><button class="pill primary" data-act="coach-ready" data-topic="${id}" ${ready?"":"disabled"}>Vorschlag zeigen</button>`;
   }
   const advice=coachAdvice(id);
   const r=advice.routine, inRt=(state.coach.routine||[]).some(x=>x.topic===id);
-  // Produkt-Chips: bei Haut nur, was noch fehlt; sonst die passenden Produkte
-  const chip=(name,pid)=>pid?`<button class="chip" data-act="open" data-type="product" data-id="${pid}">${esc(name)} ›</button>`:`<span class="chip">${esc(name)}</span>`;
-  const miss=advice.missing||[];
-  const prods=[...new Set(advice.items.map(i=>i.product).filter(Boolean))].map(pid=>allItems().find(x=>x.id===pid)).filter(Boolean);
-  const shop=miss.length
-    ?`<div class="section"><h2>Fehlt dir noch</h2></div><div class="opts">${miss.map(n=>chip(n,careId(n))).join("")}</div><p class="sub mt-2">Einzeln einführen, je 1–2 Wochen Abstand.</p>`
-    :prods.length?`<div class="section"><h2>Dazu passen</h2></div><div class="opts">${prods.map(p=>chip(p.name,p.id)).join("")}</div>`:"";
-  const plan=r&&r.am?`<span>☀️ ${esc(r.am.join(" → "))}</span><span>🌙 ${esc(r.pm.join(" → "))}</span>`:r&&r.detail?`<span>${esc(r.detail)}</span>`:"";
+  // Kompakter Ablauf: Haut = morgens/abends, Schlaf = Uhrzeiten. Andere Themen: die Tipps reichen.
+  const plan=r&&r.am?`<div class="rplan"><span>☀️</span><b>${esc(r.am.join(" · "))}</b><span>🌙</span><b>${esc(r.pm.join(" · "))}</b></div>`
+    :r&&r.detail?`<div class="rplan one"><b>${esc(r.detail)}</b></div>`:"";
+  const row=i=>{
+    const body=`<div class="grow"><b>${esc(i.title)}</b>${i.detail?`<div class="sub">„${esc(i.detail)}“</div>`:""}</div>`;
+    const prod=i.product&&allItems().some(x=>x.id===i.product);
+    return prod?`<button class="li li-tap" data-act="open" data-type="product" data-id="${i.product}">${body}<span class="chev">›</span></button>`
+      :`<div class="li">${body}${i.act?`<button class="pill ghost w-full mt-2" data-act="${i.act}" data-v="${i.v}">${i.label}</button>`:""}</div>`;
+  };
   return `<h2>${topic.title}</h2><p class="sub">${esc(advice.lead)}</p>
-    ${r?`<div class="insight"><b>${esc(r.short)}</b>${plan}</div>`:""}
+    ${plan}
     <div class="section"><h2>Deine Tipps</h2></div>
-    ${advice.items.map(i=>`<div class="li"><b>${esc(i.title)}</b>${i.detail?`<div class="sub">„${esc(i.detail)}“</div>`:""}${i.act?`<button class="pill ghost w-full mt-2" data-act="${i.act}" data-v="${i.v}">${i.label}</button>`:""}</div>`).join("")}
+    ${advice.items.map(row).join("")}
     ${advice.note?`<p class="sub mt-3">⚠️ ${esc(advice.note)}</p>`:""}
-    ${shop}
     <div class="gap"></div>
     ${inRt
       ?`<button class="pill ghost w-full" data-act="coach-remove" data-topic="${id}">Aus der Routine entfernen</button>`
       :r?`<button class="pill primary" data-act="coach-add" data-topic="${id}">In die Routine</button>`:""}
     <div class="row space mt-4"><button class="link" data-act="coach-reset" data-topic="${id}">Antworten ändern</button><span class="sub">Kein ärztlicher Rat</span></div>`;
 }
-// Name aus „Fehlt dir noch“ → passendes Produkt zum Antippen
-function careId(n){ return /LSF/.test(n)?"spf":/Azelain/.test(n)?"azelain":/BHA/.test(n)?"bha":/Zink/.test(n)?"zink":/Niacinamid/.test(n)?"nia":/Retinol/.test(n)?"retinol":/Vitamin C/.test(n)?"vitc":/Ceramid|Panthenol|Creme|Fluid/.test(n)?"cerave":/Reinigungsgel/.test(n)?"cleanser":null; }
 function planBody(id){ return areaSheet(id); }
 function supsSheet(){
   const rec=recommendStack();
