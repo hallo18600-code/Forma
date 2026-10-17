@@ -161,26 +161,44 @@ function insight(){
   const txt=t.protein-avg>10?`Protein im Schnitt ${avg} g, Richtwert ${t.protein} g. Skyr, Ei oder Hähnchen schließen die Lücke.`:`Protein im Schnitt ${avg} g, nah am Richtwert ${t.protein} g.`;
   return `<div class="insight"><b>Wochen-Check</b><span>${txt}</span></div>`;
 }
-function recommendStack(){
-  const p=state.profile, t=targets(), tot=totals(state.date);
-  const hasFish = p.fish==="oft" || day().meals.some(m=>m.id==="lachs");
-  const picks=[];
-  const add=(id,score,why)=>{ if(!picks.find(x=>x.id===id)) picks.push({id,score,why}); };
+// ---------- Supplements: Bewertung je Ziel (Muskeln, Abnehmen, Haut & Look, Energie) ----------
+// Alle hier sind gute, verbreitete Supplements, deshalb hohe Grundwerte. Je Ziel und Profil wird angepasst.
+// [Muskeln, Abnehmen, Haut & Look, Energie], dazu kurze Pros/Cons (keine Heilversprechen)
+const SUP_RATE={
+  crea:{g:[95,84,74,82], good:["Mehr Kraft und Leistung im Training","Eines der am besten untersuchten Supplements","Günstig und einfach: 5 g am Tag"], bad:["Wirkt nur bei täglicher Einnahme"]},
+  whey:{g:[92,87,72,76], good:["Schnell viel Eiweiß, wenig Kalorien","Hilft, den Protein-Richtwert zu schaffen"], bad:["Echtes Essen bleibt die beste Eiweißquelle"]},
+  d3:{g:[86,84,88,91], good:["Fehlt vielen bei wenig Sonne","Oktober bis März besonders sinnvoll","Trägt zu Knochen, Muskeln und Immunsystem bei"], bad:["Dosis nicht selbst hochdrehen"]},
+  o3:{g:[88,88,95,90], good:["Wichtige Fettsäuren (EPA/DHA), die oft fehlen","Trägt zu normaler Herz- und Gehirnfunktion bei","Beliebt für Haut und Look"], bad:[]},
+  mg:{g:[86,80,78,88], good:["Trägt zu normaler Muskel- und Nervenfunktion bei","Beim Sport schnell verbraucht","Abends beliebt zum Runterkommen"], bad:["Wirkung auf Schlaf kaum belegt"]},
+  b12:{g:[76,76,78,82], good:["Trägt zu Energie und Nerven bei","Für Veganer ein Muss"], bad:[]},
+  col:{g:[76,72,86,70], good:["Beliebt für Haut, Haare und Gelenke","Zusätzliches Eiweiß"], bad:["Nutzen noch nicht sicher belegt","Schlaf, LSF und Essen wirken stärker"]}
+};
+function supScore(id,goal){
+  const R=SUP_RATE[id]; if(!R) return {score:70,good:[],bad:[],why:""};
+  const p=state.profile, g=goal||p.goal, gi=Math.max(0,["muscle","lose","skin","energy"].indexOf(g));
   const ea=state.coach.answers.gesundheit||{}, sa=state.coach.answers.schlaf||{}, vegan=ea.stil==="Vegan";
+  const hasFish=p.fish==="oft"||day().meals.some(m=>m.id==="lachs");
+  const t=targets(), tot=totals(state.date), lowProt=tot.protein<t.protein*0.55;
   const lifts=["Krafttraining","Beides"].includes(p.trainType)&&p.trainFreq&&p.trainFreq!=="Gar nicht";
-  if(vegan) add("b12",90,"Vegan: B12 steckt fast nur in tierischen Lebensmitteln.");
-  if(p.goal==="muscle" || p.activity>=1.55 || lifts) add("crea",92,"Passt zu Krafttraining. Häufig genutzt und gut untersucht.");
-  const trained=state.workouts.some(w=>w.date===state.date);
-  if(!vegan && (p.goal==="muscle"||p.goal==="lose"||trained) && tot.protein < t.protein*0.55) add("whey",80,"Protein heute liegt klar unter dem Richtwert.");
-  if((p.goal==="skin"||p.goal==="energy"||p.goal==="lose") && !hasFish) add("o3",82,"Du isst wenig Fisch.");
-  if(p.goal==="energy" || (day().sleep!=null && day().sleep<6.5) || (sa.ein&&sa.ein!=="Geht schnell") || !day().checks.schlaf) add("mg",74,"Manche nehmen es abends. Wirkung auf Schlaf kaum belegt.");
-  if(p.goal==="skin" && picks.length<3) add("col",58,"Nur Zusatz. Schlaf, LSF und Essen sind wichtiger.");
-  if(picks.length<3) add("d3",78,"Solide Basis bei wenig Sonne. Dosis nicht selbst hochdrehen.");
-  return picks.slice(0,3);
+  const winter=[9,10,11,0,1,2].includes(new Date().getMonth());
+  let sc=R.g[gi]; const good=[...R.good], bad=[...R.bad]; let why="";
+  if(id==="crea"&&lifts){ sc+=3; why="Passt zu deinem Krafttraining. Sehr gut untersucht."; }
+  if(id==="whey"){ if(vegan){ sc-=25; bad.unshift("Enthält Milch: für Veganer nicht geeignet"); } else if(lowProt){ sc+=3; why="Protein heute liegt noch unter dem Richtwert."; } else { sc-=6; bad.unshift("Dein Protein passt heute schon"); } }
+  if(id==="d3"&&winter){ sc+=3; why="Gerade jetzt (Oktober bis März) gibt es wenig Sonne."; }
+  if(id==="o3"){ if(hasFish){ sc-=8; bad.unshift("Du isst schon oft Fisch"); } else { sc+=2; why="Du isst wenig Fisch."; } }
+  if(id==="mg"&&((day().sleep!=null&&day().sleep<6.5)||(sa.ein&&sa.ein!=="Geht schnell"))){ sc+=3; why="Viele nehmen es abends, wenn der Schlaf hakt."; }
+  if(id==="b12"){ if(vegan){ sc=97; why="Vegan: B12 steckt fast nur in tierischen Lebensmitteln."; } else bad.push("Mit Fleisch, Ei und Milch meist genug"); }
+  if(id==="col"&&g==="skin") why="Beliebt für Haut und Look.";
+  return {score:Math.max(40,Math.min(99,Math.round(sc))), good, bad, why:why||R.good[0]+"."};
+}
+function supAllGoals(id){ const o={}; ["muscle","lose","skin","energy"].forEach(g=>o[g]=supScore(id,g).score); return o; }
+// Vorschlag: die 3 am besten passenden für dein Ziel und Profil
+function recommendStack(){
+  return SUPS.map(x=>({id:x.id,...supScore(x.id)})).sort((a,b)=>b.score-a.score).slice(0,3);
 }
 function scoreSup(item){
-  const rec=recommendStack().find(x=>x.id===item.id);
-  return { score: rec?rec.score:48, reasons:[rec?rec.why:item.note, rec?"Für dich vorgeschlagen.":"Kein Kernstück für dein Profil."] };
+  const r=supScore(item.id);
+  return { score:r.score, good:r.good, bad:r.bad, reasons:[r.why] };
 }
 function scored(item){
   if(item.type==="care") return scoreCare(item);

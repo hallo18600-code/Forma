@@ -755,11 +755,27 @@ function stackSheet(){
       return `<button class="rs-item rs-tap ${on?"on":""}" data-act="take" data-id="${id}"><span class="ti">${s.emoji||"💊"}</span><div class="grow"><b>${esc(s.name)}</b><div class="sub">${esc(s.dose)} · ${esc(s.when)}</div></div><span class="rt-chk">${on?"✓":""}</span></button>`; }).join("")||`<p class="sub mt-3">Noch nichts im Stack.</p>`}
     <div class="gap"></div><button class="pill ghost w-full" data-act="open" data-type="area" data-id="sups-list">Stack bearbeiten</button><p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
 }
+// Supplement-Detail: gleicher Aufbau wie bei Lebensmitteln (Ring, Ziele, Pros/Cons)
+function supSheet(item,sc){
+  const main=state.profile.goal, all=supAllGoals(item.id), order=[main].concat(GOALS.map(x=>x.id).filter(x=>x!==main));
+  const inStack=state.stack.includes(item.id), list=(arr,cls)=>arr.map(t=>`<li class="${cls}">${esc(t)}</li>`).join("");
+  return `<div class="fhead"><span class="femo">${item.emoji||"💊"}</span><div class="grow"><h2>${esc(item.name)}</h2><div class="sub">${esc(item.dose)} · ${esc(item.when)}</div></div></div>
+    ${rateRing(sc.score)}
+    <div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
+      ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
+    </div>
+    ${sc.good.length?`<div class="fcard"><b class="fcard-t">Pros</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
+    ${sc.bad.length?`<div class="fcard"><b class="fcard-t">Cons</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
+    <p class="sub fnote">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>
+    <button class="pill w-full ${inStack?"ghost":"primary"}" data-act="toggle-stack" data-id="${item.id}">${inStack?"Aus dem Stack":"In den Stack"}</button>
+    ${PARTNERS_ENABLED&&state.profile.affiliates?`<div class="gap"></div><button class="pill ghost w-full" data-act="affiliate">Bezugsquelle · Anzeige</button>`:""}`;
+}
 function productSheet(id){
   const item=allItems().find(p=>p.id===id);
   if(!item) return `<p>Nicht gefunden.</p>`;
   const sc=scored(item);
   if(item.type==="food"||item.type==="custom") return foodSheet(item,sc);
+  if(item.type==="sup") return supSheet(item,sc);
   const inStack=item.type==="sup" && state.stack.includes(item.id);
   return `<div class="row gap-3">
       <div class="score lg ${scoreClass(sc.score)}">${sc.score}</div>
@@ -848,7 +864,7 @@ function supsSheet(){
       <div class="score ${scoreClass(r.score)}">${r.score}</div></button>`; }).join("")}
     <div class="gap"></div><button class="pill primary" data-act="apply-stack">Vorschlag übernehmen</button>
     <div class="section"><h2>Rest</h2></div>
-    ${rest.map(p=>`<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${p.note}</div></div><div class="score ${scoreClass(scored(p).score)}">${scored(p).score}</div></button>`).join("")}<p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
+    ${rest.map(p=>{ const r=supScore(p.id); return `<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${esc(r.why)}</div></div><div class="score ${scoreClass(r.score)}">${r.score}</div></button>`; }).join("")}<p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
 }
 function skinSheet(){
   const q=[
