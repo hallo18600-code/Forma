@@ -119,6 +119,8 @@ function coachQuiz(id){
     ],
     aussehen:[
       {k:"ziel", q:"Was willst du verbessern?", multi:true, opts:["Weniger Bauchfett","Mehr Muskeln","Gesicht definierter","Bessere Haltung","Frischer wirken"], emo:{"Weniger Bauchfett":"🔥","Mehr Muskeln":"💪","Gesicht definierter":"🗿","Bessere Haltung":"🧍","Frischer wirken":"✨"}},
+      {k:"gym", q:"Wie trainierst du?", opts:["Gym, schon länger","Gym, Anfänger","Zuhause","Noch gar nicht"], emo:{"Gym, schon länger":"🏋️","Gym, Anfänger":"🌱","Zuhause":"🏠","Noch gar nicht":"🛋️"}, skip:a=>!(a.ziel||[]).includes("Mehr Muskeln")},
+      {k:"tage", q:"Wie viele Tage pro Woche kannst du?", opts:["2–3 Tage","4 Tage","5–6 Tage"], skip:a=>!(a.ziel||[]).includes("Mehr Muskeln")},
       {k:"form", q:"Deine Gesichtsform?", opts:["Oval","Rund","Eckig","Länglich","Herzförmig","Weiß nicht"], emo:{"Oval":"🥚","Rund":"⚪","Eckig":"⬛","Länglich":"📏","Herzförmig":"🤍","Weiß nicht":"🤔"}},
       {k:"laenge", q:"Wie trägst du deine Haare?", opts:["Kurz","Mittel","Lang"], emo:{"Kurz":"✂️","Mittel":"💇","Lang":"💁"}},
       {k:"kfa", q:"Wie hoch schätzt du deinen Körperfettanteil?", opts:kfaOpts()},
@@ -416,6 +418,41 @@ function kfaLevel(a){
   return g<cut[0]?0:g<cut[1]?1:g<cut[2]?2:3;
 }
 function kcalFor(goal){ const old=state.profile.goal; state.profile.goal=goal; const k=targets().kcal; state.profile.goal=old; return k; }
+// ---------- Muskeln (Teil von Aussehen) ----------
+// Split nach Trainingstagen: jeder Muskel ca. 2× pro Woche. Anfänger nicht über Torso/Limbs hinaus.
+function muskelPlanId(a,lifts){
+  const gym=a.gym||(lifts?"Gym, schon länger":"Noch gar nicht"), t=a.tage||"2–3 Tage";
+  if(gym==="Zuhause") return "home";
+  if(t==="4 Tage") return "tl";
+  if(t==="5–6 Tage") return gym==="Gym, schon länger"?"ppl":"tl";
+  return "gk";
+}
+function coachPlan(id){
+  const set=(kg,reps,n=3)=>Array.from({length:n},()=>({kg,reps})), d=(id,name,ex)=>({id,name,exercises:ex.map(([e,kg,r,n])=>({id:e,sets:set(kg,r,n)}))});
+  if(id==="tl") return {id:"tl", name:"Torso / Limbs", days:[
+    d("tla","Torso A",[["bp",40,8],["row",40,10],["ohp",25,10],["lat",40,10]]),
+    d("lia","Limbs A",[["sq",50,8],["rdl",50,10],["curl",10,12],["tri",20,12]]),
+    d("tlb","Torso B",[["pull",0,8],["dip",0,10],["latraise",6,15],["face",15,15]]),
+    d("lib","Limbs B",[["legpress",80,12],["lunge",10,10],["hammer",10,12],["skull",15,12],["calf",30,15]])]};
+  if(id==="home") return {id:"home", name:"Zuhause Ganzkörper", days:[
+    d("hoa","Zuhause A",[["pushup",0,12],["bulgarian",0,10],["bridge",0,15],["plank",0,30,2]]),
+    d("hob","Zuhause B",[["pushup",0,12],["stepup",0,12],["lunge",0,12],["mountain",0,30,2]])]};
+  if(id==="ppl") return defaultRoutines()[0];
+  return fullBodyPlan();
+}
+function muskelTips(a,lvl,g,fatGoal,prot,lifts){
+  const pid=muskelPlanId(a,lifts), have=(state.routines||[]).some(r=>r.id===pid);
+  const P={gk:["Ganzkörper A/B","2–3 Tage, jeder Muskel 2–3× pro Woche."],tl:["Torso / Limbs","4 Tage, jeder Muskel 2× pro Woche."],
+    ppl:["Push / Pull / Legs","5–6 Tage, jeder Muskel 2× pro Woche."],home:["Zuhause Ganzkörper","Ohne Geräte, 3× pro Woche."]}[pid];
+  const gym=a.gym||"", beginner=gym==="Gym, Anfänger"||gym==="Noch gar nicht";
+  return [
+    tip("Plan: "+P[0],`Trainingsplan: ${P[0]}`,P[1],have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"}),
+    lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal?tip("Leichter Überschuss",`Kalorien auf ${de(kcalFor("muscle"))} erhöhen`,"+250 kcal: Muskeln statt Fett.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen"}):null,
+    tip("Protein + Kreatin",`${prot} g Protein + 3–5 g Kreatin täglich`,"Fehlt Protein beim Essen: Whey.",{act:"coach-sups",v:"",label:"Zu den Supplements"}),
+    tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wdh. oder schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche +1 Wdh.":"Jede Woche +1 Wiederholung oder +2,5 kg."),
+    tip("Carbs vorm Training","Vorm Training: schnelle Carbs","30–60 Min vorher, z. B. Reiswaffeln mit Honig, Banane.")
+  ];
+}
 function aussehenAdvice(a){
   const ziel=a.ziel||[], lvl=kfaLevel(a), g=state.profile.goal, t=targets(), p=state.profile;
   const lifts=["Krafttraining","Beides"].includes(p.trainType);
@@ -430,10 +467,7 @@ function aussehenAdvice(a){
   const G={
     "Weniger Bauchfett":[cal, tip("8.000 Schritte","8.000+ Schritte am Tag","Verbrennt viel, ohne Hunger zu machen."),
       tip(null,"Bauchübungen allein reichen nicht","Fett geht nie gezielt an einer Stelle.")],
-    "Mehr Muskeln":[lifts?tip("Progressive Overload","Progressive Overload","Jede Woche +1 Wiederholung oder +2,5 kg.")
-        :tip("3× Kraft","3×/Woche Krafttraining","Ganzkörper reicht für den Anfang.",{act:"tab",v:"sport",label:"Zum Training"}),
-      tip("Protein",`${prot} g Protein am Tag`,"1,6–2,2 g pro kg holen das Maximum raus."),
-      tip("Kreatin","3–5 g Kreatin täglich","Bestuntersuchtes Supplement für Kraft.")],
+    "Mehr Muskeln":muskelTips(a,lvl,g,fatGoal,prot,lifts),
     "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Nasenatmung + Haltung strafft die Kinnlinie optisch.")],
     "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern, Face Pulls: Schultern gehen zurück."),
       tip("Brust dehnen","Täglich 30 Sek. Brust dehnen (Türrahmen)","Enge Brust zieht Schultern nach vorn."), sit],
@@ -450,7 +484,8 @@ function aussehenAdvice(a){
   if(!ziel.length) groups.unshift([cal]);
   // Frisur passend zur Gesichtsform: immer zuerst, zählt zu den max. 4 Tipps
   const cut=haarSchnitt(a.form, a.laenge);
-  let items=pickTips(groups,cut?3:4);
+  const max=ziel.includes("Mehr Muskeln")?5:4;
+  let items=pickTips(groups,cut&&max<5?max-1:max);   // bei Muskeln zählt der Schnitt-Tipp extra
   if(!items.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
   if(cut) items.unshift(cut);
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
@@ -650,7 +685,7 @@ function areaSheet(id){
     const body=`<div class="grow"><b>${esc(i.title)}</b>${i.detail?`<div class="sub">„${esc(i.detail)}“</div>`:""}</div>`;
     const prod=i.product&&allItems().some(x=>x.id===i.product);
     return prod?`<button class="li li-tap" data-act="open" data-type="product" data-id="${i.product}">${body}<span class="chev">›</span></button>`
-      :`<div class="li">${body}${i.act?`<button class="pill ghost w-full mt-2" data-act="${i.act}" data-v="${i.v}">${i.label}</button>`:""}</div>`;
+      :`<div class="li">${body}${i.act?`<button class="link mt-2 self-start" data-act="${i.act}" data-v="${i.v}">${i.label} ›</button>`:""}</div>`;
   };
   return `<h2>${topic.title}</h2><p class="sub">${esc(advice.lead)}</p>
     ${plan}
