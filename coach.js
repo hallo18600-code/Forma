@@ -750,11 +750,9 @@ function renderRoutineDash(){
 }
 function stackSheet(){
   const d=day();
-  return `<h2>Stack heute</h2>
-    ${state.stack.map(id=>{ const s=SUPS.find(x=>x.id===id); return `<button class="task" data-act="take" data-id="${id}">
-      <span class="chk ${d.taken[id]?"on":""}">${d.taken[id]?"✓":""}</span>
-      <div class="grow"><b>${s.name}</b><div class="sub">${s.dose} · ${s.when}</div></div>
-    </button>`; }).join("")||`<p class="sub">Noch nichts im Stack.</p>`}
+  return `<div class="rs-head"><span class="rs-ico">💊</span><div class="grow"><h2>Stack heute</h2><p class="sub">Antippen, wenn genommen</p></div></div>
+    ${state.stack.map(id=>{ const s=SUPS.find(x=>x.id===id); if(!s) return ""; const on=!!(d.taken||{})[id];
+      return `<button class="rs-item rs-tap ${on?"on":""}" data-act="take" data-id="${id}"><span class="ti">${s.emoji||"💊"}</span><div class="grow"><b>${esc(s.name)}</b><div class="sub">${esc(s.dose)} · ${esc(s.when)}</div></div><span class="rt-chk">${on?"✓":""}</span></button>`; }).join("")||`<p class="sub mt-3">Noch nichts im Stack.</p>`}
     <div class="gap"></div><button class="pill ghost w-full" data-act="open" data-type="area" data-id="sups-list">Stack bearbeiten</button><p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
 }
 function productSheet(id){
