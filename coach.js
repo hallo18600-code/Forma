@@ -106,9 +106,7 @@ function coachQuiz(id){
       {k:"ausfall", q:"Wie zeigt sich der Ausfall?", opts:["Geheimratsecken / Scheitel","Überall dünner","Kahle runde Stellen"], skip:a=>a.stoert!=="Fallen viel aus"},
       {k:"wasch", q:"Wie oft wäschst du die Haare?", opts:["Täglich","2–3 mal","Seltener"]},
       {k:"hitze", q:"Wie oft kommt Hitze dran?", opts:["Fast immer","Manchmal","Selten"]},
-      {k:"typ", q:"Haartyp?", opts:["Glatt","Wellig","Lockig"]},
-      {k:"laenge", q:"Wie trägst du sie?", opts:["Kurz","Mittel","Lang"], emo:{"Kurz":"✂️","Mittel":"💇","Lang":"💁"}},
-      {k:"form", q:"Deine Gesichtsform?", opts:["Oval","Rund","Eckig","Länglich","Herzförmig","Weiß nicht"], emo:{"Oval":"🥚","Rund":"⚪","Eckig":"⬛","Länglich":"📏","Herzförmig":"🤍","Weiß nicht":"🤔"}}
+      {k:"typ", q:"Haartyp?", opts:["Glatt","Wellig","Lockig"]}
     ],
     schlaf:[
       {k:"aufzeit", q:"Wann musst du meistens aufstehen?", opts:["Vor 6 Uhr","6–7 Uhr","7–8 Uhr","Nach 8 Uhr"]},
@@ -121,6 +119,8 @@ function coachQuiz(id){
     ],
     aussehen:[
       {k:"ziel", q:"Was willst du verbessern?", multi:true, opts:["Weniger Bauchfett","Mehr Muskeln","Gesicht definierter","Bessere Haltung","Frischer wirken"], emo:{"Weniger Bauchfett":"🔥","Mehr Muskeln":"💪","Gesicht definierter":"🗿","Bessere Haltung":"🧍","Frischer wirken":"✨"}},
+      {k:"form", q:"Deine Gesichtsform?", opts:["Oval","Rund","Eckig","Länglich","Herzförmig","Weiß nicht"], emo:{"Oval":"🥚","Rund":"⚪","Eckig":"⬛","Länglich":"📏","Herzförmig":"🤍","Weiß nicht":"🤔"}},
+      {k:"laenge", q:"Wie trägst du deine Haare?", opts:["Kurz","Mittel","Lang"], emo:{"Kurz":"✂️","Mittel":"💇","Lang":"💁"}},
       {k:"kfa", q:"Wie hoch schätzt du deinen Körperfettanteil?", opts:kfaOpts()},
       {k:"bloat", q:"Wirkt dein Gesicht morgens aufgedunsen?", opts:["Oft","Manchmal","Selten"]},
       {k:"abend", skip:a=>a.bloat==="Selten", q:"Was gibt es abends oft?", multi:true, none:"Nichts davon", opts:["Salziges / Fast Food","Alkohol","Spät gegessen","Nichts davon"], emo:{"Salziges / Fast Food":"🍟","Alkohol":"🍺","Spät gegessen":"🌙","Nichts davon":"👍"}},
@@ -148,6 +148,9 @@ function openQuizzes(){ return ["haut","gesundheit","schlaf"].filter(id=>!quizDo
 function migrateCoach(s){
   const A=s.coach.answers, old=A.ernaehrung;
   if(old&&!A.gesundheit){ A.gesundheit={}; ["stil","intol","wasser","trink"].forEach(k=>{ if(old[k]!=null) A.gesundheit[k]=old[k]; }); }
+  // Frisur/Gesichtsform ist von Haare zu Aussehen gewandert
+  const H=A.haare||{};
+  if(H.form||H.laenge){ A.aussehen=A.aussehen||{}; ["form","laenge"].forEach(k=>{ if(H[k]!=null&&A.aussehen[k]==null) A.aussehen[k]=H[k]; delete H[k]; }); }
   return s;
 }
 // Alte Coach-Routinen (4 Punkte pro Thema) einmalig zu einem Punkt zusammenfassen
@@ -358,10 +361,8 @@ function haareAdvice(a){
   if(heat) tips.push(tip("Hitzeschutz","Hitzeschutz, max. 180 °C","Darüber leidet das Keratin."));
   if(curly) tips.push(tip("Locken","Nur nass entwirren, T-Shirt statt Handtuch","Schont die Lockenform."));
   const items=tips.slice(0,3);
-  const cut=haarSchnitt(a.form, a.laenge);
-  if(cut) items.unshift(cut);   // Schnitt-Tipp immer zuerst
   const routine=sumRoutine("Haare",items,"","Mildes Shampoo");
-  return {lead:`${a.typ||"Haar"}${a.laenge?", "+a.laenge.toLowerCase():""} · ${st==="Fallen viel aus"&&a.ausfall?a.ausfall:st}`, routine, items, note};
+  return {lead:`${a.typ||"Haar"} · ${st==="Fallen viel aus"&&a.ausfall?a.ausfall:st}`, routine, items, note};
 }
 // Kurzer Schnitt-Tipp nach Gesichtsform (kurz = Kurzhaar, sonst Mittel/Lang). Allgemeine Stilregeln.
 function haarSchnitt(form, len){
@@ -447,8 +448,11 @@ function aussehenAdvice(a){
   }
   groups.push([sit]);
   if(!ziel.length) groups.unshift([cal]);
-  let items=pickTips(groups,4);
+  // Frisur passend zur Gesichtsform: immer zuerst, zählt zu den max. 4 Tipps
+  const cut=haarSchnitt(a.form, a.laenge);
+  let items=pickTips(groups,cut?3:4);
   if(!items.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
+  if(cut) items.unshift(cut);
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
   return {lead:`${kfaTxt} · ${ziel.length?ziel.join(", "):"kein Fokus"}`, routine:sumRoutine("Aussehen",items,"","Training nach Plan"), items};
 }
