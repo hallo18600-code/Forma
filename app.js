@@ -602,7 +602,15 @@ document.getElementById("app").addEventListener("click", e=>{
     state.coach.routine=state.coach.routine.filter(r=>r.topic!==topic).concat([{id:topic+"-r", topic, title:advice.routine.title, detail:advice.routine.detail, product:null}]);
     ui.modal=null; save(); toast("In der Routine");
   }
-  else if(act==="coach-plan"){ const pl=coachPlan(el.dataset.v); if(!state.routines.some(r=>r.id===pl.id)) state.routines=[pl].concat(state.routines); ui.modal=null; state.tab="sport"; save(); toast(pl.name+" übernommen"); }
+  else if(act==="coach-plan"){
+    const pl=coachPlan(el.dataset.v), R=JSON.stringify(state.routines);
+    // Unveränderte Start-Pläne ersetzen, damit nichts doppelt herumliegt; eigene Pläne bleiben
+    const untouched=R===JSON.stringify(defaultRoutines())||R===JSON.stringify([fullBodyPlan()]);
+    if(untouched) state.routines=[pl]; else if(!state.routines.some(r=>r.id===pl.id)) state.routines=[pl].concat(state.routines);
+    state.planPicked=pl.id; ui.planPrev=null; ui.modal=null; state.tab="sport"; save(); toast(pl.name+" übernommen");
+  }
+  else if(act==="plan-prev"){ ui.planPrev=el.dataset.v; }
+  else if(act==="plan-skip"){ state.planPicked="none"; save(); }
   else if(act==="coach-sups"){ openModal("area","sups-list"); return; }
   else if(act==="coach-goal"){ state.profile.goal=el.dataset.v; const r=(state.coach.routine||[]).find(x=>x.topic==="aussehen"); if(r) r.title=coachAdvice("aussehen").routine.title; save(); toast(`Neuer Richtwert: ${de(targets().kcal)} kcal`); }
   else if(act==="coach-remove"){ state.coach.routine=(state.coach.routine||[]).filter(r=>r.topic!==el.dataset.topic); ui.modal=null; save(); toast("Aus der Routine entfernt"); }

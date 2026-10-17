@@ -734,3 +734,15 @@ svg.chart { width:100%; height:auto; display:block; }
 .rplan b { font-weight:600; }
 .rplan.one { display:block; }
 .li-tap { display:flex; align-items:center; gap:var(--s-3); width:100%; text-align:left; }
+/* Coach: Muskelaufbau-Kasten (eine Zeile pro Punkt) */
+.mbox { margin-top:var(--s-3); padding:var(--s-3) var(--s-4); border-radius:var(--r-l); background:var(--accent-soft); color:var(--on-accent-soft); font-size:var(--fs-s); }
+.mbox-h { display:flex; flex-direction:column; margin-bottom:var(--s-2); }
+.mbrow { display:flex; align-items:baseline; gap:var(--s-2); padding:6px 0; border-top:1px solid color-mix(in srgb, currentColor 12%, transparent); }
+.mbrow .grow { flex:1; min-width:0; }
+.mbrow .link { display:inline; min-height:0; padding:0; white-space:nowrap; }
+/* Training: Plan-Vorschlag mit Wochenübersicht */
+.psug { margin-top:var(--s-4); }
+.pweek { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin:var(--s-3) 0; }
+.pweek div { display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0; border-radius:var(--r-m); background:var(--fill); font-size:11px; color:var(--ink-3); }
+.pweek div b { font-size:11px; font-weight:700; }
+.pweek div.on { background:var(--accent-soft); color:var(--on-accent-soft); }

@@ -43,6 +43,24 @@ function prevSet(id, index){
   }
   return "–";
 }
+// Plan-Vorschlag beim ersten Öffnen: aus Coach-Antworten (Muskeln) oder der Trainingshäufigkeit im Fragebogen
+function suggestPlanId(){
+  const a=(state.coach.answers||{}).aussehen||{}, p=state.profile;
+  if(a.gym||a.tage) return muskelPlanId(a,["Krafttraining","Beides"].includes(p.trainType));
+  return p.trainFreq==="5× oder öfter"?"ppl":p.trainFreq==="3–4× pro Woche"?"tl":"gk";
+}
+function planSuggest(){
+  if(state.planPicked) return "";
+  const pid=ui.planPrev||suggestPlanId(), P=PLAN_INFO[pid], f=state.profile.trainFreq;
+  const why=pid===suggestPlanId()&&f?`Du trainierst ${f.replace(" pro Woche","").toLowerCase()} pro Woche.`:"Deine Auswahl.";
+  return `<div class="card psug">
+    <div class="row space"><b>Dein Trainingsplan</b><button class="x" data-act="plan-skip" aria-label="Vorschlag ausblenden">✕</button></div>
+    <div class="sub">${why} ${P.why}</div>
+    <div class="pweek">${["Mo","Di","Mi","Do","Fr","Sa","So"].map((d,i)=>`<div class="${P.week[i]?"on":""}"><span>${d}</span><b>${P.week[i]||"–"}</b></div>`).join("")}</div>
+    <div class="opts">${Object.keys(PLAN_INFO).map(id=>`<button class="chip ${id===pid?"on":""}" data-act="plan-prev" data-v="${id}">${PLAN_INFO[id].name.replace(" A/B","").replace("Zuhause Ganzkörper","Zuhause")}</button>`).join("")}</div>
+    <button class="pill primary mt-3" data-act="coach-plan" data-v="${pid}">${P.name} übernehmen</button>
+  </div>`;
+}
 function renderSport(){
   const plans=state.routines||[];
   const list=[...state.workouts].reverse().slice(0,6);
@@ -66,6 +84,7 @@ function renderSport(){
         return `<div class="wbar ${v?"has":""} ${s===todayIso()?"on":""}"><i style="height:${Math.max(6, Math.round(v/maxV*78))}px"></i><span>${weekday(s)}</span></div>`;
       }).join("")}</div>
     </div>
+    ${planSuggest()}
     <div class="section"><h2>Routinen</h2><button class="link" data-act="new-plan">Neu</button></div>
     ${plans.map(r=>`<div class="card meals mb-3">
       <div class="row space py-2"><div class="meal-name">${esc(r.name)}</div><button class="link" data-act="edit-plan" data-id="${r.id}">Bearbeiten</button></div>

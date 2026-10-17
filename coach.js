@@ -440,18 +440,25 @@ function coachPlan(id){
   if(id==="ppl") return defaultRoutines()[0];
   return fullBodyPlan();
 }
-function muskelTips(a,lvl,g,fatGoal,prot,lifts){
-  const pid=muskelPlanId(a,lifts), have=(state.routines||[]).some(r=>r.id===pid);
-  const P={gk:["Ganzkörper A/B","2–3 Tage, jeder Muskel 2–3× pro Woche."],tl:["Torso / Limbs","4 Tage, jeder Muskel 2× pro Woche."],
-    ppl:["Push / Pull / Legs","5–6 Tage, jeder Muskel 2× pro Woche."],home:["Zuhause Ganzkörper","Ohne Geräte, 3× pro Woche."]}[pid];
+// Plan-Infos für Coach und Training-Tab: Name, Häufigkeit, Wochenverteilung (Index = Mo..So)
+const PLAN_INFO={
+  gk:{name:"Ganzkörper A/B", freq:"2–3×/Woche", why:"Jeder Muskel 2–3× pro Woche.", week:["A","","B","","A","",""]},
+  tl:{name:"Torso / Limbs", freq:"4×/Woche", why:"Jeder Muskel 2× pro Woche.", week:["Torso","Limbs","","Torso","Limbs","",""]},
+  ppl:{name:"Push / Pull / Legs", freq:"5–6×/Woche", why:"Jeder Muskel 2× pro Woche.", week:["Push","Pull","Beine","Push","Pull","Beine",""]},
+  home:{name:"Zuhause Ganzkörper", freq:"3×/Woche", why:"Ohne Geräte, nur Körpergewicht.", week:["A","","B","","A","",""]}
+};
+// Muskelaufbau als EIN kompakter Kasten statt 5 einzelner Tipps (gleiche Infos, eine Zeile pro Punkt)
+function muskelBox(a,lvl,g,fatGoal,prot,lifts){
+  const pid=muskelPlanId(a,lifts), P=PLAN_INFO[pid], have=(state.routines||[]).some(r=>r.id===pid);
   const gym=a.gym||"", beginner=gym==="Gym, Anfänger"||gym==="Noch gar nicht";
-  return [
-    tip("Plan: "+P[0],`Trainingsplan: ${P[0]}`,P[1],have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"}),
-    lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal?tip("Leichter Überschuss",`Kalorien auf ${de(kcalFor("muscle"))} erhöhen`,"+250 kcal: Muskeln statt Fett.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen"}):null,
-    tip("Protein + Kreatin",`${prot} g Protein + 3–5 g Kreatin täglich`,"Fehlt Protein beim Essen: Whey.",{act:"coach-sups",v:"",label:"Zu den Supplements"}),
-    tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wdh. oder schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche +1 Wdh.":"Jede Woche +1 Wiederholung oder +2,5 kg."),
-    tip("Carbs vorm Training","Vorm Training: schnelle Carbs","30–60 Min vorher, z. B. Reiswaffeln mit Honig, Banane.")
-  ];
+  const surplus=lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal;
+  return {title:"💪 Muskelaufbau", sub:P.why, rows:[
+    ["🏋️",`${P.name}, ${P.freq}`, have?"tab":"coach-plan", have?"sport":pid, have?"Öffnen":"Übernehmen"],
+    ["📈",gym==="Zuhause"?"Jede Woche mehr Wdh. oder schwerere Variante":beginner?"Erst Technik, dann jede Woche +1 Wdh.":"Progressive Overload: +1 Wdh. oder +2,5 kg/Woche"],
+    ["🍗",`${prot} g Protein am Tag${surplus?`, ${de(kcalFor("muscle"))} kcal (+250)`:""}`, surplus?"coach-goal":null, "muscle", "Ziel setzen"],
+    ["🍌","Vorm Training: Reiswaffeln mit Honig oder Banane"],
+    ["💊","Kreatin 3–5 g täglich, Whey wenn Protein fehlt","coach-sups","","Stack"]
+  ]};
 }
 function aussehenAdvice(a){
   const ziel=a.ziel||[], lvl=kfaLevel(a), g=state.profile.goal, t=targets(), p=state.profile;
@@ -467,7 +474,6 @@ function aussehenAdvice(a){
   const G={
     "Weniger Bauchfett":[cal, tip("8.000 Schritte","8.000+ Schritte am Tag","Verbrennt viel, ohne Hunger zu machen."),
       tip(null,"Bauchübungen allein reichen nicht","Fett geht nie gezielt an einer Stelle.")],
-    "Mehr Muskeln":muskelTips(a,lvl,g,fatGoal,prot,lifts),
     "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Nasenatmung + Haltung strafft die Kinnlinie optisch.")],
     "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern, Face Pulls: Schultern gehen zurück."),
       tip("Brust dehnen","Täglich 30 Sek. Brust dehnen (Türrahmen)","Enge Brust zieht Schultern nach vorn."), sit],
@@ -484,12 +490,13 @@ function aussehenAdvice(a){
   if(!ziel.length) groups.unshift([cal]);
   // Frisur passend zur Gesichtsform: immer zuerst, zählt zu den max. 4 Tipps
   const cut=haarSchnitt(a.form, a.laenge);
-  const max=ziel.includes("Mehr Muskeln")?5:4;
-  let items=pickTips(groups,cut&&max<5?max-1:max);   // bei Muskeln zählt der Schnitt-Tipp extra
-  if(!items.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
+  const box=ziel.includes("Mehr Muskeln")?muskelBox(a,lvl,g,fatGoal,prot,lifts):null;
+  let items=pickTips(groups,box?(cut?2:3):cut?3:4);   // mit Muskel-Kasten weniger Einzeltipps
+  if(!items.length&&!box) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
   if(cut) items.unshift(cut);
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
-  return {lead:`${kfaTxt} · ${ziel.length?ziel.join(", "):"kein Fokus"}`, routine:sumRoutine("Aussehen",items,"","Training nach Plan"), items};
+  return {lead:`${kfaTxt} · ${ziel.length?ziel.join(", "):"kein Fokus"}`, box,
+    routine:sumRoutine("Aussehen",items,"","Training nach Plan",box?["Training nach Plan","Protein + Kreatin"]:[]), items};
 }
 
 // ---------- Gesundheit ----------
@@ -687,9 +694,12 @@ function areaSheet(id){
     return prod?`<button class="li li-tap" data-act="open" data-type="product" data-id="${i.product}">${body}<span class="chev">›</span></button>`
       :`<div class="li">${body}${i.act?`<button class="link mt-2 self-start" data-act="${i.act}" data-v="${i.v}">${i.label} ›</button>`:""}</div>`;
   };
+  const bx=advice.box;
+  const box=bx?`<div class="mbox"><div class="mbox-h"><b>${bx.title}</b><span class="sub">${esc(bx.sub)}</span></div>
+    ${bx.rows.map(([e,t,act,v,l])=>`<div class="mbrow"><span>${e}</span><span class="grow">${esc(t)}${act?` <button class="link" data-act="${act}" data-v="${v}">${l} ›</button>`:""}</span></div>`).join("")}</div>`:"";
   return `<h2>${topic.title}</h2><p class="sub">${esc(advice.lead)}</p>
-    ${plan}
-    <div class="section"><h2>Deine Tipps</h2></div>
+    ${plan}${box}
+    ${advice.items.length?`<div class="section"><h2>${bx?"Außerdem":"Deine Tipps"}</h2></div>`:""}
     ${advice.items.map(row).join("")}
     ${advice.note?`<p class="sub mt-3">⚠️ ${esc(advice.note)}</p>`:""}
     <div class="gap"></div>
