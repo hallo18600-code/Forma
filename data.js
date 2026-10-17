@@ -277,20 +277,33 @@ const ROUTINES = [
   { id:"empty", name:"Leer", detail:"Übungen selbst wählen", exercises:[] }
 ];
 const EX = {}; // wird in uebungen.js mit allen Übungen gefüllt
+// Plan-Vorlagen: max. 2 Sätze pro Übung, 4–5 Sätze pro Muskel und Training, Startwert immer 6 Wdh.
+// Kurzform: [Übungs-ID, Start-kg, Anzahl Sätze (Standard 2), Wdh (Standard 6)]
+function planDay(id, name, list){
+  return {id, name, exercises:list.map(([e,kg,n=2,reps=6])=>({id:e, sets:Array.from({length:n},()=>({kg, reps}))}))};
+}
 function defaultRoutines(){
-  const set = (kg, reps, n=3) => Array.from({length:n}, ()=>({kg, reps}));
-  const day = (id, name, exercises) => ({id, name, exercises});
   return [
     { id:"ppl", name:"Push Pull Legs", days:[
-      day("push","Push",[{id:"bp", sets:set(60,8)},{id:"ohp", sets:set(30,8)},{id:"dip", sets:set(0,8)}]),
-      day("pull","Pull",[{id:"row", sets:set(50,10)},{id:"lat", sets:set(45,10)},{id:"curl", sets:set(12,10)}]),
-      day("legs","Beine",[{id:"sq", sets:set(80,5)},{id:"rdl", sets:set(70,8)},{id:"lunge", sets:set(16,10)}])
+      planDay("push","Push",[["bp_inc_smith",30],["chest_press",30,1],["pecdeck",25,1],["ohp_machine",20],["latraise_cable",5],["tri_rope",15],["tri_oh_cable",10]]),
+      planDay("pull","Pull",[["lat_machine",35],["row_machine",30],["rear_fly_machine",15],["preacher_machine",15],["hammer",8],["cable_crunch",15]]),
+      planDay("legs","Beine",[["legpress",60],["leg_ext",25],["leg_curl",20],["leg_curl_seat",20],["calf",30],["adductor",25]])
     ]}
   ];
 }
+// Alte Vorlagen (vor Okt 2026): wer sie nie verändert hat, bekommt automatisch die neuen
+const OLD_PLAN_SIG={
+  ppl:'[{"id":"ppl","name":"Push Pull Legs","days":[{"id":"push","name":"Push","exercises":[{"id":"bp","sets":[{"kg":60,"reps":8},{"kg":60,"reps":8},{"kg":60,"reps":8}]},{"id":"ohp","sets":[{"kg":30,"reps":8},{"kg":30,"reps":8},{"kg":30,"reps":8}]},{"id":"dip","sets":[{"kg":0,"reps":8},{"kg":0,"reps":8},{"kg":0,"reps":8}]}]},{"id":"pull","name":"Pull","exercises":[{"id":"row","sets":[{"kg":50,"reps":10},{"kg":50,"reps":10},{"kg":50,"reps":10}]},{"id":"lat","sets":[{"kg":45,"reps":10},{"kg":45,"reps":10},{"kg":45,"reps":10}]},{"id":"curl","sets":[{"kg":12,"reps":10},{"kg":12,"reps":10},{"kg":12,"reps":10}]}]},{"id":"legs","name":"Beine","exercises":[{"id":"sq","sets":[{"kg":80,"reps":5},{"kg":80,"reps":5},{"kg":80,"reps":5}]},{"id":"rdl","sets":[{"kg":70,"reps":8},{"kg":70,"reps":8},{"kg":70,"reps":8}]},{"id":"lunge","sets":[{"kg":16,"reps":10},{"kg":16,"reps":10},{"kg":16,"reps":10}]}]}]}]',
+  gk:'[{"id":"gk","name":"Ganzkörper","days":[{"id":"gka","name":"Ganzkörper A","exercises":[{"id":"sq","sets":[{"kg":40,"reps":10},{"kg":40,"reps":10},{"kg":40,"reps":10}]},{"id":"bp","sets":[{"kg":30,"reps":10},{"kg":30,"reps":10},{"kg":30,"reps":10}]},{"id":"row","sets":[{"kg":30,"reps":10},{"kg":30,"reps":10},{"kg":30,"reps":10}]},{"id":"plank","sets":[{"kg":0,"reps":30},{"kg":0,"reps":30}]}]},{"id":"gkb","name":"Ganzkörper B","exercises":[{"id":"rdl","sets":[{"kg":40,"reps":10},{"kg":40,"reps":10},{"kg":40,"reps":10}]},{"id":"ohp","sets":[{"kg":20,"reps":10},{"kg":20,"reps":10},{"kg":20,"reps":10}]},{"id":"lat","sets":[{"kg":30,"reps":10},{"kg":30,"reps":10},{"kg":30,"reps":10}]},{"id":"lunge","sets":[{"kg":8,"reps":10},{"kg":8,"reps":10},{"kg":8,"reps":10}]}]}]}]'
+};
 function normalizeRoutines(list){
   if(!list || !list.length) return defaultRoutines();
-  if(list[0].days) return list;
+  if(list[0].days){
+    const j=JSON.stringify(list);
+    if(j===OLD_PLAN_SIG.ppl) return defaultRoutines();
+    if(j===OLD_PLAN_SIG.gk && typeof fullBodyPlan==="function") return [fullBodyPlan()];
+    return list;
+  }
   return [{ id:"ppl", name:"Push Pull Legs", days:list.map(r=>({id:r.id, name:r.name, exercises:r.exercises||[]})) }];
 }
 const TASKS = [

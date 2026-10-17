@@ -433,15 +433,13 @@ function muskelPlanId(a,lifts){
   return "gk";
 }
 function coachPlan(id){
-  const set=(kg,reps,n=3)=>Array.from({length:n},()=>({kg,reps})), d=(id,name,ex)=>({id,name,exercises:ex.map(([e,kg,r,n])=>({id:e,sets:set(kg,r,n)}))});
   if(id==="tl") return {id:"tl", name:"Torso / Limbs", days:[
-    d("tla","Torso A",[["bp",40,8],["row",40,10],["ohp",25,10],["lat",40,10]]),
-    d("lia","Limbs A",[["sq",50,8],["rdl",50,10],["curl",10,12],["tri",20,12]]),
-    d("tlb","Torso B",[["pull",0,8],["dip",0,10],["latraise",6,15],["face",15,15]]),
-    d("lib","Limbs B",[["legpress",80,12],["lunge",10,10],["hammer",10,12],["skull",15,12],["calf",30,15]])]};
+    planDay("tla","Torso",[["bp_inc_smith",30],["chest_press",30,1],["pecdeck",25,1],["lat_machine",35],["row_machine",30],["ohp_machine",20],["latraise_cable",5],["rear_fly_machine",15,1],["cable_crunch",15]]),
+    planDay("lia","Limbs",[["legpress",60],["leg_ext",25],["leg_curl",20],["leg_curl_seat",20],["calf",30],["adductor",25],["preacher_machine",15],["hammer",8],["tri_rope",15],["tri_oh_cable",10]])]};
+  // Zuhause: Plank in Sekunden (30), alles andere 6 Wdh.
   if(id==="home") return {id:"home", name:"Zuhause Ganzkörper", days:[
-    d("hoa","Zuhause A",[["pushup",0,12],["bulgarian",0,10],["bridge",0,15],["plank",0,30,2]]),
-    d("hob","Zuhause B",[["pushup",0,12],["stepup",0,12],["lunge",0,12],["mountain",0,30,2]])]};
+    planDay("hoa","Zuhause A",[["pushup",0],["bench_dip",0],["sq_bw",0],["bulgarian",0],["bridge",0],["back_ext",0],["plank",0,2,30]]),
+    planDay("hob","Zuhause B",[["pushup",0],["bench_dip",0],["lunge_bw",0],["stepup",0],["bridge",0],["back_ext",0],["plank",0,2,30]])]};
   if(id==="ppl") return defaultRoutines()[0];
   return fullBodyPlan();
 }

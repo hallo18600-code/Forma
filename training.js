@@ -20,14 +20,14 @@ function lastSet(id){
   return "–";
 }
 // Startwerte für eine neu hinzugefügte Übung: die abgehakten Sätze vom letzten Mal,
-// sonst n Sätze mit 20 kg × 8 (wenn es noch keinen Verlauf gibt)
+// sonst n Sätze mit 20 kg × 6 (wenn es noch keinen Verlauf gibt)
 function startSets(id, n){
   for(const w of [...state.workouts].reverse()){
     const hit=(w.exercises||[]).find(e=>e.id===id);
     const done=hit ? (hit.sets||[]).filter(s=>s.done) : [];
     if(done.length) return done.map(s=>({kg:s.kg, reps:s.reps}));
   }
-  return Array.from({length:n||1},()=>({kg:20, reps:8}));
+  return Array.from({length:n||1},()=>({kg:20, reps:6}));
 }
 function clock(t0){
   const s=Math.max(0, Math.floor((Date.now()-t0)/1000));
