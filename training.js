@@ -49,16 +49,20 @@ function suggestPlanId(){
   if(a.gym||a.tage) return muskelPlanId(a,["Krafttraining","Beides"].includes(p.trainType));
   return p.trainFreq==="5× oder öfter"?"ppl":p.trainFreq==="3–4× pro Woche"?"tl":"gk";
 }
+// Plan-Auswahl als 4 Kacheln: Name, wie oft, Wochen-Rhythmus als Punkte. ⭐ = passt zu deinen Angaben.
+const PLAN_ICON={gk:"🔁", tl:"💪", ppl:"🏋️", home:"🏠"};
+const PLAN_SHORT={gk:"Ganzkörper", tl:"Torso / Limbs", ppl:"Push / Pull / Legs", home:"Zuhause"};
 function planSuggest(){
   if(state.planPicked) return "";
-  const pid=ui.planPrev||suggestPlanId(), P=PLAN_INFO[pid], f=state.profile.trainFreq;
-  const why=pid===suggestPlanId()&&f?`Du trainierst ${f.replace(" pro Woche","").toLowerCase()} pro Woche.`:"Deine Auswahl.";
+  const rec=suggestPlanId(), pid=ui.planPrev||rec;
+  const dots=w=>`<div class="pdots">${["M","D","M","D","F","S","S"].map((d,i)=>`<span class="${w[i]?"on":""}"><i></i>${d}</span>`).join("")}</div>`;
   return `<div class="card psug">
     <div class="row space"><b>Dein Trainingsplan</b><button class="x" data-act="plan-skip" aria-label="Vorschlag ausblenden">✕</button></div>
-    <div class="sub">${why} ${P.why}</div>
-    <div class="pweek">${["Mo","Di","Mi","Do","Fr","Sa","So"].map((d,i)=>`<div class="${P.week[i]?"on":""}"><span>${d}</span><b>${P.week[i]||"–"}</b></div>`).join("")}</div>
-    <div class="opts">${Object.keys(PLAN_INFO).map(id=>`<button class="chip ${id===pid?"on":""}" data-act="plan-prev" data-v="${id}">${PLAN_INFO[id].name.replace(" A/B","").replace("Zuhause Ganzkörper","Zuhause")}</button>`).join("")}</div>
-    <button class="pill primary mt-3" data-act="coach-plan" data-v="${pid}">${P.name} übernehmen</button>
+    <div class="pcards">${Object.keys(PLAN_INFO).map(id=>{ const P=PLAN_INFO[id];
+      return `<button class="pcard ${id===pid?"on":""}" data-act="plan-prev" data-v="${id}">
+        ${id===rec?`<span class="prec">⭐ Passt zu dir</span>`:""}
+        <span class="pc-ico">${PLAN_ICON[id]}</span><b>${PLAN_SHORT[id]}</b><span class="sub">${id==="home"?"Ohne Geräte":P.freq}</span>${dots(P.week)}</button>`; }).join("")}</div>
+    <button class="pill primary mt-3" data-act="coach-plan" data-v="${pid}">Plan übernehmen</button>
   </div>`;
 }
 function renderSport(){

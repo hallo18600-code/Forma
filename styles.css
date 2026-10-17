@@ -783,10 +783,18 @@ svg.chart { width:100%; height:auto; display:block; }
 .mbrow .link { display:inline; min-height:0; padding:0; white-space:nowrap; }
 /* Training: Plan-Vorschlag mit Wochenübersicht */
 .psug { margin-top:var(--s-4); }
-.pweek { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin:var(--s-3) 0; }
-.pweek div { display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 0; border-radius:var(--r-m); background:var(--fill); font-size:11px; color:var(--ink-3); }
-.pweek div b { font-size:11px; font-weight:700; }
-.pweek div.on { background:var(--accent-soft); color:var(--on-accent-soft); }
+.pcards { display:grid; grid-template-columns:1fr 1fr; gap:var(--s-2); margin-top:var(--s-3); }
+.pcard { position:relative; display:flex; flex-direction:column; align-items:flex-start; gap:2px; padding:var(--s-3); border-radius:var(--r-l); background:var(--fill-2); text-align:left; transition:background .2s, transform .12s; }
+.pcard:active { transform:scale(.97); }
+.pcard.on { background:var(--accent-soft); box-shadow:inset 0 0 0 2px var(--accent); }
+.pcard b { font-size:var(--fs-m); line-height:1.2; margin-top:var(--s-1); }
+.pc-ico { font-size:22px; line-height:1; }
+.prec { position:absolute; top:8px; right:8px; font-size:11px; font-weight:700; color:var(--accent-text); }
+.pdots { display:flex; gap:4px; margin-top:var(--s-2); }
+.pdots span { display:flex; flex-direction:column; align-items:center; gap:2px; font-size:10px; color:var(--ink-3); }
+.pdots i { width:10px; height:10px; border-radius:50%; background:var(--line-strong); }
+.pdots span.on { color:var(--ink-2); font-weight:700; }
+.pdots span.on i { background:var(--accent); }
 /* Coach: ruhige Liste – jeder Punkt eine Zeile, Details per Antippen */
 .tips { margin-top:var(--s-3); }
 .tipgrp { margin:var(--s-4) 0 var(--s-1); font-size:var(--fs-s); font-weight:700; color:var(--ink-3); }
