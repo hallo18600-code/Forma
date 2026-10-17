@@ -32,7 +32,7 @@ async function bcLookup(code){
   let f=foods().find(x=>x.bc===code);
   if(!f){ const d=dbGet(code); if(d){ ensureDb(d.id); f=foods().find(x=>x.id===d.id); } }
   if(!f&&location.protocol.startsWith("http")){ toast("Suche Produkt…"); try{ const it=await offLookup(code); if(it){ state.customs.push(it); save(); f=it; } }catch(e){} }
-  if(f){ ui.modal={type:"product",payload:f.id}; render(); return; }
+  if(f){ ui.modal={type:"product",payload:f.id}; ui.amtFor=null; render(); return; }
   ui.newBc=code; ui.newBack="barcode"; ui.scanView="newfood"; toast("Nicht gefunden, leg es kurz an"); render();
 }
 function aiMic(){

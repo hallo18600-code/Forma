@@ -93,7 +93,7 @@ function renderMealPage(){
   return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button><b>${slot.name}</b></div>
     <div class="mealhero s-${slot.id}"><span>${marks[slot.id]}</span></div>
     <div class="mgrid"><div><b>${tot.kcal.toLocaleString(LOC)} kcal</b><span>Kalorien</span></div><div><b>${f(tot.carbs)}</b><span>Kohlenhydrate</span></div><div><b>${f(tot.protein)}</b><span>Eiweiß</span></div><div><b>${f(tot.fat)}</b><span>Fett</span></div></div>
-    ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}${m.portion} g</div></div><span>${line(p,m.portion).kcal} kcal</span><i>›</i></button>`).join("")||`<p class="sub li">Noch nichts eingetragen.</p>`}
+    ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}<span class="notr">${esc(amtTxt(p,m))}</span></div></div><span>${line(p,m.portion).kcal} kcal</span><i>›</i></button>`).join("")||`<p class="sub li">Noch nichts eingetragen.</p>`}
     <button class="yfertig" data-act="open" data-type="scan" data-slot="${slot.id}">Mehr hinzufügen</button>`;
 }
 function customSheet(){
@@ -123,7 +123,8 @@ function rateRing(n){
 }
 const GOAL_SHORT={muscle:"Muskeln",lose:"Abnehmen",skin:"Haut & Look",energy:"Energie"};
 function foodSheet(it,sc){
-  const slot=SLOTS.find(s=>s.id===ui.addSlot), g=ui.portion||100, main=state.profile.goal;
+  amtInit(it);
+  const slot=SLOTS.find(s=>s.id===ui.addSlot), g=Math.round(ui.portion||100), main=state.profile.goal;
   const src=it.src==="off"?"Quelle: Open Food Facts":it.type==="custom"?"Eigene Angaben":"Basisdaten";
   const all=scoreAllGoals(it), order=[main].concat(GOALS.map(x=>x.id).filter(x=>x!==main));
   const intol=((state.coach.answers.gesundheit||{}).intol||[]).some(x=>x!=="Nein, alles okay");
@@ -144,12 +145,8 @@ function foodSheet(it,sc){
     <p class="sub fnote">${src}</p>
     <div class="amt ${ui.amtOpen?"open":""}">
       <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>
-      <button class="amt-compact" data-act="amt-open"><b id="amt-val">${g}</b><span>Gramm ⌄</span></button>
-      <div class="amt-body">
-        <div class="opts">${[50,100,150,200,250].map(n=>`<button class="chip ${g===n?"on":""}" data-act="portion-set" data-v="${n}">${n} g</button>`).join("")}</div>
-        <div class="famt"><input id="portion" type="number" inputmode="decimal" value="${g}" data-act="portion-in" data-id="${it.id}"><span>Gramm</span></div>
-        <p class="sub">Nach unten wischen, um Bewertung und Nährwerte zu sehen.</p>
-      </div>
+      <button class="amt-compact" id="amt-compact" data-act="amt-open">${amtCompact(it)}</button>
+      <div class="amt-body" id="amt-body">${amtBody(it)}</div>
       ${ui.editUid?`<button class="yfertig static" data-act="save-meal">Speichern</button><button class="pill w-full t-bad" data-act="del-meal2">Eintrag löschen</button>`:`<button class="yfertig static" data-act="log-food" data-id="${it.id}">Hinzufügen</button>`}
     </div>`;
 }

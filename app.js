@@ -51,7 +51,12 @@ function day(s){ s=s||state.date; if(!state.days[s]) state.days[s]=blankDay(); r
 function foods(){ return [...BASE_FOODS, ...state.customs]; }
 function allItems(){ return [...foods(), ...CARE, ...SUPS]; }
 function toast(m){ ui.toast=m; render(); setTimeout(()=>{ if(ui.toast===m){ ui.toast=null; render(); } }, 1600); }
-function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; render(); }
+function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; ui.amtFor=null; render(); }
+// Menge für einen Tagebuch-Eintrag: Gramm plus (falls gewählt) Einheit und Anzahl
+function amtEntry(){
+  const i=ui.unit==="g"&&document.getElementById("portion"), g=Math.max(1,Math.round(+(i?String(i.value).replace(",","."):ui.portion)||ui.portion||100));
+  return ui.unit&&ui.unit!=="g"?{portion:g,u:ui.unit,q:ui.qty||1}:{portion:g};
+}
 function closeModal(){ stopCam(); ui.modal=null; render(); }
 
 function targets(){
@@ -536,8 +541,8 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="scan-mode") ui.scanMode=el.dataset.v;
   else if(act==="meal-open"){ ui.addSlot=el.dataset.slot; ui.dash="meal"; ui.modal=null; }
-  else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.portion=m.portion; } }
-  else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid), i=document.getElementById("portion"); if(m) m.portion=Math.max(1,+(i&&i.value||ui.portion)||m.portion); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
+  else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.amtFor=null; } }
+  else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid); if(m){ const e=amtEntry(); delete m.u; delete m.q; Object.assign(m,e); } ui.editUid=null; ui.amtFor=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
   else if(act==="del-meal2"){ day().meals=day().meals.filter(x=>x.uid!==ui.editUid); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gelöscht"); }
   else if(act==="ai-del"){ (ui.aiRes||[]).splice(+el.dataset.i,1); if(!(ui.aiRes||[]).length) ui.aiRes=null; }
   else if(act==="steps-add"){ const i=document.getElementById("st-input"); if(i) i.value=(+i.value||0)+ +el.dataset.v; return; }
@@ -552,11 +557,27 @@ document.getElementById("app").addEventListener("click", e=>{
     return;
   }
   else if(act==="back-scan"){ ui.scanView="list"; openModal("scan"); return; }
-  else if(act==="portion-set"){ ui.portion=+el.dataset.v; }
+  else if(act==="portion-set"){ ui.unit="g"; ui.qty=null; ui.portion=+el.dataset.v; const it=allItems().find(p=>p.id===(ui.modal&&ui.modal.payload)); if(it){ amtRefresh(it); return; } }
+  else if(act==="unit-set"||act==="qty"){
+    const it=allItems().find(p=>p.id===el.dataset.id); if(!it) return;
+    const us=unitsFor(it);
+    if(act==="unit-set"){
+      const u=us.find(x=>x.k===el.dataset.k); if(!u) return;
+      ui.unit=u.k;
+      if(u.k==="g"){ ui.qty=null; ui.portion=Math.round(ui.portion||100); }
+      else { ui.qty=1; ui.portion=u.g; }
+    } else {
+      const u=us.find(x=>x.k===ui.unit); if(!u) return;
+      // halbe Schritte (½ Teller), bei kleinen Einheiten (Stückchen, Bonbon) ganze
+      const step=u.g<10&&(ui.qty||1)>=1?1:.5;
+      ui.qty=Math.min(50,Math.max(.5,Math.round(((ui.qty||1)+ +el.dataset.v*step)*2)/2));
+      ui.portion=Math.round(u.g*ui.qty);
+    }
+    amtRefresh(it,act==="qty"); return;
+  }
   else if(act==="log-food"){
-    const input=document.getElementById("portion");
-    const portion=Math.max(5, +(input&&input.value||ui.portion)||100);
-    day().meals.push({ uid:uid(), id:el.dataset.id, portion, slot:ui.addSlot });
+    day().meals.push({ uid:uid(), id:el.dataset.id, slot:ui.addSlot, ...amtEntry() });
+    ui.amtFor=null;
     syncAuto(state.date); ui.modal=null; save(); toast("Im Tagebuch");
   }
   else if(act==="del-meal"){ day().meals=day().meals.filter(m=>m.uid!==el.dataset.id); syncAuto(state.date); save(); }
@@ -832,7 +853,7 @@ document.getElementById("app").addEventListener("input", e=>{
     if(box) box.innerHTML=scanResults(); else render();
   }
   if(el.dataset.act==="ai-g"){ const k=+el.dataset.i, it=(ui.aiRes||[])[k]; if(it){ it.grams=Math.max(0,+el.value||0); const kc=document.getElementById("ai-k"+k), tt=document.getElementById("ai-tot"); if(kc) kc.textContent=Math.round(it.kcal*it.grams/100); if(tt) tt.textContent=ui.aiRes.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0); } }
-  if(el.dataset.act==="portion-in"){ ui.portion=+el.value||0; const it=allItems().find(p=>p.id===el.dataset.id), b=document.getElementById("fmacros"), t=document.getElementById("ftable"), v=document.getElementById("amt-val"); if(it){ if(b) b.innerHTML=fMacros(it,ui.portion); if(t) t.innerHTML=fTable(it,ui.portion); } if(v) v.textContent=ui.portion||0; const fg=document.getElementById("fgram"); if(fg) fg.textContent=ui.portion||0; }
+  if(el.dataset.act==="portion-in"){ ui.unit="g"; ui.qty=null; ui.portion=Math.max(0,+String(el.value).replace(",",".")||0); const it=allItems().find(p=>p.id===el.dataset.id); if(it) amtSync(it); }
   if(el.dataset.act==="w-kg"){ const v=+String(el.value).replace(",","."); if(v) ui.draftKg=v; }
   if(el.dataset.act==="wo-f"&&ui.woEdit){ ui.woEdit[el.dataset.k]=el.value; }
   if(el.dataset.act==="wo-set"&&ui.woEdit){ const st=ui.woEdit.exercises[+el.dataset.e].sets[+el.dataset.s]; st[el.dataset.f]=Math.max(0,+String(el.value).replace(",",".")||0); }
