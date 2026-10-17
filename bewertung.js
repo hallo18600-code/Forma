@@ -216,6 +216,12 @@ function scoreFood(item){
     if(id==="softdrink"&&/(energy|red bull|monster)/.test(h)&&g==="energy") bad("Koffein auf Pump, danach Tief",13);
     if(id==="juice"&&/smoothie/.test(h)){ score+=6; }
     if(id==="cheese"&&/(ziegen|schafs|schaf |hirtenkase|feta)/.test(h)&&g==="skin") score+=14;
+    // Milch & Joghurt: Vollfett ist naturbelassener und für die Haut besser als fettarm (Magermilch steht eher mit Unreinheiten in Verbindung)
+    if(id==="dairy"||id==="kefir"){
+      const low=fa<2||/(fettarm|mager|entrahmt|0,1|0,3|1,5|light|leicht)/.test(h), full=!low&&(fa>=3||/(vollmilch|vollfett|3,5|3,8|4,0)/.test(h));
+      if(full){ score+=[2,0,10,3][gi]; good(g==="skin"?"Vollfett: besser für die Haut als fettarm":"Vollfett: naturbelassener",g==="skin"?13:11); }
+      else if(low){ score+=[-1,2,-6,-2][gi]; if(g==="skin") bad("Fettarm: für die Haut eher ungünstiger",11); else if(g==="lose") good("Fettarm: weniger Kalorien",9); }
+    }
     if(id==="wholewheat"&&/sauerteig/.test(h)){ score+=5; good("Sauerteig: besser verträglich",8); }
     if(id==="tea"&&g==="energy"&&/(kraut|frucht|pfefferminz|kamille|rooibos|fenchel|hagebutte)/.test(h)) score-=6;
     // Naturbelassenes Lebensmittel, aber stark verarbeitet (z. B. Fruchtjoghurt mit Zusätzen)
