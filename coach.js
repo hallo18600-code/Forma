@@ -170,7 +170,7 @@ const cap=t=>t?t[0].toUpperCase()+t.slice(1):"";
 function rShort(r){ if(["haut","haare","schlaf","aussehen","gesundheit"].includes(r.topic)){ try{ const x=coachAdvice(r.topic).routine; if(x&&x.short) return x.short; }catch(e){} } return r.title; }
 // ---------- Coach-Tipps ----------
 // Ein Tipp: k = Kurzname für den Routine-Punkt (null = einmalige Sache, kommt nicht in die Routine),
-// title = einfacher Tipp, detail = kurze Begründung (wird in „…“ gezeigt).
+// title = einfacher Tipp, detail = ganz kurze Begründung (wird in „…“ gezeigt). Beides bewusst knapp halten.
 const tip=(k,title,detail,extra)=>Object.assign({k,title,detail,product:null},extra||{});
 // Wichtige Tipps (must) zuerst, dann reihum je einen Tipp aus jeder Gruppe, damit jedes gewählte Ziel vorkommt
 function pickTips(groups,max){
@@ -197,97 +197,100 @@ function hautAdvice(a){
   const typ=a.bild||"Normal", st=a.stoert||"Nichts Bestimmtes", has=a.hab||[], w=state.profile.sex==="w";
   const sens=typ==="Sensibel"||a.empf==="Ja", dry=typ==="Trocken", oily=typ==="Fettig", mixed=typ==="Gemischt";
   const slow=sens||dry; // empfindliche/trockene Haut: Wirkstoffe langsamer einschleichen
-  let wash=dry||sens?"Reinigungsmilch":"mildes Reinigungsgel";
-  let cream=dry?"Ceramid-Creme":oily?"leichtes Gel-Fluid":sens?"Panthenol-Creme ohne Duft":"leichte Creme";
-  let spf=sens?"mineralischer LSF 50":oily||mixed?"LSF 50 Fluid":"LSF 50";
+  let wash=dry||sens?"Reinigungsmilch":"Reinigungsgel";
+  let cream=dry?"Ceramid-Creme":oily?"Gel-Fluid":sens?"Panthenol-Creme":"leichte Creme";
+  let spf=sens?"Mineral-LSF 50":oily||mixed?"LSF 50 Fluid":"LSF 50";
   const am=[], pm=[], spot=[]; let items=[], note="", photo=false; // photo = Wirkstoff macht sonnenempfindlicher
-  const lsf=(d)=>tip("LSF 50",`${cap(spf)} jeden Morgen`,d||"UV ist der größte Hautalterer und macht Flecken dunkler.",{product:"spf"});
-  const bha=(x)=>tip("BHA 2 %",`BHA 2 % (Salicylsäure) abends, ${slow?"2×":"3×"} pro Woche`,"Öllöslich, löst den Talgpfropf in der Pore. Langsam steigern.",{product:"bha"});
+  const n=slow?"2×":"3×";
+  const lsf=(d)=>tip("LSF 50",`${spf} jeden Morgen`,d||"Größter Schutz vor Hautalterung.",{product:"spf"});
+  const bha=()=>tip("BHA 2 %",`BHA 2 % abends, ${n}/Woche`,"Löst Talg in der Pore. Langsam steigern.",{product:"bha"});
   const nia=(when,d)=>tip("Niacinamid",`Niacinamid 4–5 % ${when}`,d,{product:"nia"});
-  const aze=(pct,d)=>tip("Azelainsäure",`Azelainsäure ${pct} abends${slow?", erst jeden 2. Abend":""}`,d,{product:"azelain"});
+  const aze=(pct,d)=>tip("Azelainsäure",`Azelainsäure ${pct} abends${slow?", jeden 2. Tag":""}`,d,{product:"azelain"});
 
   if(st==="Unreinheiten"){
     const art=a.art||"Entzündete Pickel";
     if(art==="Mitesser"){
-      items=[bha(), nia("morgens","Senkt die Talgmenge, es bilden sich weniger neue Mitesser."), tip(null,"Mitesser nicht ausdrücken","Weitet die Pore und kann sich entzünden.")];
-      pm.push(`BHA (${slow?"2×":"3×"}/Woche)`); am.push("Niacinamid"); photo=true;
-      note="Wirkt nach 6–12 Wochen. Ohne Besserung: Hautarzt.";
+      items=[bha(), nia("morgens","Weniger Talg, weniger Mitesser."), tip(null,"Nicht ausdrücken","Weitet die Pore, entzündet sich.")];
+      pm.push(`BHA (${n}/Wo.)`); am.push("Niacinamid"); photo=true;
+      note="Wirkt nach 6–12 Wochen. Sonst: Hautarzt.";
     } else if(art==="Tiefe, schmerzhafte Knoten"){
-      items=[tip(null,"Termin beim Hautarzt machen","Knoten hinterlassen oft Narben. Hier helfen meist nur verschreibungspflichtige Mittel.",{must:1}),
-        aze("10–20 %","Bis zum Termin: wirkt entzündungshemmend und verstopft keine Poren."),
-        tip(null,"Knoten nie ausdrücken","Sie sitzen zu tief. Drücken macht Narben.",{must:1})];
+      items=[tip(null,"Zum Hautarzt","Knoten machen Narben. Braucht Rezept-Mittel.",{must:1}),
+        aze("10–20 %","Bis dahin: beruhigt, verstopft nichts."),
+        tip(null,"Nie ausdrücken","Sitzen zu tief, gibt Narben.",{must:1})];
       pm.push("Azelainsäure");
     } else if(art==="Rote/braune Male"){
-      items=[lsf("UV macht Male dunkler und lässt sie länger bleiben."), aze("10–20 %","Hellt Male auf und beugt neuen Pickeln vor."), nia("morgens","Bremst den Farbstoff-Transport in die Haut.")];
+      items=[lsf("UV macht Male dunkler."), aze("10–20 %","Hellt Male auf, stoppt neue Pickel."), nia("morgens","Bremst neue Verfärbung.")];
       am.push("Niacinamid"); pm.push("Azelainsäure");
-      note="Male verblassen meist in 3–6 Monaten.";
+      note="Male verblassen in 3–6 Monaten.";
     } else {
-      items=[aze(sens?"10 %":"10–20 %","Wirkt gegen Bakterien und Entzündung, ohne Poren zu verstopfen. Leichtes Kribbeln am Anfang ist normal."),
-        tip("Zink punktuell","Zinksalbe nur punktuell auf entzündete Pickel","Trocknet aus und beruhigt. Flächig würde sie die Poren verstopfen.",{product:"zink"}),
-        tip(null,"Pickel nicht ausdrücken","Drückt die Entzündung tiefer und hinterlässt Male.")];
-      pm.push("Azelainsäure"); spot.push("Zinksalbe nur auf Pickel");
-      note="Bleibt es nach 8–12 Wochen: Hautarzt.";
+      items=[aze(sens?"10 %":"10–20 %","Gegen Bakterien und Entzündung. Kribbeln anfangs normal."),
+        tip("Zink punktuell","Zinksalbe nur auf entzündete Pickel","Trocknet aus. Flächig verstopft sie Poren.",{product:"zink"}),
+        tip(null,"Nicht ausdrücken","Gibt Male und tiefere Entzündung.")];
+      pm.push("Azelainsäure"); spot.push("Zink auf Pickel");
+      note="Nach 8–12 Wochen keine Besserung: Hautarzt.";
     }
   } else if(st==="Glänzt / große Poren"){
-    items=[nia("morgens und abends","Reduziert Talg, Poren wirken kleiner."), bha(),
-      tip("Mattes LSF-Fluid","LSF als leichtes Fluid statt Creme","Mattiert, ohne zu fetten.",{product:"spf"})];
-    spf="LSF 50 Fluid"; am.push("Niacinamid"); pm.push("Niacinamid",`BHA (${slow?"2×":"3×"}/Woche)`); photo=true;
-    note="Poren schrumpfen nicht wirklich, wirken aber deutlich kleiner.";
+    spf="LSF 50 Fluid";
+    items=[nia("morgens + abends","Weniger Talg, Poren wirken kleiner."), bha(),
+      tip("Mattes LSF-Fluid","LSF als Fluid statt Creme","Mattiert, ohne zu fetten.",{product:"spf"})];
+    am.push("Niacinamid"); pm.push("Niacinamid",`BHA (${n}/Wo.)`); photo=true;
+    note="Poren schrumpfen nicht, wirken aber kleiner.";
   } else if(st==="Rötung"){
     const rot=a.rot||"Brennt / spannt schnell";
     if(rot==="Wangen & Nase, oft mit Pickelchen"){
-      spf="mineralischer LSF 50"; wash="Reinigungsmilch"; cream="Panthenol-Creme ohne Duft";
-      items=[tip("Azelainsäure",`Azelainsäure 10–15 % abends${slow?", erst jeden 2. Abend":""}`,"Bremst Rötung und Pickelchen. 15 % gibt's über den Hautarzt.",{product:"azelain"}),
-        tip(null,"Auslöser meiden: Hitze, Alkohol, scharfes Essen","Lösen bei Rosazea die Schübe aus."),
-        lsf("Sonne ist der häufigste Auslöser für Schübe.")];
+      spf="Mineral-LSF 50"; wash="Reinigungsmilch"; cream="Panthenol-Creme";
+      items=[tip("Azelainsäure",`Azelainsäure 10–15 % abends${slow?", jeden 2. Tag":""}`,"Gegen Rötung und Pickelchen.",{product:"azelain"}),
+        tip(null,"Hitze, Alkohol, Scharfes meiden","Typische Auslöser für Schübe."),
+        lsf("Sonne ist Auslöser Nr. 1.")];
       pm.push("Azelainsäure");
-      note="Klingt nach Rosazea. Ein Hautarzt kann das bestätigen und hat stärkere Mittel.";
+      note="Klingt nach Rosazea. Hautarzt hat stärkere Mittel (z. B. 15 %).";
     } else if(rot==="Schuppig an Nase / Brauen"){
       cream="leichte Creme ohne Öle";
-      items=[tip("Anti-Schuppen-Maske","2× pro Woche Anti-Schuppen-Shampoo auf die Stellen","Mit Ketoconazol oder Zinkpyrithion. 3 Min einwirken, abwaschen. Wirkt gegen den Hefepilz dahinter."),
-        tip(null,"Leichte Creme statt reichhaltiger","Öle und fette Cremes füttern den Hefepilz."),
-        tip(null,"Kopfhaut gleich mitbehandeln","Schuppen am Kopf und im Gesicht haben oft dieselbe Ursache.")];
-      spot.push("Anti-Schuppen-Maske (2×/Woche)");
-      note="Kommt in Schüben, Stress verstärkt. Breitet es sich aus: Hautarzt.";
+      items=[tip("Anti-Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche drauf","Ketoconazol/Zink. 3 Min, dann abwaschen."),
+        tip(null,"Leichte Creme, keine Öle","Fett füttert den Hefepilz dahinter."),
+        tip(null,"Kopfhaut mitbehandeln","Oft dieselbe Ursache.")];
+      spot.push("Schuppen-Maske (2×/Wo.)");
+      note="Kommt in Schüben. Breitet es sich aus: Hautarzt.";
     } else {
-      wash="Reinigungsmilch"; cream="Ceramid-Panthenol-Creme"; spf="mineralischer LSF 50";
-      items=[tip("Nur 3 Produkte","2 Wochen nur Reinigung, Creme, LSF","Die Hautbarriere braucht Ruhe. Jeder Wirkstoff reizt gerade."),
-        tip("Ceramide","Creme mit Ceramiden und Panthenol","Repariert die Hautbarriere.",{product:"cerave"}),
-        tip(null,"Nur lauwarm waschen und abtupfen","Heißes Wasser und Reiben reizen.")];
+      wash="Reinigungsmilch"; cream="Ceramid-Creme"; spf="Mineral-LSF 50";
+      items=[tip("Nur 3 Produkte","2 Wochen: nur Reinigung, Creme, LSF","Die Barriere braucht Ruhe."),
+        tip("Ceramide","Creme mit Ceramiden + Panthenol","Repariert die Barriere.",{product:"cerave"}),
+        tip(null,"Lauwarm waschen, abtupfen","Hitze und Reiben reizen.")];
       note="Bis es ruhig ist: keine Säuren, kein Retinol, kein Duft.";
     }
   } else if(st==="Trockenheit"){
-    items=[tip("Ceramide","Ceramid-Creme auf noch feuchte Haut","Hält das Wasser in der Haut und stärkt die Barriere.",{product:"cerave"}),
-      sens?tip("Panthenol","Abends Creme mit Panthenol","Beruhigt und spendet Feuchtigkeit."):tip("Urea 5 %","Abends Creme mit 5 % Urea","Bindet Feuchtigkeit, raue Stellen werden glatt."),
-      tip(null,"Morgens nur Wasser, abends milde Reinigung","Jedes Waschen nimmt Fett aus der Haut.")];
-    wash="Reinigungsmilch"; cream="Ceramid-Creme"; pm.push(sens?"Panthenol-Creme":"Urea-Creme 5 %");
-    note="Schuppig, rot und juckend: Hautarzt, kann ein Ekzem sein.";
+    wash="Reinigungsmilch"; cream="Ceramid-Creme";
+    items=[tip("Ceramide","Ceramid-Creme auf feuchte Haut","Hält das Wasser in der Haut.",{product:"cerave"}),
+      sens?tip("Panthenol","Abends Panthenol-Creme","Beruhigt und spendet Feuchtigkeit."):tip("Urea 5 %","Abends Creme mit 5 % Urea","Bindet Feuchtigkeit, glättet."),
+      tip(null,"Morgens nur Wasser","Jedes Waschen nimmt Fett weg.")];
+    pm.push(sens?"Panthenol-Creme":"Urea-Creme");
+    note="Rot, schuppig, juckt: Hautarzt (Ekzem?).";
   } else if(st==="Pigmentflecken"){
-    spf=sens?"getönter mineralischer LSF 50":"getönter LSF 50";
-    items=[tip("Getönter LSF 50",`${cap(spf)} jeden Morgen, mittags nachcremen`,"Ohne konsequenten Schutz kommen Flecken immer zurück. Getönt blockt auch sichtbares Licht.",{product:"spf"}),
-      sens?nia("morgens","Bremst den Farbstoff-Transport in die Haut."):tip("Vitamin C","Vitamin-C-Serum morgens vor dem LSF","Hellt auf und verstärkt den Sonnenschutz.",{product:"vitc"}),
-      aze("10–20 %","Hemmt die Farbstoffbildung, gut verträglich.")];
+    spf=sens?"getönter Mineral-LSF 50":"getönter LSF 50";
+    items=[tip("Getönter LSF 50",`${cap(spf)}, mittags nachcremen`,"Blockt auch sichtbares Licht.",{product:"spf"}),
+      sens?nia("morgens","Bremst neue Verfärbung."):tip("Vitamin C","Vitamin-C-Serum morgens","Hellt auf, stärkt den LSF.",{product:"vitc"}),
+      aze("10–20 %","Hemmt die Farbstoffbildung.")];
     am.push(sens?"Niacinamid":"Vitamin C"); pm.push("Azelainsäure");
-    note="Flecken, die wachsen oder sich verändern: Hautarzt.";
+    note="Fleck wächst oder verändert sich: Hautarzt.";
   } else if(st==="Wirkt stumpf"){
-    items=[sens?nia("morgens","Gleicht den Teint aus und stärkt die Barriere."):tip("Vitamin C","Vitamin-C-Serum morgens vor dem LSF","Mehr Glow und Schutz vor freien Radikalen.",{product:"vitc"}),
-      tip("Milchsäure",`Milchsäure 5–10 % abends, ${sens?"1×":"2×"} pro Woche`,"Löst abgestorbene Hautschüppchen, die Haut reflektiert mehr Licht."),
-      tip(null,"Hyaluron-Serum auf feuchte Haut, dann Creme","Pralle Haut wirkt frischer.")];
-    am.push(sens?"Niacinamid":"Vitamin C"); pm.push(`Milchsäure (${sens?"1×":"2×"}/Woche)`); photo=true;
+    items=[sens?nia("morgens","Gleicht den Teint aus."):tip("Vitamin C","Vitamin-C-Serum morgens","Mehr Glow, schützt vor Radikalen.",{product:"vitc"}),
+      tip("Milchsäure",`Milchsäure 5–10 % abends, ${sens?"1×":"2×"}/Woche`,"Löst abgestorbene Schüppchen."),
+      tip(null,"Hyaluron auf feuchte Haut","Pralle Haut wirkt frischer.")];
+    am.push(sens?"Niacinamid":"Vitamin C"); pm.push(`Milchsäure (${sens?"1×":"2×"}/Wo.)`); photo=true;
   } else if(st==="Erste Fältchen"){
-    items=[sens?tip("Retinol","Retinol 0,1–0,2 % abends: Creme, Retinol, Creme","Die Sandwich-Methode reizt weniger. Langsam auf jeden 2. Abend steigern.",{product:"retinol"})
-               :tip("Retinol","Retinol 0,2–0,3 % abends, 2× pro Woche","Am besten belegter Wirkstoff gegen Fältchen. Langsam auf jeden 2. Abend steigern.",{product:"retinol"}),
-      lsf("UV verursacht den Großteil der sichtbaren Hautalterung."),
-      sens?nia("morgens","Stärkt die Barriere und macht Retinol verträglicher."):tip("Vitamin C","Vitamin-C-Serum morgens","Fördert Kollagen und schützt zusätzlich.",{product:"vitc"})];
-    pm.push(sens?"Retinol (Sandwich)":"Retinol (2×/Woche)"); am.push(sens?"Niacinamid":"Vitamin C"); photo=true;
-    note=(w?"Kein Retinol in Schwangerschaft und Stillzeit. ":"")+"Kein Retinol am selben Abend wie Säuren.";
+    items=[sens?tip("Retinol","Retinol 0,1–0,2 %: Creme, Retinol, Creme","Sandwich reizt weniger. Langsam steigern.",{product:"retinol"})
+               :tip("Retinol","Retinol 0,2–0,3 % abends, 2×/Woche","Bester Wirkstoff gegen Fältchen.",{product:"retinol"}),
+      lsf("UV macht die meiste Hautalterung."),
+      sens?nia("morgens","Macht Retinol verträglicher."):tip("Vitamin C","Vitamin-C-Serum morgens","Fördert Kollagen.",{product:"vitc"})];
+    pm.push(sens?"Retinol (Sandwich)":"Retinol (2×/Wo.)"); am.push(sens?"Niacinamid":"Vitamin C"); photo=true;
+    note=(w?"Kein Retinol in Schwangerschaft/Stillzeit. ":"")+"Nie am selben Abend wie Säuren.";
   } else {
-    items=[tip(null,"Reinigung, Creme, LSF: mehr braucht's nicht","Gesunde Haut braucht keine 10 Schritte."),
-      tip(null,"Neue Produkte einzeln, im Abstand von 2 Wochen","So merkst du sofort, was die Haut nicht verträgt.")];
+    items=[tip(null,"Reinigung, Creme, LSF reichen","Gesunde Haut braucht keine 10 Schritte."),
+      tip(null,"Neues einzeln, 2 Wochen Abstand","So merkst du, was reizt.")];
   }
   // Kein täglicher LSF → LSF-Tipp hat Vorrang vor einem weniger wichtigen Tipp
   if(a.sonne!=="Täglich"&&!items.some(i=>i.k==="LSF 50"||i.k==="Getönter LSF 50")){
-    const t=lsf(photo?"Dein Wirkstoff macht die Haut sonnenempfindlicher. Ohne LSF wird es schlechter.":"Der wichtigste Schritt jeder Routine.");
+    const t=lsf(photo?"Dein Wirkstoff macht sonnenempfindlich.":"Wichtigster Schritt jeder Routine.");
     let i=-1; items.forEach((x,j)=>{ if(!x.k&&!x.must) i=j; });
     if(items.length<3) items.push(t); else if(i>=0) items[i]=t; else items[items.length-1]=t;
   }
@@ -295,9 +298,9 @@ function hautAdvice(a){
   const evening=[wash, ...pm, cream, ...spot];
   const newOnes=items.map(i=>i.k).filter(k=>k&&!/LSF|Ceramide|Nur 3|Panthenol/.test(k)).map(k=>({"Zink punktuell":"Zinksalbe","Anti-Schuppen-Maske":"Anti-Schuppen-Shampoo"}[k]||k));
   const missing=[...new Set([!has.includes("Waschgel")&&wash, !has.includes("Creme")&&cream, !has.includes("Sonnencreme")&&spf, ...(has.includes("Serum")?[]:newOnes)].filter(Boolean))];
-  const routine=sumRoutine("Haut",items,`Morgens: ${cjoin(morning)}. Abends: ${cjoin(evening)}.`,null,["LSF 50"]);
-  return {lead:`Hautbild ${typ.toLowerCase()} · ${st==="Unreinheiten"?(a.art||st):st==="Rötung"?(a.rot||st):st}`, routine, items:items.slice(0,3), note,
-    missing:missing.length?`Fehlt noch: ${missing.join(", ")}. Neues einzeln einführen, je 1–2 Wochen Abstand.`:""};
+  const routine=sumRoutine("Haut",items,"",null,["LSF 50"]);
+  routine.am=morning.filter(Boolean); routine.pm=evening.filter(Boolean);
+  return {lead:`Hautbild ${typ.toLowerCase()} · ${st==="Unreinheiten"?(a.art||st):st==="Rötung"?(a.rot||st):st}`, routine, items:items.slice(0,3), note, missing};
 }
 
 // ---------- Haare ----------
@@ -305,45 +308,45 @@ function haareAdvice(a){
   const st=a.stoert||"Nichts Konkretes", heat=a.hitze&&a.hitze!=="Selten", curly=a.typ==="Lockig", w=state.profile.sex==="w";
   let tips=[], note="";
   if(st==="Fettiger Ansatz"){
-    tips=[tip("Waschen nach Bedarf","Waschen, sobald der Ansatz fettet, auch täglich","Seltener waschen gewöhnt die Kopfhaut nicht um."),
-      tip("Shampoo nur am Ansatz","Shampoo nur auf die Kopfhaut, Conditioner nur in die Spitzen","Conditioner am Ansatz beschwert und fettet nach."),
-      tip(null,"Trockenshampoo für Tag 2","Saugt den Talg auf. Abends gut ausbürsten.")];
+    tips=[tip("Waschen nach Bedarf","Waschen, wenn's fettet, auch täglich","Seltener waschen gewöhnt nichts um."),
+      tip("Shampoo nur am Ansatz","Shampoo oben, Conditioner nur unten","Conditioner am Ansatz fettet nach."),
+      tip(null,"Trockenshampoo für Tag 2","Saugt Talg auf. Abends ausbürsten.")];
   } else if(st==="Trocken / Spliss"){
-    tips=[tip("1× Woche Maske","1× pro Woche Haarmaske, 10 Min einwirken","Glättet die Schuppenschicht, die Haare brechen weniger."),
-      tip("Öl in die Spitzen","2–3 Tropfen Öl in die feuchten Spitzen","Versiegelt die Längen gegen Austrocknen."),
-      tip(null,"Alle 8–12 Wochen 1 cm schneiden","Spliss lässt sich nicht reparieren, nur abschneiden.")];
+    tips=[tip("1× Woche Maske","1×/Woche Haarmaske, 10 Min","Glättet das Haar, weniger Bruch."),
+      tip("Öl in die Spitzen","2–3 Tropfen Öl in die Spitzen","Schützt die Längen vorm Austrocknen."),
+      tip(null,"Alle 8–12 Wochen 1 cm ab","Spliss geht nur mit der Schere weg.")];
   } else if(st==="Schuppen"){
     if(a.schuppen==="Klein, weiß, trocken"){
-      tips=[tip("Mildes Shampoo","Mildes Shampoo ohne Duft","Aggressive Tenside trocknen die Kopfhaut zusätzlich aus.",{product:"shampoo"}),
-        tip("Kopfhaut-Serum","Kopfhaut-Serum mit Urea oder Panthenol","Bindet Feuchtigkeit, der Juckreiz lässt nach."),
+      tips=[tip("Mildes Shampoo","Mildes Shampoo ohne Duft","Starke Tenside trocknen aus.",{product:"shampoo"}),
+        tip("Kopfhaut-Serum","Kopfhaut-Serum mit Urea/Panthenol","Spendet Feuchtigkeit, stoppt Jucken."),
         tip(null,"Lauwarm waschen, kühl föhnen","Hitze trocknet die Kopfhaut aus.")];
     } else {
-      tips=[tip("Anti-Schuppen-Shampoo","Shampoo mit Ketoconazol oder Zinkpyrithion, 2–3× pro Woche","Wirkt gegen den Hefepilz, der die Schuppen auslöst."),
-        tip(null,"3–5 Min einwirken lassen","Sonst hat der Wirkstoff keine Zeit zu wirken."),
-        tip(null,"Nach 4 Wochen: 1× pro Woche weiter","Ohne Erhaltung kommen die Schuppen zurück.")];
-      note="Dicke, rote, scharf begrenzte Stellen: Hautarzt, kann Schuppenflechte sein.";
+      tips=[tip("Anti-Schuppen-Shampoo","Ketoconazol- oder Zink-Shampoo, 2–3×/Woche","Wirkt gegen den Hefepilz dahinter."),
+        tip(null,"3–5 Min einwirken lassen","Sonst wirkt der Wirkstoff kaum."),
+        tip(null,"Nach 4 Wochen: 1×/Woche weiter","Sonst kommen sie zurück.")];
+      note="Dicke, rote Stellen: Hautarzt (Schuppenflechte?).";
     }
   } else if(st==="Fallen viel aus"){
     const af=a.ausfall||"Überall dünner";
     if(af==="Geheimratsecken / Scheitel"){
-      tips=[tip("Minoxidil",`Minoxidil 5 % Schaum, ${w?"1×":"2×"} täglich`,"Das einzige rezeptfreie Mittel mit klarer Studienlage. Wirkt nach 3–6 Monaten."),
-        tip(null,"Früh zum Hautarzt","Je früher, desto mehr lässt sich halten. Dort gibt's stärkere Mittel."),
-        tip("Ketoconazol-Shampoo","Ketoconazol-Shampoo 2× pro Woche","Kann die Behandlung leicht unterstützen.")];
-      note="Am Anfang fallen kurz mehr Haare aus. Das ist normal."+(w?" Nicht in Schwangerschaft und Stillzeit.":"");
+      tips=[tip("Minoxidil",`Minoxidil 5 % Schaum, ${w?"1×":"2×"} täglich`,"Rezeptfrei, gut belegt. Wirkt nach 3–6 Monaten."),
+        tip(null,"Früh zum Hautarzt","Je früher, desto mehr bleibt."),
+        tip("Ketoconazol-Shampoo","Ketoconazol-Shampoo 2×/Woche","Kann leicht unterstützen.")];
+      note="Anfangs fallen kurz mehr aus, das ist normal."+(w?" Nicht in Schwangerschaft/Stillzeit.":"");
     } else if(af==="Kahle runde Stellen"){
-      tips=[tip(null,"Zeitnah zum Hautarzt","Kreisrunder Haarausfall ist gut behandelbar, aber nicht mit Shampoo.",{must:1}),
-        tip("Mildes Shampoo","Bis dahin mild waschen, nichts selbst behandeln","Reizungen können die Stellen verschlimmern.",{product:"shampoo"})];
+      tips=[tip(null,"Zeitnah zum Hautarzt","Gut behandelbar, aber nicht mit Shampoo.",{must:1}),
+        tip("Mildes Shampoo","Bis dahin mild waschen","Nichts selbst behandeln.",{product:"shampoo"})];
     } else {
-      tips=[tip(null,"Blutbild: Ferritin, Vitamin D, Schilddrüse","Die häufigsten Ursachen für diffusen Ausfall."),
-        tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,"Haare reagieren 2–3 Monate verzögert auf Diät, Stress oder Krankheit."),
-        tip(null,"Meist wächst es nach 3–6 Monaten nach","Ist die Ursache weg, kommen die Haare zurück.")];
+      tips=[tip(null,"Blutbild: Ferritin, Vit. D, Schilddrüse","Häufigste Ursachen."),
+        tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,"Haare reagieren 2–3 Monate verzögert."),
+        tip(null,"Wächst meist in 3–6 Monaten nach","Ursache weg, Haare kommen zurück.")];
     }
   } else {
-    if(a.wasch==="Täglich") tips.push(tip("Ein Waschtag weniger","Ein Waschtag weniger pro Woche","Schont die Längen, wenn der Ansatz nicht fettet."));
-    tips.push(tip("Conditioner","Conditioner nach jeder Wäsche, nur in die Längen","Glättet die Haare und schützt vor Bruch."));
+    if(a.wasch==="Täglich") tips.push(tip("Ein Waschtag weniger","Ein Waschtag weniger pro Woche","Schont die Längen."));
+    tips.push(tip("Conditioner","Conditioner nach jeder Wäsche","Nur in die Längen. Schützt vor Bruch."));
   }
-  if(heat) tips.push(tip("Hitzeschutz","Hitzeschutz und max. 180 °C","Darüber wird das Keratin im Haar geschädigt."));
-  if(curly) tips.push(tip("Locken","Nur nass entwirren, mit T-Shirt trocknen","Trocken bürsten und Rubbeln zerstören die Lockenform."));
+  if(heat) tips.push(tip("Hitzeschutz","Hitzeschutz, max. 180 °C","Darüber leidet das Keratin."));
+  if(curly) tips.push(tip("Locken","Nur nass entwirren, T-Shirt statt Handtuch","Schont die Lockenform."));
   const items=tips.slice(0,3);
   const cut=haarSchnitt(a.form, a.laenge);
   if(cut) items.unshift(cut);   // Schnitt-Tipp immer zuerst
@@ -353,14 +356,14 @@ function haareAdvice(a){
 // Kurzer Schnitt-Tipp nach Gesichtsform (kurz = Kurzhaar, sonst Mittel/Lang). Allgemeine Stilregeln.
 function haarSchnitt(form, len){
   if(!form) return null;
-  if(form==="Weiß nicht") return tip(null,"Schnitt-Tipp","Frag beim Friseur nach deiner Gesichtsform.");
+  if(form==="Weiß nicht") return tip(null,"Schnitt-Tipp","Frag den Friseur nach deiner Gesichtsform.");
   const k=len==="Kurz";
   const t={
     "Oval":      "Fast jeder Schnitt passt.",
     "Rund":      k?"Oben Volumen, Seiten kurz.":"Stufen unters Kinn, Seitenscheitel.",
-    "Eckig":     k?"Oben locker mit Textur, Seiten nicht zu kurz.":"Weiche Stufen oder Wellen.",
+    "Eckig":     k?"Oben locker, Seiten nicht zu kurz.":"Weiche Stufen oder Wellen.",
     "Länglich":  k?"Seiten nicht zu kurz, oben flach.":"Volumen an den Seiten, Pony passt.",
-    "Herzförmig":k?"Oben nicht zu voll, Seiten etwas länger.":"Volumen ab Kinnhöhe, Seitenpony."
+    "Herzförmig":k?"Oben nicht zu voll, Seiten länger.":"Volumen ab Kinnhöhe, Seitenpony."
   }[form];
   return t?tip(null,`Schnitt: ${t}`,`Passt zu ${form==="Herzförmig"?"herzförmigem":form.toLowerCase()+"em"} Gesicht.`):null;
 }
@@ -373,21 +376,21 @@ function schlafAdvice(a){
   const alk=((state.coach.answers||{}).gesundheit||{}).alk==="Mehrmals pro Woche";
   const g=[];
   if(a.morgen==="Gerädert"&&(a.stunden==="7–8"||a.stunden==="Über 8"))
-    g.push([tip(null,"Schnarchen oder Atemaussetzer? Ärztlich abklären","Genug Stunden, trotzdem gerädert: oft wird der Schlaf unbemerkt unterbrochen.",{must:1})]);
+    g.push([tip(null,"Schnarchen? Ärztlich abklären","Genug Stunden, trotzdem gerädert: oft Atemaussetzer.",{must:1})]);
   if(a.stunden==="Unter 6"||a.stunden==="6–7")
-    g.push([tip(`Bett ${hm(bed)}`,`Um ${hm(bed)} ins Bett, jede Woche 15 Min früher`,"Erwachsene brauchen 7–9 Stunden. Kleine Schritte halten länger.")]);
-  if(a.ein==="Dauert") g.push([tip("Morgenlicht","10 Min Tageslicht direkt nach dem Aufstehen","Stellt die innere Uhr. Abends wirst du früher müde."),
-    tip("20-Min-Regel","Nach 20 Min wach: kurz aufstehen, bis du müde bist","So bleibt das Bett mit Schlafen verknüpft, nicht mit Grübeln.")]);
-  if(a.ein==="Wach in der Nacht") g.push([tip("16–19 °C","Schlafzimmer kühl: 16–19 °C","Der Körper muss abkühlen, um durchzuschlafen."),
-    alk?tip("Kein Alkohol abends","Kein Alkohol in den 3 h vor dem Schlafen","Macht müde, stört aber die zweite Nachthälfte."):tip(null,"Nachts nicht auf die Uhr schauen","Rechnen und Grübeln macht hellwach.")]);
-  if(a.kaffee==="Oft") g.push([tip(`Kaffee bis ${hm(caf)}`,`Letzter Kaffee bis ${hm(caf)}`,"Koffein hat eine Halbwertszeit von ca. 5 Stunden.")]);
-  if(a.vorher==="Handy / Serie im Bett") g.push([tip("Handy raus","Handy 30 Min vorher weg, nicht mit ins Bett","Inhalte halten den Kopf wach, mehr noch als das Licht.")]);
-  if(a.vorher==="Arbeit / Lernen") g.push([tip("To-do notieren","5 Min To-dos für morgen aufschreiben","Studien zeigen: So schläfst du schneller ein.")]);
-  if(a.vorher==="Sport") g.push([tip("Sport früher","Intensiven Sport 1–2 h vor dem Bett beenden","Direkt davor sind Puls und Körpertemperatur noch zu hoch.")]);
-  if(a.auf==="Wechselt stark") g.push([tip("Feste Weckzeit",`Wecker auch am Wochenende, spätestens ${hm(wake+60)}`,"Ausschlafen verschiebt die innere Uhr wie ein Mini-Jetlag.")]);
+    g.push([tip(`Bett ${hm(bed)}`,`Um ${hm(bed)} ins Bett`,"Ziel 7–9 h. Jede Woche 15 Min früher.")]);
+  if(a.ein==="Dauert") g.push([tip("Morgenlicht","10 Min Tageslicht nach dem Aufstehen","Stellt die innere Uhr."),
+    tip("20-Min-Regel","Nach 20 Min wach: kurz aufstehen","Bett bleibt zum Schlafen, nicht Grübeln.")]);
+  if(a.ein==="Wach in der Nacht") g.push([tip("16–19 °C","Schlafzimmer auf 16–19 °C","Kühl schläft man durch."),
+    alk?tip("Kein Alkohol abends","3 h vorm Bett kein Alkohol","Stört die zweite Nachthälfte."):tip(null,"Nachts nicht auf die Uhr schauen","Rechnen macht hellwach.")]);
+  if(a.kaffee==="Oft") g.push([tip(`Kaffee bis ${hm(caf)}`,`Letzter Kaffee bis ${hm(caf)}`,"Nach 5 h wirkt noch die Hälfte.")]);
+  if(a.vorher==="Handy / Serie im Bett") g.push([tip("Handy raus","Handy 30 Min vorher weg","Inhalte halten wach, mehr als das Licht.")]);
+  if(a.vorher==="Arbeit / Lernen") g.push([tip("To-do notieren","5 Min To-dos für morgen notieren","So schläfst du schneller ein.")]);
+  if(a.vorher==="Sport") g.push([tip("Sport früher","Harten Sport 1–2 h vorm Bett beenden","Puls und Temperatur sind sonst zu hoch.")]);
+  if(a.auf==="Wechselt stark") g.push([tip("Feste Weckzeit",`Wochenende spätestens ${hm(wake+60)} aufstehen`,"Ausschlafen wirkt wie Mini-Jetlag.")]);
   let items=pickTips(g,3);
-  if(!items.length) items=[tip(null,"Dein Schlaf passt","Zeiten halten, dann bleibt es so.")];
-  const routine=sumRoutine("Schlaf",items,`Wecker ${hm(wake)} · Kaffee bis ${hm(caf)} · ${hm(dim)} Licht runter · ${hm(bed)} ins Bett`,null);
+  if(!items.length) items=[tip(null,"Dein Schlaf passt","Zeiten halten.")];
+  const routine=sumRoutine("Schlaf",items,`⏰ ${hm(wake)} · ☕ bis ${hm(caf)} · 💡 ${hm(dim)} · 🛏️ ${hm(bed)}`,null);
   if(!routine.short.includes("Bett")){ routine.short=[`Bett ${hm(bed)}`].concat(routine.short?routine.short.split(" · "):[]).slice(0,4).join(" · "); routine.title="Schlaf: "+routine.short; }
   return {lead:`Aufstehen ${hm(wake)} → Bett ${hm(bed)}`, routine, items};
 }
@@ -409,33 +412,33 @@ function aussehenAdvice(a){
   const prot=Math.max(t.protein, Math.round(p.weight*1.6));
   let cal=null;
   if(lvl>=3||(lvl===2&&fatGoal))
-    cal = g==="lose" ? tip("Defizit halten",`Bei ${de(t.kcal)} kcal bleiben`,"300–500 kcal Minus: Fett geht, Muskeln bleiben.")
-      : tip("Leichtes Defizit",`Kalorien auf ${de(kcalFor("lose"))} senken`,"Bauch und Gesicht werden nur über weniger Körperfett schlanker.",{act:"coach-goal",v:"lose",label:"Kalorienziel senken"});
-  const lean = lvl===0&&g==="lose" ? tip("Muskeln statt Minus","Nicht weiter abnehmen","Du bist schon schlank. Mehr Form bringen jetzt Muskeln.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen"}) : null;
-  const sit = a.sitzen==="Über 8" ? tip("Stündlich aufstehen","Jede Stunde 2 Min aufstehen","Langes Sitzen fördert Rundrücken und bremst den Kreislauf.") : null;
+    cal = g==="lose" ? tip("Defizit halten",`Bei ${de(t.kcal)} kcal bleiben`,"Fett geht, Muskeln bleiben.")
+      : tip("Leichtes Defizit",`Kalorien auf ${de(kcalFor("lose"))} senken`,"Nur weniger Körperfett macht Bauch und Gesicht schlanker.",{act:"coach-goal",v:"lose",label:"Kalorienziel senken"});
+  const lean = lvl===0&&g==="lose" ? tip("Muskeln statt Minus","Nicht weiter abnehmen","Du bist schlank. Jetzt bringen Muskeln Form.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen"}) : null;
+  const sit = a.sitzen==="Über 8" ? tip("Stündlich aufstehen","Jede Stunde 2 Min aufstehen","Gegen Rundrücken und träge Durchblutung.") : null;
   const G={
-    "Weniger Bauchfett":[cal, tip("8.000 Schritte","8.000+ Schritte am Tag","Alltagsbewegung verbrennt viel, ohne hungrig zu machen."),
-      tip(null,"Bauchübungen verbrennen kein Bauchfett","Fett geht immer am ganzen Körper, nie gezielt.")],
-    "Mehr Muskeln":[lifts?tip("Progression","Jede Woche +1 Wiederholung oder +2,5 kg","Ohne steigende Last gibt es keinen neuen Wachstumsreiz.")
-        :tip("3× Kraft","3× pro Woche Krafttraining","Der Reiz für Muskelwachstum. Ganzkörper reicht.",{act:"tab",v:"sport",label:"Zum Training"}),
-      tip("Protein",`${prot} g Protein am Tag`,"1,6–2,2 g pro kg Körpergewicht holen das Maximum raus."),
-      tip("Kreatin","3–5 g Kreatin täglich","Das am besten untersuchte Supplement für Kraft und Muskeln.")],
-    "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge flach an den Gaumen, Lippen zu","Durch die Nase atmen. Bessere Zungen- und Kopfhaltung lässt die Kinnlinie straffer wirken.")],
-    "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken: Rudern, Face Pulls","Stärkt den oberen Rücken, die Schultern gehen zurück."),
-      tip("Brust dehnen","Täglich 30 Sek. Brust im Türrahmen dehnen","Eine verkürzte Brust zieht die Schultern nach vorn."), sit],
-    "Frischer wirken":[tip("7–9 h Schlaf","7–9 Stunden schlafen","Augenringe und fahle Haut kommen zuerst vom Schlafmangel."),
-      tip("LSF 50","Jeden Morgen LSF 50","Hält den Teint gleichmäßig und frisch.")]
+    "Weniger Bauchfett":[cal, tip("8.000 Schritte","8.000+ Schritte am Tag","Verbrennt viel, ohne Hunger zu machen."),
+      tip(null,"Bauchübungen allein reichen nicht","Fett geht nie gezielt an einer Stelle.")],
+    "Mehr Muskeln":[lifts?tip("Progression","Jede Woche +1 Wdh. oder +2,5 kg","Ohne mehr Last kein Wachstum.")
+        :tip("3× Kraft","3×/Woche Krafttraining","Ganzkörper reicht für den Anfang.",{act:"tab",v:"sport",label:"Zum Training"}),
+      tip("Protein",`${prot} g Protein am Tag`,"1,6–2,2 g pro kg holen das Maximum raus."),
+      tip("Kreatin","3–5 g Kreatin täglich","Bestuntersuchtes Supplement für Kraft.")],
+    "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Nasenatmung + Haltung strafft die Kinnlinie optisch.")],
+    "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern, Face Pulls: Schultern gehen zurück."),
+      tip("Brust dehnen","Täglich 30 Sek. Brust dehnen (Türrahmen)","Enge Brust zieht Schultern nach vorn."), sit],
+    "Frischer wirken":[tip("7–9 h Schlaf","7–9 Stunden schlafen","Schlafmangel zeigt sich zuerst im Gesicht."),
+      tip("LSF 50","Jeden Morgen LSF 50","Hält den Teint gleichmäßig.")]
   };
   const groups=[lean?[lean]:[]].concat(ziel.map(z=>G[z]));
   if(a.bloat==="Oft"||a.bloat==="Manchmal"){
     const ab=(a.abend||[]).filter(x=>x!=="Nichts davon").map(x=>({"Salziges / Fast Food":"Salz","Alkohol":"Alkohol","Spät gegessen":"spätes Essen"}[x]));
-    groups.push([tip("Gua Sha","Morgens 2 Min Gua Sha, sanft nach außen","Schiebt Gewebewasser ab, das Gesicht wirkt schlanker."),
-      ab.length?tip(null,`Abends weniger ${ab.join(", ")}`,"Bindet über Nacht Wasser im Gesicht."):tip(null,"Kopf beim Schlafen leicht erhöht","Weniger Wasser sammelt sich im Gesicht.")]);
+    groups.push([tip("Gua Sha","Morgens 2 Min Gua Sha, nach außen","Schiebt Wasser ab, Gesicht wirkt schlanker."),
+      ab.length?tip(null,`Abends weniger ${ab.join(", ")}`,"Bindet über Nacht Wasser im Gesicht."):tip(null,"Kopf beim Schlafen leicht hoch","Weniger Wasser im Gesicht.")]);
   }
   groups.push([sit]);
   if(!ziel.length) groups.unshift([cal]);
   let items=pickTips(groups,4);
-  if(!items.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßigkeit schlägt jedes Extra.")];
+  if(!items.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
   return {lead:`${kfaTxt} · ${ziel.length?ziel.join(", "):"kein Fokus"}`, routine:sumRoutine("Aussehen",items,"","Training nach Plan"), items};
 }
@@ -444,24 +447,24 @@ function aussehenAdvice(a){
 function gesundheitAdvice(a){
   const glasses=state.profile.waterTarget||8, intol=(a.intol||[]).filter(x=>x!=="Nein, alles okay"), g=[];
   let note="";
-  if(a.stil==="Vegan") g.push([tip("B12",`Vitamin B12 täglich`,"Steckt fast nur in tierischen Lebensmitteln. Ein Mangel schadet Blut und Nerven.",{product:"b12"}),
-    tip("Jodsalz","Mit Jodsalz kochen","Vegan fehlt oft Jod aus Milch und Fisch.")]);
-  if(a.energie==="Ständig müde") g.push([tip(null,"Blutbild: Ferritin, B12, Vitamin D, Schilddrüse","Die häufigsten Gründe für Dauermüdigkeit.",{must:1}),
-    tip("Morgens raus","Morgens 10 Min an die frische Luft","Tageslicht macht wach und stellt die innere Uhr.")]);
-  if(a.energie==="Tief nach dem Essen") g.push([tip("Erst Gemüse & Protein","Erst Gemüse und Protein essen, dann Brot, Reis, Nudeln","Der Blutzucker steigt langsamer, das Tief danach fällt kleiner aus."),
-    tip("10 Min gehen","10 Min gehen nach dem Essen","Arbeitende Muskeln ziehen Zucker aus dem Blut.")]);
+  if(a.stil==="Vegan") g.push([tip("B12","Vitamin B12 täglich","Fehlt vegan. Mangel schadet Blut und Nerven.",{product:"b12"}),
+    tip("Jodsalz","Mit Jodsalz kochen","Vegan fehlt oft Jod.")]);
+  if(a.energie==="Ständig müde") g.push([tip(null,"Blutbild: Ferritin, B12, Vit. D, Schilddrüse","Häufigste Gründe für Dauermüdigkeit.",{must:1}),
+    tip("Morgens raus","Morgens 10 Min raus","Tageslicht macht wach.")]);
+  if(a.energie==="Tief nach dem Essen") g.push([tip("Erst Gemüse & Protein","Erst Gemüse & Protein, dann Beilage","Blutzucker steigt langsamer, kleineres Tief."),
+    tip("10 Min gehen","10 Min gehen nach dem Essen","Muskeln ziehen Zucker aus dem Blut.")]);
   if(a.bauch==="Oft"||a.bauch==="Manchmal"){
-    g.push([intol.includes("Laktose")?tip("Laktosefrei","Laktosefreie Milchprodukte, Hartkäse ist okay","Gereifter Hartkäse enthält kaum Laktose."):tip("Langsam essen","Langsam essen, gut kauen","Weniger verschluckte Luft, leichtere Verdauung."),
-      tip(null,"Testweise weglassen: Kohlensäure, Kaugummi, Süßstoffe","Typische Auslöser für Blähungen.")]);
+    g.push([intol.includes("Laktose")?tip("Laktosefrei","Laktosefrei essen, Hartkäse geht","Hartkäse hat kaum Laktose."):tip("Langsam essen","Langsam essen, gut kauen","Weniger Luft im Bauch."),
+      tip(null,"Testweise ohne Kohlensäure, Kaugummi, Süßstoff","Typische Bläh-Auslöser.")]);
     if(a.bauch==="Oft") note="Mit Schmerzen, Gewichtsverlust oder Blut im Stuhl: Arzt.";
   }
-  if(a.wasser==="Unter 1 Liter") g.push([tip("Wasser zu jeder Mahlzeit","Ein Glas Wasser zu jeder Mahlzeit","Schon leichter Wassermangel macht müde und unkonzentriert.")]);
-  if(a.trink==="Täglich") g.push([tip("Sprudel statt Softdrink","Softdrink gegen Sprudel mit Zitrone tauschen","0,5 l Cola haben rund 53 g Zucker.")]);
-  if(a.alk==="Mehrmals pro Woche") g.push([tip("Mo–Do alkoholfrei","Montag bis Donnerstag alkoholfrei","Alkohol stört Schlaf, Leber und Regeneration.")]);
-  if(intol.includes("Gluten")) g.push([tip(null,"Vor glutenfrei: Zöliakie-Test beim Arzt","Glutenfrei essen vor dem Test verfälscht das Ergebnis.",{must:1})]);
-  if(a.stil==="Vegetarisch") g.push([tip("Eisen + Vitamin C","Linsen, Hafer & Co. mit Paprika oder Zitrone","Vitamin C verbessert die Eisenaufnahme deutlich.")]);
+  if(a.wasser==="Unter 1 Liter") g.push([tip("Wasser zu jeder Mahlzeit","Ein Glas Wasser zu jeder Mahlzeit","Wenig trinken macht müde.")]);
+  if(a.trink==="Täglich") g.push([tip("Sprudel statt Softdrink","Softdrink gegen Sprudel tauschen","0,5 l Cola = rund 53 g Zucker.")]);
+  if(a.alk==="Mehrmals pro Woche") g.push([tip("Mo–Do alkoholfrei","Montag bis Donnerstag alkoholfrei","Besser für Schlaf, Leber, Regeneration.")]);
+  if(intol.includes("Gluten")) g.push([tip(null,"Vor glutenfrei: Zöliakie-Test","Sonst ist der Test verfälscht.",{must:1})]);
+  if(a.stil==="Vegetarisch") g.push([tip("Eisen + Vitamin C","Linsen & Hafer mit Paprika/Zitrone","Vitamin C holt mehr Eisen raus.")]);
   let items=pickTips(g,4);
-  if(!items.length) items=[tip("Unverarbeitet essen","Läuft gut. Weiter auf Unverarbeitetes setzen","Je natürlicher, desto mehr Nährstoffe pro Kalorie.")];
+  if(!items.length) items=[tip("Unverarbeitet essen","Läuft gut, weiter so","Unverarbeitet bleibt die beste Basis.")];
   return {lead:`${a.stil||"–"} · Energie: ${a.energie||"–"}`, routine:sumRoutine("Gesundheit",items,"",`${glasses} Gläser Wasser`), items, note};
 }
 function coachAdvice(id){
@@ -612,25 +615,29 @@ function areaSheet(id){
       <div class="gap"></div><button class="pill primary" data-act="coach-ready" data-topic="${id}" ${ready?"":"disabled"}>Vorschlag zeigen</button>`;
   }
   const advice=coachAdvice(id);
-  const products=[...new Set(advice.items.map(i=>i.product).filter(Boolean))];
   const r=advice.routine, inRt=(state.coach.routine||[]).some(x=>x.topic===id);
+  // Produkt-Chips: bei Haut nur, was noch fehlt; sonst die passenden Produkte
+  const chip=(name,pid)=>pid?`<button class="chip" data-act="open" data-type="product" data-id="${pid}">${esc(name)} ›</button>`:`<span class="chip">${esc(name)}</span>`;
+  const miss=advice.missing||[];
+  const prods=[...new Set(advice.items.map(i=>i.product).filter(Boolean))].map(pid=>allItems().find(x=>x.id===pid)).filter(Boolean);
+  const shop=miss.length
+    ?`<div class="section"><h2>Fehlt dir noch</h2></div><div class="opts">${miss.map(n=>chip(n,careId(n))).join("")}</div><p class="sub mt-2">Einzeln einführen, je 1–2 Wochen Abstand.</p>`
+    :prods.length?`<div class="section"><h2>Dazu passen</h2></div><div class="opts">${prods.map(p=>chip(p.name,p.id)).join("")}</div>`:"";
+  const plan=r&&r.am?`<span>☀️ ${esc(r.am.join(" → "))}</span><span>🌙 ${esc(r.pm.join(" → "))}</span>`:r&&r.detail?`<span>${esc(r.detail)}</span>`:"";
   return `<h2>${topic.title}</h2><p class="sub">${esc(advice.lead)}</p>
-    ${r?`<div class="insight"><b>Dein Routine-Punkt</b><span><b>${esc(r.short||r.title)}</b>${r.detail?`<br>${esc(r.detail)}`:""}</span>${advice.missing?`<span class="sub">${esc(advice.missing)}</span>`:""}</div>`:""}
-    <div class="section"><h2>Worauf es bei dir ankommt</h2></div>
+    ${r?`<div class="insight"><b>${esc(r.short)}</b>${plan}</div>`:""}
+    <div class="section"><h2>Deine Tipps</h2></div>
     ${advice.items.map(i=>`<div class="li"><b>${esc(i.title)}</b>${i.detail?`<div class="sub">„${esc(i.detail)}“</div>`:""}${i.act?`<button class="pill ghost w-full mt-2" data-act="${i.act}" data-v="${i.v}">${i.label}</button>`:""}</div>`).join("")}
     ${advice.note?`<p class="sub mt-3">⚠️ ${esc(advice.note)}</p>`:""}
-    ${products.length?`<div class="section"><h2>Dazu passen</h2></div>${products.map(pid=>{
-      const item=allItems().find(x=>x.id===pid); if(!item) return "";
-      return `<button class="food" data-act="open" data-type="product" data-id="${pid}"><div class="thumb">${item.emoji||""}</div><div class="grow"><b>${item.name}</b><div class="sub">${item.brand||""}</div></div></button>`;
-    }).join("")}`:""}
+    ${shop}
     <div class="gap"></div>
     ${inRt
       ?`<button class="pill ghost w-full" data-act="coach-remove" data-topic="${id}">Aus der Routine entfernen</button>`
-      :r?`<button class="pill primary" data-act="coach-add" data-topic="${id}">Als 1 Punkt in die Routine</button>`:""}
-    <div class="gap"></div>
-    <button class="pill ghost w-full" data-act="coach-reset" data-topic="${id}">Antworten ändern</button>
-    <p class="sub mt-3">Allgemeine Tipps, kein ärztlicher Rat.</p>`;
+      :r?`<button class="pill primary" data-act="coach-add" data-topic="${id}">In die Routine</button>`:""}
+    <div class="row space mt-4"><button class="link" data-act="coach-reset" data-topic="${id}">Antworten ändern</button><span class="sub">Kein ärztlicher Rat</span></div>`;
 }
+// Name aus „Fehlt dir noch“ → passendes Produkt zum Antippen
+function careId(n){ return /LSF/.test(n)?"spf":/Azelain/.test(n)?"azelain":/BHA/.test(n)?"bha":/Zink/.test(n)?"zink":/Niacinamid/.test(n)?"nia":/Retinol/.test(n)?"retinol":/Vitamin C/.test(n)?"vitc":/Ceramid|Panthenol|Creme|Fluid/.test(n)?"cerave":/Reinigungsgel/.test(n)?"cleanser":null; }
 function planBody(id){ return areaSheet(id); }
 function supsSheet(){
   const rec=recommendStack();
