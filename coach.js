@@ -90,6 +90,9 @@ function coachTopics(){
 }
 // KFA-Stufen je Geschlecht (grobe Orientierung, keine Messung)
 function kfaOpts(){ return state.profile.sex==="w" ? ["Unter 20 %","20–27 %","27–33 %","Über 33 %","Weiß nicht"] : ["Unter 12 %","12–18 %","18–25 %","Über 25 %","Weiß nicht"]; }
+const HAAR_SEITEN=["Rasiert / Fade","Kurz (3–6 mm)","Mittel, mit Schere","Lang, über den Ohren"];
+const HAAR_OBEN=["Unter 2 cm","2–5 cm","5–10 cm","Über 10 cm"];
+const HAAR_LAENGE=["Kurz (Pixie)","Kinnlang / Bob","Schulterlang","Lang"];
 function coachQuiz(id){
   const q = {
     haut:[
@@ -106,7 +109,13 @@ function coachQuiz(id){
       {k:"ausfall", q:"Wie zeigt sich der Ausfall?", opts:["Geheimratsecken / Scheitel","Überall dünner","Kahle runde Stellen"], skip:a=>a.stoert!=="Fallen viel aus"},
       {k:"wasch", q:"Wie oft wäschst du die Haare?", opts:["Täglich","2–3 mal","Seltener"]},
       {k:"hitze", q:"Wie oft kommt Hitze dran?", opts:["Fast immer","Manchmal","Selten"]},
-      {k:"typ", q:"Haartyp?", opts:["Glatt","Wellig","Lockig"]}
+      {k:"typ", q:"Haartyp?", opts:["Glatt","Wellig","Lockig"]},
+      // Frisur: Gesichtsform + wie der Schnitt gerade ist (Männer: Seiten/oben, Frauen: Länge/Schnitt)
+      {k:"form", q:"Deine Gesichtsform?", opts:["Oval","Rund","Eckig","Länglich","Herzförmig","Weiß nicht"], emo:{"Oval":"🥚","Rund":"⚪","Eckig":"⬛","Länglich":"📏","Herzförmig":"🤍","Weiß nicht":"🤔"}},
+      {k:"seiten", q:"Wie sind die Seiten gerade?", opts:HAAR_SEITEN, skip:()=>state.profile.sex==="w"},
+      {k:"oben", q:"Wie lang ist es oben?", opts:HAAR_OBEN, skip:()=>state.profile.sex==="w"},
+      {k:"laenge", q:"Wie lang sind deine Haare?", opts:HAAR_LAENGE, skip:()=>state.profile.sex!=="w"},
+      {k:"schnitt", q:"Wie ist es geschnitten?", opts:["Eine Länge","Stufen","Mit Pony"], skip:()=>state.profile.sex!=="w"}
     ],
     schlaf:[
       {k:"aufzeit", q:"Wann musst du meistens aufstehen?", opts:["Vor 6 Uhr","6–7 Uhr","7–8 Uhr","Nach 8 Uhr"]},
@@ -121,8 +130,6 @@ function coachQuiz(id){
       {k:"ziel", q:"Was willst du verbessern?", multi:true, opts:["Weniger Bauchfett","Mehr Muskeln","Gesicht definierter","Bessere Haltung","Frischer wirken"], emo:{"Weniger Bauchfett":"🔥","Mehr Muskeln":"💪","Gesicht definierter":"🗿","Bessere Haltung":"🧍","Frischer wirken":"✨"}},
       {k:"gym", q:"Wie trainierst du?", opts:["Gym, schon länger","Gym, Anfänger","Zuhause","Noch gar nicht"], emo:{"Gym, schon länger":"🏋️","Gym, Anfänger":"🌱","Zuhause":"🏠","Noch gar nicht":"🛋️"}, skip:a=>!(a.ziel||[]).includes("Mehr Muskeln")},
       {k:"tage", q:"Wie viele Tage pro Woche kannst du?", opts:["2–3 Tage","4 Tage","5–6 Tage"], skip:a=>!(a.ziel||[]).includes("Mehr Muskeln")},
-      {k:"form", q:"Deine Gesichtsform?", opts:["Oval","Rund","Eckig","Länglich","Herzförmig","Weiß nicht"], emo:{"Oval":"🥚","Rund":"⚪","Eckig":"⬛","Länglich":"📏","Herzförmig":"🤍","Weiß nicht":"🤔"}},
-      {k:"laenge", q:"Wie trägst du deine Haare?", opts:["Kurz","Mittel","Lang"], emo:{"Kurz":"✂️","Mittel":"💇","Lang":"💁"}},
       {k:"kfa", q:"Wie hoch schätzt du deinen Körperfettanteil?", opts:kfaOpts()},
       {k:"bloat", q:"Wirkt dein Gesicht morgens aufgedunsen?", opts:["Oft","Manchmal","Selten"]},
       {k:"abend", skip:a=>a.bloat==="Selten", q:"Was gibt es abends oft?", multi:true, none:"Nichts davon", opts:["Salziges / Fast Food","Alkohol","Spät gegessen","Nichts davon"], emo:{"Salziges / Fast Food":"🍟","Alkohol":"🍺","Spät gegessen":"🌙","Nichts davon":"👍"}},
@@ -152,9 +159,11 @@ function openQuizzes(){ return ["haut","gesundheit","schlaf"].filter(id=>!quizDo
 function migrateCoach(s){
   const A=s.coach.answers, old=A.ernaehrung;
   if(old&&!A.gesundheit){ A.gesundheit={}; ["stil","intol","wasser","trink"].forEach(k=>{ if(old[k]!=null) A.gesundheit[k]=old[k]; }); }
-  // Frisur/Gesichtsform ist von Haare zu Aussehen gewandert
-  const H=A.haare||{};
-  if(H.form||H.laenge){ A.aussehen=A.aussehen||{}; ["form","laenge"].forEach(k=>{ if(H[k]!=null&&A.aussehen[k]==null) A.aussehen[k]=H[k]; delete H[k]; }); }
+  // Frisur/Gesichtsform gehört zu Haare (Okt 2026 zurück von Aussehen). Alte Länge „Kurz/Mittel/Lang“ passt nicht mehr.
+  const H=A.haare||{}, L=A.aussehen||{};
+  if(L.form&&H.form==null&&A.haare) H.form=L.form;
+  delete L.form; delete L.laenge;
+  if(H.laenge&&!HAAR_LAENGE.includes(H.laenge)) delete H.laenge;
   // Ernährungsstile umbenannt: "Alles" → "Nichts Bestimmtes", "Wenig Fleisch" → "Ausgewogen"
   const G=A.gesundheit||{}; if(G.stil==="Alles") G.stil="Nichts Bestimmtes"; if(G.stil==="Wenig Fleisch") G.stil="Ausgewogen";
   return s;
@@ -175,6 +184,9 @@ function slimRoutine(){
 const cjoin=(arr)=>arr.filter(Boolean).join(" → ");
 const cap=t=>t?t[0].toUpperCase()+t.slice(1):"";
 // Kurzer Name für die Routine-Liste (Details stehen im Coach-Thema)
+// Routine-Liste: pro Coach-Bereich nur ein kurzes Wort, Details per ›
+const R_LABEL={haut:"Skincare", haare:"Haarpflege", schlaf:"Schlafroutine", aussehen:"Looksmaxxing", gesundheit:"Ernährung"};
+function rLabel(r){ return R_LABEL[r.topic]||r.title; }
 function rShort(r){ if(["haut","haare","schlaf","aussehen","gesundheit"].includes(r.topic)){ try{ const x=coachAdvice(r.topic).routine; if(x&&x.short) return x.short; }catch(e){} } return r.title; }
 // ---------- Coach-Tipps ----------
 // Ein Tipp: k = Kurzname für den Routine-Punkt (null = einmalige Sache, kommt nicht in die Routine),
@@ -366,23 +378,52 @@ function haareAdvice(a){
   }
   if(heat) tips.push(tip("Hitzeschutz","Hitzeschutz, max. 180 °C","Darüber leidet das Keratin."));
   if(curly) tips.push(tip("Locken","Nur nass entwirren, T-Shirt statt Handtuch","Schont die Lockenform."));
-  const items=tips.slice(0,3);
+  const cut=haarSchnitt(a), items=cut.concat(tips.slice(0,cut.length?2:3));
   const routine=sumRoutine("Haare",items,"","Mildes Shampoo");
   return {lead:`${a.typ||"Haar"} · ${st==="Fallen viel aus"&&a.ausfall?a.ausfall:st}`, routine, items, note};
 }
-// Kurzer Schnitt-Tipp nach Gesichtsform (kurz = Kurzhaar, sonst Mittel/Lang). Allgemeine Stilregeln.
-function haarSchnitt(form, len){
-  if(!form) return null;
-  if(form==="Weiß nicht") return tip(null,"Schnitt-Tipp","Frag den Friseur nach deiner Gesichtsform.");
-  const k=len==="Kurz";
-  const t={
-    "Oval":      "Fast jeder Schnitt passt.",
-    "Rund":      k?"Oben Volumen, Seiten kurz.":"Stufen unters Kinn, Seitenscheitel.",
-    "Eckig":     k?"Oben locker, Seiten nicht zu kurz.":"Weiche Stufen oder Wellen.",
-    "Länglich":  k?"Seiten nicht zu kurz, oben flach.":"Volumen an den Seiten, Pony passt.",
-    "Herzförmig":k?"Oben nicht zu voll, Seiten länger.":"Volumen ab Kinnhöhe, Seitenpony."
-  }[form];
-  return t?tip(null,`Schnitt: ${t}`,`Passt zu ${form==="Herzförmig"?"herzförmigem":form.toLowerCase()+"em"} Gesicht.`):null;
+// Schnitt-Tipp nach Gesichtsform, Geschlecht und Haartyp. Vergleicht mit dem jetzigen Schnitt (allgemeine Stilregeln).
+// Ziel-Bereiche als Index in HAAR_SEITEN / HAAR_OBEN / HAAR_LAENGE: [min, max]
+const SCHNITT_M={
+  "Oval":      {t:"Seiten kurz, oben 5–8 cm",                      s:[0,2], o:[1,3]},
+  "Rund":      {t:"Seiten kurz (Fade), oben 5–10 cm mit Volumen", s:[0,1], o:[2,3]},
+  "Eckig":     {t:"Seiten kurz bis mittel, oben 3–7 cm locker",   s:[1,2], o:[1,2]},
+  "Länglich":  {t:"Seiten nicht zu kurz, oben flach 3–6 cm",      s:[2,3], o:[1,2]},
+  "Herzförmig":{t:"Seiten etwas länger, oben 5–8 cm, nicht zu voll", s:[2,3], o:[1,2]}
+};
+const SCHNITT_W={
+  "Oval":      {t:"Fast jede Länge passt",                        l:[0,3]},
+  "Rund":      {t:"Ab Schulterlänge, Stufen ab Kinn, Seitenscheitel", l:[2,3], ponyNein:1},
+  "Eckig":     {t:"Weiche Stufen oder Wellen ums Kinn",           l:[1,3]},
+  "Länglich":  {t:"Kinn- bis schulterlang, Pony, Volumen an den Seiten", l:[1,2], ponyJa:1},
+  "Herzförmig":{t:"Kinn- bis schulterlang, Volumen ab Kinn, Seitenpony", l:[1,2]}
+};
+// -1 = zu kurz, 1 = zu lang, 0 = passt
+const haarCmp=(v,list,[lo,hi])=>{ const i=list.indexOf(v); return i<0?0:i<lo?-1:i>hi?1:0; };
+function haarSchnitt(a){
+  const form=a.form, w=state.profile.sex==="w", out=[];
+  if(!form) return out;
+  if(form==="Weiß nicht") out.push(tip(null,"Schnitt-Tipp","Frag den Friseur nach deiner Gesichtsform."));
+  else if(w){
+    const Z=SCHNITT_W[form], d=haarCmp(a.laenge,HAAR_LAENGE,Z.l);
+    const t=[d<0?"Etwas länger wachsen lassen.":d>0?"Etwas kürzer schneiden lassen.":""];
+    if(Z.ponyNein&&a.schnitt==="Mit Pony") t.push("Lieber Seitenpony statt geradem Pony.");
+    if(Z.ponyJa&&a.schnitt&&a.schnitt!=="Mit Pony") t.push("Ein Pony würde gut passen.");
+    out.push(tip(null,"Schnitt: "+Z.t,t.filter(Boolean).join(" ")||"Passt schon, so halten."));
+  } else {
+    const Z=SCHNITT_M[form], ds=haarCmp(a.seiten,HAAR_SEITEN,Z.s), dob=haarCmp(a.oben,HAAR_OBEN,Z.o);
+    const S={"-1":"Seiten länger","1":"Seiten kürzer"}[ds], O={"-1":"oben länger","1":"oben kürzer"}[dob];
+    const txt=S&&O?`Bei dir: ${S}, ${O}.`:S?`Bei dir: ${S}.`:O?`Bei dir: ${O[0].toUpperCase()+O.slice(1)}.`:"Passt schon, so halten.";
+    out.push(tip(null,"Schnitt: "+Z.t,txt));
+  }
+  // Styling nach Haartyp
+  const T={
+    Glatt: w?["Volumenspray am Ansatz","Kopfüber föhnen, sonst liegt glattes Haar flach."]:["Matte Paste oder Clay","Gibt glattem Haar oben Halt und Volumen."],
+    Wellig:["Meersalzspray, dann lufttrocknen","Betont die Wellen ohne Glanz."],
+    Lockig: w?["Stufen schneiden lassen","Ohne Stufen wirken Locken schnell dreieckig."]:["Locken oben mindestens 5 cm lassen","Zu kurz stehen sie ab. Seiten lieber Taper statt kahl."]
+  }[a.typ];
+  if(T) out.push(tip(null,"Styling: "+T[0],T[1]));
+  return out;
 }
 
 // ---------- Schlaf ----------
@@ -491,12 +532,9 @@ function aussehenAdvice(a){
   }
   groups.push([sit]);
   if(!ziel.length) groups.unshift([cal]);
-  // Frisur passend zur Gesichtsform: immer zuerst, zählt zu den max. 4 Tipps
-  const cut=haarSchnitt(a.form, a.laenge);
   const mus=ziel.includes("Mehr Muskeln")?muskelTips(a,lvl,g,fatGoal,prot,lifts):[];
-  let items=pickTips(groups,mus.length?(cut?2:3):cut?3:4);   // mit Muskel-Tipps weniger andere
+  let items=pickTips(groups,mus.length?3:4);   // mit Muskel-Tipps weniger andere
   if(!items.length&&!mus.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
-  if(cut) items.unshift(cut);
   if(mus.length){ items.forEach(i=>i.grp=i.grp||"Look & Körper"); items=mus.concat(items); }
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
   return {lead:`${kfaTxt} · ${ziel.length?ziel.join(", "):"kein Fokus"}`,
@@ -600,7 +638,7 @@ function rStreak(){ let n=0, s=todayIso(); if(!(state.coach.routine||[]).length)
 // Eine Zeile der Routine: Haken + kurzer Name. › öffnet die Details im Coach, ✕ löscht (nur auf der Routine-Seite).
 function rRow(r,del){
   const on=routineOn(r.id,state.date), coach=coachTopics().some(t=>t.id===r.topic);
-  return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><span class="grow">${topicMark(r.topic)!=="•"?topicMark(r.topic)+" ":""}<b>${esc(rShort(r))}</b></span></button>${coach?`<button class="x" data-act="open" data-type="area" data-id="${r.topic}" aria-label="Details">›</button>`:""}${del?`<button class="x" data-act="routine-del" data-id="${r.id}" aria-label="Routine-Punkt löschen">✕</button>`:""}</div>`;
+  return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><span class="grow">${topicMark(r.topic)!=="•"?topicMark(r.topic)+" ":""}<b>${esc(rLabel(r))}</b></span></button>${coach?`<button class="x" data-act="open" data-type="area" data-id="${r.topic}" aria-label="Details">›</button>`:""}${del?`<button class="x" data-act="routine-del" data-id="${r.id}" aria-label="Routine-Punkt löschen">✕</button>`:""}</div>`;
 }
 function routineBlock(){
   const rt=state.coach.routine||[], wk=weekStart(state.date), t=rDone(state.date), open=!!ui.rOpen&&rt.length>0;

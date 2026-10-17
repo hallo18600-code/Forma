@@ -220,7 +220,7 @@ function renderObPlan(){
     </div>
     ${safetyNote()}
     <div class="card obp"><h3>⭐ Dein Score achtet auf</h3><div class="opts">${persoTags().map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div></div>
-    <div class="card obp"><h3>✅ Routine</h3>${rt.map(r=>`<div class="obp-li">${esc(rShort(r))}</div>`).join("")}</div>
+    <div class="card obp"><h3>✅ Routine</h3>${rt.map(r=>`<div class="obp-li">${esc(rLabel(r))}</div>`).join("")}</div>
     ${open.length?`<p class="sub obp-note">Später im Coach: ${open.join(", ")}</p>`:""}
     <div class="obp-2">
       <div class="card obp"><h3>🏋️ Training</h3><p>${plan}</p></div>
