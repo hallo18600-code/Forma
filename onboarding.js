@@ -31,7 +31,7 @@ function obTopics(){
   return OB_TOPICS.filter(([t])=>set.has(t));
 }
 // Ernährungsfragen, die jeder beantwortet (Score warnt sonst nicht bei Unverträglichkeiten)
-const OB_CORE=["stil","intol"];
+const OB_CORE=["stil","intol","meiden"];
 const OB_STEPS_BY_ACT={1.3:7000,1.4:8000,1.55:10000,1.7:12000};
 function obAns(t){ return state.coach.answers[t] || (state.coach.answers[t]={}); }
 function obProf(k){ return (state.ob||{})[k] ? state.profile[k] : undefined; }
@@ -71,17 +71,20 @@ function obSteps(){
     opts:list([["Krafttraining","Kraft","🏋️"],["Ausdauer","Ausdauer","🏃"],["Beides","Beides","⚡"],["Weiß ich noch nicht","Weiß ich noch nicht","🤔"]]),
     get:()=>p.trainType, set:v=>{ p.trainType=v; }});
   // Schrittziel wird aus dem Alltag abgeleitet (änderbar im Verlauf)
-  const quizStep=(t,title,q,extra)=>S.push(Object.assign({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, none:q.none, pick:q.pick,
-      opts:q.opts.map(o=>({v:o,l:o,e:(q.emo||{})[o]})), get:()=>obAns(t)[q.k], set:v=>{ obAns(t)[q.k]=v; }},extra||{}));
+  const quizStep=(t,title,q,extra)=>S.push(Object.assign({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, sub:q.sub, none:q.none, pick:q.pick,
+      opts:q.opts.map(o=>({v:o,l:o,e:(q.emo||{})[o],d:(q.desc||{})[o]})), get:()=>obAns(t)[q.k], set:v=>{ obAns(t)[q.k]=v; }},extra||{}));
   const gq=coachQuiz("gesundheit"), veg=["Vegan","Vegetarisch"].includes(obAns("gesundheit").stil);
   quizStep("gesundheit","Ernährung",gq.find(q=>q.k==="stil"),{opt:0,req:1,
     set:v=>{ obAns("gesundheit").stil=v; if(["Vegan","Vegetarisch"].includes(v)){ p.fish="wenig"; obMark("fish"); } }});
   if(!veg) S.push({id:"fish",sec:"Ernährung",kind:"single",req:1,q:"Wie oft isst du Fisch?",
     opts:list([["wenig","Selten","🥦"],["oft","Jede Woche","🐟"]]), get:()=>obProf("fish"), set:v=>{ p.fish=v; obMark("fish"); }});
   quizStep("gesundheit","Ernährung",gq.find(q=>q.k==="intol"),{opt:0,req:1});
+  quizStep("gesundheit","Ernährung",gq.find(q=>q.k==="meiden"),{opt:0});
+  // Haut-Probleme fragen wir alle: fließt in jede Lebensmittel-Bewertung ein
+  quizStep("haut","Ernährung",Object.assign({},coachQuiz("haut").find(q=>q.k==="stoert"),{q:"Hast du Haut-Probleme?",sub:"Die Bewertung achtet dann darauf."}),{opt:0});
   obTopics().forEach(([t,title])=>{
     const a=obAns(t);
-    coachQuiz(t).filter(q=>!(t==="gesundheit"&&OB_CORE.includes(q.k))&&qNeeded(q,a)).forEach(q=>quizStep(t,title,q));
+    coachQuiz(t).filter(q=>!(t==="gesundheit"&&OB_CORE.includes(q.k))&&!(t==="haut"&&q.k==="stoert")&&qNeeded(q,a)).forEach(q=>quizStep(t,title,q));
   });
   S.push({id:"sups",sec:"Supplements & Routine",opt:1,kind:"multi",none:"none",q:"Nimmst du Supplements?",
     opts:SUPS.map(s=>({v:s.id,l:s.name,e:s.emoji})).concat({v:"none",l:"Nichts davon",e:"🚫"}),
@@ -175,7 +178,9 @@ function renderOnboard(){
 // Was der Essens-Score für diese Person besonders beachtet
 function persoTags(){
   const e=state.coach.answers.gesundheit||{}, out=[goalName()];
-  if(e.stil&&e.stil!=="Alles") out.push(e.stil);
+  if(e.stil&&!["Alles","Nichts Bestimmtes"].includes(e.stil)) out.push(e.stil==="Wenig Fleisch"?"Ausgewogen":e.stil);
+  (e.meiden||[]).filter(x=>x!=="Nichts").forEach(x=>out.push("Ohne "+x));
+  ((state.coach.answers.haut||{}).stoert||[]).filter(x=>x!=="Nichts Bestimmtes").slice(0,2).forEach(x=>out.push("Haut: "+x));
   (e.intol||[]).filter(x=>x!=="Nein, alles okay").forEach(x=>out.push("Ohne "+x));
   foodFocus().filter(x=>x!=="Nichts Bestimmtes").forEach(x=>out.push(x));
   return out;

@@ -113,20 +113,35 @@ function fTable(it,g){
   const row=(l,v,sub)=>`<div class="frow${sub?" sub2":""}"><span>${l}</span><b>${v}</b></div>`;
   return row("Kalorien",Math.round((it.kcal||0)*g/100)+" kcal")+row("Eiweiß",fv(it.protein||0,g))+row("Kohlenhydrate",fv(it.carbs||0,g))+row("davon Zucker",fv(it.sugar,g),1)+row("Ballaststoffe",fv(it.fiber,g),1)+row("Fett",fv(it.fat||0,g))+row("davon gesättigte Fettsäuren",fv(it.sat,g),1)+row("Salz",fv(it.salt,g));
 }
+// Farbstufe für Ring und Balken (eigene Klassen, die Score-Badges haben einen Hintergrund)
+function qClass(n){ return scoreClass(n).replace("s-","q-"); }
+// Bewertungs-Ring (SVG), Farbe nach Wert
+function rateRing(n){
+  const r=52, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(100,n))/100), cls=qClass(n);
+  const lab=n>=85?"Sehr gut":n>=70?"Gut":n>=50?"Okay":n>=30?"Mäßig":"Schlecht";
+  return `<div class="fring ${cls}"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${r}" class="trk"/><circle cx="60" cy="60" r="${r}" class="val" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/></svg><div class="fring-t"><b>${n}</b><span>${lab}</span></div></div>`;
+}
+const GOAL_SHORT={muscle:"Muskeln",lose:"Abnehmen",skin:"Haut & Look",energy:"Energie"};
 function foodSheet(it,sc){
-  const slot=SLOTS.find(s=>s.id===ui.addSlot), g=ui.portion||100;
+  const slot=SLOTS.find(s=>s.id===ui.addSlot), g=ui.portion||100, main=state.profile.goal;
   const src=it.src==="off"?"Quelle: Open Food Facts":it.type==="custom"?"Eigene Angaben":"Basisdaten";
+  const all=scoreAllGoals(it), order=[main].concat(GOALS.map(x=>x.id).filter(x=>x!==main));
+  const intol=((state.coach.answers.gesundheit||{}).intol||[]).some(x=>x!=="Nein, alles okay");
+  const list=(arr,cls)=>arr.map(t=>`<li class="${cls}">${esc(t)}</li>`).join("");
   return `<div class="yhead"><button class="yback" data-act="${ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><span></span></div>
-    <div class="ftitle"><h2>${esc(it.name)}</h2><div class="sub">${esc(it.brand||"")}</div></div>
-    <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
-    <div class="frate">
-      <div class="top"><div class="score lg ${scoreClass(sc.score)}">${sc.score}</div>
-        <div><b>Bewertung · ${esc(goalName())}</b><div class="sub">Naturbelassen gedacht, auf dich abgestimmt</div></div></div>
-      ${rateList(sc)}
-      ${((state.coach.answers.gesundheit||{}).intol||[]).some(x=>x!=="Nein, alles okay")?`<p class="sub">Erkannt nur am Namen. Bitte Zutaten prüfen.</p>`:""}
+    <div class="fhead"><span class="femo">${it.emoji||"🍽️"}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
+    ${rateRing(sc.score)}
+    <div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
+      ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
     </div>
-    <div class="sec">Nährwerte</div><div class="ftable" id="ftable">${fTable(it,g)}</div>
-    <p class="sub">${src}</p>
+    ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Pros</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
+    ${(sc.bad||[]).length?`<div class="fcard"><b class="fcard-t">Cons</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
+    ${intol?`<p class="sub fnote">Unverträglichkeiten erkennt die App nur am Namen. Bitte Zutaten prüfen.</p>`:""}
+    <div class="fcard"><b class="fcard-t">Makros <span class="sub">· <span id="fgram">${g}</span> g</span></b>
+      <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
+      <div class="ftable" id="ftable">${fTable(it,g)}</div>
+    </div>
+    <p class="sub fnote">${src}</p>
     <div class="amt ${ui.amtOpen?"open":""}">
       <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>
       <button class="amt-compact" data-act="amt-open"><b id="amt-val">${g}</b><span>Gramm ⌄</span></button>

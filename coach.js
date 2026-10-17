@@ -129,7 +129,9 @@ function coachQuiz(id){
       {k:"sitzen", q:"Wie viele Stunden sitzt du am Tag?", opts:["Unter 4","4–8","Über 8"]}
     ],
     gesundheit:[
-      {k:"stil", q:"Wie isst du?", opts:["Alles","Wenig Fleisch","Vegetarisch","Vegan"], emo:{"Alles":"🍗","Wenig Fleisch":"🥗","Vegetarisch":"🧀","Vegan":"🌱"}},
+      {k:"stil", q:"Welche Ernährung passt zu dir?", sub:"Danach richtet sich jede Bewertung.", opts:["Ausgewogen","Whole Foods","Primal","Vegetarisch","Vegan","Nichts Bestimmtes"], emo:{"Ausgewogen":"⚖️","Whole Foods":"🥑","Primal":"🍖","Vegetarisch":"🥗","Vegan":"🌱","Nichts Bestimmtes":"🍽️"},
+        desc:{"Ausgewogen":"Von allem etwas","Whole Foods":"Unverarbeitet, naturbelassen","Primal":"Fleisch, Fisch, Eier, Obst – kaum Getreide & Soja","Vegetarisch":"Ohne Fleisch & Fisch","Vegan":"Rein pflanzlich"}},
+      {k:"meiden", q:"Was willst du meiden?", sub:"Die Bewertung warnt dich dann.", multi:true, none:"Nichts", opts:["Zucker","Milchprodukte","Gluten","Soja","Schweinefleisch","Rotes Fleisch","Alkohol","Koffein","Fertigprodukte","Nichts"], emo:{"Zucker":"🍬","Milchprodukte":"🥛","Gluten":"🌾","Soja":"🫘","Schweinefleisch":"🐖","Rotes Fleisch":"🥩","Alkohol":"🍺","Koffein":"☕","Fertigprodukte":"📦","Nichts":"👍"}},
       {k:"energie", q:"Wie ist deine Energie am Nachmittag?", opts:["Konstant","Tief nach dem Essen","Ständig müde"], emo:{"Konstant":"⚡","Tief nach dem Essen":"🥱","Ständig müde":"😴"}},
       {k:"bauch", q:"Fühlt sich dein Bauch oft aufgebläht an?", opts:["Oft","Manchmal","Selten"], emo:{"Oft":"🎈","Manchmal":"🙂","Selten":"👍"}},
       {k:"intol", q:"Verträgst du etwas nicht?", multi:true, none:"Nein, alles okay", opts:["Laktose","Gluten","Nüsse","Nein, alles okay"], emo:{"Laktose":"🥛","Gluten":"🌾","Nüsse":"🥜","Nein, alles okay":"👍"}},
@@ -153,6 +155,8 @@ function migrateCoach(s){
   // Frisur/Gesichtsform ist von Haare zu Aussehen gewandert
   const H=A.haare||{};
   if(H.form||H.laenge){ A.aussehen=A.aussehen||{}; ["form","laenge"].forEach(k=>{ if(H[k]!=null&&A.aussehen[k]==null) A.aussehen[k]=H[k]; delete H[k]; }); }
+  // Ernährungsstile umbenannt: "Alles" → "Nichts Bestimmtes", "Wenig Fleisch" → "Ausgewogen"
+  const G=A.gesundheit||{}; if(G.stil==="Alles") G.stil="Nichts Bestimmtes"; if(G.stil==="Wenig Fleisch") G.stil="Ausgewogen";
   return s;
 }
 // Alte Coach-Routinen (4 Punkte pro Thema) einmalig zu einem Punkt zusammenfassen

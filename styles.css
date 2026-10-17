@@ -284,6 +284,9 @@ p { margin:var(--s-2) 0; }
 /* Auswahl in Blättern */
 .choice { width:100%; text-align:left; min-height:var(--btn-h); padding:var(--s-3) var(--s-4); border-radius:var(--r-l); background:var(--fill-2); margin-bottom:var(--s-2); }
 .choice.on { background:var(--accent-soft); box-shadow:inset 0 0 0 2px var(--accent); }
+.choice.pref { display:flex; align-items:center; gap:var(--s-3); }
+.choice.pref > span { font-size:22px; width:28px; text-align:center; flex:none; }
+.choice.pref i { font-style:normal; font-weight:700; color:var(--accent-text); }
 
 /* ---------- 4e. Eingabefelder ---------- */
 .field label { display:block; font-size:var(--fs-s); color:var(--ink-2); margin:var(--s-3) 0 var(--s-2); font-weight:600; }
@@ -456,6 +459,38 @@ p { margin:var(--s-2) 0; }
 .bcmsg { position:absolute; bottom:var(--s-3); left:var(--s-3); right:var(--s-3); color:var(--white); font-size:var(--fs-s); text-align:center; }
 
 /* Lebensmittel-Detail */
+.fhead { display:flex; align-items:center; gap:var(--s-3); margin:var(--s-2) 0 var(--s-2); }
+.fhead h2 { font-size:var(--fs-l); margin:0; line-height:1.2; }
+.femo { font-size:34px; width:48px; height:48px; display:grid; place-items:center; border-radius:var(--r-l); background:var(--fill-2); flex:none; }
+.fring { position:relative; width:164px; height:164px; margin:var(--s-3) auto var(--s-4); }
+.fring svg { width:100%; height:100%; transform:rotate(-90deg); }
+.fring circle { fill:none; stroke-width:11; }
+.fring .trk { stroke:var(--fill-2); }
+.fring .val { stroke-linecap:round; transition:stroke-dashoffset .5s ease; }
+.fring.q-good .val { stroke:var(--accent); } .fring.q-mid .val { stroke:#E0A030; } .fring.q-bad .val { stroke:var(--bad-text); }
+.fring-t { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+.fring-t b { font-size:46px; line-height:1; letter-spacing:-.02em; }
+.fring.q-good .fring-t b { color:var(--accent-text); } .fring.q-mid .fring-t b { color:#B87A10; } .fring.q-bad .fring-t b { color:var(--bad-text); }
+.fring-t span { font-size:var(--fs-s); color:var(--ink-2); margin-top:4px; }
+.fcard { background:var(--fill-2); border-radius:var(--r-xl); padding:var(--s-4); margin-bottom:var(--s-3); }
+.fcard-h { display:flex; justify-content:space-between; align-items:baseline; gap:var(--s-2); margin-bottom:var(--s-2); }
+.fcard-h .sub { text-align:right; }
+.fcard-t { display:block; font-size:var(--fs-m); margin-bottom:var(--s-2); }
+.fgoal { display:grid; grid-template-columns:1fr 42% 34px; align-items:center; gap:var(--s-3); padding:7px 0; font-size:var(--fs-m); }
+.fgoal.main span { font-weight:700; }
+.fgoal i { display:block; height:8px; border-radius:var(--r-full); background:var(--line); overflow:hidden; }
+.fgoal i u { display:block; height:100%; border-radius:inherit; background:var(--accent); }
+.fgoal i.q-mid u { background:#E0A030; } .fgoal i.q-bad u { background:var(--bad-text); }
+.fgoal b { text-align:right; font-variant-numeric:tabular-nums; }
+.fgoal b.q-good { color:var(--accent-text); } .fgoal b.q-mid { color:#B87A10; } .fgoal b.q-bad { color:var(--bad-text); }
+.fpc { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:var(--s-2); }
+.fpc li { position:relative; padding-left:22px; font-size:var(--fs-m); line-height:1.4; }
+.fpc li::before { content:""; position:absolute; left:4px; top:.5em; width:9px; height:9px; border-radius:50%; }
+.fpc li.p::before { background:var(--accent); } .fpc li.c::before { background:#E0903A; }
+.fcard .fmacros { border-top:0; padding-top:var(--s-1); }
+.fnote { margin:0 0 var(--s-3); }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .fring.q-mid .fring-t b, :root:not([data-theme="light"]) .fgoal b.q-mid { color:#F0B850; } }
+:root[data-theme="dark"] .fring.q-mid .fring-t b, :root[data-theme="dark"] .fgoal b.q-mid { color:#F0B850; }
 .ftitle { text-align:center; margin:var(--s-2) 0 var(--s-4); }
 .ftitle h2 { font-size:var(--fs-l); margin:var(--s-1) 0; }
 .fmacros { display:grid; grid-template-columns:repeat(4,1fr); text-align:center; gap:var(--s-1); padding:var(--s-4) 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); }

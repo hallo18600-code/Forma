@@ -21,6 +21,10 @@ function renderProfil(){
       <button class="g-row" data-act="ob-redo"><span class="bubble">📝</span><div class="grow"><b>Fragebogen</b><div class="sub">Antworten ändern, Plan neu berechnen</div></div><span class="chev">›</span></button>
       <div class="g-row"><span class="bubble">🍽️</span><div class="grow"><b>Richtwert</b><div class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein</div></div></div>
     </div>
+    <div class="section"><h2>Ernährung & Haut</h2></div>
+    <div class="group">
+      ${PREFS.map(([t,k,icon,label])=>`<button class="g-row" data-act="open" data-type="pref" data-id="${t}:${k}"><span class="bubble">${icon}</span><div class="grow"><b>${label}</b><div class="sub">${esc(prefTxt(t,k))}</div></div><span class="chev">›</span></button>`).join("")}
+    </div>
     <div class="section"><h2>App</h2></div>
     <div class="group">
       <div class="g-row"><div class="grow"><b>Darstellung</b></div>
@@ -37,4 +41,25 @@ function renderProfil(){
       <button class="g-row" data-act="reset"><div class="grow"><b class="t-bad">Alles löschen</b><div class="sub">Mit Sicherheitsabfrage</div></div></button>
     </div>
   </div>`;
+}
+
+// Ernährung & Haut: fließt in jede Lebensmittel-Bewertung ein
+const PREFS=[["gesundheit","stil","🥗","Ernährung"],["gesundheit","meiden","🚫","Meiden"],["gesundheit","intol","⚠️","Unverträglichkeiten"],["haut","stoert","💧","Haut-Probleme"]];
+function prefTxt(t,k){
+  const v=((state.coach.answers||{})[t]||{})[k], arr=[].concat(v||[]).filter(x=>!["Nichts","Nein, alles okay","Nichts Bestimmtes"].includes(x));
+  if(k==="stil") return v?String(v).replace("Alles","Nichts Bestimmtes").replace("Wenig Fleisch","Ausgewogen"):"Nichts Bestimmtes";
+  return arr.length?arr.join(", "):"Keine";
+}
+function prefSheet(id){
+  const [t,k]=String(id).split(":"), q=coachQuiz(t).find(x=>x.k===k); if(!q) return "";
+  const cur=((state.coach.answers||{})[t]||{})[k], on=o=>q.multi?[].concat(cur||[]).includes(o):cur===o;
+  const title={stil:"Ernährung",meiden:"Was willst du meiden?",intol:"Unverträglichkeiten",stoert:"Haut-Probleme"}[k]||q.q;
+  return `<h2>${esc(title)}</h2><p class="sub">${q.multi?"Mehrere möglich. ":""}Jede Bewertung richtet sich danach.</p><div class="gap"></div>
+    ${q.opts.map(o=>`<button class="choice pref ${on(o)?"on":""}" data-act="pref" data-id="${t}:${k}" data-v="${esc(o)}"><span>${(q.emo||{})[o]||""}</span><div class="grow"><b>${esc(o)}</b>${(q.desc||{})[o]?`<div class="sub">${esc(q.desc[o])}</div>`:""}</div>${on(o)?"<i>✓</i>":""}</button>`).join("")}
+    <div class="gap"></div><button class="pill primary" data-act="close">Fertig</button>`;
+}
+function prefSet(id,v){
+  const [t,k]=String(id).split(":"), q=coachQuiz(t).find(x=>x.k===k); if(!q) return;
+  const A=state.coach.answers[t]||(state.coach.answers[t]={});
+  A[k]=q.multi?toggleMulti(A[k],v,q.none,q.pick):v; save();
 }

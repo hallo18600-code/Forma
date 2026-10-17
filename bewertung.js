@@ -321,8 +321,15 @@ function rClassify(item){
   cat=rPlausible(cat,nut,heavy);
   return {cat,nut,heavy,nova,h,words};
 }
-function scoreFood(item){
-  const g=state.profile.goal, gi=Math.max(0,R_GOALS.indexOf(g));
+let R_MICRO_HIT=null;
+// Diät aus dem Fragebogen (alte Antworten werden umgedeutet)
+function rDiet(){ const s=(state.coach.answers.gesundheit||{}).stil; return ({Alles:"Nichts Bestimmtes","Wenig Fleisch":"Ausgewogen"})[s]||s||"Nichts Bestimmtes"; }
+function glu0(id,item,h){ return ["wholewheat","refined"].includes(id)||foodHas(item,"glu")&&!/glutenfrei/.test(h); }
+// Alle vier Ziele auf einmal (für "Deine Ziele" in der Detailansicht)
+function scoreAllGoals(item){ const o={}; R_GOALS.forEach(g=>o[g]=scoreFood(item,g).score); return o; }
+function scoreFood(item,goal){
+  const g=goal||state.profile.goal, gi=Math.max(0,R_GOALS.indexOf(g));
+  R_MICRO_HIT=null;
   const C=rClassify(item), cat=C.cat, nut=C.nut, heavy=C.heavy, nova=C.nova, h=C.h, words=C.words;
   const {kc,pr,cb,fa,su,fi,sa}=nut;
   const id=cat?cat.id:"", pros=[], cons=[];
@@ -390,6 +397,7 @@ function scoreFood(item){
     const GK=["m","l","s","e"][gi], TK="t"+GK, BK="b"+GK;
     // Bester Treffer: Hauptwort vor Bestimmungswort (Rinder„fond“ = Fond, nicht Rind)
     let hit=null, hs=0; for(const x of R_MICRO){ const v=Math.max(...x.k.map(k=>kwHit(h,words,k))); if(v>hs){ hs=v; hit=x; if(v===2) break; } }
+    R_MICRO_HIT=hit;
     if(hit){ score+=hit[GK]||0; if(hit[TK]) good(hit[TK],12.5); if(hit[BK]) bad(hit[BK],8); }
   }
   // 5) Sonderfälle innerhalb einer Art
@@ -431,7 +439,62 @@ function scoreFood(item){
   let cap=98;
   if(ea.stil==="Vegan"&&animal){ P(-40,"Passt nicht zu vegan"); cap=15; }
   else if(ea.stil==="Vegetarisch"&&meat){ P(-40,"Passt nicht zu vegetarisch"); cap=15; }
-  if(ea.stil==="Wenig Fleisch"&&(id==="redmeat"||id==="processedmeat"||RED_MEAT.some(x=>h.includes(x)))) P(-12,"Du willst weniger Fleisch");
+  // Diät aus dem Fragebogen
+  // "Sauber": wenig verarbeitet und ohne zugesetzten Zucker (kein Bonus für Fruchtjoghurt & Co.)
+  const clean=!heavy&&(nova?nova<=2:!item.processed)&&!(su>=8&&!R_FRUITY.includes(id));
+  const diet=rDiet(), D=(v,t)=>{ v=Math.round(v); if(!v) return; score+=v; (v>0?good:bad)(t,30+Math.abs(v)); };
+  const PRIMAL_OK=["poultry","redmeat","organ","broth","fattyfish","leanfish","egg","fruit","berries","vitc","banana","honey","goodfat","butter","coconut","avocado","skinveg","veg","sweetpotato","potato","kefir","cheese"];
+  if(diet==="Primal"){
+    if(["soy","ersatz","plantmilk","legume","wholewheat","refined","seedoil","margarine"].includes(id)) D(-6,"Passt nicht zu deiner Primal-Ernährung");
+    else if(PRIMAL_OK.includes(id)&&clean) D(3,"Passt zu deiner Primal-Ernährung");
+  } else if(diet==="Whole Foods"){
+    if(heavy) D(-7,"Stark verarbeitet – passt nicht zu Whole Foods");
+    else if(["legume","wholewheat","pseudograin","oats"].includes(id)&&clean) D(6,"Vollwertig – passt zu Whole Foods");
+    else if(cat&&cat.w&&clean) D(3,"Unverarbeitet – passt zu Whole Foods");
+    else if(!heavy&&nova===3) D(-2,"Etwas verarbeitet");
+  } else if(diet==="Ausgewogen"){
+    if(["legume","wholewheat","pseudograin"].includes(id)) D(6,"Gehört zu einer ausgewogenen Ernährung");
+    if(id==="soy") D(6,"Gute pflanzliche Abwechslung");
+  } else if(diet==="Vegan"||diet==="Vegetarisch"){
+    if(id==="soy") D(12,"Pflanzliches Protein – wichtig für dich");
+    if(id==="legume") D(8,"Pflanzliches Protein & Eisen – wichtig für dich");
+    if(id==="plantmilk"&&diet==="Vegan") D(6,"Milch-Alternative für dich");
+    if(id==="ersatz") D(4,"Fleisch-Alternative für dich");
+  }
+  // "Nicht primal" ist nur ein Minus, wenn jemand primal/ohne Vorgabe isst
+  if(!["Primal","Nichts Bestimmtes"].includes(diet)){
+    const drop=/nicht primal|soja, nicht naturbelassen|verarbeitetes soja|enthält soja/i;
+    for(let i=cons.length-1;i>=0;i--) if(drop.test(cons[i].t)) cons.splice(i,1);
+    if(["Vegan","Vegetarisch","Ausgewogen"].includes(diet)&&id==="soy") score+=6; // Soja-Abzug aus der Primal-Sicht zurücknehmen
+  }
+  // Was die Person meiden will
+  const meiden=(ea.meiden||[]).filter(x=>x!=="Nichts");
+  const M=(v,t)=>P(v,t);
+  if(meiden.includes("Zucker")&&su>=8&&!R_FRUITY.includes(id)) M(-Math.min(18,6+su*0.3),"Du willst Zucker meiden");
+  if(meiden.includes("Milchprodukte")&&(["protdairy","kefir","dairy","cheese","butter","whey","coffeemilk"].includes(id)||foodHas(item,"lak"))&&!plant) M(-22,"Du willst Milchprodukte meiden");
+  if(meiden.includes("Gluten")&&glu0(id,item,h)) M(-22,"Du willst Gluten meiden");
+  if(meiden.includes("Soja")&&(["soy","ersatz"].includes(id)||/(soja|\bsoy\b|tofu|tempeh)/.test(h))) M(-22,"Du willst Soja meiden");
+  if(meiden.includes("Schweinefleisch")&&/(schwein|speck|bacon|salami|leberkase|mett|kassler|kasseler|lyoner|leberwurst|chorizo|serrano|prosciutto|parma|bratwurst|wiener|frankfurter)/.test(h)) M(-25,"Enthält (meist) Schweinefleisch");
+  if(meiden.includes("Rotes Fleisch")&&(id==="redmeat"||id==="processedmeat")) M(-18,"Du willst rotes Fleisch meiden");
+  if(meiden.includes("Alkohol")&&id==="alcohol") M(-25,"Du willst Alkohol meiden");
+  if(meiden.includes("Koffein")&&(foodHas(item,"caf")||id==="coffee"||id==="coffeemilk")&&!/(entkoffeiniert|koffeinfrei)/.test(h)) M(-15,"Du willst Koffein meiden");
+  if(meiden.includes("Fertigprodukte")&&heavy) M(-12,"Du willst Fertigprodukte meiden");
+  // Haut-Probleme: beim Ziel Haut voll, sonst halb
+  const hp=((state.coach.answers.haut||{}).stoert||[]), hk=g==="skin"?1:0.5, H=(v,t)=>{ v=Math.round(v*hk); if(!v) return; score+=v; (v>0?good:bad)(t,35+Math.abs(v)); };
+  const microTxt=(R_MICRO_HIT&&R_MICRO_HIT.ts)||"";
+  if(hp.includes("Unreinheiten")){
+    if(["protdairy","kefir","dairy","cheese","whey","coffeemilk"].includes(id)&&!plant) H(-7,"Milch kann deine Unreinheiten verstärken");
+    else if(su>=12&&!R_FRUITY.includes(id)) H(-6,"Zucker kann deine Unreinheiten verstärken");
+    if(/zink|omega/i.test(microTxt)||["fattyfish","organ"].includes(id)) H(5,"Zink/Omega-3 gegen Unreinheiten");
+  }
+  if(hp.includes("Rötung")){
+    if(id==="alcohol") H(-8,"Alkohol verstärkt Rötungen");
+    if(/omega/i.test(microTxt)||id==="fattyfish") H(5,"Omega-3 beruhigt gerötete Haut");
+  }
+  if(hp.includes("Trockenheit")&&(R_GOODFAT.includes(id)||/omega|vitamin e/i.test(microTxt))&&!heavy) H(5,"Gute Fette gegen trockene Haut");
+  if((hp.includes("Wirkt stumpf")||hp.includes("Pigmentflecken"))&&(["berries","skinveg","vitc","vegjuice"].includes(id)||/antioxid|vitamin c|carotin/i.test(microTxt))&&!heavy) H(5,"Antioxidantien für mehr Glow");
+  if(hp.includes("Erste Fältchen")&&(["broth","fattyfish","vitc"].includes(id)||/kollagen|vitamin c/i.test(microTxt))&&!heavy) H(5,"Kollagen & Vitamin C gegen Fältchen");
+  if(hp.includes("Glänzt / große Poren")&&["refined","sweets","fastfood","chips","cereal"].includes(id)) H(-5,"Schnelle Carbs fördern fettige Haut");
   const fokus=foodFocus(), intol=ea.intol||[];
   const lak=["protdairy","kefir","dairy","cheese","whey","coffeemilk"].includes(id)||foodHas(item,"lak")&&!plant;
   const glu=["wholewheat","refined"].includes(id)||foodHas(item,"glu");
