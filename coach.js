@@ -185,7 +185,7 @@ const cjoin=(arr)=>arr.filter(Boolean).join(" → ");
 const cap=t=>t?t[0].toUpperCase()+t.slice(1):"";
 // Kurzer Name für die Routine-Liste (Details stehen im Coach-Thema)
 // Routine-Liste: pro Coach-Bereich nur ein kurzes Wort, Details per ›
-const R_LABEL={haut:"Skincare", haare:"Haarpflege", schlaf:"Schlafroutine", aussehen:"Looksmaxxing", gesundheit:"Ernährung"};
+const R_LABEL={haut:"Skincare", haare:"Haarpflege", schlaf:"Schlafroutine", aussehen:"Looksmaxxing", gesundheit:"Ernährung", sups:"Supplements"};
 function rLabel(r){ return R_LABEL[r.topic]||r.title; }
 function rShort(r){ if(["haut","haare","schlaf","aussehen","gesundheit"].includes(r.topic)){ try{ const x=coachAdvice(r.topic).routine; if(x&&x.short) return x.short; }catch(e){} } return r.title; }
 // ---------- Coach-Tipps ----------
@@ -497,11 +497,11 @@ function muskelTips(a,lvl,g,fatGoal,prot,lifts){
   const gym=a.gym||"", beginner=gym==="Gym, Anfänger"||gym==="Noch gar nicht";
   const surplus=lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal, G={grp:"Training"};
   return [
-    tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why,Object.assign({s:P.name,e:"🏋️"},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
-    tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wdh. oder schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche +1 Wdh.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈"},G)),
+    tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why,Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
+    tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wdh. oder schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche +1 Wdh.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
     tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+250): Muskeln statt Fett.`:"1,6–2,2 g pro kg holen das Maximum raus.",Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
     tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher","Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
-    tip("Kreatin","3–5 g Kreatin täglich","Bestuntersucht für Kraft. Fehlt Protein beim Essen: Whey.",Object.assign({e:"💊"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
+    tip("Kreatin","3–5 g Kreatin täglich","Bestuntersucht für Kraft. Fehlt Protein beim Essen: Whey.",Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
   ];
 }
 function aussehenAdvice(a){
@@ -512,14 +512,14 @@ function aussehenAdvice(a){
   let cal=null;
   if(lvl>=3||(lvl===2&&fatGoal))
     cal = g==="lose" ? tip("Defizit halten",`Bei ${de(t.kcal)} kcal bleiben`,"Fett geht, Muskeln bleiben.")
-      : tip("Leichtes Defizit",`Kalorien auf ${de(kcalFor("lose"))} senken`,"Nur weniger Körperfett macht Bauch und Gesicht schlanker.",{act:"coach-goal",v:"lose",label:"Kalorienziel senken"});
-  const lean = lvl===0&&g==="lose" ? tip("Muskeln statt Minus","Nicht weiter abnehmen","Du bist schlank. Jetzt bringen Muskeln Form.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen"}) : null;
+      : tip("Leichtes Defizit",`Kalorien auf ${de(kcalFor("lose"))} senken`,"Nur weniger Körperfett macht Bauch und Gesicht schlanker.",{act:"coach-goal",v:"lose",label:"Kalorienziel senken",once:1});
+  const lean = lvl===0&&g==="lose" ? tip("Muskeln statt Minus","Nicht weiter abnehmen","Du bist schlank. Jetzt bringen Muskeln Form.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen",once:1}) : null;
   const sit = a.sitzen==="Über 8" ? tip("Stündlich aufstehen","Jede Stunde 2 Min aufstehen","Gegen Rundrücken und träge Durchblutung.") : null;
   const G={
     "Weniger Bauchfett":[cal, tip("8.000 Schritte","8.000+ Schritte am Tag","Verbrennt viel, ohne Hunger zu machen."),
       tip(null,"Bauchübungen allein reichen nicht","Fett geht nie gezielt an einer Stelle.")],
     "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Nasenatmung + Haltung strafft die Kinnlinie optisch.")],
-    "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern, Face Pulls: Schultern gehen zurück."),
+    "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern, Face Pulls: Schultern gehen zurück.",{once:1}),
       tip("Brust dehnen","Täglich 30 Sek. Brust dehnen (Türrahmen)","Enge Brust zieht Schultern nach vorn."), sit],
     "Frischer wirken":[tip("7–9 h Schlaf","7–9 Stunden schlafen","Schlafmangel zeigt sich zuerst im Gesicht."),
       tip("LSF 50","Jeden Morgen LSF 50","Hält den Teint gleichmäßig.")]
@@ -534,7 +534,7 @@ function aussehenAdvice(a){
   if(!ziel.length) groups.unshift([cal]);
   const mus=ziel.includes("Mehr Muskeln")?muskelTips(a,lvl,g,fatGoal,prot,lifts):[];
   let items=pickTips(groups,mus.length?3:4);   // mit Muskel-Tipps weniger andere
-  if(!items.length&&!mus.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.")];
+  if(!items.length&&!mus.length) items=[tip("Training nach Plan","Training nach Plan halten","Regelmäßig schlägt jedes Extra.",{once:1})];
   if(mus.length){ items.forEach(i=>i.grp=i.grp||"Look & Körper"); items=mus.concat(items); }
   const kfaTxt=a.kfa==="Weiß nicht"?`KFA ca. ${kfaGuess()} % (geschätzt)`:`KFA ${a.kfa||"–"}`;
   return {lead:`${kfaTxt} · ${ziel.length?ziel.join(", "):"kein Fokus"}`,
@@ -545,7 +545,7 @@ function aussehenAdvice(a){
 function gesundheitAdvice(a){
   const glasses=state.profile.waterTarget||8, intol=(a.intol||[]).filter(x=>x!=="Nein, alles okay"), g=[];
   let note="";
-  if(a.stil==="Vegan") g.push([tip("B12","Vitamin B12 täglich","Fehlt vegan. Mangel schadet Blut und Nerven.",{product:"b12"}),
+  if(a.stil==="Vegan") g.push([tip("B12","Vitamin B12 täglich","Fehlt vegan. Mangel schadet Blut und Nerven.",{product:"b12",sup:"b12"}),
     tip("Jodsalz","Mit Jodsalz kochen","Vegan fehlt oft Jod.")]);
   if(a.energie==="Ständig müde") g.push([tip(null,"Blutbild: Ferritin, B12, Vit. D, Schilddrüse","Häufigste Gründe für Dauermüdigkeit.",{must:1}),
     tip("Morgens raus","Morgens 10 Min raus","Tageslicht macht wach.")]);
@@ -571,9 +571,10 @@ function coachAdvice(id){
 }
 function routineOn(id, s){
   const d = s? (state.days[s]||{}) : day();
+  if(id===SUPS_R) return !!(state.stack.length && state.stack.every(x=>(d.taken||{})[x]));
   return !!(d.routine && d.routine[id]);
 }
-function topicMark(id){ return {haut:"💧", haare:"✂️", schlaf:"🌙", aussehen:"🪞", gesundheit:"💚"}[id] || "•"; }
+function topicMark(id){ return {haut:"💧", haare:"✂️", schlaf:"🌙", aussehen:"🪞", gesundheit:"💚", sups:"💊"}[id] || "•"; }
 // Tagesbezogene Hinweise aus Ernährung, Training, Schlaf und Wasser
 function coachToday(){
   const t=targets(), tot=totals(), d=day(), hints=[], isToday=state.date===todayIso();
@@ -627,26 +628,88 @@ function noDupes(list){
   if(/Schritte|Kraft|Training|aufstehen|gehen|Overload/.test(txt)){ drop.add("u-s2"); drop.add("ob-bewegen"); }
   return list.filter(r=>!drop.has(r.id));
 }
+// Fester Routine-Punkt „Supplements“: kommt automatisch, sobald etwas im Stack ist (außer man hat ihn gelöscht)
+const SUPS_R="sups-r";
+function supsPoint(){ return {id:SUPS_R,topic:"sups",title:"Supplements",detail:"",product:null}; }
 function ensureRoutine(){
   if(!state.routineSeeded){ state.routineSeeded=true; if(!(state.coach.routine||[]).length) state.coach.routine=starterRoutine(); if(!state.rStart) state.rStart=todayIso(); }
-  const rt=state.coach.routine||[], clean=noDupes(rt);
-  if(clean.length!==rt.length){ state.coach.routine=clean; save(); }
+  let rt=state.coach.routine||[], clean=noDupes(rt);
+  const has=clean.some(r=>r.id===SUPS_R);
+  if(state.stack.length&&!has&&!state.supsROff) clean=clean.concat(supsPoint());
+  if(!state.stack.length&&has) clean=clean.filter(r=>r.id!==SUPS_R);
+  if(clean.map(r=>r.id).join()!==rt.map(r=>r.id).join()){ state.coach.routine=clean; save(); }
 }
+// Ins Stack legen (z. B. Kreatin aus dem Coach) → Supplements-Punkt kommt (wieder) in die Routine
+function addToStack(ids){
+  const add=ids.filter(id=>SUPS.some(x=>x.id===id)&&!state.stack.includes(id));
+  if(add.length) state.stack=state.stack.concat(add);
+  if(ids.length) state.supsROff=0;
+  return add;
+}
+// Was davon gehört in die tägliche Routine? Nur Dinge, die man jeden Tag macht.
+// Raus: einmalige Fakten (k fehlt oder once), Supplements (eigener Punkt), Schnitt & Arzt-Tipps.
+function dailyTips(items){ return (items||[]).filter(i=>i.k&&!i.once&&!i.sup&&!i.must); }
 function rDone(s){ const rt=state.coach.routine||[]; return {c:rt.filter(r=>routineOn(r.id,s)).length, n:rt.length}; }
 function rState(s){ const x=rDone(s); if(!x.n) return ""; if(x.c===x.n) return "on"; if(x.c) return "part"; const st=state.rStart||(state.rStart=todayIso()); return (s<todayIso()&&s>=st)?"miss":""; }
 function rStreak(){ let n=0, s=todayIso(); if(!(state.coach.routine||[]).length) return 0; if(rState(s)!=="on") s=addDays(s,-1); while(rState(s)==="on"&&n<400){ n++; s=addDays(s,-1); } return n; }
-// Eine Zeile der Routine: Haken + kurzer Name. › öffnet die Details im Coach, ✕ löscht (nur auf der Routine-Seite).
-function rRow(r,del){
-  const on=routineOn(r.id,state.date), coach=coachTopics().some(t=>t.id===r.topic);
-  return `<div class="rchk"><button class="rbtn" data-act="routine-check" data-id="${r.id}"><span class="box ${on?"on":""}">${on?"✓":""}</span><span class="grow">${topicMark(r.topic)!=="•"?topicMark(r.topic)+" ":""}<b>${esc(rLabel(r))}</b></span></button>${coach?`<button class="x" data-act="open" data-type="area" data-id="${r.topic}" aria-label="Details">›</button>`:""}${del?`<button class="x" data-act="routine-del" data-id="${r.id}" aria-label="Routine-Punkt löschen">✕</button>`:""}</div>`;
+// Icon je Routine-Punkt (eigene Punkte bekommen ein passendes Emoji nach Stichwort)
+function rIcon(r){
+  if(r.topic!=="eigen") return topicMark(r.topic);
+  const M=[[/wasser|trink/i,"💧"],[/beweg|schritt|geh|spazier|lauf/i,"🚶"],[/lies|lese|buch/i,"📖"],[/medit|atm|ruhe/i,"🧘"],[/sport|training|liegest|gym/i,"💪"],
+    [/schlaf|bett/i,"🛏️"],[/handy|bildschirm/i,"📵"],[/obst|gemüse|ess|koch/i,"🥦"],[/dehn|stretch/i,"🤸"],[/zahn|zähne/i,"🪥"],[/sonne|licht|raus/i,"🌤️"],[/tagebuch|schreib|journal/i,"📝"]];
+  const m=M.find(([re])=>re.test(r.title)); return m?m[1]:"⭐";
 }
+// Routine als Kacheln: Antippen = abhaken, › = was heute zu tun ist, ✕ nur im Bearbeiten-Modus
+function rTile(r,edit){
+  const on=routineOn(r.id,state.date), info=coachTopics().some(t=>t.id===r.topic)||r.topic==="sups";
+  return `<div class="rtile ${on?"on":""}">
+    <button class="rt-main" data-act="routine-check" data-id="${r.id}" aria-pressed="${on}"><span class="rt-ico">${rIcon(r)}</span><b>${esc(rLabel(r))}</b>${edit?"":`<span class="rt-chk">${on?"✓":""}</span>`}</button>
+    ${edit?`<button class="rt-x" data-act="routine-del" data-id="${r.id}" aria-label="Routine-Punkt löschen">✕</button>`:info?`<button class="rt-more" data-act="open" data-type="rarea" data-id="${r.topic}" aria-label="Details">›</button>`:""}
+  </div>`;
+}
+function rTiles(rt,edit){ return `<div class="rtiles">${rt.map(r=>rTile(r,edit)).join("")}${edit?"":`<button class="rtile add" data-act="r-edit"><span class="rt-ico">＋</span><b>Eigener Punkt</b></button>`}</div>`; }
 function routineBlock(){
   const rt=state.coach.routine||[], wk=weekStart(state.date), t=rDone(state.date), open=!!ui.rOpen&&rt.length>0;
   const when=state.date===todayIso()?"heute":labelDate(state.date);
-  const list=open?`<div class="rlist">${rt.map(r=>rRow(r,false)).join("")}
+  const list=open?`<div class="rlist">${rTiles(rt,false).replace('data-act="r-edit"','data-act="dash" data-id="routine"')}
       <button class="link mt-3" data-act="dash" data-id="routine">Kalender, Serie &amp; eigene Punkte ›</button></div>`:"";
   return `<div class="card rprev"><button class="rhead" data-act="${rt.length?"r-toggle":"dash"}" ${rt.length?"":'data-id="routine"'}><div class="row space"><b>Routine${rStreak()>=3?` <span class="rfire">🔥 ${rStreak()}</span>`:""}</b><span class="sub">${rt.length?t.c+"/"+t.n+" "+when+" "+(open?"▴":"▾"):"Anlegen ›"}</span></div></button>
     <div class="rweek">${Array.from({length:7},(_,i)=>addDays(wk,i)).map(s=>`<i class="rd ${rState(s)} ${s===todayIso()?"today":""}">${weekday(s)}</i>`).join("")}</div>${list}</div>`;
+}
+// Was heißt dieser Routine-Punkt heute? Nur das Tägliche, ohne Fakten (die stehen im Coach).
+function routineSheet(id){
+  if(id==="sups"){
+    const d=day(), all=routineOn(SUPS_R,state.date);
+    return `<div class="rs-head"><span class="rs-ico">💊</span><div class="grow"><h2>Supplements</h2><p class="sub">Antippen, wenn genommen</p></div></div>
+      ${state.stack.map(x=>{ const p=SUPS.find(y=>y.id===x); if(!p) return ""; const on=!!(d.taken||{})[x];
+        return `<button class="rs-item rs-tap ${on?"on":""}" data-act="take" data-id="${x}"><span class="ti">${p.emoji}</span><div class="grow"><b>${esc(p.name)}</b><div class="sub">${esc(p.dose)} · ${esc(p.when)}</div></div><span class="rt-chk">${on?"✓":""}</span></button>`; }).join("")||`<p class="sub mt-3">Noch nichts im Stack.</p>`}
+      ${state.stack.length?`<div class="gap"></div><button class="pill ${all?"ghost":"primary"} w-full" data-act="routine-check" data-id="${SUPS_R}">${all?"Alles genommen ✓":"Alle abhaken"}</button>`:""}
+      <div class="row space mt-4"><button class="link" data-act="open" data-type="area" data-id="sups-list">Stack bearbeiten ›</button><span class="sub">Kein ärztlicher Rat</span></div>`;
+  }
+  const topic=coachTopics().find(t=>t.id===id); if(!topic) return "<p>Kein Thema.</p>";
+  const pt=(state.coach.routine||[]).find(r=>r.topic===id), on=pt&&routineOn(pt.id,state.date);
+  const head=`<div class="rs-head"><span class="rs-ico">${topicMark(id)}</span><div class="grow"><h2>${R_LABEL[id]||topic.title}</h2><p class="sub">Jeden Tag</p></div></div>`;
+  let body="";
+  if(!quizDone(id)) body=`<p class="sub mt-3">Beantworte erst die Fragen im Coach.</p>`;
+  else {
+    const adv=coachAdvice(id), r=adv.routine||{};
+    const steps=l=>`<ol class="rs-steps">${l.map((x,i)=>`<li><i>${i+1}</i><span>${esc(cap(x))}</span></li>`).join("")}</ol>`;
+    if(id==="haut"&&r.am){
+      body=`<div class="rs-box"><div class="rs-box-h">☀️ Morgens</div>${steps(r.am)}</div><div class="rs-box"><div class="rs-box-h">🌙 Abends</div>${steps(r.pm)}</div>`;
+    } else {
+      if(r.times) body+=`<div class="rs-times">${r.times.map(([e,l,t])=>`<div><span>${e}</span><b>${t}</b><span class="sub">${l}</span></div>`).join("")}</div>`;
+      let list=dailyTips(adv.items);
+      // Uhrzeiten stehen schon oben im Zeitplan → keine doppelten Tipps dazu
+      if(r.times) list=list.filter(i=>!r.times.some(([,,t])=>i.title.includes(t)));
+      if(!list.length&&id==="gesundheit") list=[tip("Wasser",`${state.profile.waterTarget||8} Gläser Wasser`,"")];
+      body+=list.map(i=>{ const l=tipLabel(i), sub=i.title.startsWith(l+": ")?cap(i.title.slice(l.length+2)):i.title;
+        return `<div class="rs-item"><span class="ti">${i.e||tipIcon(i,id)}</span><div class="grow"><b>${esc(l)}</b>${sub!==l?`<div class="sub">${esc(sub)}</div>`:""}</div></div>`; }).join("");
+      if(!body) body=`<p class="sub mt-3">Heute nichts Festes. Tipps findest du im Coach.</p>`;
+    }
+  }
+  return `${head}${body}
+    ${pt?`<div class="gap"></div><button class="pill ${on?"ghost":"primary"} w-full" data-act="routine-check" data-id="${pt.id}">${on?"Erledigt ✓":"Heute abhaken"}</button>`:""}
+    <div class="row space mt-4"><button class="link" data-act="open" data-type="area" data-id="${id}">Alle Tipps im Coach ›</button><span class="sub">Kein ärztlicher Rat</span></div>`;
 }
 function rMonth(y,mo){
   const first=new Date(y,mo,1), pad=(first.getDay()+6)%7, count=new Date(y,mo+1,0).getDate();
@@ -656,29 +719,31 @@ function rMonth(y,mo){
   return `<h2 class="month-h">${first.toLocaleDateString(LOC,{month:"long",year:"numeric"})}</h2><div class="calgrid">${heads}${cells}</div>`;
 }
 function renderRoutineDash(){
-  const m=ui.rcal||"day", now=new Date(), rt=state.coach.routine||[], tdy=rDone(todayIso());
+  const m=ui.rcal||"day", now=new Date(), rt=state.coach.routine||[], edit=!!ui.rEdit;
   const modes=[["day","Tag"],["month","Monat"],["year","Jahr"]];
+  const n=rDone(state.date), st=rStreak(), isToday=state.date===todayIso();
   let body="";
   if(m==="day"){
-    const n=rDone(state.date);
-    body=`${state.rHint?"":`<div class="insight"><b>Was ist das?</b><span>Hake ab, was du heute geschafft hast. Alles erledigt = Serie +1.</span><button class="link mt-1 self-start" data-act="rhint">Verstanden</button></div>`}
-    <h2 class="month-h">${labelDate(state.date)}${rt.length?` · ${n.c}/${n.n}`:""}</h2><div class="card">
-      ${rt.map(r=>rRow(r,true)).join("")||`<p class="sub">Noch keine Routine. Leg unten deine erste an.</p>`}
-      <div class="row mt-4"><input id="r-new" class="input grow" placeholder="Eigene Routine, z. B. 10 Min lesen" aria-label="Eigene Routine"><button class="plus dark" data-act="routine-add" aria-label="Routine-Punkt hinzufügen">+</button></div></div>`;
-  } else if(m==="month") body=rMonth(now.getFullYear(),now.getMonth())+rMonth(now.getFullYear(),now.getMonth()-1);
-  else { const y=now.getFullYear();
-    body=`<h2 class="month-h">${y}</h2><div class="yeargrid">${Array.from({length:12},(_,mo)=>{
-      const first=new Date(y,mo,1), pad=(first.getDay()+6)%7, count=new Date(y,mo+1,0).getDate();
-      let cells=Array.from({length:pad},()=>`<i class="sq empty"></i>`).join("");
-      for(let d=1;d<=count;d++) cells+=`<i class="sq ${rState(iso(new Date(y,mo,d)))}"></i>`;
-      return `<div><div class="sub mb-1">${first.toLocaleDateString(LOC,{month:"short"})}</div><div class="mini">${cells}</div></div>`;
-    }).join("")}</div>`; }
+    body=`<div class="row space rs-title"><h2>${isToday?"Heute":labelDate(state.date)}</h2>${rt.length?`<button class="link" data-act="r-edit">${edit?"Fertig":"Bearbeiten"}</button>`:""}</div>
+      ${rt.length?rTiles(rt,edit):`<p class="sub">Noch keine Routine. Leg unten deinen ersten Punkt an.</p>`}
+      ${edit||!rt.length?`<div class="row mt-3"><input id="r-new" class="input grow" placeholder="Eigener Punkt, z. B. 10 Min lesen" aria-label="Eigener Routine-Punkt"><button class="plus dark" data-act="routine-add" aria-label="Routine-Punkt hinzufügen">+</button></div>`:""}`;
+  } else {
+    const legend=`<div class="rlegend"><span><i class="rd on"></i>Alles</span><span><i class="rd part"></i>Teilweise</span><span><i class="rd miss"></i>Verpasst</span></div>`;
+    if(m==="month") body=legend+rMonth(now.getFullYear(),now.getMonth())+rMonth(now.getFullYear(),now.getMonth()-1);
+    else { const y=now.getFullYear();
+      body=legend+`<h2 class="month-h">${y}</h2><div class="yeargrid">${Array.from({length:12},(_,mo)=>{
+        const first=new Date(y,mo,1), pad=(first.getDay()+6)%7, count=new Date(y,mo+1,0).getDate();
+        let cells=Array.from({length:pad},()=>`<i class="sq empty"></i>`).join("");
+        for(let d=1;d<=count;d++) cells+=`<i class="sq ${rState(iso(new Date(y,mo,d)))}"></i>`;
+        return `<div><div class="sub mb-1">${first.toLocaleDateString(LOC,{month:"short"})}</div><div class="mini">${cells}</div></div>`;
+      }).join("")}</div>`; }
+  }
   return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button>
     <div class="seg grow">${modes.map(([id,l])=>`<button class="${m===id?"on":""}" data-act="rcal-mode" data-v="${id}">${l}</button>`).join("")}</div></div>
-    <div class="card split">
-      <div><b>${rStreak()}-Tage-Serie${rStreak()>=3?" 🔥":""}</b><div class="sub">Alle Routinen erledigt</div></div>
-      <div><b>${tdy.c}/${tdy.n} heute</b><div class="sub">Erledigt</div></div></div>
-    <div class="sub mt-4">Grün: alle erledigt · Hellgrün: teilweise · Rot: verpasst</div>
+    <div class="rstat">
+      <div class="rs-card"><b>${st?"🔥 ":""}${st}</b><span class="sub">${st===1?"Tag":"Tage"} am Stück</span></div>
+      <div class="rs-card"><b>${n.c}/${n.n}</b><span class="sub">${isToday?"heute erledigt":"erledigt"}</span><div class="rbar"><i style="width:${n.n?Math.round(n.c/n.n*100):0}%"></i></div></div>
+    </div>
     ${body}`;
 }
 function stackSheet(){

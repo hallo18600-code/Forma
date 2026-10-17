@@ -406,6 +406,7 @@ function renderModal(){
   if(type==="scan") inner=scanSheet();
   if(type==="product") inner=productSheet(payload);
   if(type==="area") inner=areaSheet(payload);
+  if(type==="rarea") inner=routineSheet(payload);
   if(type==="lang") inner=`<h2>Sprache</h2><div class="group mt-3">${Object.keys(LANGS).map(k=>`<button class="g-row" data-act="set-lang" data-v="${k}"><div class="grow notr"><b>${LANGS[k]}</b></div>${k===LANG?"✓":""}</button>`).join("")}</div>`;
   if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein. Berechnet aus Körper, Alltag, Training pro Woche und Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
   if(type==="pref") inner=prefSheet(payload);
@@ -588,9 +589,10 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="toggle-stack"){
     const id=el.dataset.id;
     state.stack = state.stack.includes(id) ? state.stack.filter(x=>x!==id) : state.stack.concat(id);
+    if(state.stack.includes(id)) state.supsROff=0;
     save(); toast(state.stack.includes(id)?"Im Stack":"Entfernt");
   }
-  else if(act==="apply-stack"){ state.stack=recommendStack().map(x=>x.id); save(); toast("Stack aktualisiert"); }
+  else if(act==="apply-stack"){ state.stack=recommendStack().map(x=>x.id); state.supsROff=0; save(); toast("Stack aktualisiert"); }
   else if(act==="coach-answer"){
     const A=state.coach.answers[el.dataset.topic]=state.coach.answers[el.dataset.topic]||{};
     const qd=coachQuiz(el.dataset.topic).find(q=>q.k===el.dataset.k);
@@ -603,7 +605,9 @@ document.getElementById("app").addEventListener("click", e=>{
     const advice=coachAdvice(topic);
     if(!advice.routine) return;
     state.coach.routine=state.coach.routine.filter(r=>r.topic!==topic).concat([{id:topic+"-r", topic, title:advice.routine.title, detail:advice.routine.detail, product:null}]);
-    ui.modal=null; save(); toast("In der Routine");
+    // Empfohlene Supplements (z. B. Kreatin, B12) landen automatisch im Stack → Punkt „Supplements“
+    const added=addToStack(advice.items.filter(i=>i.sup).map(i=>i.sup));
+    ui.modal=null; ensureRoutine(); save(); toast(added.length?"In der Routine · "+added.map(id=>SUPS.find(x=>x.id===id).name).join(", ")+" im Stack":"In der Routine");
   }
   else if(act==="coach-plan"){
     const pl=coachPlan(el.dataset.v), R=JSON.stringify(state.routines);
@@ -628,7 +632,13 @@ document.getElementById("app").addEventListener("click", e=>{
     if(!t){ toast("Name fehlt"); return; }
     state.coach.routine=(state.coach.routine||[]).concat([{id:"u-"+uid(),topic:"eigen",title:t.slice(0,60),detail:"",product:null}]); save();
   }
-  else if(act==="routine-del"){ state.coach.routine=(state.coach.routine||[]).filter(r=>r.id!==el.dataset.id); save(); }
+  else if(act==="routine-del"){ if(el.dataset.id===SUPS_R) state.supsROff=1; state.coach.routine=(state.coach.routine||[]).filter(r=>r.id!==el.dataset.id); save(); }
+  else if(act==="r-edit"){ ui.rEdit=!ui.rEdit; if(!ui.dash){ ui.dash="routine"; ui.rcal="day"; ui.rEdit=true; } }
+  else if(act==="routine-check"&&el.dataset.id===SUPS_R){
+    // Supplements abhaken = alles aus dem Stack genommen (und umgekehrt)
+    const d=day(), all=routineOn(SUPS_R,state.date); d.taken=d.taken||{};
+    state.stack.forEach(x=>d.taken[x]=all?0:1); syncAuto(state.date); save();
+  }
   else if(act==="routine-check"){
     day().routine=day().routine||{};
     day().routine[el.dataset.id]=day().routine[el.dataset.id]?0:1;
@@ -717,7 +727,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="del-ex"){ ui.workout.exercises.splice(+el.dataset.e,1); }
   else if(act==="add-ex"){ ui.workout.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 1).map(s=>({...s, done:false}))}); ui.modal=null; }
   else if(act==="rest-skip") ui.rest=0;
-  else if(act==="dash-close") ui.dash=null;
+  else if(act==="dash-close"){ ui.dash=null; ui.rEdit=false; }
   else if(act==="cal-mode") ui.cal=el.dataset.v;
   else if(act==="cal-day"){
     const hits=workoutOn(el.dataset.v);
