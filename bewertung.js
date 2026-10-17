@@ -123,7 +123,7 @@ const R_CATS=[
   {id:"veg",k:["asparagus","asperge","cornichon","pepinillo","olives","azeitona","aceituna","petits pois","=pois","haricots verts","gingembre","ginger shot","=ginger","brocoli","courgette","champignon","=funghi","legumes","verdure","gurke","zucchini","aubergine","blumenkohl","rosenkohl","kohlrabi","weisskohl","wirsing","spitzkohl","chinakohl","=kohl","sellerie","spargel","pilz","champignon","shiitake","austernpilz","zwiebel","schalotte","knoblauch","lauch","porree","fenchel","=salat","salatherz","eisberg","kopfsalat","romana","chicoree","radicchio","endivie","artischocke","okra","=gemuse","gemuse","grune bohnen","brechbohnen","prinzessbohnen","zuckerschoten","=erbsen","erbse","=mais","zuckermais","radieschen","rettich","rucola","ingwer","oliven","kapern","gewurzgurke","sprossen","keimlinge","bambus","pak choi","staudensellerie","fruhlingszwiebel"],n:["ingwertee","ingwer tee"],w:1,
    b:[52,94,90,70],g:["Mikronährstoffe für die Regeneration","Viel Volumen, kaum Kalorien","Vitamine & Antioxidantien","Vitamine & Ballaststoffe"],x:["Kaum Protein","","","Wenig Kalorien – allein keine Energie"]},
   {id:"honey",k:["=miel","=miele","erable","=maple","honig","honey","ahornsirup","maple"],w:1,
-   b:[38,22,40,54],g:["Schnelle Carbs nach dem Training","","Natürlich, mit etwas Antioxidantien","Natürlicher Zucker, besser als Haushaltszucker"],x:["Trotzdem purer Zucker","Purer Zucker, null Sättigung","Zucker kann Unreinheiten fördern","Trotzdem purer Zucker"]},
+   b:[46,30,58,66],g:["Schnelle Carbs nach dem Training","Natürlich süßen – kleine Menge reicht","Natürlich, mit Antioxidantien & Enzymen","Natürlicher Zucker, besser als Haushaltszucker"],x:["Kaum Protein","Viele Kalorien – nur ein Teelöffel","In Maßen: ein Teelöffel statt drei","In Maßen, sonst Zucker-Tief"]},
   {id:"coffeemilk",k:["cappuccino","=latte","latte macchiato","milchkaffee","eiskaffee","frappuccino","frappe","flat white","chai latte","mocca","mokka","caffe latte","cafe au lait","=macchiato","kaffeegetrank","coffee drink"],d:1,
    b:[48,46,34,48],g:["","","","Wacher Kick"],x:["Milch & oft Zucker","Kalorien aus Milch & Sirup","Milch im Kaffee – bei Hautfokus lieber schwarz","Leiht Energie, ersetzt keinen Schlaf"]},
   {id:"coffee",k:["=cafe","=caffe","nescafe","arabica","cafe moulu","caffe in grani","kaffee","espresso","cold brew","=americano","filterkaffee","=coffee","=lungo","=ristretto"],w:1,
@@ -252,6 +252,7 @@ function rPlausible(cat,n,heavy){
   if(id==="nuts"&&n.fa<25&&n.pr<15) return n.su>20?R_BYID.sweets:dish;
   if(["nuts","peanut","coconut","avocado","darkchoc"].includes(id)&&n.su>25) return R_BYID.sweets;
   if(id==="spice"&&n.su>15) return R_BYID.sweets;
+  if(id==="honey"&&(n.pr>=4||n.fi>=3)) return R_BYID.cereal; // "Dinkel gepufft mit Honig" ist Frühstücksflocke, kein Honig
   if(id==="chips"&&n.pr>=18) return R_BYID.processedmeat;
   if(id==="oats"&&n.su>15) return R_BYID.cereal;
   if(id==="oats"&&n.cb<40&&n.kc>150) return dish;
@@ -395,6 +396,12 @@ function scoreFood(item){
   if(id==="softdrink"&&su<1){ score+=[8,18,8,6][gi]; cons.length=0; bad("Süßstoffe & Zusätze statt echter Nahrung",12); if(g==="lose") good("Ohne Kalorien",8); }
   if(id==="softdrink"&&/(energy|red bull|monster)/.test(h)&&g==="energy") bad("Koffein auf Pump, danach Tief",13);
   // Saft: Mikronährstoffe gegen Zucker abwägen. Smoothie (mit Fruchtfleisch) und Direktsaft besser, Konzentrat etwas schlechter
+  // Honig: Imkerhonig/roh/kaltgeschleudert ist naturbelassener als Industrie-Mischhonig
+  if(id==="honey"){
+    if(/(imker|roh|raw|kaltgeschleudert|wabenhonig|waben|naturbelassen|regional|heimisch|deutscher honig|aus deutschland)/.test(h)){ score+=[3,3,6,4][gi]; good("Imkerhonig: roh & naturbelassen",12.5); }
+    else if(/(eu-?landern|nicht-eu|mischung|aus eu)/.test(h)){ score-=[1,1,3,2][gi]; bad("Mischhonig: oft stark erhitzt",7); }
+    if(/manuka/.test(h)){ score+=[1,1,5,2][gi]; good("Manuka: wirkt antibakteriell",12); }
+  }
   if(id==="juice"){
     if(/smoothie/.test(h)){ score+=[2,3,5,4][gi]; good("Mit Fruchtfleisch: mehr Ballaststoffe",9); }
     if(/(direktsaft|frisch gepresst|naturtrub|100 ?%|nfc)/.test(h)){ score+=[1,0,3,2][gi]; good("Direktsaft: mehr Vitamine",8); }
@@ -443,7 +450,7 @@ function scoreFood(item){
   return rateOut(Math.min(cap,score),pros,cons);
 }
 // Typische Nährwert-Bewertung je Art (Median aus 100.000 Produkten), Reihenfolge: Muskeln, Abnehmen, Haut, Energie
-const R_MED={_0:[22,39,74,10],_1:[48,42,84,31],_2:[0,-28,73,0],_3:[29,44,82,14],_4:[9,29,67,4],alcohol:[0,50,85,0],avocado:[10,47,100,28],banana:[10,50,51,11],berries:[7,54,49,3],broth:[35,81,85,8],butter:[1,-17,95,15],cereal:[29,13,65,23],cheese:[56,35,82,14],chips:[25,13,84,18],coconut:[6,40,95,17],coffee:[33,36,85,21],coffeemilk:[16,58,50,5],dairy:[19,52,79,6],darkchoc:[17,-6,91,25],driedfruit:[-34,-17,-23,-47],egg:[58,62,95,30],ersatz:[46,53,88,22],fastfood:[46,46,85,28],fattyfish:[75,61,95,30],fermentedveg:[9,68,85,10],fruit:[3,50,45,1],goodfat:[0,-28,95,15],honey:[-59,-36,-50,-60],juice:[2,52,45,1],kefir:[17,66,85,6],leanfish:[85,76,85,15],legume:[58,56,94,35],margarine:[1,-15,73,0],mixedmeal:[32,52,83,16],nectar:[1,50,42,0],nuts:[38,4,100,37],oats:[50,39,85,45],organ:[43,40,95,25],peanut:[43,9,93,25],plantmilk:[7,60,67,6],potato:[31,58,85,26],poultry:[87,76,85,15],processedmeat:[49,42,81,13],protdairy:[78,78,85,15],proteinbar:[78,49,85,23],pseudograin:[55,34,88,48],readymeal:[35,49,82,19],redmeat:[75,63,95,30],refined:[53,37,83,43],rice:[46,26,76,38],ricecake:[43,18,73,34],sauce:[9,35,75,5],seedoil:[0,-28,73,0],skinveg:[10,65,65,8],softdrink:[0,51,44,0],soy:[64,67,86,18],spice:[30,53,85,12],sugar:[-42,-17,-31,-57],sweetpotato:[24,52,75,18],sweets:[-3,-11,36,-14],tea:[0,52,48,0],veg:[11,64,82,7],vegjuice:[5,63,53,5],vitc:[1,55,46,0],water:[33,54,85,18],whey:[90,46,85,16],wholewheat:[56,42,97,54]};
+const R_MED={_0:[22,39,74,10],_1:[48,42,84,31],_2:[0,-28,73,0],_3:[29,44,82,14],_4:[9,29,67,4],alcohol:[0,50,85,0],avocado:[10,47,100,28],banana:[10,50,51,11],berries:[7,54,49,3],broth:[35,81,85,8],butter:[1,-17,95,15],cereal:[29,13,65,23],cheese:[56,35,82,14],chips:[25,13,84,18],coconut:[6,40,95,17],coffee:[33,36,85,21],coffeemilk:[16,58,50,5],dairy:[19,52,79,6],darkchoc:[17,-6,91,25],driedfruit:[-34,-17,-23,-47],egg:[58,62,95,30],ersatz:[46,53,88,22],fastfood:[46,46,85,28],fattyfish:[75,61,95,30],fermentedveg:[9,68,85,10],fruit:[3,50,45,1],goodfat:[0,-28,95,15],honey:[-59,-37,-50,-60],juice:[2,52,45,1],kefir:[17,66,85,6],leanfish:[85,76,85,15],legume:[58,56,94,35],margarine:[1,-15,73,0],mixedmeal:[32,52,83,16],nectar:[1,50,42,0],nuts:[38,4,100,37],oats:[50,39,85,45],organ:[43,40,95,25],peanut:[43,9,93,25],plantmilk:[7,60,67,6],potato:[31,58,85,26],poultry:[87,76,85,15],processedmeat:[49,42,81,13],protdairy:[78,78,85,15],proteinbar:[78,49,85,23],pseudograin:[55,34,88,48],readymeal:[35,49,82,19],redmeat:[75,63,95,30],refined:[53,37,83,43],rice:[46,26,76,38],ricecake:[43,18,73,34],sauce:[9,35,75,5],seedoil:[0,-28,73,0],skinveg:[10,65,65,8],softdrink:[0,51,44,0],soy:[64,67,86,18],spice:[30,53,85,12],sugar:[-42,-17,-31,-57],sweetpotato:[24,52,75,18],sweets:[-3,-11,36,-14],tea:[0,52,48,0],veg:[11,64,82,7],vegjuice:[5,63,53,5],vitc:[1,55,46,0],water:[33,54,85,18],whey:[90,46,85,16],wholewheat:[56,42,97,54]};
 // Höchstens 3 gute und 3 schlechte Punkte, wichtigste zuerst, jedes Thema nur einmal
 // Wichtige Wörter eines Textes (für "sagt nicht zweimal dasselbe")
 const R_STOP=new Set(["fur","die","der","das","und","mit","haut","energie","lange","lang","gut","gute","guter","viel","viele","wenig","sehr","top","kaum","eine","einen","nach","beim","oder","ohne","dein","deine","bei","als","pro","kann","fur","ist","nur","noch"]);
