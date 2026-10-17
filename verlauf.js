@@ -89,7 +89,7 @@ function stepsSheet(){
   const goal=state.profile.stepGoal||10000, n=day().steps||0;
   return `<h2>Schritte</h2><p class="sub">${labelDate(state.date)} · Ziel ${goal.toLocaleString(LOC)}</p>
     <div class="field"><label>Schritte</label><input id="st-input" type="number" inputmode="numeric" value="${n||""}" placeholder="z. B. 8500"></div>
-    <div class="opts">${[500,1000,2500].map(v=>`<button class="chip" data-act="steps-add" data-v="${v}">+${v}</button>`).join("")}</div>
+    <div class="quickadd">${[500,1000,2500].map(v=>`<button data-act="steps-add" data-v="${v}"><b>+${v.toLocaleString(LOC)}</b><span>Schritte</span></button>`).join("")}</div>
     <button class="pill primary w-full" data-act="steps-save">Speichern</button>
     <div class="field"><label>Tagesziel</label></div>
     <div class="opts">${[6000,8000,10000,12000].map(v=>`<button class="chip ${goal===v?"on":""}" data-act="step-goal" data-v="${v}">${v/1000}k</button>`).join("")}</div>`;
