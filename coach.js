@@ -429,7 +429,7 @@ function aussehenAdvice(a){
   const G={
     "Weniger Bauchfett":[cal, tip("8.000 Schritte","8.000+ Schritte am Tag","Verbrennt viel, ohne Hunger zu machen."),
       tip(null,"Bauchübungen allein reichen nicht","Fett geht nie gezielt an einer Stelle.")],
-    "Mehr Muskeln":[lifts?tip("Progression","Jede Woche +1 Wdh. oder +2,5 kg","Ohne mehr Last kein Wachstum.")
+    "Mehr Muskeln":[lifts?tip("Progressive Overload","Progressive Overload","Jede Woche +1 Wiederholung oder +2,5 kg.")
         :tip("3× Kraft","3×/Woche Krafttraining","Ganzkörper reicht für den Anfang.",{act:"tab",v:"sport",label:"Zum Training"}),
       tip("Protein",`${prot} g Protein am Tag`,"1,6–2,2 g pro kg holen das Maximum raus."),
       tip("Kreatin","3–5 g Kreatin täglich","Bestuntersuchtes Supplement für Kraft.")],
