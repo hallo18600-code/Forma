@@ -529,8 +529,21 @@ function renderCoach(){
     <p class="sub note">Vorschläge kannst du in deine Routine übernehmen. Abhaken geht im Tagebuch unter „Dein Tag“.</p>
   </div>`;
 }
-function starterRoutine(){ return [["u-s1","Wasser trinken (2 Liter)"],["u-s2","10 Minuten bewegen"],["u-s3","Gesicht reinigen und Sonnenschutz"],["u-s4","Vor 23 Uhr ins Bett"]].map(([id,title])=>({id,topic:"eigen",title,detail:"",product:null})); }
-function ensureRoutine(){ if(!state.routineSeeded){ state.routineSeeded=true; if(!(state.coach.routine||[]).length) state.coach.routine=starterRoutine(); if(!state.rStart) state.rStart=todayIso(); } }
+// Voreinstellung nur mit Punkten, die der Coach nicht selbst liefert (Haut und Schlaf kommen aus dem Coach)
+function starterRoutine(){ return [["u-s1","Wasser trinken (2 Liter)"],["u-s2","10 Minuten bewegen"]].map(([id,title])=>({id,topic:"eigen",title,detail:"",product:null})); }
+// Keine Dopplungen: Standard-Punkte fallen weg, wenn ein Coach-Punkt dasselbe schon abdeckt
+function noDupes(list){
+  const txt=list.filter(r=>r.topic!=="eigen").map(r=>{ try{ return rShort(r); }catch(e){ return r.title||""; } }).join(" ");
+  const drop=new Set(["u-s3","u-s4"]);   // alte Voreinstellungen „Gesicht reinigen …“ / „Vor 23 Uhr ins Bett“
+  if(/Wasser/.test(txt)){ drop.add("u-s1"); drop.add("ob-wasser"); }
+  if(/Schritte|Kraft|Training|aufstehen|gehen|Overload/.test(txt)){ drop.add("u-s2"); drop.add("ob-bewegen"); }
+  return list.filter(r=>!drop.has(r.id));
+}
+function ensureRoutine(){
+  if(!state.routineSeeded){ state.routineSeeded=true; if(!(state.coach.routine||[]).length) state.coach.routine=starterRoutine(); if(!state.rStart) state.rStart=todayIso(); }
+  const rt=state.coach.routine||[], clean=noDupes(rt);
+  if(clean.length!==rt.length){ state.coach.routine=clean; save(); }
+}
 function rDone(s){ const rt=state.coach.routine||[]; return {c:rt.filter(r=>routineOn(r.id,s)).length, n:rt.length}; }
 function rState(s){ const x=rDone(s); if(!x.n) return ""; if(x.c===x.n) return "on"; if(x.c) return "part"; const st=state.rStart||(state.rStart=todayIso()); return (s<todayIso()&&s>=st)?"miss":""; }
 function rStreak(){ let n=0, s=todayIso(); if(!(state.coach.routine||[]).length) return 0; if(rState(s)!=="on") s=addDays(s,-1); while(rState(s)==="on"&&n<400){ n++; s=addDays(s,-1); } return n; }

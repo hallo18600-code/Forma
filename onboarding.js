@@ -203,7 +203,7 @@ function buildRoutine(){
   const areas=(p.areas||[]).map(a=>({"Körperpflege":"Aussehen","Ernährung":"Gesundheit"}[a]||a));
   c.sort((a,b)=>(areas.includes(b.area)?1:0)-(areas.includes(a.area)?1:0));
   const max={"5 Minuten":2,"15 Minuten":4,"30 Minuten oder mehr":6}[p.routineTime]||3;
-  return c.slice(0,max).map(({area,...r})=>r);
+  return noDupes(c).slice(0,max).map(({area,...r})=>r);
 }
 function renderObPlan(){
   const p=state.profile, t=targets(), rt=buildRoutine();
