@@ -582,17 +582,19 @@ function coachToday(){
   const ea=state.coach.answers.gesundheit||{}, veg=ea.stil==="Vegan"||ea.stil==="Vegetarisch";
   const food=veg?"Tofu, Linsen oder Quark":"Skyr, Ei oder Hähnchen";
   const gap=Math.round(t.protein-tot.protein);
-  if(!d.meals.length) hints.push({e:"🍽️",t:"Noch nichts gegessen eingetragen",d:"Trag die erste Mahlzeit ein, dann passen Score und Tipps zu deinem Tag.",go:"heute"});
-  else if(wo.length&&gap>15) hints.push({e:"💪",t:`Nach dem Training fehlen noch ${gap} g Protein`,d:`${food} schließen die Lücke.`,go:"heute"});
-  else if(gap>t.protein*0.4) hints.push({e:"🥚",t:`Protein: ${Math.round(tot.protein)} von ${t.protein} g`,d:`${food} zur nächsten Mahlzeit.`,go:"heute"});
+  // Kurz: Titel = was los ist, d = was tun (ein paar Worte), bar = Fortschritt 0–1 (optional)
+  const pBar=Math.min(1,tot.protein/t.protein);
+  if(!d.meals.length) hints.push({e:"🍽️",t:"Erste Mahlzeit eintragen",d:"Dann passen die Tipps zu deinem Tag",go:"heute"});
+  else if(wo.length&&gap>15) hints.push({e:"💪",t:`Noch ${gap} g Protein`,d:food,bar:pBar,go:"heute"});
+  else if(gap>t.protein*0.4) hints.push({e:"🥚",t:`Protein ${Math.round(tot.protein)} / ${t.protein} g`,d:food,bar:pBar,go:"heute"});
   if(!wo.length){
     const last=[...state.workouts].filter(w=>w.date<=state.date).sort((a,b)=>a.date<b.date?1:-1)[0];
     const gapD=last?Math.round((parseIso(state.date)-parseIso(last.date))/864e5):null;
-    if(gapD==null||gapD>=3) hints.push({e:"🏋️",t:last?`Seit ${gapD} Tagen kein Training`:"Noch kein Training gespeichert",d:"Eine kurze Einheit reicht. Dein Plan liegt im Training-Tab.",go:"sport"});
+    if(gapD==null||gapD>=3) hints.push({e:"🏋️",t:last?`${gapD} Tage kein Training`:"Erstes Training starten",d:"Eine kurze Einheit reicht",go:"sport"});
   }
-  if(d.sleep!=null&&d.sleep<6.5) hints.push({e:"🌙",t:`Nur ${de(d.sleep,1)} h Schlaf`,d:wo.length?"Heute abends früher Licht runter.":"Heute lieber moderat trainieren und abends früher Licht runter.",go:"heute"});
-  else if(d.sleep==null&&isToday) hints.push({e:"🌙",t:"Wie hast du geschlafen?",d:"Trag deine Stunden ein. Der Coach berücksichtigt sie dann.",go:"heute"});
-  if(isToday&&new Date().getHours()>=14&&d.water<state.profile.waterTarget/2) hints.push({e:"💧",t:`Erst ${d.water} von ${state.profile.waterTarget} Gläsern`,d:"Ein Glas jetzt, eins zur nächsten Mahlzeit.",go:"heute"});
+  if(d.sleep!=null&&d.sleep<6.5) hints.push({e:"🌙",t:`Nur ${de(d.sleep,1)} h Schlaf`,d:"Heute früher Licht aus",go:"heute"});
+  else if(d.sleep==null&&isToday) hints.push({e:"🌙",t:"Schlaf eintragen",d:"Wie lange hast du geschlafen?",go:"heute"});
+  if(isToday&&new Date().getHours()>=14&&d.water<state.profile.waterTarget/2) hints.push({e:"💧",t:`Erst ${d.water} von ${state.profile.waterTarget} Gläsern`,d:"Jetzt ein Glas trinken",bar:d.water/state.profile.waterTarget,go:"heute"});
   return hints.slice(0,3);
 }
 // Themen, die im Fragebogen als wichtig gewählt wurden, zuerst
@@ -602,7 +604,7 @@ function renderCoach(){
   const tip = coachToday()[0];
   return `<div class="scroll pad">
     <div class="topbar"><div><h1>Coach</h1><div class="sub">Ein paar Fragen, dann ein einfacher Plan</div></div></div>
-    ${tip?`<button class="card tipcard" data-act="tab" data-v="${tip.go}"><span class="tipk">Tipp für heute</span><b>${tip.e} ${tip.t}</b><span class="sub">${tip.d}</span></button>`:""}
+    ${tip?`<button class="card tipcard" data-act="tab" data-v="${tip.go}"><span class="tip-ico">${tip.e}</span><span class="grow"><span class="tipk">Tipp für heute</span><b>${tip.t}</b>${tip.bar!=null?`<span class="tip-bar"><i style="width:${Math.round(tip.bar*100)}%"></i></span>`:""}<span class="sub">${tip.d}</span></span><span class="chev">›</span></button>`:""}
     <div class="section"><h2>Deine Themen</h2></div>
     <div class="card meals">
     ${coachTopics().sort((a,b)=>coachPrio(b.id)-coachPrio(a.id)).map(t=>{
