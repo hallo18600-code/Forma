@@ -4,3 +4,4 @@ Object.assign(I18N.en,{"Wie viel?":"How much?"});
 Object.assign(I18N.en,{"genau":"exact"});
 Object.assign(I18N.en,{"Tierisch – passt nicht zu deiner veganen Ernährung": "Animal-based – doesn't fit your vegan diet", "Enthält Fleisch oder Fisch – passt nicht zu deiner vegetarischen Ernährung": "Contains meat or fish – doesn't fit your vegetarian diet", "Enthält Milch – passt nicht zu deiner veganen Ernährung": "Contains milk – doesn't fit your vegan diet", "Ändert die Bewertung nicht. Die zeigt nur, wie gesund es ist und wie gut es zu deinem Ziel passt.": "Doesn't change the rating. It only shows how healthy it is and how well it fits your goal.", "Ändert die Bewertung nicht.": "Doesn't change the rating.", "Viel Zucker – du willst Zucker meiden": "Lots of sugar – you want to avoid sugar"});
 Object.assign(I18N.en,{"Hinweis":"Note"});
+Object.assign(I18N.en,{"Milcheiweiß kann bei manchen Unreinheiten fördern": "Milk protein can make breakouts worse for some people"});

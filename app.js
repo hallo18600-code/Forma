@@ -185,7 +185,10 @@ function supScore(id,goal){
   if(id==="crea"&&lifts){ sc+=3; why="Passt zu deinem Krafttraining. Sehr gut untersucht."; }
   const notes=[];
   if(id==="whey"&&vegan) notes.push("Enthält Milch – passt nicht zu deiner veganen Ernährung");
-  if(id==="whey"){ if(lowProt){ sc+=3; why="Protein heute liegt noch unter dem Richtwert."; } else { sc-=6; bad.unshift("Dein Protein passt heute schon"); } }
+  if(id==="whey"){
+    if(g==="skin"){ sc=Math.min(sc,75); bad.unshift("Milcheiweiß kann bei manchen Unreinheiten fördern"); }   // für die Haut nur 70–75
+    else if(lowProt){ sc+=3; why="Protein heute liegt noch unter dem Richtwert."; } else { sc-=6; bad.unshift("Dein Protein passt heute schon"); }
+  }
   if(id==="d3"&&winter){ sc+=3; why="Gerade jetzt (Oktober bis März) gibt es wenig Sonne."; }
   if(id==="o3"){ if(hasFish){ sc-=8; bad.unshift("Du isst schon oft Fisch"); } else { sc+=2; why="Du isst wenig Fisch."; } }
   if(id==="mg"&&((day().sleep!=null&&day().sleep<6.5)||(sa.ein&&sa.ein!=="Geht schnell"))){ sc+=3; why="Viele nehmen es abends, wenn der Schlaf hakt."; }
