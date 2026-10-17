@@ -16,8 +16,10 @@ const R_CATS=[
    b:[10,8,6,10],g:["","","",""],x:["Zucker ohne Nährstoffe","Flüssige Kalorien machen nicht satt","Zucker kann Unreinheiten fördern","Zucker-Hoch, danach Absturz"]},
   {id:"vegjuice",k:["karottensaft","mohrensaft","gemusesaft","rote bete saft","rote beete saft","tomatensaft","selleriesaft","gemuse saft"],w:1,
    b:[45,58,88,58],g:["Mikronährstoffe für die Regeneration","Wenig Kalorien für einen Saft","Viel Beta-Carotin für die Haut","Vitamine ohne viel Zucker"],x:["Kaum Protein","Ganzes Gemüse sättigt mehr","",""]},
-  {id:"juice",k:["=jus","zumo","succo","saft","nektar","smoothie","schorle","=juice","direktsaft"],n:["zitronensaft","limettensaft","saftig","nektarine"],
-   b:[34,18,30,34],g:["Schnelle Carbs nach dem Training","","Etwas Vitamin C","Schnelle Energie aus Obst"],x:["Fruchtzucker ohne Ballaststoffe","Flüssiger Zucker, macht nicht satt","Viel Fruchtzucker auf einmal","Schneller Zucker, schnelles Tief"]},
+  {id:"nectar",k:["nektar","nectar","fruchtnektar","fruchtsaftgetrank","saftgetrank","juice drink","fruchtgetrank","multivitamingetrank"],n:["nektarine"],
+   b:[24,12,24,26],g:["","","Etwas Vitamin C","Schnelle Energie"],x:["Zugesetzter Zucker, kaum Nährstoffe","Zugesetzter Zucker, flüssige Kalorien","Zugesetzter Zucker – schlechter als echter Saft","Zucker-Hoch, danach Tief"]},
+  {id:"juice",k:["=jus","zumo","succo","saft","smoothie","schorle","=juice","direktsaft"],n:["zitronensaft","limettensaft","saftig","nektarine"],w:1,
+   b:[44,30,64,62],g:["Schnelle Carbs & Kalium nach dem Training","","Vitamine & Antioxidantien aus Obst","Schnelle Energie & Vitamine"],x:["Kaum Protein","Flüssige Kalorien sättigen kaum","Fruchtzucker – in Maßen: ein Glas statt einer Flasche","Ohne Ballaststoffe geht der Zucker schnell ins Blut"]},
   {id:"plantmilk",f:(h,raw,c)=>rHit(h,h.trim().split(/[^a-z0-9%&]+/),c.k)||/(hafer|mandel|reis|cashew|soja|erbsen|dinkel|oat|almond|hanf|haselnuss|hazelnut|nocciola|almendra|zobi)[ -]?(drink|milch|milk)/.test(h)||/(bevanda|napitak|leche de|lait d.?amande|boisson)/.test(h),k:["hafermilch","haferdrink","hafer drink","oat drink","mandelmilch","mandeldrink","mandel drink","reisdrink","reismilch","cashewdrink","kokosdrink","erbsendrink","dinkeldrink"],
    b:[22,32,26,28],g:["","Wenig Kalorien","",""],x:["Fast kein Protein|Ersatzdrink, nicht naturbelassen","Ersatzdrink, nicht naturbelassen|Oft Zucker aus Getreide","Ersatzdrink mit Zusätzen & Öl","Kaum echte Nährstoffe|Ersatzdrink, nicht naturbelassen"]},
   {id:"ersatz",f:h=>/(vegan|veggie|vegetar|pflanzlich|plant based|fleischfrei|fleischlos|ohne fleisch)/.test(h)&&/(burger|wurst|schnitzel|hack|nugget|aufschnitt|salami|frikadell|bulette|chicken|steak|schinken|geschnetzelt|mortadella|filet|gyros|doner|bites|fischstabchen|thunfisch|lachs|lyoner|leberwurst|cevapcici|balls|mince)/.test(h)||/(vegan|pflanzlich|plant based)/.test(h)&&/(kase|cheese|joghurt|jogurt|quark|skyr|sahne|butter|mayo|cuisine|alternative|creme)/.test(h)||/(seitan|beyond meat|quorn|like meat|vegetarian butcher|sojaschnetzel|soja schnetzel|garden gourmet|veganz|planted|rugenwalder vegetar)/.test(h),
@@ -107,7 +109,7 @@ const R_CATS=[
   {id:"refined",k:["=pain","pain de mie","=pan","bauletto","biscotte","krisprolls","tartines craquantes","fette croccanti","farine","harina","semoule","=pates","coquillette","spaghettoni","maccheroni","tortiglioni","capellini","pipe rigate","risoni","nouilles","=noodles","glass noodles","=soba","pasta","=bread","=toast","brot","brotchen","semmel","schrippe","weckle","wecken","toast","baguette","ciabatta","brezel","breze","laugen","=wrap","wraps","tortilla","fladenbrot","=pita","bagel","=bun","buns","nudel","pasta","spaghetti","penne","fusilli","makkaroni","tagliatelle","farfalle","rigatoni","linguine","lasagneplatten","gnocchi","couscous","bulgur","=mehl","weizenmehl","dinkelmehl","spatzle","knodel","kloss","grieß","griess","paniermehl","=focaccia","naan","=toastbrot"],w:1,lq:1,
    b:[42,28,28,38],g:["Schnelle Carbs nach dem Training","","","Schnelle Carbs"],x:["Weißmehl: wenig Nährstoffe","Weißmehl macht schnell wieder hungrig","Weißmehl lässt Blutzucker springen","Schnelle Energie, schnelles Tief"]},
   {id:"driedfruit",k:["getrocknet","trockenobst","trockenfrucht","dattel","rosine","sultanine","bananenchips","apfelchips","=cranberries","softfeige","trockenpflaume","aprikose getrocknet","mango getrocknet","gojibeere","goji"],w:1,
-   b:[46,28,46,62],g:["Schnelle Carbs fürs Training","","Etwas Mineralstoffe","Schnelle, natürliche Energie"],x:["Kaum Protein","Sehr viel Zucker auf kleinem Raum","Konzentrierter Zucker","Nur kleine Mengen – viel Zucker"]},
+   b:[46,28,56,62],g:["Schnelle Carbs fürs Training","","Kalium, Eisen & Polyphenole","Schnelle, natürliche Energie"],x:["Kaum Protein","Sehr viel Zucker auf kleinem Raum","Konzentrierter Zucker","Nur kleine Mengen – viel Zucker"]},
   {id:"berries",k:["beere","erdbeer","himbeer","heidelbeer","blaubeer","brombeer","johannisbeer","stachelbeer","=acai","granatapfel","cranberry","holunder"],n:["kaffeebohne"],w:1,
    b:[60,86,96,76],g:["Antioxidantien für die Regeneration","Wenig Zucker für Obst","Antioxidantien – Top für die Haut","Natürlicher Zucker + Ballaststoffe"],x:["Kaum Protein","","",""]},
   {id:"banana",k:["banane","banana"],w:1,
@@ -121,7 +123,7 @@ const R_CATS=[
   {id:"veg",k:["asparagus","asperge","cornichon","pepinillo","olives","azeitona","aceituna","petits pois","=pois","haricots verts","gingembre","ginger shot","=ginger","brocoli","courgette","champignon","=funghi","legumes","verdure","gurke","zucchini","aubergine","blumenkohl","rosenkohl","kohlrabi","weisskohl","wirsing","spitzkohl","chinakohl","=kohl","sellerie","spargel","pilz","champignon","shiitake","austernpilz","zwiebel","schalotte","knoblauch","lauch","porree","fenchel","=salat","salatherz","eisberg","kopfsalat","romana","chicoree","radicchio","endivie","artischocke","okra","=gemuse","gemuse","grune bohnen","brechbohnen","prinzessbohnen","zuckerschoten","=erbsen","erbse","=mais","zuckermais","radieschen","rettich","rucola","ingwer","oliven","kapern","gewurzgurke","sprossen","keimlinge","bambus","pak choi","staudensellerie","fruhlingszwiebel"],n:["ingwertee","ingwer tee"],w:1,
    b:[52,94,90,70],g:["Mikronährstoffe für die Regeneration","Viel Volumen, kaum Kalorien","Vitamine & Antioxidantien","Vitamine & Ballaststoffe"],x:["Kaum Protein","","","Wenig Kalorien – allein keine Energie"]},
   {id:"honey",k:["=miel","=miele","erable","=maple","honig","honey","ahornsirup","maple"],w:1,
-   b:[38,22,32,54],g:["Schnelle Carbs nach dem Training","","","Natürlicher Zucker, besser als Haushaltszucker"],x:["Trotzdem purer Zucker","Purer Zucker, null Sättigung","Zucker kann Unreinheiten fördern","Trotzdem purer Zucker"]},
+   b:[38,22,40,54],g:["Schnelle Carbs nach dem Training","","Natürlich, mit etwas Antioxidantien","Natürlicher Zucker, besser als Haushaltszucker"],x:["Trotzdem purer Zucker","Purer Zucker, null Sättigung","Zucker kann Unreinheiten fördern","Trotzdem purer Zucker"]},
   {id:"coffeemilk",k:["cappuccino","=latte","latte macchiato","milchkaffee","eiskaffee","frappuccino","frappe","flat white","chai latte","mocca","mokka","caffe latte","cafe au lait","=macchiato","kaffeegetrank","coffee drink"],d:1,
    b:[48,46,34,48],g:["","","","Wacher Kick"],x:["Milch & oft Zucker","Kalorien aus Milch & Sirup","Milch im Kaffee – bei Hautfokus lieber schwarz","Leiht Energie, ersetzt keinen Schlaf"]},
   {id:"coffee",k:["=cafe","=caffe","nescafe","arabica","cafe moulu","caffe in grani","kaffee","espresso","cold brew","=americano","filterkaffee","=coffee","=lungo","=ristretto"],w:1,
@@ -136,6 +138,10 @@ const R_CATS=[
 // Mikronährstoffe je Lebensmittel. Die Datenbank kennt keine Vitamine, deshalb steckt dieses Wissen hier.
 // m/l/s/e = Plus/Minus für Muskeln/Abnehmen/Haut/Energie, tm/tl/ts/te = Gut-Text, bs/be = Schlecht-Text
 const R_MICRO=[
+  {k:["orangensaft","o-saft","blutorangensaft","grapefruitsaft","mandarinensaft","acerolasaft","sanddornsaft","acerola","orange juice","jus d'orange","zumo de naranja"],s:9,e:3,l:1,ts:"Viel Vitamin C & Folat für die Haut",te:"Vitamin C & Kalium"},
+  {k:["granatapfelsaft","aroniasaft","heidelbeersaft","blaubeersaft","johannisbeersaft","kirschsaft","holundersaft","cranberrysaft"],s:9,e:2,ts:"Polyphenole – starke Antioxidantien"},
+  {k:["multivitaminsaft","multisaft","acerolakirsch"],s:5,ts:"Viele Vitamine auf einmal"},
+  {k:["apfelsaft","traubensaft","birnensaft","ananassaft"],s:0,e:1,ts:"Etwas Vitamin C & Polyphenole"},
   {k:["karotte","mohre","karottensaft","mohrensaft"],s:7,ts:"Beta-Carotin (Vitamin A) für frischen Teint"},
   {k:["susskartoffel","batate"],s:6,e:2,ts:"Beta-Carotin für die Haut",te:"Kalium & langsame Stärke"},
   {k:["kurbis","hokkaido","butternut"],s:6,ts:"Beta-Carotin für die Haut"},
@@ -189,7 +195,7 @@ const R_MICRO=[
 ];
 R_MICRO.forEach(x=>{ x.k=x.k.map(k=>{ const p=/^[=^]/.test(k)?k[0]:""; return p+NORM(p?k.slice(1):k); }); });
 // Diese Arten sind naturbelassen, aber sie haben ihren Zucker von Natur aus (Obst & Co.)
-const R_FRUITY=["fruit","berries","banana","vitc","driedfruit","vegjuice","honey"];
+const R_FRUITY=["juice","fruit","berries","banana","vitc","driedfruit","vegjuice","honey"];
 // Gesunde, natürliche Fettquellen
 const R_GOODFAT=["nuts","coconut","avocado","goodfat","butter","fattyfish","egg","darkchoc","organ","redmeat"];
 // Stichwörter einmal normalisieren (wie die Produktnamen)
@@ -379,7 +385,7 @@ function scoreFood(item){
     if(su>=12&&!fruity) bad("Viel Zucker ("+rG(su)+" g)"+(g==="skin"?" – kann Unreinheiten fördern":g==="energy"?" – danach Tief":""),13);
   }
   // 4) Mikronährstoffe einzelner Lebensmittel (nur bei naturbelassenen)
-  if(cat&&(cat.w||["darkchoc","vegjuice","fermentedveg"].includes(id))&&!heavy){
+  if(cat&&(cat.w||["darkchoc","vegjuice","fermentedveg","nectar"].includes(id))&&!heavy){
     const GK=["m","l","s","e"][gi], TK="t"+GK, BK="b"+GK;
     // Bester Treffer: Hauptwort vor Bestimmungswort (Rinder„fond“ = Fond, nicht Rind)
     let hit=null, hs=0; for(const x of R_MICRO){ const v=Math.max(...x.k.map(k=>kwHit(h,words,k))); if(v>hs){ hs=v; hit=x; if(v===2) break; } }
@@ -388,6 +394,12 @@ function scoreFood(item){
   // 5) Sonderfälle innerhalb einer Art
   if(id==="softdrink"&&su<1){ score+=[8,18,8,6][gi]; cons.length=0; bad("Süßstoffe & Zusätze statt echter Nahrung",12); if(g==="lose") good("Ohne Kalorien",8); }
   if(id==="softdrink"&&/(energy|red bull|monster)/.test(h)&&g==="energy") bad("Koffein auf Pump, danach Tief",13);
+  // Saft: Mikronährstoffe gegen Zucker abwägen. Smoothie (mit Fruchtfleisch) und Direktsaft besser, Konzentrat etwas schlechter
+  if(id==="juice"){
+    if(/smoothie/.test(h)){ score+=[2,3,5,4][gi]; good("Mit Fruchtfleisch: mehr Ballaststoffe",9); }
+    if(/(direktsaft|frisch gepresst|naturtrub|100 ?%|nfc)/.test(h)){ score+=[1,0,3,2][gi]; good("Direktsaft: mehr Vitamine",8); }
+    else if(/konzentrat/.test(h)){ score-=[1,0,3,2][gi]; bad("Aus Konzentrat: weniger Vitamine",7); }
+  }
   // Milch & Joghurt: Vollfett ist naturbelassener und für die Haut besser als fettarm
   if(id==="dairy"||id==="kefir"){
     const low=fa<2||/(fettarm|mager|entrahmt|0,1|0,3|1,5|light|leicht)/.test(h), full=!low&&(fa>=3||/(vollmilch|vollfett|3,5|3,8|4,0)/.test(h));
@@ -431,7 +443,7 @@ function scoreFood(item){
   return rateOut(Math.min(cap,score),pros,cons);
 }
 // Typische Nährwert-Bewertung je Art (Median aus 100.000 Produkten), Reihenfolge: Muskeln, Abnehmen, Haut, Energie
-const R_MED={_0:[22,39,74,10],_1:[48,42,84,31],_2:[0,-28,73,0],_3:[29,44,82,14],_4:[9,29,67,4],alcohol:[0,50,85,0],avocado:[10,47,100,28],banana:[10,50,51,10],berries:[7,54,49,3],broth:[35,81,85,8],butter:[1,-17,95,15],cereal:[29,13,65,23],cheese:[56,35,82,14],chips:[25,13,84,18],coconut:[6,40,95,17],coffee:[33,36,85,21],coffeemilk:[16,58,50,5],dairy:[19,52,79,6],darkchoc:[17,-6,91,25],driedfruit:[-34,-17,-23,-47],egg:[58,62,95,30],ersatz:[46,53,88,22],fastfood:[46,46,85,28],fattyfish:[75,61,95,30],fermentedveg:[9,68,85,10],fruit:[3,50,45,1],goodfat:[0,-28,95,15],honey:[-59,-36,-50,-60],juice:[2,52,44,1],kefir:[17,66,85,6],leanfish:[85,76,85,15],legume:[58,56,94,35],margarine:[1,-15,73,0],mixedmeal:[32,52,83,16],nuts:[38,4,100,37],oats:[50,39,85,45],organ:[43,40,95,25],peanut:[43,9,93,25],plantmilk:[7,60,67,6],potato:[31,58,85,26],poultry:[87,76,85,15],processedmeat:[49,42,81,13],protdairy:[78,78,85,15],proteinbar:[78,49,85,23],pseudograin:[55,34,88,48],readymeal:[35,49,82,19],redmeat:[75,63,95,30],refined:[53,37,83,43],rice:[46,26,76,38],ricecake:[43,18,73,34],sauce:[9,35,75,5],seedoil:[0,-28,73,0],skinveg:[10,65,65,8],softdrink:[0,51,44,0],soy:[64,67,86,18],spice:[30,53,85,12],sugar:[-42,-17,-31,-57],sweetpotato:[24,52,75,18],sweets:[-3,-11,36,-14],tea:[0,52,48,0],veg:[11,64,82,7],vegjuice:[5,63,53,5],vitc:[1,55,46,0],water:[33,54,85,18],whey:[90,46,85,16],wholewheat:[56,42,97,54]};
+const R_MED={_0:[22,39,74,10],_1:[48,42,84,31],_2:[0,-28,73,0],_3:[29,44,82,14],_4:[9,29,67,4],alcohol:[0,50,85,0],avocado:[10,47,100,28],banana:[10,50,51,11],berries:[7,54,49,3],broth:[35,81,85,8],butter:[1,-17,95,15],cereal:[29,13,65,23],cheese:[56,35,82,14],chips:[25,13,84,18],coconut:[6,40,95,17],coffee:[33,36,85,21],coffeemilk:[16,58,50,5],dairy:[19,52,79,6],darkchoc:[17,-6,91,25],driedfruit:[-34,-17,-23,-47],egg:[58,62,95,30],ersatz:[46,53,88,22],fastfood:[46,46,85,28],fattyfish:[75,61,95,30],fermentedveg:[9,68,85,10],fruit:[3,50,45,1],goodfat:[0,-28,95,15],honey:[-59,-36,-50,-60],juice:[2,52,45,1],kefir:[17,66,85,6],leanfish:[85,76,85,15],legume:[58,56,94,35],margarine:[1,-15,73,0],mixedmeal:[32,52,83,16],nectar:[1,50,42,0],nuts:[38,4,100,37],oats:[50,39,85,45],organ:[43,40,95,25],peanut:[43,9,93,25],plantmilk:[7,60,67,6],potato:[31,58,85,26],poultry:[87,76,85,15],processedmeat:[49,42,81,13],protdairy:[78,78,85,15],proteinbar:[78,49,85,23],pseudograin:[55,34,88,48],readymeal:[35,49,82,19],redmeat:[75,63,95,30],refined:[53,37,83,43],rice:[46,26,76,38],ricecake:[43,18,73,34],sauce:[9,35,75,5],seedoil:[0,-28,73,0],skinveg:[10,65,65,8],softdrink:[0,51,44,0],soy:[64,67,86,18],spice:[30,53,85,12],sugar:[-42,-17,-31,-57],sweetpotato:[24,52,75,18],sweets:[-3,-11,36,-14],tea:[0,52,48,0],veg:[11,64,82,7],vegjuice:[5,63,53,5],vitc:[1,55,46,0],water:[33,54,85,18],whey:[90,46,85,16],wholewheat:[56,42,97,54]};
 // Höchstens 3 gute und 3 schlechte Punkte, wichtigste zuerst, jedes Thema nur einmal
 // Wichtige Wörter eines Textes (für "sagt nicht zweimal dasselbe")
 const R_STOP=new Set(["fur","die","der","das","und","mit","haut","energie","lange","lang","gut","gute","guter","viel","viele","wenig","sehr","top","kaum","eine","einen","nach","beim","oder","ohne","dein","deine","bei","als","pro","kann","fur","ist","nur","noch"]);
