@@ -93,6 +93,12 @@ function kfaOpts(){ return state.profile.sex==="w" ? ["Unter 20 %","20–27 %","
 const HAAR_SEITEN=["Rasiert / Fade","Kurz (3–6 mm)","Mittel, mit Schere","Lang, über den Ohren"];
 const HAAR_OBEN=["Unter 2 cm","2–5 cm","5–10 cm","Über 10 cm"];
 const HAAR_LAENGE=["Kurz (Pixie)","Kinnlang / Bob","Schulterlang","Lang"];
+// Schon im Fragebogen beantwortet → im Coach nicht nochmal fragen
+const FREQ_TAGE={"1–2× pro Woche":"2–3 Tage","3–4× pro Woche":"4 Tage","5× oder öfter":"5–6 Tage"};
+const ACT_SITZEN={1.3:"Über 8",1.4:"4–8",1.55:"Unter 4",1.7:"Unter 4"};
+function knownTage(){ return FREQ_TAGE[state.profile.trainFreq]; }
+function knownSitzen(){ return (state.ob||{}).activity?ACT_SITZEN[state.profile.activity]:undefined; }
+function avoidsCaffeine(){ return (((state.coach.answers||{}).gesundheit||{}).meiden||[]).includes("Koffein"); }
 function coachQuiz(id){
   const q = {
     haut:[
@@ -109,7 +115,7 @@ function coachQuiz(id){
       {k:"ausfall", q:"Wie zeigt sich der Ausfall?", opts:["Geheimratsecken / Scheitel","Überall dünner","Kahle runde Stellen"], skip:a=>a.stoert!=="Fallen viel aus"},
       {k:"wasch", q:"Wie oft wäschst du die Haare?", opts:["Täglich","2–3 mal","Seltener"]},
       {k:"hitze", q:"Wie oft kommt Hitze dran?", opts:["Fast immer","Manchmal","Selten"]},
-      {k:"typ", q:"Haartyp?", opts:["Glatt","Wellig","Lockig"]},
+      {k:"typ", q:"Haartyp?", opts:["Glatt","Wellig","Lockig","Kraus / Afro"], emo:{"Glatt":"➖","Wellig":"〰️","Lockig":"➰","Kraus / Afro":"🌀"}},
       // Frisur: Gesichtsform + wie der Schnitt gerade ist (Männer: Seiten/oben, Frauen: Länge/Schnitt)
       {k:"form", q:"Deine Gesichtsform?", opts:["Oval","Rund","Eckig","Länglich","Herzförmig","Weiß nicht"], emo:{"Oval":"🥚","Rund":"⚪","Eckig":"⬛","Länglich":"📏","Herzförmig":"🤍","Weiß nicht":"🤔"}},
       {k:"seiten", q:"Wie sind die Seiten gerade?", opts:HAAR_SEITEN, skip:()=>state.profile.sex==="w"},
@@ -121,7 +127,7 @@ function coachQuiz(id){
       {k:"aufzeit", q:"Wann musst du meistens aufstehen?", opts:["Vor 6 Uhr","6–7 Uhr","7–8 Uhr","Nach 8 Uhr"]},
       {k:"ein", q:"Wie ist das Einschlafen?", opts:["Geht schnell","Dauert","Wach in der Nacht"]},
       {k:"auf", q:"Ist die Aufstehzeit fest?", opts:["Ja, auch am Wochenende","Wechselt stark"]},
-      {k:"kaffee", q:"Kaffee nach 15 Uhr?", opts:["Oft","Selten","Nie"]},
+      {k:"kaffee", q:"Kaffee nach 15 Uhr?", opts:["Oft","Selten","Nie"], skip:()=>avoidsCaffeine()},
       {k:"stunden", q:"Wie viele Stunden schläfst du?", opts:["Unter 6","6–7","7–8","Über 8"]},
       {k:"vorher", q:"Was machst du in der Stunde vorm Schlafen?", opts:["Handy / Serie im Bett","Arbeit / Lernen","Sport","Ruhig, z. B. lesen"], emo:{"Handy / Serie im Bett":"📱","Arbeit / Lernen":"💻","Sport":"🏃","Ruhig, z. B. lesen":"📖"}},
       {k:"morgen", q:"Wie fühlst du dich morgens?", opts:["Ausgeruht","Gerädert"], emo:{"Ausgeruht":"😊","Gerädert":"🥴"}}
@@ -129,17 +135,18 @@ function coachQuiz(id){
     aussehen:[
       {k:"ziel", q:"Was willst du verbessern?", multi:true, opts:["Weniger Bauchfett","Mehr Muskeln","Gesicht definierter","Bessere Haltung","Frischer wirken"], emo:{"Weniger Bauchfett":"🔥","Mehr Muskeln":"💪","Gesicht definierter":"🗿","Bessere Haltung":"🧍","Frischer wirken":"✨"}},
       {k:"gym", q:"Wie trainierst du?", opts:["Gym, schon länger","Gym, Anfänger","Zuhause","Noch gar nicht"], emo:{"Gym, schon länger":"🏋️","Gym, Anfänger":"🌱","Zuhause":"🏠","Noch gar nicht":"🛋️"}, skip:a=>!(a.ziel||[]).includes("Mehr Muskeln")},
-      {k:"tage", q:"Wie viele Tage pro Woche kannst du?", opts:["2–3 Tage","4 Tage","5–6 Tage"], skip:a=>!(a.ziel||[]).includes("Mehr Muskeln")},
+      {k:"tage", q:"Wie viele Tage pro Woche kannst du?", opts:["2–3 Tage","4 Tage","5–6 Tage"], skip:a=>!(a.ziel||[]).includes("Mehr Muskeln")||!!knownTage()},
       {k:"kfa", q:"Wie hoch schätzt du deinen Körperfettanteil?", opts:kfaOpts()},
       {k:"bloat", q:"Wirkt dein Gesicht morgens aufgedunsen?", opts:["Oft","Manchmal","Selten"]},
       {k:"abend", skip:a=>a.bloat==="Selten", q:"Was gibt es abends oft?", multi:true, none:"Nichts davon", opts:["Salziges / Fast Food","Alkohol","Spät gegessen","Nichts davon"], emo:{"Salziges / Fast Food":"🍟","Alkohol":"🍺","Spät gegessen":"🌙","Nichts davon":"👍"}},
-      {k:"sitzen", q:"Wie viele Stunden sitzt du am Tag?", opts:["Unter 4","4–8","Über 8"]}
+      {k:"sitzen", q:"Wie viele Stunden sitzt du am Tag?", opts:["Unter 4","4–8","Über 8"], skip:()=>!!knownSitzen()}
     ],
     gesundheit:[
       {k:"stil", q:"Welche Ernährung passt zu dir?", sub:"Danach richtet sich jede Bewertung.", opts:["Ausgewogen","Whole Foods","Primal","Vegetarisch","Vegan","Nichts Bestimmtes"], emo:{"Ausgewogen":"⚖️","Whole Foods":"🥑","Primal":"🍖","Vegetarisch":"🥗","Vegan":"🌱","Nichts Bestimmtes":"🍽️"},
         desc:{"Ausgewogen":"Von allem etwas","Whole Foods":"Unverarbeitet, naturbelassen","Primal":"Fleisch, Fisch, Eier, Obst – kaum Getreide & Soja","Vegetarisch":"Ohne Fleisch & Fisch","Vegan":"Rein pflanzlich"}},
       {k:"meiden", q:"Was willst du meiden?", sub:"Die Bewertung warnt dich dann.", multi:true, none:"Nichts", opts:["Zucker","Milchprodukte","Gluten","Soja","Schweinefleisch","Rotes Fleisch","Alkohol","Koffein","Fertigprodukte","Nichts"], emo:{"Zucker":"🍬","Milchprodukte":"🥛","Gluten":"🌾","Soja":"🫘","Schweinefleisch":"🐖","Rotes Fleisch":"🥩","Alkohol":"🍺","Koffein":"☕","Fertigprodukte":"📦","Nichts":"👍"}},
       {k:"energie", q:"Wie ist deine Energie am Nachmittag?", opts:["Konstant","Tief nach dem Essen","Ständig müde"], emo:{"Konstant":"⚡","Tief nach dem Essen":"🥱","Ständig müde":"😴"}},
+      {k:"gemuese", q:"Wie oft isst du Gemüse oder Salat?", opts:["Selten","1× am Tag","2× am Tag oder öfter"], emo:{"Selten":"🫥","1× am Tag":"🥕","2× am Tag oder öfter":"🥦"}},
       {k:"bauch", q:"Fühlt sich dein Bauch oft aufgebläht an?", opts:["Oft","Manchmal","Selten"], emo:{"Oft":"🎈","Manchmal":"🙂","Selten":"👍"}},
       {k:"intol", q:"Verträgst du etwas nicht?", multi:true, none:"Nein, alles okay", opts:["Laktose","Gluten","Nüsse","Nein, alles okay"], emo:{"Laktose":"🥛","Gluten":"🌾","Nüsse":"🥜","Nein, alles okay":"👍"}},
       {k:"wasser", q:"Wie viel trinkst du am Tag?", opts:["Unter 1 Liter","1–2 Liter","Über 2 Liter"], emo:{"Unter 1 Liter":"🥤","1–2 Liter":"💧","Über 2 Liter":"🌊"}},
@@ -336,7 +343,7 @@ function hautAdvice(a){
 
 // ---------- Haare ----------
 function haareAdvice(a){
-  const st=a.stoert||"Nichts Konkretes", heat=a.hitze&&a.hitze!=="Selten", curly=a.typ==="Lockig", w=state.profile.sex==="w";
+  const st=a.stoert||"Nichts Konkretes", heat=a.hitze&&a.hitze!=="Selten", curly=a.typ==="Lockig"||a.typ==="Kraus / Afro", w=state.profile.sex==="w";
   let tips=[], note="";
   if(st==="Fettiger Ansatz"){
     tips=[tip("Waschen nach Bedarf","Waschen, wenn's fettet, auch täglich","Seltener waschen gewöhnt nichts um."),
@@ -420,7 +427,8 @@ function haarSchnitt(a){
   const T={
     Glatt: w?["Volumenspray am Ansatz","Kopfüber föhnen, sonst liegt glattes Haar flach."]:["Matte Paste oder Clay","Gibt glattem Haar oben Halt und Volumen."],
     Wellig:["Meersalzspray, dann lufttrocknen","Betont die Wellen ohne Glanz."],
-    Lockig: w?["Stufen schneiden lassen","Ohne Stufen wirken Locken schnell dreieckig."]:["Locken oben mindestens 5 cm lassen","Zu kurz stehen sie ab. Seiten lieber Taper statt kahl."]
+    Lockig: w?["Stufen schneiden lassen","Ohne Stufen wirken Locken schnell dreieckig."]:["Locken oben mindestens 5 cm lassen","Zu kurz stehen sie ab. Seiten lieber Taper statt kahl."],
+    "Kraus / Afro": w?["Leave-in + Öl, dann Schutzfrisur","Krauses Haar ist von Natur aus trocken."]:["Taper an den Seiten, oben Leave-in","Hält Feuchtigkeit, Locken bleiben definiert."]
   }[a.typ];
   if(T) out.push(tip(null,"Styling: "+T[0],T[1]));
   return out;
@@ -467,7 +475,7 @@ function kcalFor(goal){ const old=state.profile.goal; state.profile.goal=goal; c
 // ---------- Muskeln (Teil von Aussehen) ----------
 // Split nach Trainingstagen: jeder Muskel ca. 2× pro Woche. Anfänger nicht über Torso/Limbs hinaus.
 function muskelPlanId(a,lifts){
-  const gym=a.gym||(lifts?"Gym, schon länger":"Noch gar nicht"), t=a.tage||"2–3 Tage";
+  const gym=a.gym||(lifts?"Gym, schon länger":"Noch gar nicht"), t=a.tage||knownTage()||"2–3 Tage";
   if(gym==="Zuhause") return "home";
   if(t==="4 Tage") return "tl";
   if(t==="5–6 Tage") return gym==="Gym, schon länger"?"ppl":"tl";
@@ -499,7 +507,7 @@ function muskelTips(a,lvl,g,fatGoal,prot,lifts){
   return [
     tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why,Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
     tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wdh. oder schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche +1 Wdh.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
-    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+250): Muskeln statt Fett.`:"1,6–2,2 g pro kg holen das Maximum raus.",Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
+    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:"1,6–2,2 g pro kg holen das Maximum raus.",Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
     tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher","Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
     tip("Kreatin","3–5 g Kreatin täglich","Bestuntersucht für Kraft. Fehlt Protein beim Essen: Whey.",Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
   ];
@@ -508,15 +516,15 @@ function aussehenAdvice(a){
   const ziel=a.ziel||[], lvl=kfaLevel(a), g=state.profile.goal, t=targets(), p=state.profile;
   const lifts=["Krafttraining","Beides"].includes(p.trainType);
   const fatGoal=ziel.includes("Weniger Bauchfett")||ziel.includes("Gesicht definierter");
-  const prot=Math.max(t.protein, Math.round(p.weight*1.6));
+  const hm2=Math.pow(p.height/100,2), prot=Math.max(t.protein, Math.round(Math.min(p.weight,25*hm2)*1.6));
   let cal=null;
   if(lvl>=3||(lvl===2&&fatGoal))
     cal = g==="lose" ? tip("Defizit halten",`Bei ${de(t.kcal)} kcal bleiben`,"Fett geht, Muskeln bleiben.")
       : tip("Leichtes Defizit",`Kalorien auf ${de(kcalFor("lose"))} senken`,"Nur weniger Körperfett macht Bauch und Gesicht schlanker.",{act:"coach-goal",v:"lose",label:"Kalorienziel senken",once:1});
   const lean = lvl===0&&g==="lose" ? tip("Muskeln statt Minus","Nicht weiter abnehmen","Du bist schlank. Jetzt bringen Muskeln Form.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen",once:1}) : null;
-  const sit = a.sitzen==="Über 8" ? tip("Stündlich aufstehen","Jede Stunde 2 Min aufstehen","Gegen Rundrücken und träge Durchblutung.") : null;
+  const sit = (a.sitzen||knownSitzen())==="Über 8" ? tip("Stündlich aufstehen","Jede Stunde 2 Min aufstehen","Gegen Rundrücken und träge Durchblutung.") : null;
   const G={
-    "Weniger Bauchfett":[cal, tip("8.000 Schritte","8.000+ Schritte am Tag","Verbrennt viel, ohne Hunger zu machen."),
+    "Weniger Bauchfett":[cal, tip(`${de(Math.max(8000,p.stepGoal||8000))} Schritte`,`${de(Math.max(8000,p.stepGoal||8000))}+ Schritte am Tag`,"Verbrennt viel, ohne Hunger zu machen."),
       tip(null,"Bauchübungen allein reichen nicht","Fett geht nie gezielt an einer Stelle.")],
     "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Nasenatmung + Haltung strafft die Kinnlinie optisch.")],
     "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern, Face Pulls: Schultern gehen zurück.",{once:1}),
@@ -556,11 +564,13 @@ function gesundheitAdvice(a){
       tip(null,"Testweise ohne Kohlensäure, Kaugummi, Süßstoff","Typische Bläh-Auslöser.")]);
     if(a.bauch==="Oft") note="Mit Schmerzen, Gewichtsverlust oder Blut im Stuhl: Arzt.";
   }
+  if(a.gemuese==="Selten"||a.gemuese==="1× am Tag") g.push([tip("Gemüse 2× am Tag","Mittags und abends eine Handvoll Gemüse","Ballaststoffe und Vitamine, macht satt.")]);
   if(a.wasser==="Unter 1 Liter") g.push([tip("Wasser zu jeder Mahlzeit","Ein Glas Wasser zu jeder Mahlzeit","Wenig trinken macht müde.")]);
   if(a.trink==="Täglich") g.push([tip("Sprudel statt Softdrink","Softdrink gegen Sprudel tauschen","0,5 l Cola = rund 53 g Zucker.")]);
   if(a.alk==="Mehrmals pro Woche") g.push([tip("Mo–Do alkoholfrei","Montag bis Donnerstag alkoholfrei","Besser für Schlaf, Leber, Regeneration.")]);
   if(intol.includes("Gluten")) g.push([tip(null,"Vor glutenfrei: Zöliakie-Test","Sonst ist der Test verfälscht.",{must:1})]);
-  if(a.stil==="Vegetarisch") g.push([tip("Eisen + Vitamin C","Linsen & Hafer mit Paprika/Zitrone","Vitamin C holt mehr Eisen raus.")]);
+  if(a.stil==="Vegetarisch") g.push([tip("Eisen + Vitamin C","Linsen & Hafer mit Paprika/Zitrone","Vitamin C holt mehr Eisen raus."),
+    tip("B12 im Blick","Täglich Milch, Ei oder Käse","Sonst B12 ergänzen.",{sup:"b12"})]);
   let items=pickTips(g,4);
   if(!items.length) items=[tip("Unverarbeitet essen","Läuft gut, weiter so","Unverarbeitet bleibt die beste Basis.")];
   return {lead:`${a.stil||"–"} · Energie: ${a.energie||"–"}`, routine:sumRoutine("Gesundheit",items,"",`${glasses} Gläser Wasser`), items, note};

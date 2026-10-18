@@ -746,6 +746,7 @@ svg.chart { width:100%; height:auto; display:block; }
 .obp-row div { background:rgba(0,0,0,.14); border-radius:var(--r-m); padding:var(--s-2) var(--s-3); }
 .obp-row b { display:block; font-size:var(--fs-m); }
 .obp-row span { font-size:var(--fs-s); opacity:.9; }
+.obp-mac { margin-top:var(--s-2); font-size:var(--fs-s); opacity:.9; }
 .card.obp { margin-top:var(--s-3); box-shadow:none; border:1px solid var(--line); }
 .obp h3 { margin:0 0 var(--s-2); }
 .obp p { margin:0; font-size:var(--fs-s); color:var(--ink-2); line-height:1.45; }

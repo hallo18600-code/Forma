@@ -262,10 +262,10 @@ CARE.push(
   {id:"vitc",type:"care",name:"Vitamin-C-Serum",emoji:"🍊",skin:["normal","trocken","fettig"],fragrance:false,alcohol:false,actives:["Vitamin C"]}
 );
 const SUPS = [
-  { id:"crea", type:"sup", name:"Creatin Monohydrat", emoji:"💪", dose:"5 g", when:"täglich", note:"Häufig beim Krafttraining genutzt." },
+  { id:"crea", type:"sup", name:"Creatin Monohydrat", emoji:"💪", dose:"3–5 g", when:"täglich", note:"Häufig beim Krafttraining genutzt." },
   { id:"whey", type:"sup", name:"Whey Isolat", emoji:"🥛", dose:"25 g", when:"nach dem Training", note:"Nur wenn Protein aus Essen fehlt." },
   { id:"d3", type:"sup", name:"Vitamin D3", emoji:"☀️", dose:"800 IE (20 µg)", when:"zur Mahlzeit", note:"Basis bei wenig Sonne, v. a. Oktober bis März." },
-  { id:"o3", type:"sup", name:"Omega-3", emoji:"🐟", dose:"1–2 g EPA/DHA", when:"zur Mahlzeit", note:"Eine Option bei wenig Fisch." },
+  { id:"o3", type:"sup", name:"Omega-3", emoji:"🐟", dose:"ca. 1 g EPA/DHA", when:"zur Mahlzeit", note:"Eine Option bei wenig Fisch." },
   { id:"mg", type:"sup", name:"Magnesium", emoji:"🌙", dose:"bis 250 mg", when:"abends", note:"Wirkung auf Schlaf nur schwach belegt." },
   { id:"b12", type:"sup", name:"Vitamin B12", emoji:"🌱", dose:"laut Packung", when:"täglich", note:"Wichtig bei veganer Ernährung." },
   { id:"col", type:"sup", name:"Kollagen", emoji:"✨", dose:"10 g", when:"morgens", note:"Nutzen unklar. Schlaf, LSF und Essen sind wichtiger." }

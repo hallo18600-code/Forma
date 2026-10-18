@@ -32,16 +32,18 @@ function obTopics(){
 }
 // Ernährungsfragen, die jeder beantwortet (Score warnt sonst nicht bei Unverträglichkeiten)
 const OB_CORE=["stil","intol","meiden"];
-const OB_STEPS_BY_ACT={1.3:7000,1.4:8000,1.55:10000,1.7:12000};
 function obAns(t){ return state.coach.answers[t] || (state.coach.answers[t]={}); }
 function obProf(k){ return (state.ob||{})[k] ? state.profile[k] : undefined; }
 function obMark(k){ state.ob = state.ob||{}; state.ob[k]=1; }
 function obMinTarget(){ const m=state.profile.height/100; return Math.ceil(18.5*m*m*2)/2; }
+// Vorschlag fürs Wunschgewicht: Abnehmen höchstens bis BMI 25 und nicht mehr als 8 % auf einmal (mind. 3 kg),
+// Muskeln +3 kg (Männer) bzw. +2 kg (Frauen). Sonst bleibt das Gewicht.
 function obDefaultTarget(){
-  const p=state.profile, w=+p.weight||70;
-  const t = p.goal==="lose" ? w-4 : p.goal==="muscle" ? w+2 : w;
+  const p=state.profile, w=+p.weight||70, m=(+p.height||175)/100;
+  const t = p.goal==="lose" ? Math.max(w*0.92, Math.min(w-3, 24.9*m*m)) : p.goal==="muscle" ? w+(p.sex==="w"?2:3) : w;
   return Math.max(obMinTarget(), Math.round(t*2)/2);
 }
+function obNeedsTarget(){ return ["lose","muscle"].includes(state.profile.goal); }
 
 // Alle Fragen in Reihenfolge. Themen-Fragen kommen aus coachQuiz(), damit Coach und Fragebogen gleich bleiben.
 function obSteps(){
@@ -57,18 +59,19 @@ function obSteps(){
   S.push({id:"goal",sec:"Dein Ziel",kind:"single",req:1,q:"Dein Hauptziel?",
     opts:GOALS.map(g=>({v:g.id,l:g.name,e:OB_GOALS[g.id][0]})), get:()=>obProf("goal"),
     set:v=>{ p.goal=v; obMark("goal"); if(!state.ob.target) p.target=obDefaultTarget(); }});
-  num("target","Dein Ziel","Dein Wunschgewicht",obMinTarget(),200,0.5,"kg");
+  if(obNeedsTarget()) num("target","Dein Ziel","Dein Wunschgewicht",obMinTarget(),200,0.5,"kg");
   S.push({id:"areas",sec:"Dein Ziel",kind:"multi",q:"Was willst du noch verbessern?",sub:"Nur dazu kommen gleich ein paar Fragen.",
     opts:list([["Haut","Haut","💧"],["Haare","Haare","✂️"],["Schlaf","Schlaf","🌙"],["Energie","Energie","⚡"],["Aussehen","Aussehen","🪞"],["Gesundheit","Gesundheit","💚"],["Gewohnheiten","Gewohnheiten","✅"]]),
     get:()=>p.areas, set:v=>{ p.areas=v; }});
   S.push({id:"activity",sec:"Alltag & Training",kind:"single",req:1,q:"Wie aktiv ist dein Alltag?",
-    opts:list([["1.3","Meist sitzend","🪑"],["1.4","Leicht aktiv","🚶"],["1.55","Aktiv","🚴"],["1.7","Sehr aktiv","🏗️"]]),
+    sub:"Ohne Sport – der kommt gleich.",
+    opts:list([["1.3","Meist sitzend","🪑","Büro, Auto, wenig Wege"],["1.4","Leicht aktiv","🚶","Viel zu Fuß oder öfter stehen"],["1.55","Aktiv","🚴","Job auf den Beinen, Rad statt Auto"],["1.7","Sehr aktiv","🏗️","Körperliche Arbeit, z. B. Bau, Pflege"]]),
     get:()=>state.ob&&state.ob.activity?String(p.activity):undefined, set:v=>{ p.activity=+v; obMark("activity"); }});
-  S.push({id:"trainFreq",sec:"Alltag & Training",kind:"single",req:1,q:"Wie oft trainierst du pro Woche?",sub:"Gym, Sport, Laufen. Das fließt in deine Kalorien ein.",
+  S.push({id:"trainFreq",sec:"Alltag & Training",kind:"single",req:1,q:"Wie oft trainierst du pro Woche?",sub:"Gym, Sport, Laufen – fließt in deine Kalorien ein.",
     opts:list([["Gar nicht","Gar nicht","🛋️"],["1–2× pro Woche","1–2× pro Woche","🙂"],["3–4× pro Woche","3–4× pro Woche","💪"],["5× oder öfter","5× oder öfter","🔥"]]),
     get:()=>p.trainFreq, set:v=>{ p.trainFreq=v; }});
   if(p.trainFreq!=="Gar nicht") S.push({id:"trainType",sec:"Alltag & Training",kind:"single",q:"Welches Training?",
-    opts:list([["Krafttraining","Kraft","🏋️"],["Ausdauer","Ausdauer","🏃"],["Beides","Beides","⚡"],["Weiß ich noch nicht","Weiß ich noch nicht","🤔"]]),
+    opts:list([["Krafttraining","Kraft","🏋️","Gym, Geräte, Hanteln"],["Ausdauer","Ausdauer","🏃","Laufen, Rad, Schwimmen"],["Beides","Beides","⚡"],["Weiß ich noch nicht","Weiß ich noch nicht","🤔"]]),
     get:()=>p.trainType, set:v=>{ p.trainType=v; }});
   // Schrittziel wird aus dem Alltag abgeleitet (änderbar im Verlauf)
   const quizStep=(t,title,q,extra)=>S.push(Object.assign({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, sub:q.sub, none:q.none, pick:q.pick,
@@ -119,7 +122,12 @@ function renderWelcome(){
 function obNumHint(k){
   const p=state.profile, m=p.height/100;
   if(k==="weight"){ const b=p.weight/(m*m); return `BMI <b>${de(b,1)}</b>`; }
-  if(k==="target"){ const b=p.target/(m*m), d=p.target-p.weight; return `BMI <b>${de(b,1)}</b>${Math.abs(d)>=0.5?` · ${d<0?"−":"+"}${de(Math.abs(d),1)} kg`:""}`; }
+  if(k==="target"){
+    const b=p.target/(m*m), d=p.target-p.weight;
+    // Gesundes Tempo: abnehmen ca. 0,5 % pro Woche, zunehmen ca. 0,25 kg pro Woche (Muskeln brauchen Zeit)
+    const wk=Math.abs(d)>=0.5?Math.ceil(Math.abs(d)/(d<0?p.weight*0.005:0.25)):0;
+    return `BMI <b>${de(b,1)}</b>${wk?` · ${d<0?"−":"+"}${de(Math.abs(d),1)} kg · ca. ${wk>=8?Math.round(wk/4.3)+" Monate":wk+" Wochen"}`:""}`;
+  }
   return "";
 }
 function obOpt(o, on, multi, act){
@@ -191,7 +199,6 @@ function fullBodyPlan(){
     planDay("gkb","Ganzkörper B",[["chest_press",30],["ohp_machine",20],["lat_close",35],["row_cable",30],["leg_ext",25],["leg_curl_seat",20],["preacher_machine",15],["cable_crunch",15]])
   ]};
 }
-function obWantsFullBody(){ return ["Gar nicht","1–2× pro Woche"].includes(state.profile.trainFreq); }
 function obDefaultPlans(){ return JSON.stringify(state.routines)===JSON.stringify(defaultRoutines()); }
 // Tägliche Routine aus den Antworten
 function buildRoutine(){
@@ -211,12 +218,14 @@ function buildRoutine(){
 }
 function renderObPlan(){
   const p=state.profile, t=targets(), rt=buildRoutine();
-  const plan = obWantsFullBody()&&obDefaultPlans() ? "Ganzkörper A/B" : obDefaultPlans() ? "Push · Pull · Beine" : "Deine Pläne";
+  // Gleicher Vorschlag wie im Training-Tab (Häufigkeit aus dem Fragebogen bzw. Coach-Antworten)
+  const plan = obDefaultPlans() ? PLAN_INFO[suggestPlanId()].name : "Deine Pläne";
   const open = OB_TOPICS.filter(([t])=>!quizDone(t)).map(x=>x[1]);
   const sups = (state.stack.length?state.stack:recommendStack().map(r=>r.id)).map(id=>(SUPS.find(x=>x.id===id)||{}).name).filter(Boolean);
   return `<div class="obp-hero">
       <div class="obp-k">${de(t.kcal)} kcal</div>
-      <div class="obp-row"><div><b>${t.protein} g</b><span>Protein</span></div><div><b>${p.waterTarget}</b><span>Gläser</span></div><div><b>${de(p.stepGoal&&!p.stepAuto?p.stepGoal:OB_STEPS_BY_ACT[p.activity]||8000)}</b><span>Schritte</span></div></div>
+      <div class="obp-row"><div><b>${t.protein} g</b><span>Protein</span></div><div><b>${p.waterManual?p.waterTarget:waterGoal()}</b><span>Gläser</span></div><div><b>${de(p.stepGoal&&!p.stepAuto?p.stepGoal:stepGoalFor())}</b><span>Schritte</span></div></div>
+      <div class="obp-mac">${t.carbs} g Kohlenhydrate · ${t.fat} g Fett</div>
     </div>
     ${safetyNote()}
     <div class="card obp"><h3>⭐ Dein Score achtet auf</h3><div class="opts">${persoTags().map(x=>`<span class="chip">${esc(x)}</span>`).join("")}</div></div>
@@ -276,12 +285,13 @@ function obFinish(){
   p.target=Math.max(obMinTarget(),p.target);
   if(!state.weights.length||Math.abs(lastWeight()-p.weight)>0.05)
     state.weights=state.weights.filter(w=>w.date!==todayIso()).concat({date:todayIso(),kg:+p.weight}).sort((a,b)=>a.date<b.date?-1:1);
+  if(!p.stepGoal||p.stepAuto){ p.stepGoal=stepGoalFor(); p.stepAuto=true; }
+  if(!p.waterManual) p.waterTarget=waterGoal();
   // Routine: neu aus den Antworten, eigene Punkte bleiben erhalten
   const own=(state.coach.routine||[]).filter(r=>!/^ob-|^u-s\d$/.test(r.id));
   state.coach.routine=buildRoutine().concat(own); state.routineSeeded=true; if(!state.rStart) state.rStart=todayIso();
-  if(obDefaultPlans()&&obWantsFullBody()) state.routines=[fullBodyPlan()];
+  if(obDefaultPlans()) state.routines=[coachPlan(suggestPlanId())];
   if(first&&!state.ob.sups) state.stack=[];
-  if(!p.stepGoal||p.stepAuto){ p.stepGoal=OB_STEPS_BY_ACT[p.activity]||8000; p.stepAuto=true; }
   state.coach.skipped=OB_TOPICS.map(x=>x[0]).filter(t=>!quizDone(t));
   state.obDone=true; state.obRedo=false; state.obMinor=false;
   state.onboarded=true; state.step=null; state.date=todayIso(); state.tab="heute";

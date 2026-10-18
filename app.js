@@ -59,20 +59,42 @@ function amtEntry(){
 }
 function closeModal(){ stopCam(); ui.modal=null; render(); }
 
+// Richtwerte aus dem Fragebogen. Grundumsatz nach Mifflin-St Jeor, Alltag (ohne Sport) + Training getrennt.
+// Gespeichert ist die Alltags-Stufe (1.3/1.4/1.55/1.7), gerechnet wird mit dem Faktor ohne Sport.
+const PAL_ALLTAG={1.3:1.25,1.4:1.375,1.55:1.5,1.7:1.65};
+function protPerKg(p){
+  p=p||state.profile;
+  const lifts=["Krafttraining","Beides"].includes(p.trainType)&&p.trainFreq&&p.trainFreq!=="Gar nicht";
+  return p.goal==="lose"?(lifts?2.0:1.6):p.goal==="muscle"?1.8:lifts?1.6:1.3;
+}
 function targets(){
-  const p=state.profile;
-  const bmr=10*p.weight+6.25*p.height-5*p.age+(p.sex==="m"?5:-161);
-  let kcal=Math.round(bmr*p.activity+trainKcal(p));
-  if(p.goal==="lose") kcal-=Math.min(400,Math.round(kcal*0.2));
-  if(p.goal==="muscle") kcal+=250;
-  kcal=Math.max(p.sex==="m"?1500:1200, kcal);
-  const protein=Math.round(p.weight*((p.goal==="lose"||p.goal==="muscle")?1.8:1.4));
-  return { kcal, protein, carbs:Math.round(kcal*0.4/4), fat:Math.round(kcal*0.25/9) };
+  const p=state.profile, w=+p.weight||70, h=+p.height||175, m=h/100;
+  const bmr=10*w+6.25*h-5*(+p.age||30)+(p.sex==="m"?5:-161);
+  const tdee=bmr*(PAL_ALLTAG[p.activity]||p.activity||1.375)+trainKcal(p);
+  let kcal=tdee;
+  // Abnehmen: ca. 0,5 % Körpergewicht pro Woche (1 kg Fett ≈ 7.700 kcal), höchstens 20 % unter Bedarf
+  if(p.goal==="lose") kcal-=Math.min(tdee*0.2, w*0.005*7700/7);
+  // Muskeln: kleines Plus (ca. 10 %, 200–300 kcal), damit möglichst wenig Fett dazukommt
+  if(p.goal==="muscle") kcal+=Math.min(300,Math.max(200,tdee*0.1));
+  kcal=Math.round(Math.max(p.sex==="m"?1500:1200, kcal)/10)*10;
+  // Protein je kg – bei hohem BMI aufs Gewicht bei BMI 25 bezogen (sonst unrealistisch hoch)
+  const ref=Math.min(w,25*m*m), protein=Math.round(ref*protPerKg(p));
+  // Fett ca. 28 % (mind. 0,8 g/kg), Carbs = der Rest. So ergeben die Makros genau die Kalorien.
+  const fat=Math.round(Math.max(kcal*0.28/9, ref*0.8));
+  const carbs=Math.max(0,Math.round((kcal-protein*4-fat*9)/4));
+  return { kcal, protein, carbs, fat };
 }
 // Training pro Woche (aus dem Fragebogen) → Einheiten im Schnitt
 const TRAIN_PER_WEEK={"Gar nicht":0,"1–2× pro Woche":1.5,"3–4× pro Woche":3.5,"5× oder öfter":5.5};
-// Mehrbedarf pro Tag durch Training, fest im Richtwert: ca. 45 Min. mit 5 MET je Einheit, auf 7 Tage verteilt
-function trainKcal(p){ p=p||state.profile; return Math.round((TRAIN_PER_WEEK[p.trainFreq]||0)*(+p.weight||70)*5*0.75/7); }
+// Je Einheit: [MET, Stunden]. Kraft ca. 60 Min. mit Pausen, Ausdauer ca. 45 Min.
+const TRAIN_MET={"Krafttraining":[5,1],"Ausdauer":[7,0.75],"Beides":[6,1]};
+// Mehrbedarf pro Tag durch Training, fest im Richtwert: (MET − 1, der Ruheumsatz ist schon drin) × kg × Stunden, auf 7 Tage verteilt
+function trainKcal(p){ p=p||state.profile; const [met,hrs]=TRAIN_MET[p.trainType]||[5.5,0.75]; return Math.round((TRAIN_PER_WEEK[p.trainFreq]||0)*(+p.weight||70)*(met-1)*hrs/7); }
+// Wasser (Gläser à 250 ml): ca. 28 ml je kg aus Getränken (der Rest kommt übers Essen) + ca. 0,5 l je Training
+function waterGoal(p){ p=p||state.profile; const ml=28*(+p.weight||70)+(TRAIN_PER_WEEK[p.trainFreq]||0)*500/7; return Math.max(6,Math.min(14,Math.round(ml/250))); }
+// Schritte: nach Alltag, beim Abnehmen etwas mehr
+const STEPS_BY_ACT={1.3:7000,1.4:8000,1.55:10000,1.7:12000};
+function stepGoalFor(p){ p=p||state.profile; return Math.min(12000,(STEPS_BY_ACT[p.activity]||8000)+(p.goal==="lose"?2000:0)); }
 function lastWeight(){ return state.weights.length ? state.weights[state.weights.length-1].kg : state.profile.weight; }
 function bmi(){ const m=state.profile.height/100; return +(lastWeight()/(m*m)).toFixed(1); }
 function bmiLabel(v){ return v<18.5?"Untergewicht":v<25?"Normalbereich":v<30?"Übergewicht":"Adipositas"; }
@@ -128,7 +150,7 @@ function foodFocus(){
   if((au.abend||[]).includes("Salziges / Fast Food")||au.bloat==="Oft") f.add("Weniger Salz");
   if((e.huerde||[]).includes("Heißhunger")||e.energie==="Ständig müde") f.add("Sättigung");
   if(s.kaffee==="Oft"||(s.ein&&s.ein!=="Geht schnell")) f.add("Koffein am Abend");
-  if([].concat(h.stoert||[]).includes("Unreinheiten")&&state.profile.goal!=="skin") f.add("Zucker & Haut");
+  if([].concat(h.stoert||[]).includes("Unreinheiten")&&state.profile.goal!=="skin"&&!(e.meiden||[]).includes("Zucker")) f.add("Zucker & Haut");
   return [...f];
 }
 const RED_MEAT=["rind","schwein","salami","wurst","schinken","speck","bacon","hack","doner","leberkas","steak","kalb","lamm"];
@@ -165,7 +187,7 @@ function insight(){
 // Alle hier sind gute, verbreitete Supplements, deshalb hohe Grundwerte. Je Ziel und Profil wird angepasst.
 // [Muskeln, Abnehmen, Haut & Look, Energie], dazu kurze Pros/Cons (keine Heilversprechen)
 const SUP_RATE={
-  crea:{g:[95,84,74,82], good:["Mehr Kraft und Leistung im Training","Eines der am besten untersuchten Supplements","Günstig und einfach: 5 g am Tag"], bad:["Wirkt nur bei täglicher Einnahme"]},
+  crea:{g:[95,84,74,82], good:["Mehr Kraft und Leistung im Training","Eines der am besten untersuchten Supplements","Günstig und einfach: 3–5 g am Tag"], bad:["Wirkt nur bei täglicher Einnahme"]},
   whey:{g:[92,87,72,76], good:["Schnell viel Eiweiß, wenig Kalorien","Hilft, den Protein-Richtwert zu schaffen"], bad:["Echtes Essen bleibt die beste Eiweißquelle"]},
   d3:{g:[86,84,88,91], good:["Fehlt vielen bei wenig Sonne","Oktober bis März besonders sinnvoll","Trägt zu Knochen, Muskeln und Immunsystem bei"], bad:["Dosis nicht selbst hochdrehen"]},
   o3:{g:[88,88,95,90], good:["Wichtige Fettsäuren (EPA/DHA), die oft fehlen","Trägt zu normaler Herz- und Gehirnfunktion bei","Beliebt für Haut und Look"], bad:[]},
@@ -440,7 +462,7 @@ function renderModal(){
   if(type==="pref") inner=prefSheet(payload);
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
-    ${[["age","Alter",state.profile.age,18,80,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,obMinTarget(),160,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
+    ${[["age","Alter",state.profile.age,18,90,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,obMinTarget(),160,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
     <div class="field"><label>Training pro Woche</label></div>
     <div class="opts">${[["Gar nicht","Gar nicht"],["1–2× pro Woche","1–2×"],["3–4× pro Woche","3–4×"],["5× oder öfter","5× +"]].map(([v,l])=>`<button class="chip ${state.profile.trainFreq===v?"on":""}" data-act="set" data-k="trainFreq" data-v="${v}">${l}</button>`).join("")}</div>
     <div class="field"><label>Fisch</label></div>
@@ -531,7 +553,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="pref"){ prefSet(el.dataset.id,el.dataset.v); }
   else if(act==="set-num"){ p[el.dataset.k]=parseFloat(el.dataset.v); save(); }
   else if(act==="set-bool"){ p.adult=true; save(); }
-  else if(act==="nudge"){ p[el.dataset.k]=Math.min(+el.dataset.max, Math.max(+el.dataset.min, +(p[el.dataset.k]+ +el.dataset.d).toFixed(1))); save(); }
+  else if(act==="nudge"){ if(el.dataset.k==="waterTarget") p.waterManual=true; p[el.dataset.k]=Math.min(+el.dataset.max, Math.max(+el.dataset.min, +(p[el.dataset.k]+ +el.dataset.d).toFixed(1))); save(); }
   else if(act==="tab"){ state.tab=el.dataset.v; ui.modal=null; save(); }
   else if(act==="shift"){ const next=addDays(state.date, +el.dataset.d); if(next<=todayIso()){ state.date=next; save(); } }
   else if(act==="today"){ state.date=todayIso(); save(); }
