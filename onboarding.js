@@ -191,7 +191,7 @@ function persoTags(){
   ((state.coach.answers.haut||{}).stoert||[]).filter(x=>x!=="Nichts Bestimmtes").slice(0,2).forEach(x=>out.push("Haut: "+x));
   (e.intol||[]).filter(x=>x!=="Nein, alles okay").forEach(x=>out.push("Ohne "+x));
   foodFocus().filter(x=>x!=="Nichts Bestimmtes").forEach(x=>out.push(x));
-  return out;
+  return [...new Set(out)];
 }
 function fullBodyPlan(){
   return { id:"gk", name:"Ganzkörper", days:[

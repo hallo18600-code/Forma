@@ -85,8 +85,11 @@ function unitsFor(it){
   const plates=T=>[["teller_k",R(T*.6),"teller_k"],["teller",T,"teller",1],["teller_g",R(T*1.4),"teller_g"]];
   const pieces=(p,ic)=>[["stueck_k",R(p*.7),"stueck_k"],["stueck",p,ic||"stueck",1],["stueck_g",R(p*1.3),"stueck_g"]];
   const drinkRe=/ (wasser|water|eau|mineralwasser|sprudel|cola|limo|limonade|fanta|sprite|eistee|ice tea|saft|juice|jus|nektar|schorle|smoothie|kaffee|coffee|espresso|cappuccino|latte|macchiato|flat white|tee|tea|milch|milk|lait|kakao|trinkschokolade|kefir|buttermilch|ayran|lassi|bier|beer|pils|radler|weizen|wein|wine|sekt|prosecco|champagner|energy|red bull|mate|kombucha|shake|getrank|cider|limonata) |drink|saft |milch |wasser /;
+  // 0. Supplements: Kreatin im Messlöffel, Kapseln & Tabletten als Stück
+  if(has(/kreatin|creatin/)&&kc<100) u=[["mess",5,"mess",1],["tl",4]];
+  else if(has(/kapsel|tablette|softgel|brausetabl|dragee/)) u=[["stueck",1,"stueck",1]];
   // 1. Pulver und Fette
-  if(has(/protein ?pulver|whey|eiweiss ?pulver|casein|kollagen|protein powder/)) u=[["mess",30,"mess",1],["tl",3],["el",8]];
+  else if(has(/protein ?pulver|whey|eiweiss ?pulver|casein|kollagen|protein powder/)) u=[["mess",30,"mess",1],["tl",3],["el",8]];
   else if(has(/pulver|poudre|powder|gewurz|zimt/)) u=[["tl",4,"tl",1],["el",10]];
   else if(kc>=700&&has(/ ol |olivenol|rapsol|sonnenblumenol|kokosol|leinol|sesamol|walnussol|bratol|kurbiskernol|speiseol| oil |huile|ghee /)) u=[["tl",4],["el",10,"el",1]];
   else if(has(/^ (zucker|puderzucker|rohrzucker|brauner zucker|vanillezucker|kokosblutenzucker|erythrit|xylit|birkenzucker|sugar|sucre)/)) u=[["tl",4,"tl",1],["el",12]];

@@ -193,7 +193,9 @@ const SUP_RATE={
   o3:{g:[88,88,95,90], good:["Wichtige Fettsäuren (EPA/DHA), die oft fehlen","Trägt zu normaler Herz- und Gehirnfunktion bei","Beliebt für Haut und Look"], bad:[]},
   mg:{g:[86,80,78,88], good:["Trägt zu normaler Muskel- und Nervenfunktion bei","Beim Sport schnell verbraucht","Abends beliebt zum Runterkommen"], bad:["Wirkung auf Schlaf kaum belegt"]},
   b12:{g:[76,76,78,82], good:["Trägt zu Energie und Nerven bei","Für Veganer ein Muss"], bad:[]},
-  col:{g:[76,72,86,70], good:["Beliebt für Haut, Haare und Gelenke","Zusätzliches Eiweiß"], bad:["Nutzen noch nicht sicher belegt","Schlaf, LSF und Essen wirken stärker"]}
+  col:{g:[76,72,86,70], good:["Beliebt für Haut, Haare und Gelenke","Zusätzliches Eiweiß"], bad:["Nutzen noch nicht sicher belegt","Schlaf, LSF und Essen wirken stärker"]},
+  // Sonstige aus der Datenbank (Zink, Multivitamin, Vitamin C …)
+  gen:{g:[76,76,80,80], good:["Kann Lücken in der Ernährung schließen"], bad:["Ersetzt keine ausgewogene Ernährung","Nicht über der Packungsdosis einnehmen"]}
 };
 function supScore(id,goal){
   const R=SUP_RATE[id]; if(!R) return {score:70,good:[],bad:[],why:""};
@@ -207,6 +209,7 @@ function supScore(id,goal){
   if(id==="crea"&&lifts){ sc+=3; why="Passt zu deinem Krafttraining. Sehr gut untersucht."; }
   const notes=[];
   if(id==="whey"&&vegan) notes.push("Enthält Milch – passt nicht zu deiner veganen Ernährung");
+  if(id==="col"&&(vegan||ea.stil==="Vegetarisch")) notes.push("Kollagen ist tierisch – passt nicht zu deiner Ernährung");
   if(id==="whey"){
     if(g==="skin"){ sc=Math.min(sc,75); bad.unshift("Milcheiweiß kann bei manchen Unreinheiten fördern"); }   // für die Haut nur 70–75
     else if(lowProt){ sc+=3; why="Protein heute liegt noch unter dem Richtwert."; } else { sc-=6; bad.unshift("Dein Protein passt heute schon"); }

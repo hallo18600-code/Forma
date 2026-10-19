@@ -142,7 +142,7 @@ function coachQuiz(id){
       {k:"sitzen", q:"Wie viele Stunden sitzt du am Tag?", opts:["Unter 4","4–8","Über 8"], skip:()=>!!knownSitzen()}
     ],
     gesundheit:[
-      {k:"stil", q:"Welche Ernährung passt zu dir?", sub:"Danach richtet sich jede Bewertung.", opts:["Ausgewogen","Whole Foods","Primal","Vegetarisch","Vegan","Nichts Bestimmtes"], emo:{"Ausgewogen":"⚖️","Whole Foods":"🥑","Primal":"🍖","Vegetarisch":"🥗","Vegan":"🌱","Nichts Bestimmtes":"🍽️"},
+      {k:"stil", q:"Welche Ernährung passt zu dir?", sub:"Die Bewertung zeigt dir, was dazu passt.", opts:["Ausgewogen","Whole Foods","Primal","Vegetarisch","Vegan","Nichts Bestimmtes"], emo:{"Ausgewogen":"⚖️","Whole Foods":"🥑","Primal":"🍖","Vegetarisch":"🥗","Vegan":"🌱","Nichts Bestimmtes":"🍽️"},
         desc:{"Ausgewogen":"Von allem etwas","Whole Foods":"Unverarbeitet, naturbelassen","Primal":"Fleisch, Fisch, Eier, Obst – kaum Getreide & Soja","Vegetarisch":"Ohne Fleisch & Fisch","Vegan":"Rein pflanzlich"}},
       {k:"meiden", q:"Was willst du meiden?", sub:"Die Bewertung warnt dich dann.", multi:true, none:"Nichts", opts:["Zucker","Milchprodukte","Gluten","Soja","Schweinefleisch","Rotes Fleisch","Alkohol","Koffein","Fertigprodukte","Nichts"], emo:{"Zucker":"🍬","Milchprodukte":"🥛","Gluten":"🌾","Soja":"🫘","Schweinefleisch":"🐖","Rotes Fleisch":"🥩","Alkohol":"🍺","Koffein":"☕","Fertigprodukte":"📦","Nichts":"👍"}},
       {k:"energie", q:"Wie ist deine Energie am Nachmittag?", opts:["Konstant","Tief nach dem Essen","Ständig müde"], emo:{"Konstant":"⚡","Tief nach dem Essen":"🥱","Ständig müde":"😴"}},
@@ -356,7 +356,7 @@ function haareAdvice(a){
   } else if(st==="Schuppen"){
     if(a.schuppen==="Klein, weiß, trocken"){
       tips=[tip("Mildes Shampoo","Mildes Shampoo ohne Duft","Starke Tenside trocknen aus.",{product:"shampoo"}),
-        tip("Kopfhaut-Serum","Kopfhaut-Serum mit Urea/Panthenol","Spendet Feuchtigkeit, stoppt Jucken."),
+        tip("Kopfhaut-Serum","Kopfhaut-Serum mit Urea/Panthenol","Spendet Feuchtigkeit, kann Jucken lindern."),
         tip(null,"Lauwarm waschen, kühl föhnen","Hitze trocknet die Kopfhaut aus.")];
     } else {
       tips=[tip("Anti-Schuppen-Shampoo","Ketoconazol- oder Zink-Shampoo, 2–3×/Woche","Wirkt gegen den Hefepilz dahinter."),
@@ -367,7 +367,7 @@ function haareAdvice(a){
   } else if(st==="Fallen viel aus"){
     const af=a.ausfall||"Überall dünner";
     if(af==="Geheimratsecken / Scheitel"){
-      tips=[tip("Minoxidil",`Minoxidil 5 % Schaum, ${w?"1×":"2×"} täglich`,"Rezeptfrei, gut belegt. Wirkt nach 3–6 Monaten."),
+      tips=[tip("Minoxidil",`Minoxidil 5 % Schaum, ${w?"1×":"2×"} täglich`,"Rezeptfrei in der Apotheke, gut untersucht. Erste Effekte oft nach 3–6 Monaten."),
         tip(null,"Früh zum Hautarzt","Je früher, desto mehr bleibt."),
         tip("Ketoconazol-Shampoo","Ketoconazol-Shampoo 2×/Woche","Kann leicht unterstützen.")];
       note="Anfangs fallen kurz mehr aus, das ist normal."+(w?" Nicht in Schwangerschaft/Stillzeit.":"");
@@ -377,7 +377,7 @@ function haareAdvice(a){
     } else {
       tips=[tip(null,"Blutbild: Ferritin, Vit. D, Schilddrüse","Häufigste Ursachen."),
         tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,"Haare reagieren 2–3 Monate verzögert."),
-        tip(null,"Wächst meist in 3–6 Monaten nach","Ursache weg, Haare kommen zurück.")];
+        tip(null,"Geduld: oft 3–6 Monate","Haare wachsen langsam nach, wenn die Ursache behoben ist.")];
     }
   } else {
     if(a.wasch==="Täglich") tips.push(tip("Ein Waschtag weniger","Ein Waschtag weniger pro Woche","Schont die Längen."));
