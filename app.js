@@ -361,7 +361,7 @@ function renderDash(){
 
 function dashSheet(id){ return ""; }
 // Anbieter-Angaben für Impressum und Datenschutz (hier zentral pflegen)
-const ANBIETER={ name:"Simon Spieß", strasse:"Melanchthonstr. 41", ort:"[PLZ] München", land:"Deutschland", mail:"[E-MAIL]" };
+const ANBIETER={ name:"Simon Spieß", strasse:"Melanchthonstr. 41", ort:"81739 München", land:"Deutschland", mail:"simonspiess@t-online.de" };
 const anbieterHtml=()=>`${ANBIETER.name}<br>${ANBIETER.strasse}<br>${ANBIETER.ort}<br>${ANBIETER.land}`;
 // Impressum (Angaben nach § 5 DDG)
 function impressumSheet(){
