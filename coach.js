@@ -534,9 +534,12 @@ function aussehenAdvice(a){
   };
   const groups=[lean?[lean]:[]].concat(ziel.map(z=>G[z]));
   if(a.bloat==="Oft"||a.bloat==="Manchmal"){
-    const ab=(a.abend||[]).filter(x=>x!=="Nichts davon").map(x=>({"Salziges / Fast Food":"Salz","Alkohol":"Alkohol","Spät gegessen":"spätes Essen"}[x]));
+    // Feste Sätze (gut übersetzbar): weniger Salz / Alkohol, früher essen
+    const ab=["Salziges / Fast Food","Alkohol","Spät gegessen"].filter(x=>(a.abend||[]).includes(x));
+    const less=ab.filter(x=>x!=="Spät gegessen").map(x=>x==="Alkohol"?"Alkohol":"Salz"), early=ab.includes("Spät gegessen");
+    const abT=less.length?`Abends weniger ${less.join(" und ")}${early?(less.length>1?", früher essen":" und früher essen"):""}`:"Abends früher essen";
     groups.push([tip("Gua Sha","Morgens 2 Min Gua Sha, nach außen","Kann Schwellungen verringern, das Gesicht wirkt schmaler."),
-      ab.length?tip(null,`Abends weniger ${ab.join(", ")}`,"Das kann über Nacht Wasser im Gesicht einlagern."):tip(null,"Kopf beim Schlafen leicht hoch","Morgens sammelt sich weniger Wasser im Gesicht.")]);
+      ab.length?tip(null,abT,"Das kann über Nacht Wasser im Gesicht einlagern."):tip(null,"Kopf beim Schlafen leicht hoch","Morgens sammelt sich weniger Wasser im Gesicht.")]);
   }
   groups.push([sit]);
   if(!ziel.length) groups.unshift([cal]);
@@ -815,7 +818,7 @@ function areaSheet(id){
   if(!ready){
     return `<h2>${topic.title}</h2><p class="sub">${topic.ask}</p>
       ${quiz.filter(item=>qNeeded(item,answers)).map(item=>`<div class="q"><b>${item.q}</b>${item.multi?`<span class="sub"> · ${item.pick?"bis zu "+item.pick:"mehrere möglich"}</span>`:""}<div class="opts">${item.opts.map(o=>`<button class="chip ${(item.multi?(answers[item.k]||[]).includes(o):answers[item.k]===o)?"on":""}" data-act="coach-answer" data-topic="${id}" data-k="${item.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}
-      <div class="gap"></div><button class="pill primary" data-act="coach-ready" data-topic="${id}" ${ready?"":"disabled"}>Vorschlag zeigen</button>`;
+      <div class="gap"></div><p class="sub t-c">${(()=>{ const open=quiz.filter(item=>qNeeded(item,answers)&&!hasVal(answers[item.k])).length; return open===1?"Noch 1 Frage, dann kommt dein Vorschlag":`Noch ${open} Fragen, dann kommt dein Vorschlag`; })()}</p>`;
   }
   const advice=coachAdvice(id);
   const r=advice.routine, inRt=(state.coach.routine||[]).some(x=>x.topic===id);
@@ -869,7 +872,7 @@ function supsSheet(){
   const rec=recommendStack();
   const rest=SUPS.filter(p=>!rec.some(r=>r.id===p.id));
   return `<h2>Dein Stack</h2>
-    <p class="sub">${goalName()} · Protein heute ${Math.round(totals().protein)} / ${targets().protein} g · Fisch ${state.profile.fish}</p>
+    <p class="sub">${goalName()} · Protein heute ${Math.round(totals().protein)} / ${targets().protein} g · Fisch: ${state.profile.fish==="oft"?"jede Woche":"selten"}</p>
     ${rec.map(r=>{ const p=SUPS.find(x=>x.id===r.id); return `<button class="food" data-act="open" data-type="product" data-id="${p.id}">
       <div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${r.why}</div></div>
       <div class="score ${scoreClass(r.score)}">${r.score}</div></button>`; }).join("")}

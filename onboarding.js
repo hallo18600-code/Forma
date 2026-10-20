@@ -104,13 +104,29 @@ function obSteps(){
 }
 
 // ---------- Rendern ----------
+// Startbildschirm: Die drei Pfeile aus dem App-Icon leuchten nacheinander auf („Level up“),
+// danach gleiten drei Momente aus der App herein. Ein Ablauf beim Öffnen, danach nur ein ruhiges Pulsieren.
+// --wl-t verschiebt alle Animationen um die schon vergangene Zeit: Ein Neuaufbau (Sprache, Datenbank geladen)
+// startet sie nicht von vorn, sondern sie laufen nahtlos weiter.
 function renderWelcome(){
-  return `<div class="screen wlscreen">
+  if(ui.wlT0==null) ui.wlT0=Date.now();
+  const t=Math.min(60000,Date.now()-ui.wlT0), C=2*Math.PI*15;
+  const rows=["M28 80 L50 60 L72 80","M28 62 L50 42 L72 62","M28 44 L50 24 L72 44"];
+  return `<div class="screen wlscreen" style="--wl-t:-${t}ms">
     <div class="scroll wl">
-      <div class="row space"><div class="logo">health maxxing</div><button class="chip notr" data-act="open" data-type="lang" aria-label="Sprache">🌐 ${LANG.toUpperCase()}</button></div>
-      <h1 class="wl-h">Alles für deine Gesundheit<br>in einer App.</h1>
+      <div class="row space wl-top"><div class="logo">health maxxing</div><button class="chip notr" data-act="open" data-type="lang" aria-label="Sprache">🌐 ${LANG.toUpperCase()}</button></div>
+      <div class="wl-stage" aria-hidden="true">
+        <svg class="wl-chev" viewBox="0 0 100 100">
+          <g class="wl-glow">${rows.map((d,i)=>`<path class="c${i}" d="${d}"/>`).join("")}</g>
+          <g class="wl-line">${rows.map((d,i)=>`<path class="c${i}" d="${d}" pathLength="1"/>`).join("")}</g>
+        </svg>
+        <div class="wl-card wl-c1"><span class="wl-emo">🐟</span><span class="wl-ct"><b>Lachsfilet</b><span>Sehr gut</span></span><span class="wl-score">94</span></div>
+        <div class="wl-card wl-c2"><svg class="wl-ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" class="trk"/><circle cx="18" cy="18" r="15" class="val" style="stroke-dasharray:${C.toFixed(1)};--off:${(C*0.24).toFixed(1)};--c:${C.toFixed(1)}"/></svg><span class="wl-ct"><b>${de(1840)} kcal</b><span>Heute</span></span></div>
+        <div class="wl-card wl-c3"><span class="wl-fire">🔥</span><span class="wl-ct"><b>7</b><span>Tage am Stück</span></span></div>
+      </div>
+      <h1 class="wl-h"><span class="wl-l1">Alles für deine Gesundheit</span> <span class="wl-l2">in einer App.</span></h1>
       <p class="wl-sub">Essen, Training, Haut, Schlaf und mehr.</p>
-      <div class="wl-grid">${OB_FEATURES.map(([e,t])=>`<div class="wl-tile"><span>${e}</span><b>${t}</b></div>`).join("")}</div>
+      <ul class="wl-feats">${OB_FEATURES.map(([e,f],i)=>`<li style="--d:${900+i*45}ms"><span>${e}</span>${f}</li>`).join("")}</ul>
       <p class="wl-privacy">🔒 Deine Daten bleiben auf deinem Handy.</p>
     </div>
     <div class="wl-cta">
@@ -174,7 +190,7 @@ function renderOnboard(){
       ${state.obRedo?`<button class="link" data-act="ob-close">Schließen</button>`:""}
     </div>
     <div class="scroll ob-body">
-      <div class="ob-sec">${st.sec}${secSteps.length>1&&st.kind!=="plan"?` · Frage ${secPos} von ${secSteps.length}`:""}</div>
+      ${st.kind==="plan"?"":`<div class="ob-sec">${st.sec}${secSteps.length>1?` · Frage ${secPos} von ${secSteps.length}`:""}</div>`}
       <h1>${st.kind==="plan"&&p.name?`Dein Plan, ${esc(p.name)}`:st.q}</h1>
       ${st.sub?`<p class="sub">${st.sub}</p>`:""}
       ${body}
@@ -210,7 +226,8 @@ function buildRoutine(){
     const r=coachAdvice(t).routine; if(r) c.push({id:"ob-"+t, topic:t, title:r.title, detail:r.detail, product:null, area:area[t]});
   });
   if(p.trainFreq==="Gar nicht") c.push({id:"ob-bewegen", topic:"eigen", title:"10 Minuten bewegen", detail:"", product:null, area:"Energie"});
-  if(!Object.keys(e).length) c.push({id:"ob-wasser", topic:"eigen", title:`${p.waterTarget} Gläser Wasser trinken`, detail:"", product:null, area:"Gewohnheiten"});
+  // Gleiche Zahl wie oben im Plan (eigener Wert oder der berechnete)
+  if(!Object.keys(e).length) c.push({id:"ob-wasser", topic:"eigen", title:`${p.waterManual?p.waterTarget:waterGoal()} Gläser Wasser trinken`, detail:"", product:null, area:"Gewohnheiten"});
   const areas=(p.areas||[]).map(a=>({"Körperpflege":"Aussehen","Ernährung":"Gesundheit"}[a]||a));
   c.sort((a,b)=>(areas.includes(b.area)?1:0)-(areas.includes(a.area)?1:0));
   const max={"5 Minuten":2,"15 Minuten":4,"30 Minuten oder mehr":6}[p.routineTime]||3;
@@ -221,7 +238,8 @@ function renderObPlan(){
   // Gleicher Vorschlag wie im Training-Tab (Häufigkeit aus dem Fragebogen bzw. Coach-Antworten)
   const plan = obDefaultPlans() ? PLAN_INFO[suggestPlanId()].name : "Deine Pläne";
   const open = OB_TOPICS.filter(([t])=>!quizDone(t)).map(x=>x[1]);
-  const sups = (state.stack.length?state.stack:recommendStack().map(r=>r.id)).map(id=>(SUPS.find(x=>x.id===id)||{}).name).filter(Boolean);
+  const stack = state.obDone||(state.ob||{}).sups ? state.stack : [];   // beim ersten Durchlauf ohne Antwort bleibt der Stack leer
+  const sups = (stack.length?stack:recommendStack().map(r=>r.id)).map(id=>(SUPS.find(x=>x.id===id)||{}).name).filter(Boolean);
   return `<div class="obp-hero">
       <div class="obp-k">${de(t.kcal)} kcal</div>
       <div class="obp-row"><div><b>${t.protein} g</b><span>Protein</span></div><div><b>${p.waterManual?p.waterTarget:waterGoal()}</b><span>Gläser</span></div><div><b>${de(p.stepGoal&&!p.stepAuto?p.stepGoal:stepGoalFor())}</b><span>Schritte</span></div></div>
@@ -233,7 +251,7 @@ function renderObPlan(){
     ${open.length?`<p class="sub obp-note">Später im Coach: ${open.join(", ")}</p>`:""}
     <div class="obp-2">
       <div class="card obp"><h3>🏋️ Training</h3><p>${plan}</p></div>
-      <div class="card obp"><h3>💊 ${state.stack.length?"Stack":"Vorschlag"}</h3><p>${sups.join(", ")}</p></div>
+      <div class="card obp"><h3>💊 ${stack.length?"Stack":"Vorschlag"}</h3><p>${sups.join(", ")}</p></div>
     </div>
     <p class="sub obp-note">Richtwerte, keine medizinische Beratung.</p>`;
 }

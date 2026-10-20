@@ -84,7 +84,7 @@ function unitsFor(it){
   let u=null, ml=false;
   const plates=T=>[["teller_k",R(T*.6),"teller_k"],["teller",T,"teller",1],["teller_g",R(T*1.4),"teller_g"]];
   const pieces=(p,ic)=>[["stueck_k",R(p*.7),"stueck_k"],["stueck",p,ic||"stueck",1],["stueck_g",R(p*1.3),"stueck_g"]];
-  const drinkRe=/ (wasser|water|eau|mineralwasser|sprudel|cola|limo|limonade|fanta|sprite|eistee|ice tea|saft|juice|jus|nektar|schorle|smoothie|kaffee|coffee|espresso|cappuccino|latte|macchiato|flat white|tee|tea|milch|milk|lait|kakao|trinkschokolade|kefir|buttermilch|ayran|lassi|bier|beer|pils|radler|weizen|wein|wine|sekt|prosecco|champagner|energy|red bull|mate|kombucha|shake|getrank|cider|limonata) |drink|saft |milch |wasser /;
+  const drinkRe=/ (wasser|water|eau|mineralwasser|sprudel|cola|limo|limonade|fanta|sprite|eistee|ice tea|saft|juice|jus|nektar|schorle|smoothie|kaffee|coffee|espresso|cappuccino|latte|macchiato|flat white|tee|tea|milch|milk|lait|kakao|trinkschokolade|kefir|buttermilch|ayran|lassi|bier|beer|pils|radler|weizen|wein|wine|sekt|prosecco|champagner|energy|red bull|mate|kombucha|shake|getrank|cider|limonata|spritz|aperol|hugo) |drink|saft |milch |wasser /;
   // 0. Supplements: Kreatin im Messlöffel, Kapseln & Tabletten als Stück
   if(has(/kreatin|creatin/)&&kc<100) u=[["mess",5,"mess",1],["tl",4]];
   else if(has(/kapsel|tablette|softgel|brausetabl|dragee/)) u=[["stueck",1,"stueck",1]];
@@ -96,7 +96,7 @@ function unitsFor(it){
   else if(has(/chips|crisps|pringles|flips|salzstangen|cracker|nachos|snack|knabber|brezeln /)) u=[["hand",20,"hand",1],["schale",50,"schale"],["tuete",150,"tuete"]];
   // 2. Soßen, Dips, Senf
   else if(has(/pesto/)) u=[["tl",6],["el",15,"el",1],["portion",50,"schaelchen"]];
-  else if(kc<150&&has(/tomatensauce|tomatensosse|sauce tomate|tomato sauce|sauce basilic|passata|pastasauce|pastasosse|sugo|napoli|arrabbiata|bratensosse|bratensauce|rahmsosse|gravy/)) u=[["el",15],["portion",125,"schaelchen",1]];
+  else if(kc<150&&has(/tomatensauce|tomatensosse|sauce tomate|tomato sauce|sauce basilic|passata|pastasauce|pastasosse|sugo|napoli|arrabbiata|bolognese sosse|bolognesesosse|bolognese sauce|hackfleischsosse|bratensosse|bratensauce|rahmsosse|gravy/)) u=[["el",15],["portion",125,"schaelchen",1]];
   else if(kc<300&&has(/soja ?sauce|soja ?sosse|sojasauce|worcester|tabasco|sriracha|fischsauce|teriyaki|essig|balsamico|vinegar|tomatenmark|tubenmark/)) u=[["tl",6,"tl",1],["el",16]];
   else if(has(/ketchup|mayo|remoulade|senf|moutarde|mustard|dressing|aioli|barbecue|bbq|salsa|tzatziki| dip |sosse|sauce|hummus|guacamole|ajvar/)) u=[["tl",6],["el",15,"el",1],["schaelchen",50,"schaelchen"]];
   // 3. Honig, Aufstriche, Butter
@@ -109,7 +109,11 @@ function unitsFor(it){
   else if(!has(/beyond|patty|patties|veggie|vegan/)&&has(/doner|kebab|durum|burger|wrap|burrito|sandwich|hot ?dog|bagel|panini|quesadilla|falafeltasche/)) u=[["stueck",pw||250,"steak",1]];
   else if(has(/currywurst/)) u=[["portion",pw||250,"portion",1]];
   else if(has(/kartoffelsalat|nudelsalat|reissalat|krautsalat|coleslaw|tabouleh|couscoussalat/)) u=[["el",25],["beilage",150,"schale",1],["teller",300,"teller"]];
-  else if(kc<300&&has(/bolognese|carbonara|lasagne|gulasch|chili con|chili sin|eintopf|curry|risotto|auflauf|paella|gratin|ragout|geschnetzel|frikassee|griechischer salat|bowl|nasi|bami|pad thai|ramen|kaiserschmarrn|spatzle|maultasche|gnocchi|ravioli|tortellini|moussaka|shakshuka|pfanne|knodel|gyros|tacos|sushi|fajita|chili|stroganoff|rouladen|braten mit|mit sosse|nudeln mit|reis mit|pasta mit/)) u=plates(pw>=250?pw:400);
+  // Knödel & Co. zählt man (2 Knödel), deshalb Stück statt Teller
+  else if(has(/knodel|kloss|klosse|maultasche|tacos|taco /)) u=[["stueck",pw||80,"stueck",1],["teller",300,"teller"]];
+  else if(has(/sushi|maki|nigiri/)) u=[["stueck",pw||25,"stueck",1],["portion",200,"portion"]];
+  else if(has(/gyros|pulled/)&&!has(/teller|mit /)) u=[["handflaeche",100,"steak"],["portion",pw||200,"portion",1]];
+  else if(kc<300&&has(/bolognese|carbonara|lasagne|gulasch|chili con|chili sin|eintopf|curry|risotto|auflauf|paella|gratin|ragout|geschnetzel|frikassee|griechischer salat|bowl|nasi|bami|pad thai|ramen|kaiserschmarrn|spatzle|maultasche|gnocchi|ravioli|tortellini|moussaka|shakshuka|pfanne|knodel|gyros|tacos|sushi|fajita|chili|stroganoff|rouladen|braten mit|mit sosse|nudeln mit|reis mit|pasta mit/)) u=plates(pw>=250?pw:has(/salat/)?250:400);
   // 5. Süßes, Frühstücksflocken, Knabberzeug
   else if(has(/riegel|snickers|twix| mars |bounty|kitkat|kinder bueno|duplo|hanuta|corny| bar /)) u=[["riegel",pw||40,"riegel",1]];
   else if(has(/kuchen|torte|muffin|brownie|donut|berliner|krapfen|plunder|schnecke|strudel|tarte|cheesecake|waffel |crepe/)&&!has(/reibekuchen|kartoffelpuffer/)) u=[["stueck",sw||pw||80,has(/donut|muffin|berliner|krapfen|waffel|crepe|pfannkuchen/)?"keks":"kuchen",1]];

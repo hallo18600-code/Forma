@@ -29,7 +29,7 @@ function renderHeute(){
           <div class="bubble">${marks[slot.id]}</div>
           <button class="grow" data-act="meal-open" data-slot="${slot.id}">
             <div class="meal-name">${slot.name} <span class="chev">›</span></div>
-            <div class="sub">${showKcal()?k.toLocaleString(LOC)+" / "+goal.toLocaleString(LOC)+" kcal":items.length+" Einträge"}</div>
+            <div class="sub">${showKcal()?k.toLocaleString(LOC)+" / "+goal.toLocaleString(LOC)+" kcal":items.length+(items.length===1?" Eintrag":" Einträge")}</div>
             ${showKcal()?`<div class="mbar"><i style="width:${Math.min(100,goal?k/goal*100:0)}%"></i></div>`:""}
           </button>
           <button class="plus dark" data-act="open" data-type="scan" data-slot="${slot.id}" aria-label="${slot.name}: Essen hinzufügen">+</button>

@@ -98,13 +98,13 @@ Speck;Bacon|Frühstücksspeck;420;14;0.5;40;0.5;0;8;8;1
 Kochschinken;Schinken;110;19;1;3.5;1;0;15;15;
 Salami;;400;20;1;35;1;0;6;6;1
 Leberwurst;;300;12;2;27;1;0;;20;1
-Fleischwurst;Lyoner|Mortadella;260;11;2;23;1;0;;20;1
+Fleischwurst;Lyoner|Mortadella|Wurst|Aufschnitt|Wurstaufschnitt;260;11;2;23;1;0;;20;1
 Gulasch;Rindergulasch;130;12;4;7;2;1;350;;
 Lasagne;;150;8;13;7;3;1;400;;1
 Spaghetti Bolognese;Bolognese|Spaghetti Bolo;140;7;17;5;3;1.5;400;;
 Spaghetti Carbonara;Carbonara;190;8;20;8;1;1;400;;
 Chili con Carne;Chili;120;9;10;5;2;4;350;;
-Linseneintopf;Eintopf;80;5;11;2;2;3;350;;
+Linseneintopf;Eintopf|Linsensuppe;80;5;11;2;2;3;350;;
 Gemüsesuppe;Suppe;35;1.2;6;0.8;3;1.5;300;;
 Tomatensuppe;;45;1.2;7;1.5;5;1;300;;
 Hühnersuppe;Nudelsuppe;40;3;3;1.5;1;0.5;300;;
@@ -187,7 +187,7 @@ Gummibärchen;Haribo|Weingummi;340;7;77;0.1;46;0;;;1
 Kekse;Keks|Butterkeks;450;7;72;14;24;2;;10;1
 Kuchen;Rührkuchen;380;5;50;18;30;1;;80;1
 Eis;Speiseeis|Vanilleeis|Eiscreme;200;3.5;24;10;22;0;50;;1
-Müsliriegel;;400;6;65;13;30;5;25;;1
+Müsliriegel;Riegel|Haferriegel|Getreideriegel;400;6;65;13;30;5;25;;1
 Honig;;300;0.4;75;0;75;0;;;
 Marmelade;Konfitüre;250;0.5;60;0.1;55;1;;;
 Zucker;;400;0;100;0;100;0;;;
@@ -199,7 +199,7 @@ Kaffee;Espresso|Filterkaffee|Kaffee schwarz;2;0.1;0;0;0;0;200;;
 Cappuccino;;45;2.5;4;2;4;0;200;;
 Latte Macchiato;Milchkaffee|Latte;50;3;5;2;5;0;250;;
 Tee;Schwarztee|Grüner Tee|Früchtetee;1;0;0.2;0;0;0;250;;
-Cola;Coca-Cola|Pepsi|Fanta|Sprite;42;0;10.6;0;10.6;0;330;;1
+Cola;Coca-Cola|Pepsi|Fanta|Sprite|Spezi|Mezzo Mix|Coke;42;0;10.6;0;10.6;0;330;;1
 Cola Zero;Cola light|Zero;0;0;0;0;0;0;330;;1
 Apfelsaft;Saft|Multivitaminsaft;46;0.1;11;0.1;10;0;200;;
 Orangensaft;;45;0.7;10;0.2;9;0;200;;
@@ -216,10 +216,98 @@ Tomatensauce;Passata|Pastasauce|Tomatensoße;40;1.5;7;1;5;1.5;;;
 Pesto;;450;5;4;46;2;2;;;
 Salatdressing;Dressing;300;1;8;30;5;0.5;;;1
 Proteinriegel;Proteinbar;350;30;35;10;5;5;45;;1
-Proteinpulver;Whey|Whey Protein|Proteinshake;380;75;8;5;5;0;30;;1`;
+Proteinpulver;Whey|Whey Protein|Proteinshake|Eiweißpulver|Proteinpulver Shake;380;75;8;5;5;0;30;;1
+Butter;Süßrahmbutter|Sauerrahmbutter|Markenbutter;741;0.7;0.6;83;0.6;0;;;
+Haferdrink;Hafermilch|Oat Drink;46;1;7;1.5;4;0.8;200;;
+Blaubeeren;Heidelbeeren|Heidelbeere|Blaubeere;57;0.7;14;0.3;10;2.4;;;
+Brokkoli;Broccoli|Brokkoliröschen;34;2.8;7;0.4;1.7;2.6;;;
+Kartoffelchips;Chips|Crisps;536;6;50;34;0.5;4;;;1
+Energy Drink;Red Bull|Energydrink|Monster Energy;45;0;11;0;11;0;250;;1
+Vollkornbrötchen;Körnerbrötchen|Dinkelbrötchen|Mehrkornbrötchen;250;10;42;3.5;2;6;70;;
+Burger;Hamburger|Rindfleischburger;250;13;24;11;5;1.5;220;;1
+Cheeseburger;;265;14;26;12;6;1.5;120;;1
+Chicken Nuggets;Nuggets|Hähnchen-Nuggets;270;15;17;16;0.5;1;18;;1
+Sandwich;Sandwiches|Clubsandwich;230;10;27;8;4;2;150;;1
+Wrap;Wraps;210;9;24;8;3;2;250;;
+Burrito;;210;9;25;8;2;3;300;;1
+Tacos;Taco;220;10;20;11;2;3;80;;1
+Sushi;Maki|Nigiri|Sushi-Rolle;150;5.5;28;1.5;5;1;25;;
+Poke Bowl;Bowl|Buddha Bowl;140;8;17;4.5;3;2.5;;;
+Curry;Hähnchencurry|Chicken Curry|Currygericht;140;10;8;8;3;1.5;;;
+Risotto;;140;3.5;20;5;0.5;0.5;;;
+Nudelauflauf;Auflauf|Kartoffelauflauf|Gratin;160;7;15;8;2;1;;;
+Käsespätzle;Kässpätzle;230;9;24;11;1;1;;;
+Spätzle;;150;5;28;2;0.5;1;;;
+Gnocchi;;135;3;29;0.3;0.5;1.5;;;
+Maultaschen;Maultasche;200;8;24;8;1.5;1.5;50;;1
+Ravioli;Tortellini;170;7;27;4;2;2;;;1
+Kartoffelknödel;Knödel|Klöße|Kloß|Semmelknödel;110;2.5;23;0.5;0.5;1.5;80;;
+Kartoffelpuffer;Reibekuchen|Rösti;200;3;22;11;1;2.5;80;;1
+Kroketten;;190;3;25;9;0.5;2;20;;1
+Frikadelle;Bulette|Fleischpflanzerl|Fleischküchle|Hackbällchen|Köttbullar;240;16;8;16;1;0.5;80;;1
+Cevapcici;;250;16;3;20;1;0;25;;1
+Gyros;;210;19;2;14;1;0;;;1
+Backfisch;Fisch paniert;230;13;15;13;1;1;150;;1
+Omelett;Omelette;155;10;1.5;12;1;0;;;
+Kartoffelsuppe;;65;2;9;2.5;1;1.2;300;;
+Erbsensuppe;Erbseneintopf;75;5;9;2;1.5;3;350;;
+Ramen;Ramensuppe;90;4;12;3;1;1;;;
+Bratensoße;Soße|Sauce|Bratensauce|Rahmsoße|Jägersoße;60;1;5;3.5;1;0.3;;;1
+Obst (gemischt);Obst|Früchte|Obstsalat;55;0.6;12;0.3;11;2;150;;
+Gemüse (gemischt);Gemüse|Mischgemüse|Gemüsemix;35;2;5;0.5;3;2.5;;;
+Beeren (gemischt);Beeren|Waldbeeren|Beerenmischung;45;1;8;0.4;6;4;;;
+Brombeeren;Brombeere;43;1.2;6;0.5;5;5;;;
+Zitrone;Zitronen;35;0.7;3;0.6;2.5;1;100;;
+Grapefruit;Pampelmuse;40;0.6;8;0.1;7;1.5;300;;
+Pflaumen;Pflaume|Zwetschgen|Zwetschge;47;0.6;10;0.2;9;1.6;35;;
+Aprikose;Aprikosen|Marille;43;0.9;9;0.1;8;1.5;40;;
+Granatapfel;;83;1.7;19;1.2;14;4;250;;
+Feigen;Feige;70;1;16;0.3;16;2.5;50;;
+Apfelmus;Kompott;75;0.3;18;0.2;16;1.5;;;
+Rotkohl;Rotkraut|Blaukraut;60;1.5;11;0.5;9;2.5;;;
+Spargel;;18;2;2;0.2;1;1.5;;;
+Grüne Bohnen;Brechbohnen|Prinzessbohnen;25;2;3;0.2;1.5;2;;;
+Rosenkohl;;43;3.4;5;0.3;2;4;;;
+Lauch;Porree;27;1.5;3;0.3;2;2.3;;;
+Kohlrabi;;24;2;4;0.1;3.5;1.5;250;;
+Radieschen;;16;1;2;0.1;2;1.5;10;;
+Rucola;Rauke;25;2.6;2;0.7;2;1.6;;;
+Feldsalat;;21;2;1;0.4;0.7;1.5;;;
+Knoblauch;Knoblauchzehe;140;6;28;0.1;1;2;4;;
+Bulgur gekocht;Bulgur;83;3;19;0.2;0.1;4.5;;;
+Kokosöl;Kokosfett;860;0;0;99;0;0;;;
+Leinöl;;884;0;0;100;0;0;;;
+Schmand;;240;2.5;3.5;24;3.5;0;;;
+Saure Sahne;Sauerrahm;115;3;4;10;4;0;;;
+Crème fraîche;Creme fraiche;290;2.5;3;30;3;0;;;
+Kaffeesahne;Kondensmilch;120;3;4;10;4;0;;;
+Fruchtjoghurt;Erdbeerjoghurt|Kirschjoghurt|Joghurt mit Früchten;100;3.5;14;3;13;0.3;150;;1
+Milchreis;;115;3.5;19;3;9;0.3;;;
+Bolognese-Soße;Bolognesesoße|Bolognese Sauce|Hackfleischsoße;110;7;5;7;3;1;;;1
+Kaiserschmarrn;Kaiserschmarren;200;6;28;7;12;1;300;;
+Grießbrei;Griesbrei;95;3.5;15;2.5;8;0.3;;;
+Magerquark;Quark|Speisequark|Quark mager;67;12;4;0.3;4;0;;;
+Overnight Oats;Porridge mit Milch;150;6;20;5;6;2.5;250;;
+Nussmischung;Nüsse|Nussmix|Nuss-Mix|gemischte Nüsse;600;18;15;52;5;7;;;
+Studentenfutter;Trail Mix;460;13;40;28;30;6;;;
+Waffel;Waffeln;300;6;38;14;14;1;60;;1
+Muffin;Muffins;400;5.5;50;20;28;1.5;80;;1
+Brownie;Brownies;430;5;55;21;38;2;60;;1
+Käsekuchen;Cheesecake;250;7;24;14;17;0.5;;120;1
+Schokoriegel;Schokoladenriegel;480;6;60;24;50;2;50;;1
+Salzstangen;Salzbrezeln;380;10;76;3.5;2;3;;;1
+Espresso;;2;0.1;0;0.2;0;0;30;;
+Kakao;Kakao mit Milch|Trinkschokolade|Heiße Schokolade|Kakaogetränk;80;3.5;11;2.5;10;0.5;250;;
+Milchshake;Milkshake;110;3.5;17;3;16;0;300;;1
+Eistee;Ice Tea;28;0;6.8;0;6.5;0;330;;1
+Limonade;Limo|Zitronenlimonade;40;0;10;0;10;0;330;;1
+Sekt;Prosecco|Champagner;85;0.2;3;0;3;0;;;
+Radler;Alster;35;0.3;6;0;5.5;0;500;;
+Aperol Spritz;Spritz|Hugo;110;0;12;0;10;0;;;
+Schnaps;Wodka|Korn|Obstler|Whisky|Gin|Rum;230;0;0;0;0;0;;;`;
 (function(){
   // Format: Name;Alias|Alias;kcal;Eiweiss;KH;Fett;Zucker;Ballaststoffe;Stueck-g;Scheibe-g;verarbeitet
-  const EMO=[["brot","🍞"],["broetchen","🥖"],["brezel","🥨"],["croissant","🥐"],["reis","🍚"],["nudel","🍝"],["spaghetti","🍝"],["pasta","🍝"],["kartoffel","🥔"],["pommes","🍟"],["pizza","🍕"],["doner","🌯"],["wurst","🌭"],["salami","🌭"],["schnitzel","🍖"],["hahn","🍗"],["huhn","🍗"],["pute","🍗"],["steak","🥩"],["fleisch","🥩"],["hack","🥩"],["speck","🥓"],["schinken","🥓"],["lachs","🐟"],["fisch","🐟"],["forelle","🐟"],["kabeljau","🐟"],["hering","🐟"],["garnele","🦐"],["ei","🥚"],["milch","🥛"],["drink","🥛"],["joghurt","🥛"],["quark","🥛"],["kase","🧀"],["mozzarella","🧀"],["feta","🧀"],["camembert","🧀"],["parmesan","🧀"],["sahne","🥛"],["banane","🍌"],["birne","🍐"],["orange","🍊"],["mandarine","🍊"],["trauben","🍇"],["erdbeer","🍓"],["himbeer","🍓"],["kiwi","🥝"],["ananas","🍍"],["mango","🥭"],["melone","🍉"],["pfirsich","🍑"],["kirsche","🍒"],["tomate","🍅"],["gurke","🥒"],["paprika","🫑"],["karotte","🥕"],["blumenkohl","🥦"],["zucchini","🥒"],["aubergine","🍆"],["spinat","🥬"],["salat","🥗"],["zwiebel","🧅"],["champignon","🍄"],["mais","🌽"],["erbse","🫛"],["bohne","🫘"],["kichererbse","🫘"],["tofu","🫘"],["nuss","🥜"],["nusse","🥜"],["mandel","🌰"],["cashew","🥜"],["schokolade","🍫"],["nutella","🍫"],["gummi","🍬"],["keks","🍪"],["kuchen","🍰"],["eis","🍨"],["riegel","🍫"],["honig","🍯"],["donut","🍩"],["popcorn","🍿"],["wasser","💧"],["kaffee","☕"],["cappuccino","☕"],["latte","☕"],["tee","🍵"],["cola","🥤"],["saft","🧃"],["schorle","🧃"],["bier","🍺"],["wein","🍷"],["smoothie","🥤"],["suppe","🍲"],["eintopf","🍲"],["gulasch","🍲"],["chili","🍲"],["lasagne","🍝"],["bolognese","🍝"],["carbonara","🍝"],["ol","🫒"],["oliven","🫒"],["protein","💪"],["muesli","🥣"],["cornflakes","🥣"],["porridge","🥣"],["haferflocken","🥣"]];
+  const EMO=[["suppe","🍲"],["eintopf","🍲"],["currywurst","🌭"],["kasekuchen","🍰"],["cheeseburger","🍔"],["burger","🍔"],["sandwich","🥪"],["wrap","🌯"],["burrito","🌯"],["tacos","🌮"],["sushi","🍣"],["bowl","🥗"],["curry","🍛"],["risotto","🍚"],["ramen","🍜"],["nuggets","🍗"],["frikadelle","🍖"],["cevapcici","🍖"],["gyros","🥙"],["backfisch","🐟"],["omelett","🍳"],["bagel","🥯"],["waffel","🧇"],["muffin","🧁"],["brownie","🍫"],["milchreis","🍮"],["griessbrei","🍮"],["kakao","☕"],["espresso","☕"],["milchshake","🥤"],["eistee","🥤"],["limonade","🥤"],["sekt","🥂"],["radler","🍺"],["aperol","🍹"],["schnaps","🥃"],["butter","🧈"],["knoblauch","🧄"],["zitrone","🍋"],["grapefruit","🍊"],["pflaume","🫐"],["aprikose","🍑"],["granatapfel","🍎"],["feige","🍇"],["obst","🍎"],["beeren","🫐"],["gemuse","🥦"],["rotkohl","🥬"],["spargel","🥬"],["grune bohnen","🫛"],["rosenkohl","🥬"],["lauch","🥬"],["kohlrabi","🥬"],["radieschen","🥕"],["rucola","🥬"],["feldsalat","🥬"],["knodel","🥔"],["kartoffelpuffer","🥔"],["kroketten","🥔"],["nuss","🥜"],["studentenfutter","🥜"],["schmand","🥛"],["sahne","🥛"],["creme","🥛"],["kokos","🥥"],["leinol","🫒"],["salzstangen","🥨"],["schokoriegel","🍫"],["auflauf","🧀"],["spatzle","🍝"],["gnocchi","🍝"],["maultasche","🥟"],["ravioli","🥟"],["apfelmus","🍎"],["bulgur","🍚"],["brot","🍞"],["broetchen","🥖"],["brezel","🥨"],["croissant","🥐"],["reis","🍚"],["nudel","🍝"],["spaghetti","🍝"],["pasta","🍝"],["kartoffel","🥔"],["pommes","🍟"],["pizza","🍕"],["doner","🌯"],["wurst","🌭"],["salami","🌭"],["schnitzel","🍖"],["hahn","🍗"],["huhn","🍗"],["pute","🍗"],["steak","🥩"],["fleisch","🥩"],["hack","🥩"],["speck","🥓"],["schinken","🥓"],["lachs","🐟"],["fisch","🐟"],["forelle","🐟"],["kabeljau","🐟"],["hering","🐟"],["garnele","🦐"],["ei","🥚"],["milch","🥛"],["drink","🥛"],["joghurt","🥛"],["quark","🥛"],["kase","🧀"],["mozzarella","🧀"],["feta","🧀"],["camembert","🧀"],["parmesan","🧀"],["sahne","🥛"],["banane","🍌"],["birne","🍐"],["orange","🍊"],["mandarine","🍊"],["trauben","🍇"],["erdbeer","🍓"],["himbeer","🍓"],["kiwi","🥝"],["ananas","🍍"],["mango","🥭"],["melone","🍉"],["pfirsich","🍑"],["kirsche","🍒"],["tomate","🍅"],["gurke","🥒"],["paprika","🫑"],["karotte","🥕"],["blumenkohl","🥦"],["zucchini","🥒"],["aubergine","🍆"],["spinat","🥬"],["salat","🥗"],["zwiebel","🧅"],["champignon","🍄"],["mais","🌽"],["erbse","🫛"],["bohne","🫘"],["kichererbse","🫘"],["tofu","🫘"],["nuss","🥜"],["nusse","🥜"],["mandel","🌰"],["cashew","🥜"],["schokolade","🍫"],["nutella","🍫"],["gummi","🍬"],["keks","🍪"],["kuchen","🍰"],["eis","🍨"],["riegel","🍫"],["honig","🍯"],["donut","🍩"],["popcorn","🍿"],["wasser","💧"],["kaffee","☕"],["cappuccino","☕"],["latte","☕"],["tee","🍵"],["cola","🥤"],["saft","🧃"],["schorle","🧃"],["bier","🍺"],["wein","🍷"],["smoothie","🥤"],["suppe","🍲"],["eintopf","🍲"],["gulasch","🍲"],["chili","🍲"],["lasagne","🍝"],["bolognese","🍝"],["carbonara","🍝"],["ol","🫒"],["oliven","🫒"],["protein","💪"],["muesli","🥣"],["cornflakes","🥣"],["porridge","🥣"],["haferflocken","🥣"]];
   const emo=n=>{ const x=NORM(n); for(const [k,e] of EMO){ if(x.includes(k)) return e; } return "🍽️"; };
   const byName=new Map(); BASE_FOODS.forEach(f=>byName.set(NORM(f.name),f));
   const num=v=>{ const n=parseFloat(String(v).replace(",",".")); return isFinite(n)?n:NaN; };

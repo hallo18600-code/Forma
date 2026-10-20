@@ -21,7 +21,7 @@ function fresh(){
   return {
     onboarded:false, step:null, tab:"heute", date:todayIso(),
     profile:{ name:"", goal:"muscle", sex:"m", age:24, height:178, weight:76, activity:1.55, adult:false, target:74, reminders:true, health:false, calories:true, affiliates:true, fish:"wenig", waterTarget:8, theme:"system", restSec:90 },
-    days:{}, weights:[], workouts:[], routines:defaultRoutines(), measures:[], stack:["crea","d3"], customs:[], customEx:[], skin:{}, hautPlan:false, coach:{answers:{}, routine:[], skipped:[]}
+    days:{}, weights:[], workouts:[], routines:defaultRoutines(), measures:[], stack:["crea","d3"], customs:[], customEx:[], skin:{}, hautPlan:false, coach:{answers:{}, routine:[], skipped:[]}, ob:{}
   };
 }
 let state = load();
@@ -50,7 +50,11 @@ function save(){
 function day(s){ s=s||state.date; if(!state.days[s]) state.days[s]=blankDay(); return state.days[s]; }
 function foods(){ return [...BASE_FOODS, ...state.customs]; }
 function allItems(){ return [...foods(), ...CARE, ...SUPS]; }
-function toast(m){ ui.toast=m; render(); setTimeout(()=>{ if(ui.toast===m){ ui.toast=null; render(); } }, 1600); }
+// Kurzer Hinweis unten. Beim Ausblenden nur das Element entfernen (kein Neuaufbau, damit Tastatur und Eingaben bleiben).
+function toast(m){
+  ui.toast=m; render(); clearTimeout(ui.toastT);
+  ui.toastT=setTimeout(()=>{ if(ui.toast!==m) return; ui.toast=null; const t=document.querySelector("#app > .toast"); if(t){ t.classList.add("out"); setTimeout(()=>t.remove(),180); } }, 1600);
+}
 function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; ui.amtFor=null; render(); }
 // Menge für einen Tagebuch-Eintrag: Gramm plus (falls gewählt) Einheit und Anzahl
 function amtEntry(){
@@ -252,6 +256,8 @@ function syncAuto(s){
 }
 
 function de(v,d){ d=d||0; return Number(v||0).toLocaleString(LOC,{minimumFractionDigits:d,maximumFractionDigits:d}); }
+// Zahl für Eingabefelder: Komma in allen Sprachen außer Englisch (12,5)
+function numIn(v){ const t=String(v==null?"":v); return LANG==="en"?t:t.replace(".",","); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
 
 function glyph(name){
@@ -465,7 +471,7 @@ function renderModal(){
   if(type==="pref") inner=prefSheet(payload);
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
-    ${[["age","Alter",state.profile.age,18,90,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,obMinTarget(),160,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
+    ${[["age","Alter",state.profile.age,18,90,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,obMinTarget(),200,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
     <div class="field"><label>Training pro Woche</label></div>
     <div class="opts">${[["Gar nicht","Gar nicht"],["1–2× pro Woche","1–2×"],["3–4× pro Woche","3–4×"],["5× oder öfter","5× +"]].map(([v,l])=>`<button class="chip ${state.profile.trainFreq===v?"on":""}" data-act="set" data-k="trainFreq" data-v="${v}">${l}</button>`).join("")}</div>
     <div class="field"><label>Fisch</label></div>
@@ -492,7 +498,6 @@ function renderModal(){
 function render(){ try{ ensureRoutine(); }catch(e){}
   const root=document.getElementById("app");
   let html = !state.onboarded ? (state.step==null ? renderWelcome() : renderOnboard()) : renderApp();
-  if(!state.onboarded && state.step==null) html=renderWelcome();
   html += renderModal();
   if(state.onboarded) html += renderExInfo();
   if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
@@ -531,7 +536,7 @@ function seedDemo(){
     }
   }
   ["Push","Pull","Beine","Push","Pull"].forEach((name,i)=>state.workouts.push({ id:uid(), date:addDays(t,-1-i*2), name:name, min:40, volume:2000+i*120, sets:9, exercises:[] }));
-  state.profile.weight=lastWeight();
+  state.profile.weight=lastWeight(); state.profile.waterTarget=waterGoal();
   save();
 }
 
@@ -569,16 +574,39 @@ document.getElementById("app").addEventListener("click", e=>{
     if(el.dataset.type==="product") ensureDb(el.dataset.id); openModal(el.dataset.type, el.dataset.id); return;
   }
   else if(act==="close"){ closeModal(); return; }
-  else if(act==="scan-view"){ stopCam(); ui.scanView=el.dataset.v; ui.camMsg=""; }
+  else if(act==="scan-view"){ stopCam(); ui.scanView=el.dataset.v; ui.camMsg=""; if(el.dataset.v==="ai"){ aiParse(); setTimeout(()=>{ const t=document.getElementById("ai-text"); if(t&&!t.value) t.focus(); },60); } }
   else if(act==="cam-start"){ startCam(); return; }
   else if(act==="bc-lookup"){ const i=document.getElementById("bc-input"); bcLookup(i&&i.value); return; }
   else if(act==="more-go"){ const v=el.dataset.v; if(v==="quick") ui.scanView="quick"; else { ui.newBc=v==="bc"?"":null; ui.newBack="more"; ui.scanView="newfood"; } }
-  else if(act==="quick-add"){ ensureDb(el.dataset.id); day().meals.push({uid:uid(),id:el.dataset.id,portion:100,slot:ui.addSlot||"snack"}); syncAuto(state.date); save(); toast("Hinzugefügt"); }
-  else if(act==="ai-run"){ aiRun(); return; }
+  else if(act==="quick-add"){
+    // „+“ in der Suche: eine übliche Portion (1 Banane, 1 EL Öl, 1 Glas Saft) statt pauschal 100 g
+    ensureDb(el.dataset.id); const it=foods().find(x=>x.id===el.dataset.id); if(!it) return;
+    const d=unitsFor(it).find(x=>x.d), m={uid:uid(),id:it.id,portion:d?d.g:100,slot:ui.addSlot||"snack"};
+    if(d){ m.u=d.k; m.q=1; }
+    day().meals.push(m); syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+amtTxt(it,m));
+  }
   else if(act==="ai-mic"){ aiMic(); return; }
+  else if(act==="ai-ex"){ ui.aiText=el.dataset.v; ui.aiOv={}; aiParse(); }
+  else if(act==="ai-alt"){ const k=+el.dataset.i; ui.aiOpen=ui.aiOpen===k?null:k; }
+  else if(act==="ai-swap"){
+    const it=(ui.aiRes||[])[+el.dataset.i], f=it&&(it.altFoods||[]).find(x=>x.id===el.dataset.id);
+    if(f){ teSwap(it,f); ui.aiOv=ui.aiOv||{}; ui.aiOv[it.key]={food:f}; } ui.aiOpen=null;
+  }
+  else if(act==="ai-find"){ ui.query=el.dataset.v||""; ui.scanMax=30; ui.scanView="list"; }
   else if(act==="ai-add"){
-    (ui.aiRes||[]).forEach(i=>{ if(i.ref){ ensureDb(i.ref); day().meals.push({uid:uid(),id:i.ref,portion:i.grams,slot:ui.addSlot||"snack"}); return; } const it={id:"a-"+uid(),type:"custom",hidden:true,name:i.name,brand:"KI",emoji:"✨",kcal:i.kcal,protein:i.protein,carbs:i.carbs,fat:i.fat,sugar:i.sugar,processed:i.processed}; state.customs.push(it); day().meals.push({uid:uid(),id:it.id,portion:i.grams,slot:ui.addSlot||"snack"}); });
-    ui.aiRes=null; ui.aiText=""; ui.scanView="list"; syncAuto(state.date); save(); toast("Im Tagebuch");
+    // Essen ins Tagebuch (Mahlzeit aus dem Text, sonst die gewählte), Wasser in den Wasser-Zähler
+    let n=0, gl=0;
+    (ui.aiRes||[]).forEach(i=>{
+      if(!(i.grams>0)) return;
+      if(i.water){ gl+=i.glasses||Math.max(1,Math.round(i.grams/250)); return; }
+      ensureDb(i.ref); if(!foods().some(f=>f.id===i.ref)) return;
+      const m={uid:uid(), id:i.ref, portion:i.grams, slot:i.slot||ui.addSlot||"snack"};
+      if(i.u&&i.q){ m.u=i.u; m.q=i.q; }
+      day().meals.push(m); n++;
+    });
+    if(gl) day().water=(day().water||0)+gl;
+    ui.aiRes=null; ui.aiText=""; ui.aiOv={}; ui.aiOpen=null; ui.aiMiss=[]; ui.aiIgn=[]; ui.scanView="list"; syncAuto(state.date); save();
+    toast(n?(gl?T("Im Tagebuch")+" · 💧 +"+gl:"Im Tagebuch"):gl?"💧 +"+gl:"Nichts hinzugefügt");
   }
   else if(act==="save-quick"){
     const g=id=>Math.max(0,+(document.getElementById(id).value||"").replace(",",".")||0), kcal=g("q-kcal");
@@ -592,7 +620,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.amtFor=null; } }
   else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid); if(m){ const e=amtEntry(); delete m.u; delete m.q; Object.assign(m,e); } ui.editUid=null; ui.amtFor=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
   else if(act==="del-meal2"){ day().meals=day().meals.filter(x=>x.uid!==ui.editUid); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gelöscht"); }
-  else if(act==="ai-del"){ (ui.aiRes||[]).splice(+el.dataset.i,1); if(!(ui.aiRes||[]).length) ui.aiRes=null; }
+  else if(act==="ai-del"){ const it=(ui.aiRes||[])[+el.dataset.i]; if(it){ ui.aiOv=ui.aiOv||{}; ui.aiOv[it.key]={del:true}; ui.aiRes.splice(+el.dataset.i,1); } ui.aiOpen=null; if(!(ui.aiRes||[]).length) ui.aiRes=null; }
   else if(act==="steps-add"){ const i=document.getElementById("st-input"); if(i) i.value=(+i.value||0)+ +el.dataset.v; return; }
   else if(act==="steps-save"){ const i=document.getElementById("st-input"); day().steps=Math.max(0,Math.round(+(i&&i.value)||0)); ui.modal=null; save(); toast("Gespeichert"); }
   else if(act==="step-goal"){ state.profile.stepGoal=+el.dataset.v; state.profile.stepAuto=false; save(); }
@@ -725,7 +753,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="draft"){ ui.draftKg=Math.max(35, Math.min(220, +(ui.draftKg+ +el.dataset.d).toFixed(1))); }
   else if(act==="save-weight"){
     state.weights=state.weights.filter(w=>w.date!==state.date).concat({date:state.date, kg:+ui.draftKg}).sort((a,b)=>a.date<b.date?-1:1);
-    p.weight=+ui.draftKg; ui.modal=null; save(); toast("Gewicht gespeichert");
+    p.weight=lastWeight(); ui.modal=null; save(); toast("Gewicht gespeichert");
   }
   else if(act==="toggle"){ p[el.dataset.k]=!p[el.dataset.k]; save(); }
   else if(act==="set-lang"){ p.lang=el.dataset.v; save(); location.reload(); return; }
@@ -767,8 +795,10 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="del-day"){ ui.plan.days.splice(+el.dataset.d,1); }
   else if(act==="open-day-ex"){ ui.planDay=+el.dataset.d; openModal("plan-ex"); return; }
   else if(act==="plan-add-ex"){
-    const day=ui.plan.days[ui.planDay]||ui.plan.days[0];
-    day.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 3)});
+    if(!ui.plan){ ui.modal=null; render(); return; }
+    if(!ui.plan.days.length) ui.plan.days.push({id:uid(), name:"Tag 1", exercises:[]});
+    const pd=ui.plan.days[ui.planDay]||ui.plan.days[0];
+    pd.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 2)});
     ui.modal=null;
   }
   else if(act==="plan-del-ex"){ ui.plan.days[+el.dataset.d].exercises.splice(+el.dataset.e,1); }
@@ -779,7 +809,7 @@ document.getElementById("app").addEventListener("click", e=>{
     const id="x-"+uid();
     state.customEx=state.customEx||[];
     state.customEx.push({id, name});
-    if(el.dataset.mode==="plan" && ui.plan){ const day=ui.plan.days[ui.planDay]||ui.plan.days[0]; day.exercises.push({id, sets:[{kg:20,reps:6},{kg:20,reps:6}]}); }
+    if(el.dataset.mode==="plan" && ui.plan){ if(!ui.plan.days.length) ui.plan.days.push({id:uid(), name:"Tag 1", exercises:[]}); const pd=ui.plan.days[ui.planDay]||ui.plan.days[0]; pd.exercises.push({id, sets:[{kg:20,reps:6},{kg:20,reps:6}]}); }
     else if(ui.workout) ui.workout.exercises.push({id, sets:[{kg:20,reps:6,done:false}]});
     ui.modal=null; save();
   }
@@ -793,14 +823,14 @@ document.getElementById("app").addEventListener("click", e=>{
     day().checks.sport=1; ui.workout=null; stopTick(); save(); toast("Training gespeichert");
   }
   else if(act==="toggle-set"){
-    const s=ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s];
+    const s=ui.workout&&((ui.workout.exercises[+el.dataset.e]||{}).sets||[])[+el.dataset.s]; if(!s) return;
     s.done=!s.done;
     if(s.done) ui.rest=state.profile.restSec||90;
   }
   else if(act==="rest-pick"){ const v=+el.dataset.v; if(REST_OPTS.includes(v)){ state.profile.restSec=v; save(); } }
   else if(act==="add-set"){ const sets=ui.workout.exercises[+el.dataset.e].sets; const last=sets[sets.length-1]||{kg:20,reps:6}; sets.push({kg:last.kg,reps:last.reps,done:false}); }
   else if(act==="del-ex"){ ui.workout.exercises.splice(+el.dataset.e,1); }
-  else if(act==="add-ex"){ ui.workout.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 1).map(s=>({...s, done:false}))}); ui.modal=null; }
+  else if(act==="add-ex"){ if(!ui.workout){ ui.modal=null; render(); return; } ui.workout.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 1).map(s=>({...s, done:false}))}); ui.modal=null; }
   else if(act==="rest-skip") ui.rest=0;
   else if(act==="dash-close"){ ui.dash=null; ui.rEdit=false; }
   else if(act==="cal-mode") ui.cal=el.dataset.v;
@@ -813,7 +843,8 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="save-measure"){
     state.measures=state.measures||[];
     const row={date:todayIso()};
-    ["chest","waist","arm","hip","thigh"].forEach(k=>{ const n=document.getElementById("m-"+k); row[k]=n?+n.value||0:0; });
+    ["chest","waist","arm","hip","thigh"].forEach(k=>{ const n=document.getElementById("m-"+k), v=n?parseFloat(String(n.value).replace(",",".")):0; row[k]=isFinite(v)&&v>0?Math.min(300,Math.round(v*10)/10):0; });
+    if(!["chest","waist","arm","hip","thigh"].some(k=>row[k])){ toast("Bitte mindestens einen Wert eintragen"); return; }
     state.measures=state.measures.filter(m=>m.date!==todayIso()).concat(row);
     save(); toast("Messung gespeichert");
   }
@@ -906,17 +937,28 @@ document.getElementById("app").addEventListener("input", e=>{
     const box=document.getElementById("scan-results");
     if(box) box.innerHTML=scanResults(); else render();
   }
-  if(el.dataset.act==="ai-g"){ const k=+el.dataset.i, it=(ui.aiRes||[])[k]; if(it){ it.grams=Math.max(0,+el.value||0); const kc=document.getElementById("ai-k"+k), tt=document.getElementById("ai-tot"); if(kc) kc.textContent=Math.round(it.kcal*it.grams/100); if(tt) tt.textContent=ui.aiRes.reduce((t,x)=>t+Math.round(x.kcal*x.grams/100),0); } }
+  if(el.dataset.act==="ai-type") aiTyped(el.value);
+  if(el.dataset.act==="ai-g"){
+    const k=+el.dataset.i, it=(ui.aiRes||[])[k]; if(!it) return;
+    const v=parseFloat(String(el.value).replace(",","."));
+    it.grams=isFinite(v)?Math.max(0,Math.min(10000,Math.round(v))):0; it.u=null; it.q=null; it.txt="";
+    if(it.water) it.glasses=Math.max(1,Math.round(it.grams/250));
+    ui.aiOv=ui.aiOv||{}; ui.aiOv[it.key]=Object.assign(ui.aiOv[it.key]||{},{grams:it.grams});
+    const fo=ui.aiRes.filter(x=>!x.water), kc=document.getElementById("ai-k"+k), tt=document.getElementById("ai-tot"), tp=document.getElementById("ai-pro");
+    if(kc) kc.textContent=aiK(it); if(tt) tt.textContent=fo.reduce((t,x)=>t+aiK(x),0); if(tp) tp.textContent=Math.round(fo.reduce((t,x)=>t+x.protein*x.grams/100,0));
+  }
   if(el.dataset.act==="portion-in"){ ui.unit="g"; ui.qty=null; ui.portion=Math.max(0,+String(el.value).replace(",",".")||0); const it=allItems().find(p=>p.id===el.dataset.id); if(it) amtSync(it); }
   if(el.dataset.act==="w-kg"){ const v=+String(el.value).replace(",","."); if(v) ui.draftKg=v; }
   if(el.dataset.act==="wo-f"&&ui.woEdit){ ui.woEdit[el.dataset.k]=el.value; }
   if(el.dataset.act==="wo-set"&&ui.woEdit){ const st=ui.woEdit.exercises[+el.dataset.e].sets[+el.dataset.s]; st[el.dataset.f]=Math.max(0,+String(el.value).replace(",",".")||0); }
-  if(el.dataset.act==="set-kg") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].kg=+el.value||0;
-  if(el.dataset.act==="set-reps") ui.workout.exercises[+el.dataset.e].sets[+el.dataset.s].reps=+el.value||0;
+  if((el.dataset.act==="set-kg"||el.dataset.act==="set-reps")&&ui.workout){
+    const st=((ui.workout.exercises[+el.dataset.e]||{}).sets||[])[+el.dataset.s]; if(!st) return;
+    const v=parseFloat(String(el.value).replace(",","."));
+    if(el.dataset.act==="set-kg") st.kg=isFinite(v)?Math.max(0,Math.min(1000,Math.round(v*100)/100)):0;
+    else st.reps=isFinite(v)?Math.max(0,Math.min(1000,Math.round(v))):0;
+  }
   if(el.dataset.act==="plan-name") ui.plan.name=el.value;
   if(el.dataset.act==="day-name") ui.plan.days[+el.dataset.d].name=el.value;
-  if(el.dataset.act==="plan-kg") ui.plan.exercises[+el.dataset.e].sets[+el.dataset.s].kg=+el.value||0;
-  if(el.dataset.act==="plan-reps") ui.plan.exercises[+el.dataset.e].sets[+el.dataset.s].reps=+el.value||0;
   if(el.dataset.act==="ex-query"){
     ui.exQuery=el.value; render();
     const n=document.querySelector('input[data-act="ex-query"]');

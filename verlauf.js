@@ -169,11 +169,11 @@ function renderMeasures(){
   const last=state.measures[state.measures.length-1]||{};
   const fields=[["chest","Brust"],["waist","Taille"],["arm","Arm"],["hip","Hüfte"],["thigh","Bein"]];
   return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button><h2>Messungen</h2><span class="tap-sp"></span></div>
-    <div class="card">${fields.map(([k,l])=>`<div class="field"><label>${l} cm</label><input id="m-${k}" value="${last[k]||""}"></div>`).join("")}
+    <div class="card">${fields.map(([k,l])=>`<div class="field"><label for="m-${k}">${l} cm</label><input id="m-${k}" inputmode="decimal" autocomplete="off" value="${last[k]?numIn(last[k]):""}"></div>`).join("")}
       <div class="gap"></div><button class="pill primary" data-act="save-measure">Speichern</button>
     </div>
     <div class="section"><h2>Verlauf</h2></div>
-    ${(state.measures||[]).slice().reverse().map(m=>`<div class="card mb-2"><b>${labelDate(m.date)}</b><div class="sub">${fields.map(([k,l])=>m[k]?l+" "+m[k]:"").filter(Boolean).join(" · ")}</div></div>`).join("")||`<div class="card sub">Noch keine Messung.</div>`}`;
+    ${(state.measures||[]).slice().reverse().map(m=>`<div class="card mb-2"><b>${labelDate(m.date)}</b><div class="sub">${fields.map(([k,l])=>m[k]?l+" "+de(m[k],m[k]%1?1:0):"").filter(Boolean).join(" · ")}</div></div>`).join("")||`<div class="card sub">Noch keine Messung.</div>`}`;
 }
 function weighSheet(){
   const span=weightSpan();

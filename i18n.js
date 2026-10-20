@@ -41,7 +41,10 @@ function tr(s){
       else {
         // Klein geschriebener Satzanfang („nach 8 Wochen …“): groß nachschlagen, klein zurückgeben
         const up=core[0].toUpperCase()+core.slice(1), ku=trNorm(up)[0];
+        // Satzzeichen am Ende („… Sonne.“, „Abnehmen ·“): ohne nachschlagen, Zeichen wieder anhängen
+        const pm=core.match(/^([\s\S]*?[^\s.·,:;])(\s*[.·,:;])$/), pk=pm&&trNorm(pm[1])[0];
         if(up!==core&&(D[up]!=null||D[ku]!=null)){ const t=D[up]!=null?D[up]:trFill(D[ku],nums); out=t[0].toLowerCase()+t.slice(1); }
+        else if(pm&&(D[pm[1]]!=null||D[pk]!=null)) out=tr(pm[1])+pm[2];
         else {
           // Zusammengesetzt: am stärksten Trenner zuerst teilen, Teile einzeln übersetzen
           const sep=TR_SEPS.find(x=>core.includes(x));

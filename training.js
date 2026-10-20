@@ -14,7 +14,7 @@ function lastSet(id){
     const hit = (w.exercises||[]).find(e=>e.id===id);
     if(hit && hit.sets && hit.sets.length){
       const s = [...hit.sets].reverse().find(x=>x.done) || hit.sets[hit.sets.length-1];
-      return s.kg+" kg × "+s.reps;
+      return kgTxt(+s.kg||0)+" kg × "+s.reps;
     }
   }
   return "–";
@@ -39,7 +39,7 @@ function prevSet(id, index){
     if(!hit) continue;
     const done=(hit.sets||[]).filter(s=>s.done);
     const s=done[index]||done[done.length-1];
-    if(s) return s.kg+"×"+s.reps;
+    if(s) return kgTxt(+s.kg||0)+"×"+s.reps;
   }
   return "–";
 }
@@ -106,7 +106,7 @@ function renderSport(){
     <div class="section"><h2>Workouts</h2></div>
     <div class="card meals">${list.length?list.map(w=>`<button class="meal-row" data-act="open" data-type="wo-detail" data-id="${w.id}">
       <div class="bubble">✅</div>
-      <div class="grow"><div class="meal-name">${esc(w.name)}</div><div class="sub">${labelDate(w.date)} · ${w.min} min · ${w.sets} Sätze</div></div>
+      <div class="grow"><div class="meal-name">${esc(w.name)}</div><div class="sub">${labelDate(w.date)} · ${w.min} min · ${w.sets} ${w.sets===1?"Satz":"Sätze"}</div></div>
     </button>`).join(""):`<div class="sub li">Noch kein gespeichertes Training.</div>`}</div>
   </div>`;
 }
@@ -124,7 +124,7 @@ function renderPlan(){
         <div class="row space"><input class="input-plain grow" data-act="day-name" data-d="${di}" value="${esc(d.name)}" aria-label="Name des Trainingstags"><button class="x" data-act="del-day" data-d="${di}" aria-label="Trainingstag löschen">✕</button></div>
         ${(d.exercises||[]).map((e,ei)=>`<div class="plan-ex">
           <div class="row space"><button class="ex-open" data-act="exi-open" data-id="${e.id}">${exThumb(e.id)}<b>${exName(e.id)}</b></button><button class="x" data-act="plan-del-ex" data-d="${di}" data-e="${ei}" aria-label="Übung entfernen">✕</button></div>
-          <div class="sub">${e.sets.map(s=>s.kg+"×"+s.reps).join(" · ")}</div>
+          <div class="sub">${e.sets.map(s=>kgTxt(+s.kg||0)+"×"+s.reps).join(" · ")}</div>
         </div>`).join("")}
         <button class="pill ghost w-full mt-2" data-act="open-day-ex" data-d="${di}">+ Übung</button>
       </div>`).join("")}
@@ -164,8 +164,8 @@ function renderLive(){
             ${e.sets.map((s,si)=>`<tr class="${s.done?"done":""}">
               <td>${++n}</td>
               <td class="muted">${prevSet(e.id, si)}</td>
-              <td><input inputmode="decimal" data-act="set-kg" data-e="${ei}" data-s="${si}" value="${s.kg}"></td>
-              <td><input inputmode="numeric" data-act="set-reps" data-e="${ei}" data-s="${si}" value="${s.reps}"></td>
+              <td><input inputmode="decimal" data-act="set-kg" data-e="${ei}" data-s="${si}" value="${numIn(s.kg)}" aria-label="kg"></td>
+              <td><input inputmode="numeric" data-act="set-reps" data-e="${ei}" data-s="${si}" value="${s.reps}" aria-label="Wiederholungen"></td>
               <td><button class="chk ${s.done?"on":""}" data-act="toggle-set" data-e="${ei}" data-s="${si}">${s.done?"✓":""}</button></td>
             </tr>`).join("")}
           </table>
@@ -186,7 +186,7 @@ function woDetail(id){
   const w=state.workouts.find(x=>x.id===id);
   if(!w) return "<p>Nicht gefunden.</p>";
   return `<h2>${esc(w.name)}</h2><p class="sub">${labelDate(w.date)} · ${w.min} min · ${de(w.volume)} kg</p>
-    ${(w.exercises||[]).map(e=>`<div class="li"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")}
+    ${(w.exercises||[]).map(e=>`<div class="li"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>kgTxt(+s.kg||0)+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")}
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>
     <div class="gap"></div><div class="row"><button class="pill ghost grow" data-act="wo-edit" data-id="${w.id}">Bearbeiten</button><button class="pill ghost grow t-bad" data-act="wo-del-ask" data-id="${w.id}">Löschen</button></div>`;
 }
@@ -201,7 +201,7 @@ function woEditSheet(){
     ${w.exercises.map((e,ei)=>`<div class="plan-ex">
       <b>${exName(e.id)}</b>
       ${e.sets.map((st,si)=>`<div class="row mt-2"><span class="sub set-lbl">Satz ${si+1}</span>
-        <input ${inp} type="number" inputmode="decimal" data-act="wo-set" data-f="kg" data-e="${ei}" data-s="${si}" value="${st.kg}" aria-label="kg"><span class="sub">kg ×</span>
+        <input ${inp} type="text" inputmode="decimal" data-act="wo-set" data-f="kg" data-e="${ei}" data-s="${si}" value="${numIn(st.kg)}" aria-label="kg"><span class="sub">kg ×</span>
         <input ${inp} type="number" inputmode="numeric" data-act="wo-set" data-f="reps" data-e="${ei}" data-s="${si}" value="${st.reps}" aria-label="Wiederholungen"><span class="sub">Wdh.</span>
         <button class="x" data-act="wo-del-set" data-e="${ei}" data-s="${si}" aria-label="Satz entfernen">✕</button></div>`).join("")}
     </div>`).join("")}
@@ -211,7 +211,8 @@ function woEditSheet(){
 function woDelSheet(id){
   const w=state.workouts.find(x=>x.id===id); if(!w) return "";
   return `<h2>Training löschen?</h2>
-    <p class="sub"><b>${esc(w.name)}</b> vom ${w.date.split("-").reverse().join(".")} (${w.sets} ${w.sets===1?"Satz":"Sätze"}) wird gelöscht. Das lässt sich nicht rückgängig machen.</p>
+    <p class="sub"><b>${esc(w.name)}</b><br>${labelDate(w.date)} · ${w.sets} ${w.sets===1?"Satz":"Sätze"}</p>
+    <p class="sub">Das Training wird gelöscht. Das lässt sich nicht rückgängig machen.</p>
     <div class="gap"></div><button class="pill danger" data-act="wo-del-go" data-id="${w.id}">Ja, löschen</button>
     <div class="gap"></div><button class="pill ghost w-full" data-act="open" data-type="wo-detail" data-id="${w.id}">Abbrechen</button>`;
 }
@@ -326,7 +327,7 @@ function exHist(id){
   state.workouts.forEach(w=>(w.exercises||[]).filter(e=>e.id===id).forEach(e=>{
     rows.push({date:w.date, name:w.name, sets:(e.sets||[]).filter(s=>s.done)});
   }));
-  return `<h2>${exName(id)}</h2>${rows.reverse().map(r=>`<div class="li"><b>${labelDate(r.date)}</b><div class="sub">${r.sets.map(s=>s.kg+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")||"<p class=sub>Kein Verlauf.</p>"}<div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  return `<h2>${exName(id)}</h2>${rows.reverse().map(r=>`<div class="li"><b>${labelDate(r.date)}</b><div class="sub">${r.sets.map(s=>kgTxt(+s.kg||0)+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")||"<p class=sub>Kein Verlauf.</p>"}<div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
 }
 function startTick(){
   stopTick();
@@ -334,7 +335,7 @@ function startTick(){
     const was=ui.rest>0; if(ui.rest>0) ui.rest--;
     if(!ui.workout) return;
     const c=document.querySelector(".clock"); if(c&&ui.workout) c.textContent=clock(ui.workout.t0);
-    if(was&&ui.rest===0){ render(); return; }
+    if(was&&ui.rest===0){ const r=document.querySelector(".rest"); if(r) r.remove(); const pb0=document.querySelector(".t-rest"); if(pb0) pb0.textContent="0s"; if(navigator.vibrate) try{ navigator.vibrate(200); }catch(e){} return; }
     const pb=document.querySelector(".t-rest"); if(pb) pb.textContent=(ui.rest||0)+"s";
     const rb=document.querySelector(".rest span"); if(rb) rb.textContent="Pause "+ui.rest+"s";
   }, 1000);
