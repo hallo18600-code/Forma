@@ -360,16 +360,35 @@ function renderDash(){
 }
 
 function dashSheet(id){ return ""; }
-// Datenschutz in kurzen Punkten (Apple verlangt den Text in der App)
+// Anbieter-Angaben für Impressum und Datenschutz (hier zentral pflegen)
+const ANBIETER={ name:"Sebastian Spieß", strasse:"Melanchthonstr. 41", ort:"[PLZ] München", land:"Deutschland", mail:"[E-MAIL]" };
+const anbieterHtml=()=>`${ANBIETER.name}<br>${ANBIETER.strasse}<br>${ANBIETER.ort}<br>${ANBIETER.land}`;
+// Impressum (Angaben nach § 5 DDG)
+function impressumSheet(){
+  const li=(t,d)=>`<div class="li"><b>${t}</b><div class="sub">${d}</div></div>`;
+  return `<h2>Impressum</h2>
+    ${li("Anbieter",anbieterHtml())}
+    ${li("Kontakt","E-Mail: "+ANBIETER.mail)}
+    ${li("Verantwortlich für den Inhalt",ANBIETER.name+", Anschrift wie oben")}
+    ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org).")}
+    ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte und keine medizinische Beratung. Sie ersetzen keinen Arzt.")}
+    <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+}
+// Datenschutzerklärung in kurzen Punkten (Apple verlangt den Text in der App)
 function privacySheet(){
   const li=(t,d)=>`<div class="li"><b>${t}</b><div class="sub">${d}</div></div>`;
   return `<h2>Datenschutz</h2>
-    ${li("Nur auf deinem Gerät","Profil, Essen, Training, Gewicht und Routine speichert die App nur auf diesem Gerät. Kein Konto, kein eigener Server, keine Werbung, kein Tracking.")}
-    ${li("Barcode-Suche","Fehlt ein Produkt in der eingebauten Liste, fragt die App die Barcode-Nummer bei Open Food Facts (openfoodfacts.org) ab. Gesendet wird nur die Nummer, wie bei jeder Internet-Anfrage auch deine IP-Adresse.")}
+    ${li("Verantwortlich",anbieterHtml()+"<br>E-Mail: "+ANBIETER.mail)}
+    ${li("Nur auf deinem Gerät","Profil, Essen, Training, Gewicht und Routine speichert die App nur auf diesem Gerät. Kein Konto, kein eigener Server, keine Werbung, kein Tracking, keine Analyse-Tools.")}
+    ${li("Gesundheitsdaten","Angaben wie Gewicht, Essen oder Haut verlassen dein Gerät nicht. Wir haben keinen Zugriff darauf.")}
+    ${li("Barcode-Suche","Fehlt ein Produkt in der eingebauten Liste, fragt die App die Barcode-Nummer bei Open Food Facts (openfoodfacts.org, Frankreich) ab. Gesendet wird nur die Nummer und, wie bei jeder Internet-Anfrage, deine IP-Adresse. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.")}
     ${li("Kamera","Nur zum Scannen von Barcodes. Bilder werden nicht gespeichert oder gesendet.")}
     ${li("Sprache","Nur wenn du „Sprechen“ tippst. Die Erkennung übernimmt dein Browser bzw. Handy; dessen Anbieter kann die Aufnahme dafür verarbeiten.")}
-    ${li("Scanner-Baustein","Beim ersten Start lädt die App die Barcode-Bibliothek einmal von cdn.jsdelivr.net.")}
+    ${li("Hosting","Die Web-Version liegt bei GitHub Pages (GitHub Inc., USA). Beim Laden speichert GitHub technisch nötige Daten wie die IP-Adresse kurz in Server-Protokollen. Die Barcode-Bibliothek kommt einmalig von cdn.jsdelivr.net. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (sicherer Betrieb).")}
     ${li("Exportieren und löschen","Profil → Daten exportieren. Profil → Alles löschen entfernt alles sofort und endgültig.")}
+    ${li("Deine Rechte","Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragung und Widerspruch. Schreib dafür an die E-Mail oben. Du kannst dich auch beim Bayerischen Landesamt für Datenschutzaufsicht (lda.bayern.de) beschweren.")}
+    ${li("Alter","Die App ist nur für Erwachsene ab 18 Jahren gedacht.")}
+    <p class="sub">Stand: Oktober 2026</p>
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
 }
 // Sicherheitsabfrage vor "Alles löschen"
@@ -480,6 +499,7 @@ function renderModal(){
   if(type==="weigh") inner=weighSheet();
   if(type==="legal") inner=`<h2>Hinweise</h2><p class="sub">Nur für Erwachsene. Richtwerte, keine medizinische Beratung. Supplements ersetzen kein Essen. Produktdaten teils von Open Food Facts (© Open Food Facts-Mitwirkende, ODbL 1.0). Daten bleiben im Browser dieses Geräts.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
   if(type==="privacy") inner=privacySheet();
+  if(type==="impressum") inner=impressumSheet();
   if(type==="stack") inner=stackSheet();
   if(type==="custom") inner=customSheet();
   if(type==="ex"||type==="plan-ex") inner=exPicker(type==="plan-ex"?"plan":"live");
