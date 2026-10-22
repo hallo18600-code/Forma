@@ -8,7 +8,7 @@ function renderHeute(){
       <div class="t-c"><h1 class="t-l">${labelDate(state.date)}</h1><div class="sub">${state.date===todayIso()?parseIso(state.date).toLocaleDateString(LOC,{weekday:"short",day:"numeric",month:"short"})+" · ":""}${goalName()}${state.date!==todayIso()?` · <button class="link" data-act="today">zurück</button>`:""}</div></div>
       <button class="navd" data-act="shift" data-d="1" aria-label="Tag vor" ${state.date>=todayIso()?"disabled":""}>›</button>
     </div>
-    <div class="card sumcard">
+    <div class="card">
       <div class="sum">
         <div class="side"><div class="num">${showKcal()?tot.kcal.toLocaleString(LOC):"–"}</div><div class="lbl">Gegessen</div></div>
         <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString(LOC):"–"}</b><span>${showKcal()?"Übrig":"Kalorien aus"}</span></div></div>
