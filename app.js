@@ -361,15 +361,17 @@ function renderDash(){
 
 function dashSheet(id){ return ""; }
 // Anbieter-Angaben für Impressum und Datenschutz (hier zentral pflegen)
-const ANBIETER={ name:"Simon Spieß", strasse:"Melanchthonstr. 41", ort:"81739 München", land:"Deutschland", mail:"simonspiess@t-online.de" };
-const anbieterHtml=()=>`${ANBIETER.name}<br>${ANBIETER.strasse}<br>${ANBIETER.ort}<br>${ANBIETER.land}`;
+// strasse/ort: KEINE Wohnadresse eintragen. Sobald es eine Adresse von einem Impressum-Service gibt,
+// hier eintragen (z. B. strasse:"c/o Firma XY, Musterstr. 1", ort:"12345 Stadt"). Leere Felder werden nicht angezeigt.
+const ANBIETER={ name:"Simon Spieß", strasse:"", ort:"", land:"Deutschland", mail:"simonspiess@t-online.de" };
+const anbieterHtml=()=>[ANBIETER.name,ANBIETER.strasse,ANBIETER.ort,ANBIETER.land].filter(Boolean).join("<br>");
 // Impressum (Angaben nach § 5 DDG)
 function impressumSheet(){
   const li=(t,d)=>`<div class="li"><b>${t}</b><div class="sub">${d}</div></div>`;
   return `<h2>Impressum</h2>
     ${li("Anbieter",anbieterHtml())}
     ${li("Kontakt","E-Mail: "+ANBIETER.mail)}
-    ${li("Verantwortlich für den Inhalt",ANBIETER.name+", Anschrift wie oben")}
+    ${li("Verantwortlich für den Inhalt",ANBIETER.name+(ANBIETER.strasse?", Anschrift wie oben":""))}
     ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org).")}
     ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte und keine medizinische Beratung. Sie ersetzen keinen Arzt.")}
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
