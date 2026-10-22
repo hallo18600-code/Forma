@@ -363,7 +363,7 @@ function dashSheet(id){ return ""; }
 // Anbieter-Angaben für Impressum und Datenschutz (hier zentral pflegen)
 // strasse/ort: KEINE Wohnadresse eintragen. Sobald es eine Adresse von einem Impressum-Service gibt,
 // hier eintragen (z. B. strasse:"c/o Firma XY, Musterstr. 1", ort:"12345 Stadt"). Leere Felder werden nicht angezeigt.
-const ANBIETER={ name:"Simon Spieß", strasse:"", ort:"", land:"Deutschland", mail:"simonspiess@t-online.de" };
+const ANBIETER={ name:"Simon Spieß", strasse:"", ort:"", land:"Deutschland", mail:"health.maxxing10@gmail.com" };
 const anbieterHtml=()=>[ANBIETER.name,ANBIETER.strasse,ANBIETER.ort,ANBIETER.land].filter(Boolean).join("<br>");
 // Impressum (Angaben nach § 5 DDG)
 function impressumSheet(){
