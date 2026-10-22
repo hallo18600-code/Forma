@@ -558,11 +558,12 @@ function rateList(sc){
   return `<div class="rpc">${g.map(t=>`<div class="rp"><i>✓</i><span>${esc(t)}</span></div>`).join("")}${b.map(t=>`<div class="rc"><i>✕</i><span>${esc(t)}</span></div>`).join("")}</div>`;
 }
 
-// Qualität: Bio, Weide, Freiland, Wildfang leicht besser; einfache Haltung (laut Produktname) leicht schlechter.
-// Keine Abwertung nur wegen der Marke: das wäre eine Vermutung, keine Angabe am Produkt.
+// Qualität: Bio, Weide, Freiland, Wildfang leicht besser; Günstigmarken & einfache Haltung leicht schlechter.
+// Text bei Günstigmarken neutral halten (keine Marke nennen, nichts behaupten, was nicht am Produkt steht).
 // Nur kleine Unterschiede (max. ±4), weil Haltung am Namen nicht sicher erkennbar ist.
 const R_ANIMAL=["poultry","redmeat","processedmeat","organ","broth","fattyfish","leanfish","egg","protdairy","kefir","dairy","cheese","butter"];
 const R_BIO_BRANDS=["rewe bio","edeka bio","biobio","bio bio","alnatura","gut bio","gutbio","k-bio","k bio","dmbio","dm bio","naturgut","natur gut","dennree","andechser","sobbeke","zuruck zum ursprung","enerbio","demeter","bioland","naturland","nur nur natur","schrozberger","uplander","glaserne molkerei","bio wertkost","bio sonne","bio organic","biotrend","ja! bio","spar natur pur","naturkind","alnavit","berchtesgadener land bio"];
+const R_BUDGET=["ja!","=ja","gut & gunstig","gut&gunstig","gut und gunstig","k-classic","k classic","kaufland classic","=tip","jeden tag","s-budget","muhlenhof","metzgerfrisch","meine metzgerei","gut ponholz","gut drei eichen","wiltmann","penny","=milsani","=milbona","=dulano"];
 function rateQuality(item,id,h,add){
   const bn=" "+NORM(item.brand||"")+" ", all=h+bn, ani=R_ANIMAL.includes(id), fish=id==="fattyfish"||id==="leanfish";
   const bw=bn.trim().split(/[^a-z0-9!&-]+/).filter(Boolean);
@@ -572,6 +573,7 @@ function rateQuality(item,id,h,add){
   const wild=fish&&/(wildlachs|wildfang|wild caught|wild gefangen|^ wild|alaska)/.test(all);
   const msc=fish&&/(msc|nachhaltig gefangen|nachhaltiger fang)/.test(all);
   const low=/(stallhaltung|bodenhaltung|kafighaltung|kleingruppe|haltungsform 1|haltungsform 2|haltungsstufe 1|haltungsstufe 2|aquakultur|zuchtlachs|aus zucht)/.test(all);
+  const budget=R_BUDGET.some(b=>b[0]==="="?bw.includes(b.slice(1)):bn.includes(b));
   if(ani){
     let v=0, t=[];
     if(bio){ v+=3; t.push(id==="egg"?"Bio-Eier: beste Haltung":fish?"Bio: kontrollierte Herkunft":"Bio: bessere Haltung & Futter"); }
@@ -581,6 +583,7 @@ function rateQuality(item,id,h,add){
     else if(msc&&!bio){ v+=1; t.push("MSC: nachhaltiger Fang"); }
     if(v){ add(Math.min(4,v),t[0],40); return; }
     if(low){ add(-3,id==="egg"?"Einfache Haltung (Bodenhaltung)":fish?"Aus Zucht (Aquakultur)":"Einfache Haltung (Stufe 1–2)",40); return; }
+    if(budget&&id!=="broth") add(-2,"Einfachere Qualitätsstufe",40);
   } else if(bio&&!["sweets","softdrink","alcohol","chips","fastfood","sugar","cereal","ersatz","plantmilk","margarine","seedoil","readymeal","sauce","proteinbar"].includes(id)){
     add(2,"Bio: weniger Pestizide",20);
   }
