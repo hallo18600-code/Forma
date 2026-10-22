@@ -259,7 +259,7 @@ function hautProblem(st,a,c){
       P.pm.push("Azelainsäure"); P.note="Das kann Rosazea sein. Ein Hautarzt kann dir stärkere Mittel geben.";
     } else if(rot==="Schuppig an Nase / Brauen"){
       P.cream="Creme ohne Öle";
-      P.items=[tip("Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche drauf","Mit Ketoconazol oder Zink, 3 Minuten einwirken lassen, dann abwaschen."),
+      P.items=[tip("Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche drauf","Mit Zink oder Piroctone Olamine, 3 Minuten einwirken lassen, dann abwaschen."),
         tip(null,"Leichte Creme, keine Öle","Fett kann den Hefepilz auf der Haut fördern."), tip(null,"Kopfhaut mitbehandeln","Häufig hat beides dieselbe Ursache.")];
       P.spot.push("Schuppen-Maske 2×/Wo."); P.note="Breitet es sich aus: Hautarzt.";
     } else {
@@ -359,7 +359,7 @@ function haareAdvice(a){
         tip("Kopfhaut-Serum","Kopfhaut-Serum mit Urea/Panthenol","Spendet Feuchtigkeit, kann Jucken lindern."),
         tip(null,"Lauwarm waschen, kühl föhnen","Hitze trocknet die Kopfhaut aus.")];
     } else {
-      tips=[tip("Anti-Schuppen-Shampoo","Ketoconazol- oder Zink-Shampoo, 2–3×/Woche","Hilft gegen den Hefepilz, der oft dahintersteckt."),
+      tips=[tip("Anti-Schuppen-Shampoo","Anti-Schuppen-Shampoo mit Zink, 2–3×/Woche","Wird es nach 4 Wochen nicht besser: Hautarzt."),
         tip(null,"3–5 Min einwirken lassen","Der Wirkstoff braucht Zeit, um zu wirken."),
         tip(null,"Nach 4 Wochen: 1×/Woche weiter","So kommen die Schuppen seltener zurück.")];
       note="Bei dicken, roten Stellen bitte zum Hautarzt.";
@@ -367,10 +367,11 @@ function haareAdvice(a){
   } else if(st==="Fallen viel aus"){
     const af=a.ausfall||"Überall dünner";
     if(af==="Geheimratsecken / Scheitel"){
-      tips=[tip("Minoxidil",`Minoxidil 5 % Schaum, ${w?"1×":"2×"} täglich`,"Rezeptfrei in der Apotheke, gut untersucht. Erste Effekte oft nach 3–6 Monaten."),
-        tip(null,"Früh zum Hautarzt","Früh behandelt lässt sich mehr Haar erhalten."),
-        tip("Ketoconazol-Shampoo","Ketoconazol-Shampoo 2×/Woche","Kann leicht unterstützen.")];
-      note="Anfangs fallen kurz mehr aus, das ist normal."+(w?" Nicht in Schwangerschaft/Stillzeit.":"");
+      // Keine Arzneimittel oder Dosierungen empfehlen (Behandlung gehört zum Hautarzt)
+      tips=[tip(null,"Früh zum Hautarzt","Es gibt wirksame Behandlungen. Welche zu dir passt, klärt der Hautarzt.",{must:1}),
+        tip("Mildes Shampoo","Mildes Shampoo, wenig Hitze","Schont die Haare, die noch da sind.",{product:"shampoo"}),
+        tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,"Haare brauchen genug Eiweiß.")];
+      note="Je früher du gehst, desto mehr Haar lässt sich meist erhalten.";
     } else if(af==="Kahle runde Stellen"){
       tips=[tip(null,"Zeitnah zum Hautarzt","Gut behandelbar, aber nicht mit Shampoo.",{must:1}),
         tip("Mildes Shampoo","Bis dahin mild waschen","Bitte nichts auf eigene Faust behandeln.",{product:"shampoo"})];
@@ -859,8 +860,8 @@ function tipLabel(i){ return i.s||i.k||TIP_SHORT[i.title]||(i.title.includes(": 
 function tipIcon(i,topic){
   const t=(i.k||"")+" "+i.title;
   const M=[[/arzt|Blutbild|Zöliakie|Schnarchen/i,"🩺"],[/Handy/,"📵"],[/keine Öle/,"🧴"],[/licht/i,"🌤️"],[/Waschen,/,"💇"],[/Kohlensäure/,"🫧"],[/Nur 3 Produkte|einzeln|Reinigung, Creme/,"🧴"],[/16–19|Uhr schauen/,"🌡️"],[/Sport/,"🏃"],[/20 Min wach/,"🛏️"],
-    [/Wecker|Wochenende/,"⏰"],[/ausdrücken/,"🚫"],[/Schuppen|Ketoconazol/,"🧪"],[/Zink/,"⚪"],[/LSF/,"☀️"],[/Hitze, Alkohol/,"🌶️"],[/Jodsalz/,"🧂"],[/B12|Eisen/,"💊"],
-    [/Azelain|BHA|Niacinamid|Retinol|Vitamin C|Milchsäure|Minoxidil/,"🧪"],[/Hyaluron/,"💧"],[/Kopfhaut|Trockenshampoo|Haar|Shampoo|Conditioner|Maske|Öl|Locken|Hitzeschutz|föhnen|Waschtag|einwirken/,"💇"],
+    [/Wecker|Wochenende/,"⏰"],[/ausdrücken/,"🚫"],[/Schuppen/,"🧪"],[/Zink/,"⚪"],[/LSF/,"☀️"],[/Hitze, Alkohol/,"🌶️"],[/Jodsalz/,"🧂"],[/B12|Eisen/,"💊"],
+    [/Azelain|BHA|Niacinamid|Retinol|Vitamin C|Milchsäure/,"🧪"],[/Hyaluron/,"💧"],[/Kopfhaut|Trockenshampoo|Haar|Shampoo|Conditioner|Maske|Öl|Locken|Hitzeschutz|föhnen|Waschtag|einwirken/,"💇"],
     [/Creme|Ceramid|Urea|Panthenol|Wasser,|nur Wasser|waschen/,"🧴"],[/Spitzen|Schnitt/,"✂️"],[/Mewing/,"👅"],[/Gua Sha/,"🪨"],[/Kaffee|Koffein/,"☕"],
     [/Licht|raus/,"🌤️"],[/Bett|Schlaf|schlafen/,"🛏️"],[/Handy/,"📵"],[/To-do/,"📝"],[/Kraft|Training|ziehen|Muskeln/,"💪"],[/Brust|dehnen/,"🧘"],
     [/Schritte|gehen|aufstehen/,"🚶"],[/kcal|Kalorien|Defizit|abnehmen|Bauch/i,"🔥"],[/Protein|Gemüse/,"🍗"],[/Wasser|Glas|Sprudel/,"💧"],[/alkohol/i,"🍷"],
