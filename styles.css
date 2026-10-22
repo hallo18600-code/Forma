@@ -404,6 +404,10 @@ p { margin:var(--s-2) 0; }
 .grab { width:36px; height:4px; background:var(--line-strong); border-radius:var(--r-full); margin:var(--s-1) auto var(--s-3); }
 
 /* ---------- 6a. Tagebuch ---------- */
+/* Kalorien-Karte oben im Tagebuch: leicht grün, leere Ringe/Balken passend hellgrün */
+.sumcard { background:var(--accent-soft); }
+.sumcard .ring svg circle:first-child { stroke:var(--accent-weak); }
+.sumcard .mac .dotbar { background:var(--accent-weak); }
 .sum { display:grid; grid-template-columns:1fr 120px 1fr; align-items:center; }
 .sum .side, .sum .num { text-align:center; }
 .sum .num { font-size:var(--fs-l); font-weight:800; }
