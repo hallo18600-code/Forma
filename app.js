@@ -75,11 +75,13 @@ function targets(){
   const p=state.profile, w=+p.weight||70, h=+p.height||175, m=h/100;
   const bmr=10*w+6.25*h-5*(+p.age||30)+(p.sex==="m"?5:-161);
   const tdee=bmr*(PAL_ALLTAG[p.activity]||p.activity||1.375)+trainKcal(p);
-  let kcal=tdee;
-  // Abnehmen: ca. 0,5 % Körpergewicht pro Woche (1 kg Fett ≈ 7.700 kcal), höchstens 20 % unter Bedarf
-  if(p.goal==="lose") kcal-=Math.min(tdee*0.2, w*0.005*7700/7);
-  // Muskeln: kleines Plus (ca. 10 %, 200–300 kcal), damit möglichst wenig Fett dazukommt
-  if(p.goal==="muscle") kcal+=Math.min(300,Math.max(200,tdee*0.1));
+  let kcal=tdee; const bmiNow=w/(m*m);
+  // Abnehmen: ca. 0,5 % Körpergewicht pro Woche (1 kg Fett ≈ 7.700 kcal), höchstens 20 % unter Bedarf.
+  // Bei Untergewicht (BMI < 18,5) KEIN Defizit, nur Halten – dazu zeigt safetyNote() eine Warnung.
+  if(p.goal==="lose"&&bmiNow>=18.5) kcal-=Math.min(tdee*0.2, w*0.005*7700/7);
+  // Muskeln: kleines Plus (ca. 10 %, 200–300 kcal), damit möglichst wenig Fett dazukommt.
+  // Ab BMI 30 kein Plus: Muskelaufbau klappt dann auch beim Halten der Kalorien.
+  if(p.goal==="muscle"&&bmiNow<30) kcal+=Math.min(300,Math.max(200,tdee*0.1));
   kcal=Math.round(Math.max(p.sex==="m"?1500:1200, kcal)/10)*10;
   // Protein je kg – bei hohem BMI aufs Gewicht bei BMI 25 bezogen (sonst unrealistisch hoch)
   const ref=Math.min(w,25*m*m), protein=Math.round(ref*protPerKg(p));
@@ -174,8 +176,9 @@ function scoreCare(item){
   return finish(parts);
 }
 function safetyNote(){
-  const p=state.profile, m=p.height/100, tb=p.target/(m*m); let msg="";
-  if(tb<18.5) msg="Dein Zielgewicht liegt im Untergewicht (BMI "+de(tb,1)+"). Besprich so ein Ziel bitte mit Ärzt:in.";
+  const p=state.profile, m=p.height/100, tb=p.target/(m*m), nb=(+p.weight||70)/(m*m); let msg="";
+  if(p.goal==="lose"&&nb<18.5) msg="Dein BMI liegt im Untergewicht ("+de(nb,1)+"). Abnehmen wird nicht empfohlen. Die App rechnet deshalb ohne Defizit. Besprich dein Ziel bitte mit Ärzt:in.";
+  else if(tb<18.5) msg="Dein Zielgewicht liegt im Untergewicht (BMI "+de(tb,1)+"). Besprich so ein Ziel bitte mit Ärzt:in.";
   else if(p.goal==="lose" && targets().kcal<=(p.sex==="m"?1500:1200)) msg="Dein Richtwert liegt am Mindestwert. Nicht weiter darunter gehen.";
   return msg?`<div class="warn">${msg}</div>`:"";
 }
@@ -372,7 +375,7 @@ function impressumSheet(){
     ${li("Anbieter",anbieterHtml())}
     ${li("Kontakt","E-Mail: "+ANBIETER.mail)}
     ${li("Verantwortlich für den Inhalt",ANBIETER.name+(ANBIETER.strasse?", Anschrift wie oben":""))}
-    ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org).")}
+    ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org). Angaben ohne Gewähr, sie können Fehler enthalten. Maßgeblich ist die Packung.")}
     ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte und keine medizinische Beratung. Sie ersetzen keinen Arzt.")}
     ${li("Bewertungen","Die Scores sind eine Einschätzung der App nach eigenen Regeln. Sie sind kein Test und kein Urteil über einzelne Marken.")}
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;

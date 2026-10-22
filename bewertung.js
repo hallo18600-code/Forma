@@ -344,7 +344,8 @@ function scoreAllGoals(item){ const o={}; R_GOALS.forEach(g=>o[g]=scoreFood(item
 // Supplements aus der Datenbank (Kapseln, Pulver, Brausetabletten) wie im Supplement-Bereich bewerten, nicht wie Essen
 function rSupKind(item,h,cat){
   const pr=+item.protein||0, su=+item.sugar||0;
-  if(/(saft|nektar|drink|getrank|water|wasser|schorle|limo|bonbon|riegel|joghurt|musli|tee |smoothie|mineral|kaugummi)/.test(h)) return null;
+  if(/(saft|nektar|drink|getrank|water|wasser|schorle|limo|bonbon|riegel|joghurt|musli|tee |smoothie|mineral|kaugummi|sirup|sirop|capri|traubenzucker|dextro)/.test(h)) return null;
+  if(su>=50) return null;   // überwiegend Zucker: wie eine Süßigkeit bewerten, nicht wie ein Supplement
   if(cat&&cat.id==="whey"&&pr>=50) return "whey";
   if(/(kreatin|creatin)/.test(h)) return "crea";
   if(/(kollagen|collagen)/.test(h)&&(pr>=60||+item.kcal<50)) return "col";

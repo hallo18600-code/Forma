@@ -256,7 +256,7 @@ function hautProblem(st,a,c){
       P.spf="Mineral-LSF"; P.wash="Waschmilch"; P.cream="Panthenol-Creme";
       P.items=[tip("Azelainsäure",`Azelainsäure 10–15 % abends${slow?", jeden 2. Tag":""}`,"Kann Rötungen und kleine Pickel verringern.",{product:"azelain"}),
         tip(null,"Hitze, Alkohol, Scharfes meiden","Das sind häufige Auslöser für Rötungen."), lsf("Sonne ist der häufigste Auslöser.")];
-      P.pm.push("Azelainsäure"); P.note="Das kann Rosazea sein. Ein Hautarzt kann dir stärkere Mittel geben.";
+      P.pm.push("Azelainsäure"); P.note="Rötung bleibt: Hautarzt.";
     } else if(rot==="Schuppig an Nase / Brauen"){
       P.cream="Creme ohne Öle";
       P.items=[tip("Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche drauf","Mit Zink oder Piroctone Olamine, 3 Minuten einwirken lassen, dann abwaschen."),
@@ -504,7 +504,7 @@ const PLAN_INFO={
 function muskelTips(a,lvl,g,fatGoal,prot,lifts){
   const pid=muskelPlanId(a,lifts), P=PLAN_INFO[pid], have=(state.routines||[]).some(r=>r.id===pid);
   const gym=a.gym||"", beginner=gym==="Gym, Anfänger"||gym==="Noch gar nicht";
-  const surplus=lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal, G={grp:"Training"};
+  const surplus=lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal&&(+state.profile.weight||70)/Math.pow(state.profile.height/100,2)<30, G={grp:"Training"};
   return [
     tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why,Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
     tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wiederholungen oder eine schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche eine Wiederholung mehr.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
@@ -515,14 +515,15 @@ function muskelTips(a,lvl,g,fatGoal,prot,lifts){
 }
 function aussehenAdvice(a){
   const ziel=a.ziel||[], lvl=kfaLevel(a), g=state.profile.goal, t=targets(), p=state.profile;
+  const bmiNow=(+p.weight||70)/Math.pow(p.height/100,2), under=bmiNow<18.5;   // Untergewicht: nie zum Defizit raten
   const lifts=["Krafttraining","Beides"].includes(p.trainType);
   const fatGoal=ziel.includes("Weniger Bauchfett")||ziel.includes("Gesicht definierter");
   const hm2=Math.pow(p.height/100,2), prot=Math.max(t.protein, Math.round(Math.min(p.weight,25*hm2)*1.6));
   let cal=null;
-  if(lvl>=3||(lvl===2&&fatGoal))
+  if(!under&&(lvl>=3||(lvl===2&&fatGoal)))
     cal = g==="lose" ? tip("Defizit halten",`Bei ${de(t.kcal)} kcal bleiben`,"So verlierst du Fett und behältst deine Muskeln.")
       : tip("Leichtes Defizit",`Kalorien auf ${de(kcalFor("lose"))} senken`,"Bauch und Gesicht werden erst schlanker, wenn der Körperfettanteil sinkt.",{act:"coach-goal",v:"lose",label:"Kalorienziel senken",once:1});
-  const lean = lvl===0&&g==="lose" ? tip("Muskeln aufbauen","Nicht weiter abnehmen","Du bist schon schlank. Mehr Muskeln geben dir jetzt mehr Form.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen",once:1}) : null;
+  const lean = g==="lose"&&(under||(lvl===0&&bmiNow<30)) ? tip("Muskeln aufbauen","Nicht weiter abnehmen","Du bist schon schlank. Mehr Muskeln geben dir jetzt mehr Form.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen",once:1}) : null;
   const sit = (a.sitzen||knownSitzen())==="Über 8" ? tip("Stündlich aufstehen","Jede Stunde 2 Min aufstehen","Das entlastet den Rücken und regt den Kreislauf an.") : null;
   const G={
     "Weniger Bauchfett":[cal, tip(`${de(Math.max(8000,p.stepGoal||8000))} Schritte`,`${de(Math.max(8000,p.stepGoal||8000))}+ Schritte am Tag`,"Verbraucht Energie, ohne viel Hunger zu machen."),
