@@ -526,7 +526,7 @@ function aussehenAdvice(a){
   const G={
     "Weniger Bauchfett":[cal, tip(`${de(Math.max(8000,p.stepGoal||8000))} Schritte`,`${de(Math.max(8000,p.stepGoal||8000))}+ Schritte am Tag`,"Verbraucht Energie, ohne viel Hunger zu machen."),
       tip(null,"Bauchübungen allein reichen nicht","Fett lässt sich nicht gezielt an einer Stelle abbauen.")],
-    "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Mit Nasenatmung und guter Haltung wirkt die Kinnlinie definierter.")],
+    "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Achte auf Nasenatmung und eine aufrechte Kopfhaltung. Dass sich die Kieferform dadurch ändert, ist nicht belegt.")],
     "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern und Face Pulls ziehen die Schultern nach hinten.",{once:1}),
       tip("Brust dehnen","Täglich 30 Sek. Brust dehnen (Türrahmen)","Eine verkürzte Brustmuskulatur zieht die Schultern nach vorn."), sit],
     "Frischer wirken":[tip("7–9 h Schlaf","7–9 Stunden schlafen","Zu wenig Schlaf sieht man schnell im Gesicht."),
@@ -538,7 +538,7 @@ function aussehenAdvice(a){
     const ab=["Salziges / Fast Food","Alkohol","Spät gegessen"].filter(x=>(a.abend||[]).includes(x));
     const less=ab.filter(x=>x!=="Spät gegessen").map(x=>x==="Alkohol"?"Alkohol":"Salz"), early=ab.includes("Spät gegessen");
     const abT=less.length?`Abends weniger ${less.join(" und ")}${early?(less.length>1?", früher essen":" und früher essen"):""}`:"Abends früher essen";
-    groups.push([tip("Gua Sha","Morgens 2 Min Gua Sha, nach außen","Kann Schwellungen verringern, das Gesicht wirkt schmaler."),
+    groups.push([tip("Gua Sha","Morgens 2 Min Gua Sha, nach außen","Kann morgendliche Schwellungen kurz verringern. Der Effekt hält nur einige Stunden."),
       ab.length?tip(null,abT,"Das kann über Nacht Wasser im Gesicht einlagern."):tip(null,"Kopf beim Schlafen leicht hoch","Morgens sammelt sich weniger Wasser im Gesicht.")]);
   }
   groups.push([sit]);

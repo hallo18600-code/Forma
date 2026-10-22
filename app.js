@@ -374,6 +374,7 @@ function impressumSheet(){
     ${li("Verantwortlich für den Inhalt",ANBIETER.name+(ANBIETER.strasse?", Anschrift wie oben":""))}
     ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org).")}
     ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte und keine medizinische Beratung. Sie ersetzen keinen Arzt.")}
+    ${li("Bewertungen","Die Scores sind eine Einschätzung der App nach eigenen Regeln. Sie sind kein Test und kein Urteil über einzelne Marken.")}
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
 }
 // Datenschutzerklärung in kurzen Punkten (Apple verlangt den Text in der App)
@@ -499,7 +500,7 @@ function renderModal(){
     <div class="opts">${[["wenig","Selten"],["oft","Oft"]].map(([v,l])=>`<button class="chip ${state.profile.fish===v?"on":""}" data-act="set" data-k="fish" data-v="${v}">${l}</button>`).join("")}</div>
     <div class="gap"></div><button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="weigh") inner=weighSheet();
-  if(type==="legal") inner=`<h2>Hinweise</h2><p class="sub">Nur für Erwachsene. Richtwerte, keine medizinische Beratung. Supplements ersetzen kein Essen. Produktdaten teils von Open Food Facts (© Open Food Facts-Mitwirkende, ODbL 1.0). Daten bleiben im Browser dieses Geräts.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  if(type==="legal") inner=`<h2>Hinweise</h2><p class="sub">Nur für Erwachsene. Richtwerte, keine medizinische Beratung. Supplements ersetzen kein Essen. Produktdaten teils von Open Food Facts (© Open Food Facts-Mitwirkende, ODbL 1.0). Daten bleiben im Browser dieses Geräts.</p><p class="sub">Die Scores sind eine Einschätzung der App nach eigenen Regeln. Sie sind kein Test und kein Urteil über einzelne Marken.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
   if(type==="privacy") inner=privacySheet();
   if(type==="impressum") inner=impressumSheet();
   if(type==="stack") inner=stackSheet();

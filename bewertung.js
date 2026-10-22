@@ -79,7 +79,7 @@ const R_CATS=[
   {id:"protdairy",k:["skyr","quark","huttenkase","korniger frischkase","cottage","high protein joghurt","protein joghurt","proteinjoghurt","griechischer joghurt","griechisch joghurt","=ymer","magerquark","speisequark"],w:1,d:1,
    b:[94,95,58,74],g:["Sehr viel Protein, kaum Kalorien","Viel Protein, macht lange satt","Viel Protein für Kollagen","Protein hält Blutzucker stabil"],x:["","","Milchprodukt – kann bei manchen Unreinheiten fördern","Kaum Carbs für schnelle Energie"]},
   {id:"kefir",k:["kefir","=ayran","dickmilch","sauermilch","buttermilch","=lassi","=laban"],w:1,d:1,
-   b:[74,72,64,70],g:["Protein & fermentiert","Fermentiert & leicht","Fermentiert – gut für den Darm","Fermentiert, leicht verdaulich"],x:["Weniger Protein als Skyr","","Trotzdem ein Milchprodukt",""]},
+   b:[74,72,64,70],g:["Protein & fermentiert","Fermentiert & leicht","Fermentiert, mit lebenden Kulturen","Fermentiert, leicht verdaulich"],x:["Weniger Protein als Skyr","","Trotzdem ein Milchprodukt",""]},
   {id:"dairy",n:["kokosmilch","kokosnussmilch","coconut milk","lait de coco","kokosjoghurt","kokos joghurt","hafermilch","mandelmilch","reismilch","sojamilch","sojajoghurt","milchschokolade","milchreis","schokomilch"],k:["frischcreme","fromage blanc","fromage frais","=lait","leche entera","=leche","yaourt","yoghourt","=yogur","actimel","=melk","creme entiere","creme legere","creme fleurette","smietana","philadelphia","=kiri","exquisa","=panna","nata montada","petit suisse","milch","joghurt","jogurt","yogurt","sahne","schmand","creme fraiche","frischkase","mascarpone","ricotta","=rahm","kaffeesahne","kondensmilch","schlagsahne","saure sahne","=milk"],w:1,d:1,
    b:[66,60,50,62],g:["Calcium & etwas Protein","Calcium & etwas Protein","Liefert Protein & Calcium","Protein & Carbs"],x:["","%Fettreich – auf Fettstufe achten","Milch kann bei manchen Unreinheiten fördern",""]},
   {id:"cheese",k:["fromage","formaggio","queso","parmigiano","emmental","vache qui rit","leerdamer","quesitos","saint agur","=comte","roquefort","reblochon","gruyere","pecorino","kase","cheese","gouda","emmentaler","parmesan","grana padano","pecorino","mozzarella","burrata","=feta","camembert","=brie","cheddar","halloumi","manchego","gorgonzola","raclette","tilsiter","edamer","butterkase","harzer","appenzeller","gruyere","comte","provolone","=schafskase","ziegenkase","hirtenkase","bergkase","leerdammer","maasdamer","babybel","limburger","romadur","=quarkkase"],w:1,d:1,
@@ -93,7 +93,7 @@ const R_CATS=[
   {id:"legume",k:["lentille","lentil","pois chiche","haricot","frijol","alubia","garbanzo","baked bean","=fagioli","ceci","lenticchie","linse","kichererbse","kidneybohne","=bohnen","schwarze bohnen","weisse bohnen","borlotti","cannellini","wachtelbohne","mungbohne","hummus","humus","lupine","=erbsenprotein","bohneneintopf","=dal"],n:["grune bohnen","brechbohnen","bohnen grun","prinzessbohnen","bohnenkraut","kaffeebohne"],w:1,
    b:[64,66,62,72],g:["Pflanzliches Protein & Carbs","Ballaststoffe & Protein sättigen","Ballaststoffe & Zink","Langsame Carbs für lange Energie"],x:["Hülsenfrucht, nicht primal","Hülsenfrucht, nicht primal","Hülsenfrucht, nicht primal","Kann blähen – gut kochen"]},
   {id:"fermentedveg",k:["chucrut","choucroute","sauerkraut","kimchi","=kombucha","milchsauer","fermentiert"],w:1,
-   b:[60,92,94,70],g:["Mikronährstoffe für die Regeneration","Kaum Kalorien, viel Geschmack","Fermentiert – gut für Darm & Haut","Vitamin C & Ballaststoffe"],x:["Kaum Protein","","","Wenig Kalorien – keine Energiequelle"]},
+   b:[60,92,94,70],g:["Mikronährstoffe für die Regeneration","Kaum Kalorien, viel Geschmack","Fermentiert, oft mit lebenden Kulturen","Vitamin C & Ballaststoffe"],x:["Kaum Protein","","","Wenig Kalorien – keine Energiequelle"]},
   {id:"sweetpotato",k:["susskartoffel","batate","=yams","sweet potato"],w:1,
    b:[74,78,95,90],g:["Gute Carbs fürs Training","Sättigt bei moderaten Kalorien","Viel Beta-Carotin für die Haut","Langsame, gut verträgliche Carbs"],x:["Kaum Protein","","",""]},
   {id:"potato",k:["kartoffel","erdapfel","drillinge","pellkartoffel","salzkartoffel","bratkartoffel","maniok","cassava","pastinake","topinambur","=knolle","kartoffelpuree","kartoffelbrei"],w:1,
@@ -148,7 +148,7 @@ const R_MICRO=[
   {k:["spinat","mangold"],s:6,e:4,ts:"Vitamin A, C & E für die Haut",te:"Eisen & Magnesium"},
   {k:["grunkohl","=kale","palmkohl"],s:8,e:4,ts:"Viel Vitamin A, C & K für die Haut",te:"Eisen & Magnesium"},
   {k:["paprika"],s:6,ts:"Sehr viel Vitamin C für Kollagen"},
-  {k:["tomate","passata","tomatenmark"],s:4,ts:"Lycopin schützt die Haut"},
+  {k:["tomate","passata","tomatenmark"],s:4,ts:"Enthält Lycopin, ein Antioxidans"},
   {k:["brokkoli","broccoli","rosenkohl"],s:5,m:1,ts:"Vitamin C & Sulforaphan"},
   {k:["rote bete","rote beete","rote rube"],s:3,e:4,m:2,ts:"Antioxidantien für die Haut",te:"Nitrat für bessere Durchblutung",tm:"Nitrat für mehr Ausdauer"},
   {k:["rucola","feldsalat","brunnenkresse","=kresse","postelein"],s:3,e:1,ts:"Vitamin K & Folat"},
@@ -181,9 +181,9 @@ const R_MICRO=[
   {k:["linse","kichererbse","bohne"],s:1,e:4,te:"Eisen & Magnesium"},
   {k:["olivenol","olive oil","huile d'olive","olio"],s:5,ts:"Polyphenole & Vitamin E"},
   {k:["gruner tee","gruntee","matcha","grunter tee"],s:4,e:1,ts:"Antioxidantien (EGCG)",te:"Sanftes Koffein ohne Crash"},
-  {k:["kurkuma","ingwer"],s:2,ts:"Wirkt entzündungshemmend"},
+  {k:["kurkuma","ingwer"],s:2,ts:"Reich an Pflanzenstoffen"},
   {k:["knochenbruhe","bone broth","rinderfond","kalbsfond"],s:4,m:1,ts:"Kollagen für die Haut"},
-  {k:["sauerkraut","kimchi","kefir","kombucha"],s:3,e:1,ts:"Probiotika für Darm & Haut"},
+  {k:["sauerkraut","kimchi","kefir","kombucha"],s:3,e:1,ts:"Fermentiert, oft mit lebenden Kulturen"},
   {k:["ziegen","schafs","=feta","hirtenkase","buffel"],s:8,ts:"Schaf/Ziege oft besser verträglich"},
   {k:["kakao","cacao","zartbitter","edelbitter"],s:3,e:2,ts:"Flavanole für die Haut",te:"Magnesium"},
   {k:["=ei","=eier","ruhrei","spiegelei","freilandei"],s:2,e:1,ts:"Biotin, Vitamin A & Protein"},
@@ -452,7 +452,7 @@ function scoreFood(item,goal){
   if(id==="honey"){
     if(/(imker|roh|raw|kaltgeschleudert|wabenhonig|waben|naturbelassen|regional|heimisch|deutscher honig|aus deutschland)/.test(h)){ score+=[3,3,6,4][gi]; good("Imkerhonig: roh & naturbelassen",12.5); }
     else if(/(eu-?landern|nicht-eu|mischung|aus eu)/.test(h)){ score-=[1,1,3,2][gi]; bad("Mischhonig: oft stark erhitzt",7); }
-    if(/manuka/.test(h)){ score+=[1,1,5,2][gi]; good("Manuka: wirkt antibakteriell",12); }
+    if(/manuka/.test(h)){ score+=[1,1,5,2][gi]; good("Manuka-Honig",12); }
   }
   if(id==="juice"){
     if(/smoothie/.test(h)){ score+=[2,3,5,4][gi]; good("Mit Fruchtfleisch: mehr Ballaststoffe",9); }
@@ -503,16 +503,16 @@ function scoreFood(item,goal){
   if(hp.includes("Unreinheiten")){
     if(["protdairy","kefir","dairy","cheese","whey","coffeemilk"].includes(id)&&!plant) H(-7,"Milch kann deine Unreinheiten verstärken");
     else if(su>=12&&!R_FRUITY.includes(id)) H(-6,"Zucker kann deine Unreinheiten verstärken");
-    if(/zink|omega/i.test(microTxt)||["fattyfish","organ"].includes(id)) H(5,"Zink/Omega-3 gegen Unreinheiten");
+    if(/zink|omega/i.test(microTxt)||["fattyfish","organ"].includes(id)) H(5,"Liefert Zink/Omega-3 für die Haut");
   }
   if(hp.includes("Rötung")){
     if(id==="alcohol") H(-8,"Alkohol verstärkt Rötungen");
-    if(/omega/i.test(microTxt)||id==="fattyfish") H(5,"Omega-3 beruhigt gerötete Haut");
+    if(/omega/i.test(microTxt)||id==="fattyfish") H(5,"Liefert Omega-3-Fettsäuren");
   }
-  if(hp.includes("Trockenheit")&&(R_GOODFAT.includes(id)||/omega|vitamin e/i.test(microTxt))&&!heavy) H(5,"Gute Fette gegen trockene Haut");
+  if(hp.includes("Trockenheit")&&(R_GOODFAT.includes(id)||/omega|vitamin e/i.test(microTxt))&&!heavy) H(5,"Gute Fette für die Haut");
   if((hp.includes("Wirkt stumpf")||hp.includes("Pigmentflecken"))&&(["berries","skinveg","vitc","vegjuice"].includes(id)||/antioxid|vitamin c|carotin/i.test(microTxt))&&!heavy) H(5,"Antioxidantien für einen frischen Teint");
-  if(hp.includes("Erste Fältchen")&&(["broth","fattyfish","vitc"].includes(id)||/kollagen|vitamin c/i.test(microTxt))&&!heavy) H(5,"Kollagen & Vitamin C gegen Fältchen");
-  if(hp.includes("Glänzt / große Poren")&&["refined","sweets","fastfood","chips","cereal"].includes(id)) H(-5,"Schnelle Carbs fördern fettige Haut");
+  if(hp.includes("Erste Fältchen")&&(["broth","fattyfish","vitc"].includes(id)||/kollagen|vitamin c/i.test(microTxt))&&!heavy) H(5,"Kollagen & Vitamin C für die Haut");
+  if(hp.includes("Glänzt / große Poren")&&["refined","sweets","fastfood","chips","cereal"].includes(id)) H(-5,"Schnelle Carbs können fettige Haut fördern");
   const fokus=foodFocus(), intol=ea.intol||[];
   const lak=["protdairy","kefir","dairy","cheese","whey","coffeemilk"].includes(id)||foodHas(item,"lak")&&!plant;
   const glu=["wholewheat","refined"].includes(id)||foodHas(item,"glu");
@@ -558,11 +558,11 @@ function rateList(sc){
   return `<div class="rpc">${g.map(t=>`<div class="rp"><i>✓</i><span>${esc(t)}</span></div>`).join("")}${b.map(t=>`<div class="rc"><i>✕</i><span>${esc(t)}</span></div>`).join("")}</div>`;
 }
 
-// Qualität: Bio, Weide, Freiland, Wildfang leicht besser; Günstigmarken & einfache Haltung leicht schlechter.
+// Qualität: Bio, Weide, Freiland, Wildfang leicht besser; einfache Haltung (laut Produktname) leicht schlechter.
+// Keine Abwertung nur wegen der Marke: das wäre eine Vermutung, keine Angabe am Produkt.
 // Nur kleine Unterschiede (max. ±4), weil Haltung am Namen nicht sicher erkennbar ist.
 const R_ANIMAL=["poultry","redmeat","processedmeat","organ","broth","fattyfish","leanfish","egg","protdairy","kefir","dairy","cheese","butter"];
 const R_BIO_BRANDS=["rewe bio","edeka bio","biobio","bio bio","alnatura","gut bio","gutbio","k-bio","k bio","dmbio","dm bio","naturgut","natur gut","dennree","andechser","sobbeke","zuruck zum ursprung","enerbio","demeter","bioland","naturland","nur nur natur","schrozberger","uplander","glaserne molkerei","bio wertkost","bio sonne","bio organic","biotrend","ja! bio","spar natur pur","naturkind","alnavit","berchtesgadener land bio"];
-const R_BUDGET=["ja!","=ja","gut & gunstig","gut&gunstig","gut und gunstig","k-classic","k classic","kaufland classic","=tip","jeden tag","s-budget","muhlenhof","metzgerfrisch","meine metzgerei","gut ponholz","gut drei eichen","wiltmann","penny","=milsani","=milbona","=dulano"];
 function rateQuality(item,id,h,add){
   const bn=" "+NORM(item.brand||"")+" ", all=h+bn, ani=R_ANIMAL.includes(id), fish=id==="fattyfish"||id==="leanfish";
   const bw=bn.trim().split(/[^a-z0-9!&-]+/).filter(Boolean);
@@ -572,7 +572,6 @@ function rateQuality(item,id,h,add){
   const wild=fish&&/(wildlachs|wildfang|wild caught|wild gefangen|^ wild|alaska)/.test(all);
   const msc=fish&&/(msc|nachhaltig gefangen|nachhaltiger fang)/.test(all);
   const low=/(stallhaltung|bodenhaltung|kafighaltung|kleingruppe|haltungsform 1|haltungsform 2|haltungsstufe 1|haltungsstufe 2|aquakultur|zuchtlachs|aus zucht)/.test(all);
-  const budget=R_BUDGET.some(b=>b[0]==="="?bw.includes(b.slice(1)):bn.includes(b));
   if(ani){
     let v=0, t=[];
     if(bio){ v+=3; t.push(id==="egg"?"Bio-Eier: beste Haltung":fish?"Bio: kontrollierte Herkunft":"Bio: bessere Haltung & Futter"); }
@@ -582,7 +581,6 @@ function rateQuality(item,id,h,add){
     else if(msc&&!bio){ v+=1; t.push("MSC: nachhaltiger Fang"); }
     if(v){ add(Math.min(4,v),t[0],40); return; }
     if(low){ add(-3,id==="egg"?"Einfache Haltung (Bodenhaltung)":fish?"Aus Zucht (Aquakultur)":"Einfache Haltung (Stufe 1–2)",40); return; }
-    if(budget&&id!=="broth") add(-2,"Günstigmarke – Haltung meist einfach",40);
   } else if(bio&&!["sweets","softdrink","alcohol","chips","fastfood","sugar","cereal","ersatz","plantmilk","margarine","seedoil","readymeal","sauce","proteinbar"].includes(id)){
     add(2,"Bio: weniger Pestizide",20);
   }
