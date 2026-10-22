@@ -7,7 +7,7 @@ const app=rd("app.js"), cut=(a,b)=>app.slice(app.indexOf(a),app.indexOf(b));
 vm.runInContext(rd("data.js")+"\n"+rd("bewertung.js")+"\n"+cut("const FOOD_KW","// scoreFood steht")+"\nthis.CL=rClassify; this.NU=rNutri;",ctx);
 const rows=JSON.parse(rd("foods.json")).rows, groups={};
 for(const x of rows){
-  const it={name:x[1],kcal:x[3],protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7],fiber:x[8],salt:x[9],nova:x[11],processed:x[11]>=4};
+  const it={name:x[1],brand:x[2]||"",kcal:x[3],protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7],fiber:x[8],salt:x[9],nova:x[11],processed:x[11]>=4};
   const C=ctx.CL(it), id=C.cat?C.cat.id:"", N=ctx.NU(C.nut,id); if(!N) continue;
   const k=id||("_"+(C.nova||0)); (groups[k]=groups[k]||[[],[],[],[]]).forEach((a,i)=>a.push(N[i]));
 }

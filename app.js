@@ -71,20 +71,29 @@ function protPerKg(p){
   const lifts=["Krafttraining","Beides"].includes(p.trainType)&&p.trainFreq&&p.trainFreq!=="Gar nicht";
   return p.goal==="lose"?(lifts?2.0:1.6):p.goal==="muscle"?1.8:lifts?1.6:1.3;
 }
+// Selbst angegebener Körperfettanteil (Fragebogen/Coach): 0 = schlank … 3 = hoch, null = nicht angegeben.
+// Wichtig für muskulöse Menschen: Ihr BMI ist hoch, obwohl sie wenig Fett haben.
+function kfaStated(){
+  const a=((state.coach||{}).answers||{}).aussehen||{}, o=typeof kfaOpts==="function"?kfaOpts():[], i=o.indexOf(a.kfa);
+  return i>=0&&i<4?i:null;
+}
+// Muskulös statt übergewichtig: KFA selbst als niedrig angegeben (Männer unter 18 %, Frauen unter 27 %)
+function leanStated(){ const k=kfaStated(); return k!==null&&k<=1; }
 function targets(){
   const p=state.profile, w=+p.weight||70, h=+p.height||175, m=h/100;
   const bmr=10*w+6.25*h-5*(+p.age||30)+(p.sex==="m"?5:-161);
   const tdee=bmr*(PAL_ALLTAG[p.activity]||p.activity||1.375)+trainKcal(p);
-  let kcal=tdee; const bmiNow=w/(m*m);
+  let kcal=tdee; const bmiNow=w/(m*m), lean=leanStated();
   // Abnehmen: ca. 0,5 % Körpergewicht pro Woche (1 kg Fett ≈ 7.700 kcal), höchstens 20 % unter Bedarf.
   // Bei Untergewicht (BMI < 18,5) KEIN Defizit, nur Halten – dazu zeigt safetyNote() eine Warnung.
   if(p.goal==="lose"&&bmiNow>=18.5) kcal-=Math.min(tdee*0.2, w*0.005*7700/7);
   // Muskeln: kleines Plus (ca. 10 %, 200–300 kcal), damit möglichst wenig Fett dazukommt.
-  // Ab BMI 30 kein Plus: Muskelaufbau klappt dann auch beim Halten der Kalorien.
-  if(p.goal==="muscle"&&bmiNow<30) kcal+=Math.min(300,Math.max(200,tdee*0.1));
+  // Ab BMI 30 kein Plus (Muskelaufbau klappt dann auch beim Halten) – außer der KFA ist laut Angabe niedrig (z. B. Bodybuilder).
+  if(p.goal==="muscle"&&(bmiNow<30||lean)) kcal+=Math.min(300,Math.max(200,tdee*0.1));
   kcal=Math.round(Math.max(p.sex==="m"?1500:1200, kcal)/10)*10;
-  // Protein je kg – bei hohem BMI aufs Gewicht bei BMI 25 bezogen (sonst unrealistisch hoch)
-  const ref=Math.min(w,25*m*m), protein=Math.round(ref*protPerKg(p));
+  // Protein je kg – bei hohem BMI aufs Gewicht bei BMI 25 bezogen (sonst unrealistisch hoch).
+  // Ist der KFA laut Angabe niedrig, zählt das echte Gewicht (viel Muskelmasse braucht mehr Protein).
+  const ref=lean?w:Math.min(w,25*m*m), protein=Math.round(ref*protPerKg(p));
   // Fett ca. 28 % (mind. 0,8 g/kg), Carbs = der Rest. So ergeben die Makros genau die Kalorien.
   const fat=Math.round(Math.max(kcal*0.28/9, ref*0.8));
   const carbs=Math.max(0,Math.round((kcal-protein*4-fat*9)/4));
