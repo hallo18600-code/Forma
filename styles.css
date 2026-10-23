@@ -1011,3 +1011,9 @@ details.tip[open] .chev { transform:rotate(90deg); }
 .rs-tap .rt-chk { top:50%; transform:translateY(-50%); }
 .rs-tap.on .rt-chk { background:var(--accent); border-color:var(--accent); }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .tip-bar { background:rgba(0,0,0,.3); } }
+
+/* Hinweise vor der Nutzung (Onboarding "Kurz vorab") */
+.terms { display:flex; flex-direction:column; gap:var(--s-3); margin-top:var(--s-4); }
+.terms-li { display:flex; gap:var(--s-3); align-items:flex-start; padding:var(--s-3) var(--s-4); border-radius:16px; background:var(--surface); }
+.terms-li span { font-size:20px; line-height:1.3; }
+.terms-li p { margin:0; font-size:var(--fs-m, 15px); line-height:1.4; }

@@ -1,10 +1,9 @@
 // Health Maxxing – Service Worker: macht die App offline nutzbar.
 // C = App-Dateien (Version bei jeder Änderung an index.html/JS hochzählen).
 // D = Produktdatenbank (bleibt über App-Updates erhalten, wird im Hintergrund aktualisiert).
-const C="forma-v81", D="forma-data",
-  A=["./","index.html","styles.css","data.js","foods-search.js","portionen.js","texterkennung.js","scanner.js","tagebuch.js","coach.js","onboarding.js","training.js","verlauf.js","profil.js","figur.js","uebungen.js","bewertung.js","i18n.js","app.js","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"],
-  ZX="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
-self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A).then(()=>c.add(ZX).catch(()=>{}))).then(()=>self.skipWaiting()));});
+const C="forma-v82", D="forma-data",
+  A=["./","index.html","styles.css","data.js","foods-search.js","portionen.js","texterkennung.js","scanner.js","tagebuch.js","coach.js","onboarding.js","training.js","verlauf.js","profil.js","figur.js","uebungen.js","bewertung.js","i18n.js","app.js","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
+self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting()));});
 // Alte Versionen löschen. foods.json aus einer alten Version vorher übernehmen (kein neuer 9-MB-Download).
 async function keepFoods(old){ const d=await caches.open(D); if(await d.match("foods.json")) return; for(const k of old){ const h=await (await caches.open(k)).match("foods.json"); if(h){ await d.put("foods.json",h); return; } } }
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>{ const old=k.filter(x=>x!==C&&x!==D); return keepFoods(old).catch(()=>{}).then(()=>Promise.all(old.map(x=>caches.delete(x)))); }).then(()=>self.clients.claim()));});

@@ -1,5 +1,15 @@
 // Health Maxxing – Barcode-Scanner, Kamera, KI-Eingabe und Scan-Ansichten
 const cam={s:null,t:null,r:null};
+// Barcode-Bibliothek (ZXing) nur laden, wenn das Gerät keinen eingebauten Scanner hat – und erst beim Scannen.
+// Zuerst die lokale Kopie (vendor/zxing.min.js, keine Daten an Dritte); fehlt sie, einmalig vom CDN.
+const ZX_LOCAL="vendor/zxing.min.js", ZX_CDN="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js";
+let zxLoad=null;
+function loadScript(src){ return new Promise((ok,no)=>{ const s=document.createElement("script"); s.src=src; s.onload=ok; s.onerror=()=>{ s.remove(); no(new Error("load")); }; document.head.appendChild(s); }); }
+function loadZXing(){
+  if(window.ZXing) return Promise.resolve();
+  if(!zxLoad) zxLoad=loadScript(ZX_LOCAL).catch(()=>loadScript(ZX_CDN)).catch(e=>{ zxLoad=null; throw e; });
+  return zxLoad;
+}
 function stopCam(){ if(cam.t){ clearInterval(cam.t); cam.t=null; } if(cam.r){ try{ cam.r.reset(); }catch(e){} cam.r=null; } if(cam.s){ cam.s.getTracks().forEach(t=>t.stop()); cam.s=null; } }
 async function startCam(){
   ui.camMsg="";
@@ -10,7 +20,7 @@ async function startCam(){
       cam.s=st; v.srcObject=st; await v.play();
       const det=new BarcodeDetector({formats:["ean_13","ean_8","upc_a","upc_e"]});
       cam.t=setInterval(async()=>{ try{ const r=await det.detect(v); if(r.length){ const c=r[0].rawValue; stopCam(); bcLookup(c); } }catch(e){} },400);
-    } else if(window.ZXing){
+    } else if(await loadZXing().then(()=>!!window.ZXing,()=>false)){
       const hints=new Map(); hints.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.EAN_13,ZXing.BarcodeFormat.EAN_8,ZXing.BarcodeFormat.UPC_A,ZXing.BarcodeFormat.UPC_E]);
       cam.r=new ZXing.BrowserMultiFormatReader(hints);
       await cam.r.decodeFromConstraints({video:{facingMode:"environment"}},v,res=>{ if(res){ const c=res.getText(); stopCam(); bcLookup(c); } });

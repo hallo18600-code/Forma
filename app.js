@@ -385,7 +385,7 @@ function impressumSheet(){
     ${li("Kontakt","E-Mail: "+ANBIETER.mail)}
     ${li("Verantwortlich für den Inhalt",ANBIETER.name+(ANBIETER.strasse?", Anschrift wie oben":""))}
     ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org). Angaben ohne Gewähr, sie können Fehler enthalten. Maßgeblich ist die Packung.")}
-    ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte und keine medizinische Beratung. Sie ersetzen keinen Arzt.")}
+    ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte für gesunde Erwachsene und keine medizinische Beratung. Sie ersetzen keinen Arzt. Nicht geeignet bei Essstörungen, in Schwangerschaft oder Stillzeit.")}
     ${li("Bewertungen","Die Scores sind eine Einschätzung der App nach eigenen Regeln. Sie sind kein Test und kein Urteil über einzelne Marken.")}
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
 }
@@ -399,7 +399,7 @@ function privacySheet(){
     ${li("Barcode-Suche","Fehlt ein Produkt in der eingebauten Liste, fragt die App die Barcode-Nummer bei Open Food Facts (openfoodfacts.org, Frankreich) ab. Gesendet wird nur die Nummer und, wie bei jeder Internet-Anfrage, deine IP-Adresse. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.")}
     ${li("Kamera","Nur zum Scannen von Barcodes. Bilder werden nicht gespeichert oder gesendet.")}
     ${li("Sprache","Nur wenn du „Sprechen“ tippst. Die Erkennung übernimmt dein Browser bzw. Handy; dessen Anbieter kann die Aufnahme dafür verarbeiten.")}
-    ${li("Hosting","Die Web-Version liegt bei GitHub Pages (GitHub Inc., USA). Beim Laden speichert GitHub technisch nötige Daten wie die IP-Adresse kurz in Server-Protokollen. Die Barcode-Bibliothek kommt einmalig von cdn.jsdelivr.net. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (sicherer Betrieb).")}
+    ${li("Hosting","Die Web-Version liegt bei GitHub Pages (GitHub Inc., USA). Beim Laden speichert GitHub technisch nötige Daten wie die IP-Adresse kurz in Server-Protokollen. Hat dein Gerät keinen eingebauten Barcode-Scanner, lädt die App beim ersten Scannen eine Scan-Bibliothek nach (falls nicht mitgeliefert: von cdn.jsdelivr.net, dabei wird die IP-Adresse übertragen). Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (sicherer Betrieb).")}
     ${li("Exportieren und löschen","Profil → Daten exportieren. Profil → Alles löschen entfernt alles sofort und endgültig.")}
     ${li("Deine Rechte","Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragung und Widerspruch. Schreib dafür an die E-Mail oben. Du kannst dich auch beim Bayerischen Landesamt für Datenschutzaufsicht (lda.bayern.de) beschweren.")}
     ${li("Alter","Die App ist nur für Erwachsene ab 18 Jahren gedacht.")}
@@ -532,7 +532,8 @@ function renderModal(){
 }
 function render(){ try{ ensureRoutine(); }catch(e){}
   const root=document.getElementById("app");
-  let html = !state.onboarded ? (state.step==null ? renderWelcome() : renderOnboard()) : renderApp();
+  const gate=state.onboarded&&(!termsOk()||ui.termsPending);
+  let html = !state.onboarded ? (state.step==null ? renderWelcome() : renderOnboard()) : gate ? renderTermsGate() : renderApp();
   html += renderModal();
   if(state.onboarded) html += renderExInfo();
   if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
@@ -584,6 +585,8 @@ document.getElementById("app").addEventListener("click", e=>{
   if(act==="start-onboard"){ state.step=0; }
   else if(act==="skip-demo"){ if(p.adult){ seedDemo(); toast("Beispieldaten geladen"); } else { state.demoNext=true; state.step=0; save(); } }   // erst Altersfrage
   else if(act==="ob-adult"){ if(el.dataset.v==="1"){ p.adult=true; state.obMinor=false; } else { p.adult=false; state.obMinor=true; } save(); }
+  else if(act==="ob-terms"){ const on=!termsOk(); p.termsOk=on?TERMS_V:0; p.termsAt=on?todayIso():undefined; if(state.onboarded) ui.termsPending=true; save(); }
+  else if(act==="terms-go"){ if(termsOk()){ ui.termsPending=false; render(); } return; }
   else if(act==="ob-pick"){ obPick(el.dataset.v); }
   else if(act==="ob-next"){ obNext(); }
   else if(act==="ob-back"){ obBack(); }
@@ -591,7 +594,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="ob-nudge"){ obNudge(+el.dataset.d); }
   else if(act==="ob-finish"){ obFinish(); }
   else if(act==="ob-close"){ state.obRedo=false; state.onboarded=true; state.step=null; save(); }
-  else if(act==="ob-redo"){ state.ob=Object.assign({},state.ob,{sex:1,goal:1,activity:1,fish:1,sups:1,target:1,weight:1}); state.obRedo=true; state.onboarded=false; state.step=1; ui.modal=null; save(); }
+  else if(act==="ob-redo"){ state.ob=Object.assign({},state.ob,{sex:1,goal:1,activity:1,fish:1,sups:1,target:1,weight:1}); state.obRedo=true; state.onboarded=false; state.step=Math.max(1,obSteps().findIndex(x=>x.id==="name")); ui.modal=null; save(); }
   else if(act==="set"){ p[el.dataset.k]=el.dataset.v; save(); }
   else if(act==="pref"){ prefSet(el.dataset.id,el.dataset.v); }
   else if(act==="set-num"){ p[el.dataset.k]=parseFloat(el.dataset.v); save(); }

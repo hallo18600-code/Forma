@@ -51,6 +51,7 @@ function obSteps(){
   const num=(id,sec,q,min,max,step,unit)=>S.push({id,sec,kind:"num",k:id,q,min,max,step,unit});
   const list=(arr)=>arr.map(([v,l,e,d])=>({v,l,e,d}));
   S.push({id:"adult",sec:"Start",kind:"adult",q:"Bist du 18 oder älter?"});
+  S.push({id:"terms",sec:"Start",kind:"terms",q:"Kurz vorab"});
   S.push({id:"name",sec:"Über dich",kind:"text",k:"name",q:"Wie heißt du?"});
   S.push({id:"sex",sec:"Über dich",kind:"single",req:1,q:"Dein Geschlecht",opts:list([["m","Mann","👨"],["w","Frau","👩"]]), get:()=>obProf("sex"), set:v=>{ p.sex=v; obMark("sex"); }});
   num("age","Über dich","Wie alt bist du?",18,90,1,"Jahre");
@@ -163,6 +164,9 @@ function renderOnboard(){
     body=`<div class="ob-opts">${obOpt({v:"1",l:"Ja, ich bin 18 oder älter",e:"✅"},p.adult,false,"ob-adult")}${obOpt({v:"0",l:"Nein",e:"✋"},state.obMinor,false,"ob-adult")}</div>
       ${state.obMinor?`<div class="warn">Health Maxxing ist erst ab 18.</div>`:""}`;
     can=!!p.adult;
+  } else if(st.kind==="terms"){
+    body=termsBody();
+    can=termsOk();
   } else if(st.kind==="text"){
     body=`<input class="ob-text" data-act="input" data-k="${st.k}" value="${esc(p[st.k]||"")}" placeholder="Vorname (optional)" autocomplete="given-name" maxlength="30">`;
   } else if(st.kind==="num"){
@@ -269,9 +273,30 @@ function obPick(v){
   if(st.kind==="multi"){ st.set(toggleMulti(st.get(),v,st.none,st.pick)); save(); return; }
   st.set(v); save();   // nur auswählen – weiter geht es erst mit "Weiter"
 }
+// Hinweise vor der Nutzung (Version hochzählen, wenn sich der Text wesentlich ändert – dann bestätigen alle neu)
+const TERMS_V=1;
+function termsOk(){ return (+state.profile.termsOk||0)>=TERMS_V; }
+function termsBody(){
+  const pt=(e,t)=>`<div class="terms-li"><span>${e}</span><p>${t}</p></div>`;
+  return `<div class="terms">
+      ${pt("📊","Alle Werte sind Richtwerte für gesunde Erwachsene. Keine medizinische Beratung.")}
+      ${pt("🩺","Nicht geeignet bei Essstörungen, in Schwangerschaft oder Stillzeit. Bei Erkrankungen oder Medikamenten vorher ärztlich abklären.")}
+      ${pt("🤝","Bei Essstörungen hilft ein Gespräch mit Ärzt:in oder einer Beratungsstelle.")}
+      ${pt("✅","Du nutzt die Empfehlungen auf eigene Verantwortung.")}
+    </div>
+    <div class="ob-opts">${obOpt({v:"1",l:"Gelesen und verstanden",e:"👍"},termsOk(),false,"ob-terms")}</div>`;
+}
+// Für alle, die die App schon vorher eingerichtet haben: einmal bestätigen, dann geht es normal weiter
+function renderTermsGate(){
+  return `<div class="screen ob">
+    <div class="scroll ob-body"><h1>Kurz vorab</h1>${termsBody()}</div>
+    <div class="ob-foot"><button class="pill primary" data-act="terms-go" ${termsOk()?"":"disabled"}>Weiter</button></div>
+  </div>`;
+}
 function obNext(){
   const st=obSteps()[state.step]; if(!st) return;
   if(st.kind==="adult"&&!state.profile.adult) return;
+  if(st.kind==="terms"&&!termsOk()) return;
   if(st.kind==="adult"&&state.demoNext){ seedDemo(); toast("Beispieldaten geladen"); return; }   // kam über "Mit Beispieldaten ansehen"
   if(st.kind==="num") obClampNum(st.k);
   if(st.req&&!hasVal(st.get())) return;
