@@ -459,20 +459,20 @@ const CLAIMS = {
 };
 const why = k => Object.keys(CLAIMS[k]);
 const QUESTIONS = [
-  { id: 'sleep', foods: why('sleep'), en: ['why is my sleep so deep?', 'why do I sleep like a baby?'], de: ['warum schlafe ich so tief?'], niche: ['#sleeptips', '#realfood'] },
-  { id: 'skin', foods: why('skin'), en: ['why is my skin so clear?', 'why does my skin glow?'], de: ['warum ist meine Haut so rein?'], niche: ['#clearskin', '#glowup'] },
-  { id: 'eyes', foods: why('eyes'), en: ['why are my eyes so bright?'], de: ['warum strahlen meine Augen so?'], niche: ['#glowup', '#realfood'] },
-  { id: 'mood', foods: why('mood'), en: ['why am I so happy?', 'why am I always in a good mood?'], de: ['warum bin ich so glücklich?'], niche: ['#wellness', '#realfood'] },
-  { id: 'hair', foods: why('hair'), en: ['why is my hair so thick?'], de: ['warum sind meine Haare so dicht?'], niche: ['#hairgrowth', '#glowup'] },
-  { id: 'energy', foods: why('energy'), en: ['why am I never tired?', 'why do I have so much energy?'], de: ['warum bin ich nie müde?'], niche: ['#energy', '#realfood'] },
-  { id: 'strong', foods: why('strong'), en: ['why am I so strong?'], de: ['warum bin ich so stark?'], niche: ['#protein', '#gymtok'] },
-  { id: 'calm', foods: why('calm'), en: ['why am I so calm?'], de: ['warum bin ich so entspannt?'], niche: ['#wellness', '#realfood'] },
-  { id: 'focus', foods: why('focus'), en: ['why am I so focused?', 'why is my brain so sharp?'], de: ['warum bin ich so konzentriert?'], niche: ['#focus', '#realfood'] },
-  { id: 'lean', foods: why('lean'), en: ['why am I so lean?', 'why do I stay so lean?'], de: ['warum bin ich so definiert?'], niche: ['#fatloss', '#realfood'] },
-  { id: 'young', foods: why('young'), en: ['why do I look so young?'], de: ['warum sehe ich so jung aus?'], niche: ['#glowup', '#antiaging'] },
+  { id: 'sleep', foods: why('sleep'), en: ['why is my sleep so deep?', 'why do I sleep like a baby?', 'why do I fall asleep so fast?'], de: ['warum schlafe ich so tief?', 'warum schlafe ich wie ein Baby?', 'warum schlafe ich so schnell ein?'], niche: ['#sleeptips', '#realfood'] },
+  { id: 'skin', foods: why('skin'), en: ['why is my skin so clear?', 'why does my skin glow?', 'why is my skin glowing?'], de: ['warum ist meine Haut so rein?', 'warum strahlt meine Haut so?', 'warum habe ich keine Pickel?'], niche: ['#clearskin', '#glowup'] },
+  { id: 'eyes', foods: why('eyes'), en: ['why are my eyes so bright?', 'why are my eyes so clear?'], de: ['warum strahlen meine Augen so?', 'warum sind meine Augen so klar?'], niche: ['#glowup', '#realfood'] },
+  { id: 'mood', foods: why('mood'), en: ['why am I so happy?', 'why am I always in a good mood?'], de: ['warum bin ich so glücklich?', 'warum habe ich immer gute Laune?'], niche: ['#wellness', '#realfood'] },
+  { id: 'hair', foods: why('hair'), en: ['why is my hair so thick?', 'why is my hair so healthy?'], de: ['warum sind meine Haare so dicht?', 'warum sind meine Haare so gesund?'], niche: ['#hairgrowth', '#glowup'] },
+  { id: 'energy', foods: why('energy'), en: ['why am I never tired?', 'why do I have so much energy?'], de: ['warum bin ich nie müde?', 'warum habe ich so viel Energie?'], niche: ['#energy', '#realfood'] },
+  { id: 'strong', foods: why('strong'), en: ['why am I so strong?', 'why do I build muscle so fast?'], de: ['warum bin ich so stark?', 'warum baue ich so schnell Muskeln auf?'], niche: ['#protein', '#gymtok'] },
+  { id: 'calm', foods: why('calm'), en: ['why am I so calm?', 'why am I never stressed?'], de: ['warum bin ich so entspannt?', 'warum bin ich nie gestresst?'], niche: ['#wellness', '#realfood'] },
+  { id: 'focus', foods: why('focus'), en: ['why am I so focused?', 'why is my brain so sharp?'], de: ['warum bin ich so konzentriert?', 'warum ist mein Kopf so klar?'], niche: ['#focus', '#realfood'] },
+  { id: 'lean', foods: why('lean'), en: ['why am I so lean?', 'why do I stay so lean?'], de: ['warum bin ich so definiert?', 'warum bleibe ich so schlank?'], niche: ['#fatloss', '#realfood'] },
+  { id: 'young', foods: why('young'), en: ['why do I look so young?', 'why don’t I age?'], de: ['warum sehe ich so jung aus?', 'warum altere ich nicht?'], niche: ['#glowup', '#antiaging'] },
   { id: 'testo', foods: why('testo'), en: ['why is my testosterone so high?'], de: ['warum ist mein Testosteron so hoch?'], niche: ['#testosterone', '#gymtok'] },
-  { id: 'immune', foods: why('immune'), en: ['why do I never get sick?'], de: ['warum werde ich nie krank?'], niche: ['#immunesystem', '#realfood'] },
-  { id: 'gut', foods: why('gut'), en: ['why is my gut so healthy?'], de: ['warum ist mein Darm so gesund?'], niche: ['#guthealth', '#realfood'] },
+  { id: 'immune', foods: why('immune'), en: ['why do I never get sick?', 'why is my immune system so strong?'], de: ['warum werde ich nie krank?', 'warum ist mein Immunsystem so stark?'], niche: ['#immunesystem', '#realfood'] },
+  { id: 'gut', foods: why('gut'), en: ['why is my gut so healthy?', 'why is my digestion so good?'], de: ['warum ist mein Darm so gesund?', 'warum ist meine Verdauung so gut?'], niche: ['#guthealth', '#realfood'] },
   { id: 'pump', foods: why('pump'), en: ['why is my pump so crazy?'], de: ['warum ist mein Pump so krass?'], niche: ['#gymtok', '#pump'] },
   { id: 'bones', foods: why('bones'), en: ['why are my bones so strong?'], de: ['warum sind meine Knochen so stark?'], niche: ['#realfood', '#longevity'] },
 ];
@@ -997,9 +997,11 @@ function chooseItems(sp, used) {
 function chooseFour(pred, used) {
   // echte Fotos zuerst, je Essen nur einmal; Fotos aus früheren Slides dieses Posts möglichst nicht wiederholen
   const useT = recent.use || {};
-  const real = shuffle([...photos, ...library].filter(p => p.src && pred(foodOf(p)))).sort((a, b) => (useT[a.id] || 0) - (useT[b.id] || 0));
+  // Essen, das in diesem Post schon zu sehen war, kommt nach hinten (mehr Abwechslung von Folie zu Folie)
+  const seen = p => used.has('food:' + p.food) ? 1 : 0;
+  const real = shuffle([...photos, ...library].filter(p => p.src && pred(foodOf(p)))).sort((a, b) => seen(a) - seen(b) || (useT[a.id] || 0) - (useT[b.id] || 0));
   const out = [], foods = new Set();
-  const take = p => { out.push({ src: p.src, food: foodOf(p), id: p.id, pred }); foods.add(p.food); used.add(p.id); };
+  const take = p => { out.push({ src: p.src, food: foodOf(p), id: p.id, pred }); foods.add(p.food); used.add(p.id); used.add('food:' + p.food); };
   for (const p of real) if (out.length < 4 && !used.has(p.id) && !foods.has(p.food)) take(p);
   for (const p of real) if (out.length < 4 && !foods.has(p.food)) take(p);
   const hasPhoto = id => [...photos, ...library].some(p => p.food === id && p.src);
@@ -1087,17 +1089,19 @@ function planSlides(series, n, lang) {
     pickFresh(COUNTRIES, c => c.flag).slice(0, n).forEach(c => specs.push({ pred: idsPred(c.foods), hook: c[lang], mood: 'strong', flag: c.flag, key: c.flag }));
   }
   if (series === 'god') {
-    const g = pickFresh(GOD.map((x, i) => ({ ...x, i })), x => 'god' + x.i)[0];
+    const gs = pickFresh(GOD.map((x, i) => ({ ...x, i })), x => 'god' + x.i);  // jedes Paar mit anderem Text
     const pairs = Math.max(1, Math.floor(n / 2));
     for (let k = 0; k < pairs; k++) {
+      const g = gs[k % gs.length];
       specs.push({ pred: tagPred(['godfood']), scene: sceneOf('nature'), hook: g[lang][0], mood: 'none', key: 'god' + g.i });
       specs.push({ pred: isJunk, scene: sceneOf('industry'), hook: g[lang][1], mood: 'none' });
     }
   }
   if (series === 'ancestors') {
-    const a = pickFresh(ANCESTORS.map((x, i) => ({ ...x, i })), x => 'anc' + x.i)[0];
+    const as = pickFresh(ANCESTORS.map((x, i) => ({ ...x, i })), x => 'anc' + x.i);
     const pairs = Math.max(1, Math.floor(n / 2));
     for (let k = 0; k < pairs; k++) {
+      const a = as[k % as.length];
       specs.push({ pred: tagPred(['ancestral']), scene: sceneOf('pasture'), hook: a[lang][0], mood: 'strong', key: 'anc' + a.i });
       specs.push({ pred: isJunk, scene: sceneOf('processed'), hook: a[lang][1], mood: 'sad' });
     }
