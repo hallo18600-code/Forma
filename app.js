@@ -323,9 +323,10 @@ function miniRing(pct, color){
     <circle cx="22" cy="22" r="20" fill="none" stroke="${color}" stroke-width="3" stroke-linecap="round" transform="rotate(-90 22 22)" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg>`;
 }
 function ringSvg(pct){
-  const C=2*Math.PI*46, off=C*(1-Math.min(1,Math.max(0,pct)));
-  return `<svg viewBox="0 0 118 118"><circle cx="59" cy="59" r="46" fill="none" stroke="${tc("track")}" stroke-width="10"/>
-    <circle cx="59" cy="59" r="46" fill="none" stroke="${tc("accent")}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${off}"/></svg>`;
+  // Offener Bogen (drei Viertel, unten offen) statt geschlossenem Ring
+  const C=2*Math.PI*46, A=C*0.75, v=A*Math.min(1,Math.max(0,pct));
+  return `<svg viewBox="0 0 118 118"><circle cx="59" cy="59" r="46" fill="none" stroke="${tc("track")}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${A} ${C}"/>
+    ${v>0?`<circle cx="59" cy="59" r="46" fill="none" stroke="${tc("accent")}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${v} ${C}"/>`:""}</svg>`;
 }
 function spark(arr){
   if(arr.length<2) return `<div class="sub">Noch zu wenig Punkte für eine Kurve.</div>`;

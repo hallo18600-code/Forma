@@ -780,8 +780,8 @@ function supSheet(item,sc){
     <div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
     </div>
-    ${sc.good.length?`<div class="fcard"><b class="fcard-t">Pros</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
-    ${sc.bad.length?`<div class="fcard"><b class="fcard-t">Cons</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
+    ${sc.good.length?`<div class="fcard"><b class="fcard-t">Stärken</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
+    ${sc.bad.length?`<div class="fcard"><b class="fcard-t">Schwächen</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
     ${(sc.notes||[]).length?`<div class="fcard fhint"><b class="fcard-t">Hinweis</b><ul class="fpc">${list(sc.notes,"n")}</ul><p class="sub">Ändert die Bewertung nicht.</p></div>`:""}
     <p class="sub fnote">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>
     <button class="pill w-full ${inStack?"ghost":"primary"}" data-act="toggle-stack" data-id="${item.id}">${inStack?"Aus dem Stack":"In den Stack"}</button>

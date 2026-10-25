@@ -11,14 +11,14 @@ function renderHeute(){
     <div class="card">
       <div class="sum">
         <div class="side"><div class="num">${showKcal()?tot.kcal.toLocaleString(LOC):"–"}</div><div class="lbl">Gegessen</div></div>
-        <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString(LOC):"–"}</b><span>${showKcal()?"Übrig":"Kalorien aus"}</span></div></div>
+        <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString(LOC):"–"}</b><span>${showKcal()?"kcal übrig":"Kalorien aus"}</span></div></div>
         <div class="side"><div class="num">${showKcal()?goalK.toLocaleString(LOC):"–"}</div><div class="lbl">Ziel</div></div>
       </div>
       <div class="macros">
-        ${[["Kohlenhydrate", tot.carbs, t.carbs, "carbs"],["Eiweiß", tot.protein, t.protein, "protein"],["Fett", tot.fat, t.fat, "fat"]].map(([name,val,goal,col])=>`<div class="mac" style="--mc:var(--c-${col})"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
+        ${[["Eiweiß", tot.protein, t.protein, "protein"],["Kohlenhydrate", tot.carbs, t.carbs, "carbs"],["Fett", tot.fat, t.fat, "fat"]].map(([name,val,goal,col])=>`<div class="mac" style="--mc:var(--c-${col})"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
       </div>
     </div>
-    <div class="section"><h2>Ernährung</h2><button class="link" data-act="open" data-type="custom">Mehr</button></div>
+    <div class="section"><h2>Mahlzeiten</h2><button class="link" data-act="open" data-type="custom">Mehr</button></div>
     <div class="card meals">
       ${SLOTS.map(slot=>{
         const items=d.meals.filter(m=>m.slot===slot.id);
@@ -119,7 +119,8 @@ function qClass(n){ return scoreClass(n).replace("s-","q-"); }
 function rateRing(n){
   const r=52, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(100,n))/100), cls=qClass(n);
   const lab=n>=85?"Sehr gut":n>=70?"Gut":n>=50?"Okay":n>=30?"Mäßig":"Schlecht";
-  return `<div class="fring ${cls}"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${r}" class="trk"/><circle cx="60" cy="60" r="${r}" class="val" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/></svg><div class="fring-t"><b>${n}</b><span>${lab}</span></div></div>`;
+  // Zahl im Ring, Einstufung als eigenes Etikett darunter
+  return `<div class="fring ${cls}"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${r}" class="trk"/><circle cx="60" cy="60" r="${r}" class="val" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/></svg><div class="fring-t"><b>${n}</b><small>von 100</small></div></div><div class="flabel ${cls}">${lab}</div>`;
 }
 const GOAL_SHORT={muscle:"Muskeln",lose:"Abnehmen",skin:"Haut & Look",energy:"Energie"};
 function foodSheet(it,sc){
@@ -135,8 +136,8 @@ function foodSheet(it,sc){
     <div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
     </div>
-    ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Pros</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
-    ${(sc.bad||[]).length?`<div class="fcard"><b class="fcard-t">Cons</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
+    ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Stärken</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
+    ${(sc.bad||[]).length?`<div class="fcard"><b class="fcard-t">Schwächen</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
     ${(sc.notes||[]).length?`<div class="fcard fhint"><b class="fcard-t">Hinweis</b><ul class="fpc">${list(sc.notes,"n")}</ul><p class="sub">Ändert die Bewertung nicht. Die zeigt nur, wie gesund es ist und wie gut es zu deinem Ziel passt.</p></div>`:""}
     ${intol?`<p class="sub fnote">Unverträglichkeiten erkennt die App nur am Namen. Bitte Zutaten prüfen.</p>`:""}
     <div class="fcard"><b class="fcard-t">Makros <span class="sub">· <span id="fgram">${g}</span> g</span></b>

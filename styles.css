@@ -244,6 +244,7 @@ p { margin:var(--s-2) 0; }
   display:grid; place-items:center; line-height:1;
 }
 .plus { background:var(--accent-soft); color:var(--accent-text); font-size:var(--fs-l); font-weight:600; }
+.plus { border-radius:14px; }
 .plus:disabled { opacity:.35; }
 .plus.dark { background:var(--strong); color:var(--on-strong); font-size:var(--fs-xl); font-weight:400; }
 .navd { background:var(--surface); box-shadow:var(--shadow-1); font-size:var(--fs-l); }
@@ -409,7 +410,7 @@ p { margin:var(--s-2) 0; }
 .sum .num { font-size:var(--fs-l); font-weight:800; }
 .sum .lbl { font-size:var(--fs-s); color:var(--ink-2); }
 .ring { width:120px; height:120px; position:relative; margin:0 auto; }
-.ring svg { width:120px; height:120px; transform:rotate(-90deg); }
+.ring svg { width:120px; height:120px; transform:rotate(135deg); }
 .mid { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; }
 .ring .mid b { font-size:var(--fs-xl); letter-spacing:-.04em; line-height:1.1; }
 .ring .mid span { font-size:var(--fs-s); color:var(--ink-2); }
@@ -417,9 +418,9 @@ p { margin:var(--s-2) 0; }
 .mac { text-align:center; }
 .mac b { font-size:var(--fs-s); }
 .mac span { font-size:var(--fs-s); color:var(--ink-2); }
-.mac .dotbar { height:4px; background:var(--track); border-radius:var(--r-full); position:relative; margin:var(--s-2) 0; }
-.mac .dotbar i { display:block; height:100%; border-radius:var(--r-full); background:var(--mc,var(--accent)); opacity:.45; }
-.mac .dotbar b { position:absolute; left:0; top:50%; width:8px; height:8px; border-radius:50%; background:var(--mc,var(--accent)); transform:translate(-2px,-50%); }
+.mac .dotbar { height:6px; background:var(--track); border-radius:var(--r-full); position:relative; margin:var(--s-2) 0; }
+.mac .dotbar i { display:block; height:100%; border-radius:var(--r-full); background:var(--mc,var(--accent)); }
+.mac .dotbar b { display:none; }
 .glasses { display:flex; flex-wrap:wrap; gap:var(--s-1); margin-top:var(--s-2); }
 .glasses i { width:12px; height:12px; border-radius:var(--s-1); background:var(--water-weak); }
 .glasses i.on { background:var(--water); }
@@ -513,7 +514,10 @@ p { margin:var(--s-2) 0; }
 .fring-t { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .fring-t b { font-size:46px; line-height:1; letter-spacing:-.02em; }
 .fring.q-good .fring-t b { color:var(--accent-text); } .fring.q-mid .fring-t b { color:#B87A10; } .fring.q-bad .fring-t b { color:var(--bad-text); }
-.fring-t span { font-size:var(--fs-s); color:var(--ink-2); margin-top:4px; }
+.fring-t small { font-size:var(--fs-s); color:var(--ink-2); margin-top:4px; }
+/* Einstufung als Etikett unter dem Ring */
+.flabel { display:table; margin:calc(-1 * var(--s-2)) auto var(--s-4); padding:4px 14px; border-radius:var(--r-full); font-size:var(--fs-s); font-weight:700; background:var(--fill-2); }
+.flabel.q-good { color:var(--accent-text); } .flabel.q-mid { color:#B87A10; } .flabel.q-bad { color:var(--bad-text); }
 .fcard { background:var(--fill-2); border-radius:var(--r-xl); padding:var(--s-4); margin-bottom:var(--s-3); }
 .fcard-h { display:flex; justify-content:space-between; align-items:baseline; gap:var(--s-2); margin-bottom:var(--s-2); }
 .fcard-h .sub { text-align:right; }
