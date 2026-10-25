@@ -130,7 +130,7 @@ function foodSheet(it,sc){
   const intol=((state.coach.answers.gesundheit||{}).intol||[]).some(x=>x!=="Nein, alles okay");
   const list=(arr,cls)=>arr.map(t=>`<li class="${cls}">${esc(t)}</li>`).join("");
   return `<div class="yhead"><button class="yback" data-act="${ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><span></span></div>
-    <div class="fhead"><span class="femo">${it.emoji||"🍽️"}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
+    <div class="fhead"><span class="femo">${esc(it.emoji||"🍽️")}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
     ${rateRing(sc.score)}
     <div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}

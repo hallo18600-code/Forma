@@ -82,13 +82,13 @@ function aiRow(i,k){
   const gu=i.water||(unitsFor(i.food).find(x=>x.k==="g")||{}).ml?"ml":"g";
   const sub=i.water?`<span class="notr">${i.glasses} ${esc(uName("glas",i.glasses))}</span> · <span>zählt zum Wasser</span>`
     :`${i.txt?`<span class="notr">${esc(i.txt)}</span> · `:""}<span id="ai-k${k}">${aiK(i)}</span> kcal`;
-  const main=`<span class="ai-emo">${i.water?"💧":i.emoji}</span><span class="ai-txt"><b>${esc(i.name)}</b><span class="sub">${sub}</span></span>${alts?`<span class="ai-chev" aria-hidden="true">${CHEV_DOWN}</span>`:""}`;
+  const main=`<span class="ai-emo">${i.water?"💧":esc(i.emoji)}</span><span class="ai-txt"><b>${esc(i.name)}</b><span class="sub">${sub}</span></span>${alts?`<span class="ai-chev" aria-hidden="true">${CHEV_DOWN}</span>`:""}`;
   return `<div class="ai-row ${open?"open":""} ${fresh?"new":""}">
     ${alts?`<button class="ai-main" data-act="ai-alt" data-i="${k}" aria-expanded="${open}" aria-label="${esc(i.name)}: andere Auswahl">${main}</button>`:`<div class="ai-main">${main}</div>`}
     <label class="ai-g"><input class="aig" type="text" inputmode="decimal" value="${i.grams}" data-act="ai-g" data-i="${k}" aria-label="Menge in ${gu}" autocomplete="off"><span class="notr">${gu}</span></label>
     <button class="x" data-act="ai-del" data-i="${k}" aria-label="${esc(i.name)} entfernen">✕</button>
   </div>
-  ${open?`<div class="ai-alts"><span class="sub">Stattdessen</span><div class="opts">${i.altFoods.map(f=>`<button class="chip" data-act="ai-swap" data-i="${k}" data-id="${esc(f.id)}">${f.emoji||"🍽️"} <span class="notr">${esc(f.name)}</span></button>`).join("")}</div></div>`:""}`;
+  ${open?`<div class="ai-alts"><span class="sub">Stattdessen</span><div class="opts">${i.altFoods.map(f=>`<button class="chip" data-act="ai-swap" data-i="${k}" data-id="${esc(f.id)}">${esc(f.emoji||"🍽️")} <span class="notr">${esc(f.name)}</span></button>`).join("")}</div></div>`:""}`;
 }
 function aiResults(){
   const r=ui.aiRes, txt=(ui.aiText||"").trim(), miss=ui.aiMiss||[], ign=ui.aiIgn||[];

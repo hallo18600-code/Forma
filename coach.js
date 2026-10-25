@@ -700,7 +700,7 @@ function routineSheet(id){
     const d=day(), all=routineOn(SUPS_R,state.date);
     return `<div class="rs-head"><span class="rs-ico">💊</span><div class="grow"><h2>Supplements</h2><p class="sub">Antippen, wenn genommen</p></div></div>
       ${state.stack.map(x=>{ const p=SUPS.find(y=>y.id===x); if(!p) return ""; const on=!!(d.taken||{})[x];
-        return `<button class="rs-item rs-tap ${on?"on":""}" data-act="take" data-id="${x}"><span class="ti">${p.emoji}</span><div class="grow"><b>${esc(p.name)}</b><div class="sub">${esc(p.dose)} · ${esc(p.when)}</div></div><span class="rt-chk">${on?"✓":""}</span></button>`; }).join("")||`<p class="sub mt-3">Noch nichts im Stack.</p>`}
+        return `<button class="rs-item rs-tap ${on?"on":""}" data-act="take" data-id="${x}"><span class="ti">${esc(p.emoji)}</span><div class="grow"><b>${esc(p.name)}</b><div class="sub">${esc(p.dose)} · ${esc(p.when)}</div></div><span class="rt-chk">${on?"✓":""}</span></button>`; }).join("")||`<p class="sub mt-3">Noch nichts im Stack.</p>`}
       ${state.stack.length?`<div class="gap"></div><button class="pill ${all?"ghost":"primary"} w-full" data-act="routine-check" data-id="${SUPS_R}">${all?"Alles genommen ✓":"Alle abhaken"}</button>`:""}
       <div class="row space mt-4"><button class="link" data-act="open" data-type="area" data-id="sups-list">Stack bearbeiten ›</button><span class="sub">Kein ärztlicher Rat</span></div>`;
   }
@@ -768,14 +768,14 @@ function stackSheet(){
   const d=day();
   return `<div class="rs-head"><span class="rs-ico">💊</span><div class="grow"><h2>Stack heute</h2><p class="sub">Antippen, wenn genommen</p></div></div>
     ${state.stack.map(id=>{ const s=SUPS.find(x=>x.id===id); if(!s) return ""; const on=!!(d.taken||{})[id];
-      return `<button class="rs-item rs-tap ${on?"on":""}" data-act="take" data-id="${id}"><span class="ti">${s.emoji||"💊"}</span><div class="grow"><b>${esc(s.name)}</b><div class="sub">${esc(s.dose)} · ${esc(s.when)}</div></div><span class="rt-chk">${on?"✓":""}</span></button>`; }).join("")||`<p class="sub mt-3">Noch nichts im Stack.</p>`}
+      return `<button class="rs-item rs-tap ${on?"on":""}" data-act="take" data-id="${id}"><span class="ti">${esc(s.emoji||"💊")}</span><div class="grow"><b>${esc(s.name)}</b><div class="sub">${esc(s.dose)} · ${esc(s.when)}</div></div><span class="rt-chk">${on?"✓":""}</span></button>`; }).join("")||`<p class="sub mt-3">Noch nichts im Stack.</p>`}
     <div class="gap"></div><button class="pill ghost w-full" data-act="open" data-type="area" data-id="sups-list">Stack bearbeiten</button><p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
 }
 // Supplement-Detail: gleicher Aufbau wie bei Lebensmitteln (Ring, Ziele, Pros/Cons)
 function supSheet(item,sc){
   const main=state.profile.goal, all=supAllGoals(item.id), order=[main].concat(GOALS.map(x=>x.id).filter(x=>x!==main));
   const inStack=state.stack.includes(item.id), list=(arr,cls)=>arr.map(t=>`<li class="${cls}">${esc(t)}</li>`).join("");
-  return `<div class="fhead"><span class="femo">${item.emoji||"💊"}</span><div class="grow"><h2>${esc(item.name)}</h2><div class="sub">${esc(item.dose)} · ${esc(item.when)}</div></div></div>
+  return `<div class="fhead"><span class="femo">${esc(item.emoji||"💊")}</span><div class="grow"><h2>${esc(item.name)}</h2><div class="sub">${esc(item.dose)} · ${esc(item.when)}</div></div></div>
     ${rateRing(sc.score)}
     <div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
@@ -877,11 +877,11 @@ function supsSheet(){
   return `<h2>Dein Stack</h2>
     <p class="sub">${goalName()} · Protein heute ${Math.round(totals().protein)} / ${targets().protein} g · Fisch: ${state.profile.fish==="oft"?"jede Woche":"selten"}</p>
     ${rec.map(r=>{ const p=SUPS.find(x=>x.id===r.id); return `<button class="food" data-act="open" data-type="product" data-id="${p.id}">
-      <div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${r.why}</div></div>
+      <div class="thumb">${esc(p.emoji)}</div><div class="grow"><b>${p.name}</b><div class="sub">${r.why}</div></div>
       <div class="score ${scoreClass(r.score)}">${r.score}</div></button>`; }).join("")}
     <div class="gap"></div><button class="pill primary" data-act="apply-stack">Vorschlag übernehmen</button>
     <div class="section"><h2>Rest</h2></div>
-    ${rest.map(p=>{ const r=supScore(p.id); return `<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b><div class="sub">${esc(r.why)}</div></div><div class="score ${scoreClass(r.score)}">${r.score}</div></button>`; }).join("")}<p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
+    ${rest.map(p=>{ const r=supScore(p.id); return `<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${esc(p.emoji)}</div><div class="grow"><b>${p.name}</b><div class="sub">${esc(r.why)}</div></div><div class="score ${scoreClass(r.score)}">${r.score}</div></button>`; }).join("")}<p class="sub mt-3">Mengen laut Packung. Kein ärztlicher Rat. Bei Erkrankungen, Medikamenten oder Schwangerschaft vorher ärztlich abklären.</p>`;
 }
 function skinSheet(){
   const q=[
@@ -895,7 +895,7 @@ function skinSheet(){
     return `<h2>Hautplan</h2>
       <div class="sub">Hautbild ${state.skin.typ} · ${state.skin.ziel}</div>
       <div class="sub">${state.skin.sonne==="Täglich"?"LSF beibehalten":"LSF in den Morgen"}</div>
-      ${recs.map(p=>`<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${p.emoji}</div><div class="grow"><b>${p.name}</b></div><div class="score ${scoreClass(scored(p).score)}">${scored(p).score}</div></button>`).join("")}
+      ${recs.map(p=>`<button class="food" data-act="open" data-type="product" data-id="${p.id}"><div class="thumb">${esc(p.emoji)}</div><div class="grow"><b>${p.name}</b></div><div class="score ${scoreClass(scored(p).score)}">${scored(p).score}</div></button>`).join("")}
       <p class="sub">Nur ein Hinweis. Nichts zum Abhaken.</p>`;
   }
   return `<h2>Haut</h2>${q.map(item=>`<div class="q"><b>${item.label}</b><div class="opts">${item.opts.map(o=>`<button class="chip ${state.skin[item.k]===o?"on":""}" data-act="skin" data-k="${item.k}" data-v="${o}">${o}</button>`).join("")}</div></div>`).join("")}

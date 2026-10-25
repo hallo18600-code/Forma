@@ -464,7 +464,11 @@ function checkImport(text){
     if(d.weights!=null&&!Array.isArray(d.weights)) return null;
     if(d.workouts!=null&&!Array.isArray(d.workouts)) return null;
     if((d.weights||[]).some(w=>!w||typeof w.date!=="string"||typeof w.kg!=="number")) return null;
-    return cleanIds(normalize(JSON.parse(JSON.stringify(d))));  // wirft Fehler bei kaputten Daten
+    // Texte aus fremden Dateien dürfen kein HTML enthalten: < und > überall entfernen
+    d=JSON.parse(JSON.stringify(d),(k,v)=>typeof v==="string"?v.replace(/[<>]/g,""):v);
+    // Tage nur mit echtem Datum als Schlüssel übernehmen (z. B. 2026-10-25)
+    if(d.days) Object.keys(d.days).forEach(k=>{ if(!/^\d{4}-\d{2}-\d{2}$/.test(k)) delete d.days[k]; });
+    return cleanIds(normalize(d));  // wirft Fehler bei kaputten Daten
   }catch(e){ return null; }
 }
 // IDs aus fremden Dateien landen in HTML-Attributen: nur Buchstaben, Ziffern, - und _ erlauben
