@@ -216,7 +216,7 @@ const F = (id, emoji, color, en, de, tags) => ({ id, emoji, color, en, de, tags 
 // Tags: S/A/B/F = Tier-Liste · godfood = „Was Gott uns gab“ · ancestral = „Was unsere Vorfahren aßen“
 // minor = Zutat/Getränk, nur wenn ausdrücklich passend (nicht bei „irgendwas Gesundes“)
 const FOODS = Object.fromEntries([
-  F('honey','🍯','#d99a2b','honey','Honig',['S','godfood','ancestral']),
+  F('honey','🍯','#d99a2b','honey','Honig',['A','godfood','ancestral']),
   F('kiwi','🥝','#7fb339','kiwi','Kiwi',['S','godfood']),
   F('cherries','🍒','#a3162b','cherries','Kirschen',['A','godfood']),
   F('yogurt','🥛','#e9e4d6','greek yogurt','Joghurt',['A','ancestral']),
@@ -264,6 +264,9 @@ const FOODS = Object.fromEntries([
   F('greentea','🍵','#7da35a','matcha','Matcha',['B','minor']),
   F('coffee','☕','#4a2e1e','black coffee','schwarzer Kaffee',['B','minor']),
   F('water','💧','#7fb3d9','water','Wasser',['minor']),
+  F('chamomile','🌼','#e8d27a','chamomile tea','Kamillentee',['minor']),
+  F('watermelon','🍉','#e0475a','watermelon','Wassermelone',['A','godfood']),
+  F('kimchi','🥬','#d0482a','kimchi','Kimchi',['A']),
   F('fries','🍟','#e8b03a','french fries','Pommes',['junk','F']),
   F('donut','🍩','#c97b9a','donuts','Donuts',['junk','F']),
   F('soda','🥤','#b8323a','soda','Softdrinks',['junk','F']),
@@ -275,6 +278,7 @@ const FOODS = Object.fromEntries([
   F('coldcuts','🥓','#a8424a','processed meat','Wurst & Aufschnitt',['junk','F']),
   F('chips','🥔','#e0b04a','potato chips','Chips',['junk','F']),
   F('nuggets','🍗','#c98a3a','chicken nuggets','Chicken Nuggets',['junk','F']),
+  F('beer','🍺','#d9a23a','beer','Bier',['junk','F']),
   // Vergleichsbilder (nur für „USA vs. Europa“)
   F('apple_us','🍎','#c8243c','apples (USA / supermarket)','Äpfel (USA / Supermarkt)',['cmp']),
   F('apple_eu','🍎','#a8462c','apples (Europe / farm)','Äpfel (Europa / Bauernhof)',['cmp']),
@@ -306,39 +310,188 @@ const idsPred = ids => f => ids.includes(f.id);
 /* ---------- Serien ----------
    Jede Liste enthält nur Lebensmittel, die für genau diese Aussage bekannt sind
    (z. B. Schlaf: Kiwi, Sauerkirschen, Milch, Magnesium aus Kürbiskernen/Mandeln). */
+/* ---------- Begründungen ----------
+   Pro Aussage nur Lebensmittel, die dafür zu den stärksten gehören – jeweils mit Grund.
+   Alle Serien (Fragen, Ruiniert/Repariert, Timing, Natur) ziehen aus diesen Tabellen,
+   damit dieselbe Aussage überall dieselben, begründeten Lebensmittel zeigt. */
+const CLAIMS = {
+  sleep: {
+    kiwi: 'Studie: 2 Kiwis 1 Std. vor dem Schlafen → schneller eingeschlafen, länger geschlafen',
+    cherries: 'Sauerkirschen enthalten natürliches Melatonin',
+    pumpkinseeds: 'eine der besten Magnesium-Quellen, dazu Tryptophan',
+    chamomile: 'Apigenin – wirkt leicht beruhigend',
+    almonds: 'Magnesium und Melatonin',
+    salmon: 'Studie: Lachs 3× pro Woche → besserer Schlaf (Omega-3, Vitamin D)',
+  },
+  skin: {
+    salmon: 'Omega-3 bremst Entzündungen (Pickel, Rötungen)',
+    tomatoes: 'Lycopin – Studie: weniger Rötung durch Sonne',
+    carrots: 'Beta-Carotin – Studie: gesünderer, wärmerer Hautton',
+    sweetpotato: 'sehr viel Beta-Carotin',
+    peppers: 'rote Paprika: mehr Vitamin C als Orangen → Kollagen',
+    kiwi: 'viel Vitamin C → Kollagen',
+    avocado: 'gesunde Fette und Vitamin E – Studie: elastischere Haut',
+  },
+  eyes: {
+    greens: 'Spinat: Spitzenreiter bei Lutein und Zeaxanthin',
+    eggs: 'Eigelb: Lutein, besonders gut aufnehmbar',
+    carrots: 'Beta-Carotin → Vitamin A fürs Sehen',
+    sweetpotato: 'sehr viel Beta-Carotin → Vitamin A',
+    salmon: 'DHA – Baustein der Netzhaut',
+    peppers: 'orange Paprika: viel Zeaxanthin',
+  },
+  mood: {
+    salmon: 'Omega-3 – Studien: weniger depressive Verstimmung',
+    sardines: 'Omega-3 und Vitamin D',
+    chocolate: 'Studie: Zartbitter-Esser seltener depressive Symptome',
+    walnuts: 'Studie: Walnuss-Esser mit besseren Stimmungswerten',
+    yogurt: 'Probiotika – Darm-Hirn-Achse',
+    blueberries: 'Studie: Heidelbeer-Drink → bessere Laune',
+  },
+  hair: {
+    eggs: 'Biotin und Protein – Haare bestehen aus Keratin (Protein)',
+    oysters: 'mit Abstand am meisten Zink',
+    beef: 'Eisen und Zink – Eisenmangel ist ein häufiger Grund für Haarausfall',
+    steak: 'Eisen und Zink',
+    salmon: 'Omega-3 und Vitamin D',
+    pumpkinseeds: 'viel Zink',
+    sardines: 'Omega-3, Vitamin D und Protein',
+  },
+  energy: {
+    oats: 'langsame Kohlenhydrate – kein Zucker-Crash',
+    sweetpotato: 'langsame Kohlenhydrate',
+    beef: 'Eisen und B12 – Mangel macht müde',
+    steak: 'Eisen und B12',
+    eggs: 'B12 und Protein',
+    lentils: 'Eisen und Ballaststoffe',
+    banana: 'Studie: beim Sport so gut wie ein Sportgetränk',
+  },
+  strong: {
+    steak: 'Protein und natürliches Kreatin',
+    beef: 'Protein und natürliches Kreatin',
+    chicken: 'rund 30 g Protein pro 100 g',
+    eggs: 'vollständiges Protein mit allen Aminosäuren',
+    tuna: 'rund 25 g Protein pro 100 g',
+    salmon: 'Protein und Kreatin',
+    milk: 'Whey und Casein – in Studien top für Muskelaufbau',
+  },
+  calm: {
+    chamomile: 'Apigenin – Studie: weniger Angstsymptome',
+    greentea: 'L-Theanin → ruhiger Fokus statt Nervosität',
+    chocolate: 'viel Magnesium',
+    pumpkinseeds: 'sehr viel Magnesium',
+    almonds: 'viel Magnesium',
+    greens: 'Spinat: viel Magnesium',
+    salmon: 'Omega-3 – Studie: weniger Angst',
+  },
+  focus: {
+    eggs: 'Cholin → Baustein für Acetylcholin (Gedächtnis)',
+    salmon: 'DHA – das Gehirn besteht zu großen Teilen aus Fett',
+    sardines: 'DHA',
+    walnuts: 'Omega-3 (ALA) – Studie: besseres Gedächtnis',
+    blueberries: 'Studien: bessere Gedächtnisleistung',
+    greentea: 'Koffein + L-Theanin → Fokus ohne Zittern',
+    coffee: 'Koffein – mehr Wachheit und Reaktion',
+    chocolate: 'Kakao-Flavanole – Studien: bessere Denkleistung',
+  },
+  lean: {
+    chicken: 'viel Protein, kaum Fett',
+    tuna: 'viel Protein, kaum Fett',
+    shrimp: 'rund 24 g Protein bei unter 100 kcal',
+    eggs: 'Protein macht lange satt',
+    broccoli: 'kaum Kalorien, viele Ballaststoffe',
+    greens: 'fast keine Kalorien, viel Volumen',
+    yogurt: 'griechischer Joghurt/Skyr: viel Protein, wenig Fett',
+  },
+  young: {
+    blueberries: 'Antioxidantien (Anthocyane)',
+    tomatoes: 'Lycopin – Sonnenschutz von innen',
+    greentea: 'EGCG – starkes Antioxidans',
+    salmon: 'Astaxanthin und Omega-3',
+    oliveoil: 'Polyphenole – Studie: weniger Hautalterung',
+    pomegranate: 'Ellagsäure – Antioxidans',
+    avocado: 'Vitamin E und gesunde Fette',
+  },
+  testo: {
+    oysters: 'mit Abstand am meisten Zink – Zink braucht der Körper für Testosteron',
+    beef: 'Zink und gesättigte Fette',
+    steak: 'Zink und gesättigte Fette',
+    eggs: 'Cholesterin (Baustein für Hormone) und Vitamin D',
+    pumpkinseeds: 'Zink und Magnesium',
+    salmon: 'Vitamin D',
+    sardines: 'Vitamin D und Omega-3',
+  },
+  immune: {
+    peppers: 'mehr Vitamin C als Orangen',
+    kiwi: 'sehr viel Vitamin C',
+    oranges: 'Vitamin C',
+    broccoli: 'Vitamin C und Sulforaphan',
+    garlic: 'Allicin – Studie: weniger Erkältungen',
+    ginger: 'Gingerol – entzündungshemmend',
+    kimchi: 'Probiotika – ein großer Teil des Immunsystems sitzt im Darm',
+    oysters: 'Zink – wichtig für Immunzellen',
+  },
+  gut: {
+    yogurt: 'lebende Kulturen (Probiotika)',
+    kimchi: 'fermentiert – Studie: mehr Vielfalt im Darm',
+    kiwi: 'Studie: bessere Verdauung',
+    oats: 'Beta-Glucan – Futter für gute Darmbakterien',
+    lentils: 'viele Ballaststoffe',
+    apples: 'Pektin – Präbiotikum',
+    garlic: 'Inulin – Präbiotikum',
+  },
+  pump: {
+    beets: 'Nitrat → Stickstoffmonoxid → mehr Durchblutung',
+    greens: 'Spinat: sehr viel Nitrat',
+    watermelon: 'Citrullin → mehr Stickstoffmonoxid',
+    pomegranate: 'Studie: bessere Durchblutung',
+    chocolate: 'Kakao-Flavanole weiten die Gefäße',
+    garlic: 'fördert Stickstoffmonoxid',
+  },
+  bones: {
+    milk: 'Calcium und Protein',
+    cheese: 'sehr viel Calcium',
+    yogurt: 'Calcium',
+    sardines: 'Calcium (mit Gräten) und Vitamin D',
+    almonds: 'Calcium und Magnesium',
+    broccoli: 'Calcium und Vitamin K',
+  },
+};
+const why = k => Object.keys(CLAIMS[k]);
 const QUESTIONS = [
-  { id: 'sleep', foods: ['kiwi', 'cherries', 'milk', 'pumpkinseeds', 'walnuts', 'almonds', 'salmon'], en: ['why is my sleep so deep?', 'why do I sleep like a baby?'], de: ['warum schlafe ich so tief?'], niche: ['#sleeptips', '#realfood'] },
-  { id: 'skin', foods: ['salmon', 'avocado', 'tomatoes', 'carrots', 'sweetpotato', 'peppers', 'kiwi', 'almonds', 'pomegranate'], en: ['why is my skin so clear?', 'why does my skin glow?'], de: ['warum ist meine Haut so rein?'], niche: ['#clearskin', '#glowup'] },
-  { id: 'eyes', foods: ['carrots', 'sweetpotato', 'greens', 'eggs', 'salmon', 'peppers', 'broccoli'], en: ['why are my eyes so bright?'], de: ['warum strahlen meine Augen so?'], niche: ['#glowup', '#realfood'] },
-  { id: 'mood', foods: ['salmon', 'sardines', 'chocolate', 'walnuts', 'banana', 'yogurt'], en: ['why am I so happy?', 'why am I always in a good mood?'], de: ['warum bin ich so glücklich?'], niche: ['#wellness', '#realfood'] },
-  { id: 'hair', foods: ['eggs', 'salmon', 'oysters', 'beef', 'steak', 'pumpkinseeds', 'greens', 'lentils'], en: ['why is my hair so thick?'], de: ['warum sind meine Haare so dicht?'], niche: ['#hairgrowth', '#glowup'] },
-  { id: 'energy', foods: ['oats', 'banana', 'sweetpotato', 'dates', 'eggs', 'beef', 'lentils', 'greens'], en: ['why am I never tired?', 'why do I have so much energy?'], de: ['warum bin ich nie müde?'], niche: ['#energy', '#realfood'] },
-  { id: 'strong', foods: ['steak', 'beef', 'eggs', 'chicken', 'milk', 'tuna', 'yogurt', 'salmon'], en: ['why am I so strong?'], de: ['warum bin ich so stark?'], niche: ['#protein', '#gymtok'] },
-  { id: 'calm', foods: ['greentea', 'chocolate', 'pumpkinseeds', 'almonds', 'greens', 'salmon', 'avocado', 'yogurt'], en: ['why am I so calm?'], de: ['warum bin ich so entspannt?'], niche: ['#wellness', '#realfood'] },
-  { id: 'focus', foods: ['eggs', 'salmon', 'sardines', 'walnuts', 'blueberries', 'greentea', 'chocolate', 'coffee'], en: ['why am I so focused?', 'why is my brain so sharp?'], de: ['warum bin ich so konzentriert?'], niche: ['#focus', '#realfood'] },
-  { id: 'lean', foods: ['chicken', 'eggs', 'tuna', 'shrimp', 'broccoli', 'greens', 'salmon'], en: ['why am I so lean?', 'why do I stay so lean?'], de: ['warum bin ich so definiert?'], niche: ['#fatloss', '#realfood'] },
-  { id: 'young', foods: ['blueberries', 'tomatoes', 'salmon', 'avocado', 'greentea', 'pomegranate', 'oliveoil', 'carrots'], en: ['why do I look so young?'], de: ['warum sehe ich so jung aus?'], niche: ['#glowup', '#antiaging'] },
-  { id: 'testo', foods: ['oysters', 'eggs', 'steak', 'beef', 'pumpkinseeds', 'salmon', 'sardines'], en: ['why is my testosterone so high?'], de: ['warum ist mein Testosteron so hoch?'], niche: ['#testosterone', '#gymtok'] },
-  { id: 'immune', foods: ['oranges', 'kiwi', 'peppers', 'garlic', 'ginger', 'broccoli', 'yogurt', 'honey'], en: ['why do I never get sick?'], de: ['warum werde ich nie krank?'], niche: ['#immunesystem', '#realfood'] },
-  { id: 'gut', foods: ['yogurt', 'kiwi', 'oats', 'lentils', 'apples', 'banana', 'garlic'], en: ['why is my gut so healthy?'], de: ['warum ist mein Darm so gesund?'], niche: ['#guthealth', '#realfood'] },
-  { id: 'pump', foods: ['beets', 'greens', 'pomegranate', 'chocolate', 'garlic'], en: ['why is my pump so crazy?'], de: ['warum ist mein Pump so krass?'], niche: ['#gymtok', '#pump'] },
-  { id: 'bones', foods: ['milk', 'cheese', 'yogurt', 'sardines', 'broccoli', 'almonds'], en: ['why are my bones so strong?'], de: ['warum sind meine Knochen so stark?'], niche: ['#realfood', '#longevity'] },
+  { id: 'sleep', foods: why('sleep'), en: ['why is my sleep so deep?', 'why do I sleep like a baby?'], de: ['warum schlafe ich so tief?'], niche: ['#sleeptips', '#realfood'] },
+  { id: 'skin', foods: why('skin'), en: ['why is my skin so clear?', 'why does my skin glow?'], de: ['warum ist meine Haut so rein?'], niche: ['#clearskin', '#glowup'] },
+  { id: 'eyes', foods: why('eyes'), en: ['why are my eyes so bright?'], de: ['warum strahlen meine Augen so?'], niche: ['#glowup', '#realfood'] },
+  { id: 'mood', foods: why('mood'), en: ['why am I so happy?', 'why am I always in a good mood?'], de: ['warum bin ich so glücklich?'], niche: ['#wellness', '#realfood'] },
+  { id: 'hair', foods: why('hair'), en: ['why is my hair so thick?'], de: ['warum sind meine Haare so dicht?'], niche: ['#hairgrowth', '#glowup'] },
+  { id: 'energy', foods: why('energy'), en: ['why am I never tired?', 'why do I have so much energy?'], de: ['warum bin ich nie müde?'], niche: ['#energy', '#realfood'] },
+  { id: 'strong', foods: why('strong'), en: ['why am I so strong?'], de: ['warum bin ich so stark?'], niche: ['#protein', '#gymtok'] },
+  { id: 'calm', foods: why('calm'), en: ['why am I so calm?'], de: ['warum bin ich so entspannt?'], niche: ['#wellness', '#realfood'] },
+  { id: 'focus', foods: why('focus'), en: ['why am I so focused?', 'why is my brain so sharp?'], de: ['warum bin ich so konzentriert?'], niche: ['#focus', '#realfood'] },
+  { id: 'lean', foods: why('lean'), en: ['why am I so lean?', 'why do I stay so lean?'], de: ['warum bin ich so definiert?'], niche: ['#fatloss', '#realfood'] },
+  { id: 'young', foods: why('young'), en: ['why do I look so young?'], de: ['warum sehe ich so jung aus?'], niche: ['#glowup', '#antiaging'] },
+  { id: 'testo', foods: why('testo'), en: ['why is my testosterone so high?'], de: ['warum ist mein Testosteron so hoch?'], niche: ['#testosterone', '#gymtok'] },
+  { id: 'immune', foods: why('immune'), en: ['why do I never get sick?'], de: ['warum werde ich nie krank?'], niche: ['#immunesystem', '#realfood'] },
+  { id: 'gut', foods: why('gut'), en: ['why is my gut so healthy?'], de: ['warum ist mein Darm so gesund?'], niche: ['#guthealth', '#realfood'] },
+  { id: 'pump', foods: why('pump'), en: ['why is my pump so crazy?'], de: ['warum ist mein Pump so krass?'], niche: ['#gymtok', '#pump'] },
+  { id: 'bones', foods: why('bones'), en: ['why are my bones so strong?'], de: ['warum sind meine Knochen so stark?'], niche: ['#realfood', '#longevity'] },
 ];
 // "was es kaputt macht" / "was es repariert"
 const FIXES = [
-  { bad: ['candy', 'soda', 'donut', 'cookies', 'fries', 'pizza', 'chips'], good: ['salmon', 'avocado', 'tomatoes', 'carrots', 'sweetpotato', 'kiwi', 'peppers'], en: ['what ruins your skin…', '…and what fixes it'], de: ['was deine Haut ruiniert…', '…und was sie repariert'], niche: ['#clearskin', '#skincare'] },
-  { bad: ['soda', 'candy', 'cookies', 'pizza', 'donut'], good: ['kiwi', 'cherries', 'milk', 'pumpkinseeds', 'walnuts', 'almonds'], en: ['what ruins your sleep…', '…and what fixes it'], de: ['was deinen Schlaf ruiniert…', '…und was ihn repariert'], niche: ['#sleeptips', '#realfood'] },
-  { bad: ['soda', 'fries', 'burger', 'pizza', 'candy', 'coldcuts', 'nuggets'], good: ['oysters', 'eggs', 'steak', 'beef', 'pumpkinseeds', 'salmon'], en: ['what kills your testosterone…', '…and what boosts it'], de: ['was dein Testosteron killt…', '…und was es boostet'], niche: ['#testosterone', '#gymtok'] },
-  { bad: ['donut', 'soda', 'candy', 'pancakes', 'cookies'], good: ['oats', 'banana', 'sweetpotato', 'dates', 'eggs', 'lentils'], en: ['what drains your energy…', '…and what gives it back'], de: ['was dir Energie raubt…', '…und was sie zurückgibt'], niche: ['#energy', '#realfood'] },
-  { bad: ['burger', 'fries', 'pizza', 'soda', 'cookies', 'coldcuts', 'chips', 'nuggets'], good: ['yogurt', 'kiwi', 'oats', 'lentils', 'apples', 'banana'], en: ['what destroys your gut…', '…and what heals it'], de: ['was deinen Darm zerstört…', '…und was ihn heilt'], niche: ['#guthealth', '#realfood'] },
-  { bad: ['soda', 'candy', 'donut', 'cookies', 'chips'], good: ['eggs', 'salmon', 'walnuts', 'blueberries', 'greentea', 'sardines'], en: ['what kills your focus…', '…and what sharpens it'], de: ['was deine Konzentration killt…', '…und was sie schärft'], niche: ['#focus', '#realfood'] },
+  { bad: ['candy', 'soda', 'donut', 'cookies', 'fries', 'pizza', 'chips'], good: why('skin'), en: ['what ruins your skin…', '…and what fixes it'], de: ['was deine Haut ruiniert…', '…und was sie repariert'], niche: ['#clearskin', '#skincare'] },
+  { bad: ['beer', 'soda', 'candy', 'cookies', 'pizza', 'donut'], good: why('sleep'), en: ['what ruins your sleep…', '…and what fixes it'], de: ['was deinen Schlaf ruiniert…', '…und was ihn repariert'], niche: ['#sleeptips', '#realfood'] },
+  { bad: ['beer', 'soda', 'fries', 'burger', 'pizza', 'candy', 'coldcuts', 'nuggets'], good: why('testo'), en: ['what kills your testosterone…', '…and what boosts it'], de: ['was dein Testosteron killt…', '…und was es boostet'], niche: ['#testosterone', '#gymtok'] },
+  { bad: ['donut', 'soda', 'candy', 'pancakes', 'cookies'], good: why('energy'), en: ['what drains your energy…', '…and what gives it back'], de: ['was dir Energie raubt…', '…und was sie zurückgibt'], niche: ['#energy', '#realfood'] },
+  { bad: ['burger', 'fries', 'pizza', 'soda', 'coldcuts', 'chips', 'nuggets', 'beer'], good: why('gut'), en: ['what destroys your gut…', '…and what heals it'], de: ['was deinen Darm zerstört…', '…und was ihn heilt'], niche: ['#guthealth', '#realfood'] },
+  { bad: ['soda', 'candy', 'donut', 'cookies', 'chips', 'beer'], good: why('focus'), en: ['what kills your focus…', '…and what sharpens it'], de: ['was deine Konzentration killt…', '…und was sie schärft'], niche: ['#focus', '#realfood'] },
+  { bad: ['soda', 'candy', 'donut', 'cookies', 'pizza', 'fries'], good: why('young'), en: ['what ages you…', '…and what keeps you young'], de: ['was dich alt aussehen lässt…', '…und was dich jung hält'], niche: ['#antiaging', '#glowup'] },
 ];
 const QUIT = { en: ['foods I quit…', '…what I eat instead'], de: ['Essen, das ich aufgegeben habe…', '…was ich stattdessen esse'] };
 const ROUTINE = [
-  { foods: ['eggs', 'oats', 'yogurt', 'blueberries', 'berries', 'coffee', 'greentea'], en: 'morning', de: 'morgens' },
-  { foods: ['banana', 'dates', 'oats', 'rice', 'honey', 'beets', 'coffee'], en: 'pre-workout', de: 'vor dem Training' },
-  { foods: ['chicken', 'rice', 'eggs', 'milk', 'steak', 'potatoes', 'tuna', 'yogurt'], en: 'post-workout', de: 'nach dem Training' },
-  { foods: ['kiwi', 'cherries', 'milk', 'pumpkinseeds', 'walnuts', 'almonds'], en: 'before bed', de: 'vor dem Schlafen' },
+  { foods: ['eggs', 'oats', 'yogurt', 'blueberries', 'coffee', 'greentea'], en: 'morning', de: 'morgens' },
+  { foods: ['banana', 'dates', 'oats', 'rice', 'honey', 'beets', 'coffee'], en: 'pre-workout', de: 'vor dem Training' },   // schnelle Kohlenhydrate, Koffein, Nitrat
+  { foods: ['chicken', 'rice', 'eggs', 'milk', 'steak', 'potatoes', 'tuna'], en: 'post-workout', de: 'nach dem Training' }, // Protein + Kohlenhydrate
+  { foods: ['kiwi', 'cherries', 'chamomile', 'pumpkinseeds', 'almonds', 'milk'], en: 'before bed', de: 'vor dem Schlafen' }, // Schlaf + Casein über Nacht
 ];
 const TIERS = [
   { tag: 'S', en: 'S tier foods', de: 'S-Tier Lebensmittel' },
@@ -354,19 +507,19 @@ const MEALS = [
 ];
 // passender Tausch: an derselben Stelle im Raster steht die gesunde Alternative
 const SWAPMAP = {
-  candy: ['berries', 'mango', 'cherries', 'dates', 'blueberries'], soda: ['greentea', 'water', 'coffee', 'milk'],
+  candy: ['berries', 'mango', 'cherries', 'dates', 'blueberries'], soda: ['greentea', 'water', 'coffee', 'milk'], beer: ['water', 'greentea', 'chamomile'],
   fries: ['potatoes', 'sweetpotato'], donut: ['oats', 'yogurt', 'dates'], cookies: ['dates', 'walnuts', 'chocolate', 'almonds'],
-  pancakes: ['oats', 'eggs', 'yogurt'], pizza: ['tomatoes', 'cheese', 'olives'], burger: ['steak', 'beef'],
+  pancakes: ['oats', 'eggs', 'yogurt'], pizza: ['steak', 'salmon', 'chicken'], burger: ['steak', 'beef'],
   processed: ['nuts', 'almonds', 'walnuts', 'olives', 'cheese'],
   chips: ['nuts', 'almonds', 'potatoes', 'sweetpotato'], coldcuts: ['steak', 'beef', 'chicken'], nuggets: ['chicken'],
 };
 const SWAP = { en: ['swap this…', 'for this…', 'and this…', 'for this…'], de: ['tausch das…', 'gegen das…', 'und das…', 'gegen das…'] };
 const REALS = [
-  { foods: ['steak', 'beef', 'eggs', 'chicken', 'milk', 'salmon', 'tuna', 'sardines', 'yogurt', 'shrimp'], en: 'real protein', de: 'echtes Protein' },
-  { foods: ['honey', 'dates', 'banana', 'mango', 'berries', 'cherries', 'oranges', 'apples', 'blueberries'], en: 'real sugar', de: 'echter Zucker' },
-  { foods: ['avocado', 'olives', 'oliveoil', 'butter', 'walnuts', 'almonds', 'salmon', 'eggs', 'nuts'], en: 'real fats', de: 'echte Fette' },
+  { foods: ['steak', 'beef', 'eggs', 'chicken', 'salmon', 'tuna', 'sardines', 'shrimp'], en: 'real protein', de: 'echtes Protein' },
+  { foods: ['honey', 'dates', 'banana', 'mango', 'berries', 'cherries', 'oranges', 'apples', 'blueberries', 'watermelon'], en: 'real sugar', de: 'echter Zucker' },
+  { foods: ['avocado', 'olives', 'oliveoil', 'butter', 'walnuts', 'almonds', 'salmon', 'nuts'], en: 'real fats', de: 'echte Fette' },
   { foods: ['potatoes', 'sweetpotato', 'rice', 'oats', 'banana', 'lentils'], en: 'real carbs', de: 'echte Kohlenhydrate' },
-  { foods: ['water', 'greentea', 'coffee', 'milk'], en: 'real drinks', de: 'echte Getränke' },
+  { foods: ['water', 'greentea', 'coffee', 'milk', 'chamomile'], en: 'real drinks', de: 'echte Getränke' },
 ];
 const RULES = {
   en: ['if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.'],
@@ -377,14 +530,14 @@ const RULES = {
     ['butter', 'milk', 'eggs', 'potatoes', 'cheese', 'honey', 'oats', 'apples'],
     ['eggs', 'steak', 'salmon', 'berries', 'potatoes', 'greens', 'broccoli'],
     ['eggs', 'potatoes', 'carrots', 'beef', 'broccoli', 'lentils', 'apples'],
-    ['mango', 'berries', 'cherries', 'dates', 'banana', 'kiwi', 'oranges', 'blueberries', 'pomegranate'],
+    ['mango', 'berries', 'cherries', 'dates', 'banana', 'kiwi', 'oranges', 'blueberries', 'pomegranate', 'watermelon'],
     ['eggs', 'chicken', 'steak', 'salmon', 'yogurt', 'beef', 'tuna'],
-    ['water', 'greentea', 'coffee'],
+    ['water', 'greentea', 'coffee', 'chamomile'],
   ],
 };
 // typische Lebensmittel des Landes
 const COUNTRIES = [
-  { flag: 'nl', foods: ['cheese', 'eggs', 'milk', 'potatoes', 'carrots', 'butter'], en: 'why are the Dutch so tall?', de: 'warum sind Niederländer so groß?' },
+  { flag: 'nl', foods: ['cheese', 'milk', 'yogurt', 'eggs', 'butter'], en: 'why are the Dutch so tall?', de: 'warum sind Niederländer so groß?' },
   { flag: 'it', foods: ['olives', 'oliveoil', 'tomatoes', 'sardines', 'oranges', 'cheese', 'garlic'], en: 'why do Italians live so long?', de: 'warum leben Italiener so lange?' },
   { flag: 'jp', foods: ['rice', 'salmon', 'greentea', 'sweetpotato', 'oysters', 'eggs', 'tuna'], en: 'why are the Japanese so lean?', de: 'warum sind Japaner so schlank?' },
   { flag: 'gr', foods: ['olives', 'oliveoil', 'yogurt', 'sardines', 'honey', 'tomatoes', 'cheese'], en: 'why are Greeks so healthy?', de: 'warum sind Griechen so gesund?' },
@@ -429,13 +582,14 @@ const ANCESTORS = [
 ];
 const EATLIKE = { en: ['eat like this…', '…to look like this'], de: ['iss so…', '…um so auszusehen'] };
 const NATURES = [
-  { foods: ['mango', 'dates', 'berries', 'cherries', 'banana', 'honey', 'blueberries', 'pomegranate'], en: 'nature’s candy', de: 'Süßigkeiten der Natur' },
-  { foods: ['greentea', 'coffee', 'oranges', 'banana', 'dates', 'honey'], en: 'nature’s energy drink', de: 'Energy-Drink der Natur' },
-  { foods: ['eggs', 'milk', 'yogurt', 'steak', 'beef', 'chicken'], en: 'nature’s protein shake', de: 'Proteinshake der Natur' },
-  { foods: ['avocado', 'carrots', 'tomatoes', 'salmon', 'sweetpotato', 'peppers', 'kiwi'], en: 'nature’s skincare', de: 'Hautpflege der Natur' },
-  { foods: ['kiwi', 'cherries', 'milk', 'pumpkinseeds', 'walnuts', 'almonds'], en: 'nature’s sleeping pill', de: 'Schlafmittel der Natur' },
+  { foods: ['mango', 'dates', 'berries', 'cherries', 'watermelon', 'honey', 'blueberries', 'pomegranate'], en: 'nature’s candy', de: 'Süßigkeiten der Natur' },
+  { foods: ['coffee', 'greentea', 'banana', 'dates', 'honey'], en: 'nature’s energy drink', de: 'Energy-Drink der Natur' },
+  { foods: ['eggs', 'milk', 'steak', 'beef', 'chicken', 'tuna'], en: 'nature’s protein shake', de: 'Proteinshake der Natur' },
+  { foods: why('skin'), en: 'nature’s skincare', de: 'Hautpflege der Natur' },
+  { foods: why('sleep'), en: 'nature’s sleeping pill', de: 'Schlafmittel der Natur' },
   { foods: ['eggs', 'greens', 'broccoli', 'sardines', 'oysters', 'salmon'], en: 'nature’s multivitamin', de: 'Multivitamin der Natur' },
-  { foods: ['beets', 'banana', 'dates', 'coffee', 'honey'], en: 'nature’s pre-workout', de: 'Pre-Workout der Natur' },
+  { foods: ['beets', 'banana', 'dates', 'coffee', 'watermelon'], en: 'nature’s pre-workout', de: 'Pre-Workout der Natur' },
+  { foods: why('gut'), en: 'nature’s probiotic', de: 'Probiotikum der Natur' },
 ];
 // „american apples vs european apples“: zwei Versionen desselben Essens, oben/unten
 const COMPARE = [
