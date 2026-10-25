@@ -1566,7 +1566,10 @@ async function uploadFigure(file) {
   const st = $('#figStatus'); setStatus(st, 'Bereite Figur vor…');
   try {
     let { canvas } = await resizeBlob(file, 2400, 'image/png');
-    if ($('#figBlack').checked) canvas = cutBlack(canvas);
+    // schon freigestellt (durchsichtiger Rand)? Dann nichts entfernen – sonst verschwinden z. B. dunkle Haare
+    const hasAlpha = (() => { const c = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
+      return [[0, 0], [w - 1, 0], [0, h - 1], [w - 1, h - 1], [w >> 1, 0]].some(([x, y]) => c.getImageData(x, y, 1, 1).data[3] < 250); })();
+    if ($('#figBlack').checked && !hasAlpha) canvas = cutBlack(canvas);
     const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
     const name = file.name.replace(/\.[^.]+$/, '').slice(0, 20) || 'Statue';
     const id = 'own-' + Date.now();
