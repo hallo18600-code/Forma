@@ -563,22 +563,22 @@ const COUNTRIES = [
   { flag: 'it', foods: ['olives', 'oliveoil', 'tomatoes', 'sardines', 'oranges', 'cheese', 'garlic'], en: 'why do Italians live so long?', de: 'warum leben Italiener so lange?' },
   { flag: 'jp', foods: ['rice', 'salmon', 'greentea', 'sweetpotato', 'oysters', 'eggs', 'tuna'], en: 'why are the Japanese so lean?', de: 'warum sind Japaner so schlank?' },
   { flag: 'gr', foods: ['olives', 'oliveoil', 'yogurt', 'sardines', 'honey', 'tomatoes', 'cheese'], en: 'why are Greeks so healthy?', de: 'warum sind Griechen so gesund?' },
-  { flag: 'no', foods: ['salmon', 'sardines', 'potatoes', 'milk', 'blueberries', 'eggs'], en: 'why are Norwegians so strong?', de: 'warum sind Norweger so stark?' },
+  { flag: 'no', foods: ['salmon', 'sardines', 'eggs', 'milk', 'potatoes'], en: 'why are Norwegians so strong?', de: 'warum sind Norweger so stark?' },
   { flag: 'es', foods: ['olives', 'oliveoil', 'tomatoes', 'sardines', 'oranges', 'eggs', 'shrimp', 'garlic'], en: 'why do Spaniards live so long?', de: 'warum leben Spanier so lange?' },
-  { flag: 'de', foods: ['potatoes', 'cheese', 'milk', 'eggs', 'beef', 'butter', 'oats', 'apples'], en: 'why are Germans so strong?', de: 'warum sind Deutsche so stark?' },
+  { flag: 'de', foods: ['beef', 'eggs', 'milk', 'cheese', 'potatoes', 'oats'], en: 'why are Germans so strong?', de: 'warum sind Deutsche so stark?' },
   { flag: 'at', foods: ['milk', 'cheese', 'eggs', 'potatoes', 'honey', 'butter', 'apples'], en: 'why do Austrians live so long?', de: 'warum leben Österreicher so lange?' },
   { flag: 'ch', foods: ['cheese', 'milk', 'chocolate', 'potatoes', 'butter', 'eggs', 'apples'], en: 'why are the Swiss so healthy?', de: 'warum sind Schweizer so gesund?' },
-  { flag: 'se', foods: ['salmon', 'berries', 'blueberries', 'potatoes', 'milk', 'oats'], en: 'why are Swedes so tall?', de: 'warum sind Schweden so groß?' },
+  { flag: 'se', foods: ['milk', 'salmon', 'cheese', 'eggs', 'potatoes'], en: 'why are Swedes so tall?', de: 'warum sind Schweden so groß?' },
   { flag: 'dk', foods: ['salmon', 'cheese', 'butter', 'oats', 'berries', 'potatoes'], en: 'why are Danes so happy?', de: 'warum sind Dänen so glücklich?' },
   { flag: 'fi', foods: ['blueberries', 'salmon', 'oats', 'milk', 'berries', 'potatoes'], en: 'why are Finns so tough?', de: 'warum sind Finnen so zäh?' },
-  { flag: 'is', foods: ['salmon', 'yogurt', 'milk', 'butter', 'potatoes', 'eggs'], en: 'why are Icelanders so strong?', de: 'warum sind Isländer so stark?' },
+  { flag: 'is', foods: ['salmon', 'yogurt', 'milk', 'eggs', 'butter'], en: 'why are Icelanders so strong?', de: 'warum sind Isländer so stark?' },
   { flag: 'ie', foods: ['potatoes', 'butter', 'beef', 'milk', 'oats', 'salmon'], en: 'why are the Irish so strong?', de: 'warum sind Iren so stark?' },
   { flag: 'gb', foods: ['eggs', 'potatoes', 'beef', 'milk', 'oats', 'cheese'], en: 'what the British ate 100 years ago', de: 'was Briten vor 100 Jahren aßen' },
   { flag: 'pt', foods: ['sardines', 'olives', 'oliveoil', 'tomatoes', 'oranges', 'garlic'], en: 'why do the Portuguese live so long?', de: 'warum leben Portugiesen so lange?' },
-  { flag: 'pl', foods: ['potatoes', 'beets', 'eggs', 'cheese', 'milk', 'apples'], en: 'why are Poles so strong?', de: 'warum sind Polen so stark?' },
+  { flag: 'pl', foods: ['beef', 'eggs', 'cheese', 'milk', 'potatoes', 'beets'], en: 'why are Poles so strong?', de: 'warum sind Polen so stark?' },
   { flag: 'bg', foods: ['yogurt', 'cheese', 'tomatoes', 'honey', 'walnuts', 'peppers'], en: 'why do Bulgarians live so long?', de: 'warum leben Bulgaren so lange?' },
   { flag: 'ge', foods: ['walnuts', 'yogurt', 'cheese', 'honey', 'tomatoes', 'pomegranate', 'garlic'], en: 'why do Georgians live so long?', de: 'warum leben Georgier so lange?' },
-  { flag: 'tr', foods: ['yogurt', 'olives', 'honey', 'tomatoes', 'pomegranate', 'walnuts', 'lentils', 'peppers'], en: 'why are Turks so strong?', de: 'warum sind Türken so stark?' },
+  { flag: 'tr', foods: ['beef', 'yogurt', 'lentils', 'eggs', 'olives', 'walnuts', 'pomegranate'], en: 'why are Turks so strong?', de: 'warum sind Türken so stark?' },
   { flag: 'ma', foods: ['dates', 'olives', 'oranges', 'honey', 'tomatoes', 'oliveoil', 'lentils'], en: 'why are Moroccans so healthy?', de: 'warum sind Marokkaner so gesund?' },
   { flag: 'br', foods: ['mango', 'banana', 'rice', 'beef', 'avocado', 'oranges'], en: 'why are Brazilians so fit?', de: 'warum sind Brasilianer so fit?' },
   { flag: 'ar', foods: ['steak', 'beef', 'eggs', 'potatoes', 'cheese'], en: 'why are Argentinians so strong?', de: 'warum sind Argentinier so stark?' },
@@ -1098,7 +1098,7 @@ function planSlides(series, n, lang) {
   }
   if (series === 'tier') {
     const order = { 1: ['S'], 2: ['S', 'F'], 3: ['S', 'A', 'F'], 4: ['S', 'A', 'B', 'F'] }[n];
-    order.forEach(t => { const ti = TIERS.find(x => x.tag === t); specs.push({ pred: tagPred([t]), hook: ti[lang], mood: t === 'F' ? 'sad' : 'strong', key: 'tier' + t }); });
+    order.forEach(t => { const ti = TIERS.find(x => x.tag === t); specs.push({ pred: f => tagPred([t])(f) && !f.tags.includes('minor'), hook: ti[lang], mood: t === 'F' ? 'sad' : 'strong', key: 'tier' + t }); });
   }
   if (series === 'day') {
     MEALS.slice(0, n).forEach((m, k) => specs.push({ pred: idsPred(m.foods), hook: k === 0 ? `${lang === 'de' ? 'was ich an einem Tag esse' : 'what I eat in a day'}:\n${m[lang]}` : m[lang], mood: 'strong', key: 'day' + m.tag }));
