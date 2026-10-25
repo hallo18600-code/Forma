@@ -203,7 +203,6 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
       <div class="opt"><span>Sprache auf den Slides</span><div class="seg" id="sLang"><button type="button" data-v="en">English</button><button type="button" data-v="de">Deutsch</button></div></div>
       <div class="opt"><span>Auflösung</span><div class="seg" id="sRes"><button type="button" data-v="hd">HD 1080 × 1440</button><button type="button" data-v="4k">4K 2160 × 2880</button></div></div>
       <label class="check"><input type="checkbox" id="sGray"> Figuren schwarz-weiß</label>
-      <label class="check"><input type="checkbox" id="sWhy"> Begründungen in die Beschreibung (warum dieses Essen?)</label>
       <p class="note">TikTok rechnet Bilder beim Hochladen kleiner. HD reicht meistens, 4K ist etwas schärfer, dauert aber länger.</p>
     </div>
   </details>
@@ -458,28 +457,7 @@ const CLAIMS = {
     broccoli: 'Calcium und Vitamin K',
   },
 };
-// Kurzbegründungen [englisch, deutsch] für die TikTok-Beschreibung
-const WHY_SHORT = {"sleep": {"kiwi": ["study: fall asleep faster", "Studie: schneller eingeschlafen"], "cherries": ["natural melatonin", "natürliches Melatonin"], "pumpkinseeds": ["top magnesium source", "Top-Magnesiumquelle"], "chamomile": ["apigenin, calming", "Apigenin, beruhigend"], "almonds": ["magnesium + melatonin", "Magnesium + Melatonin"], "salmon": ["study: better sleep 3×/week", "Studie: besser geschlafen bei 3×/Woche"]}, "skin": {"salmon": ["omega-3 calms inflammation", "Omega-3 gegen Entzündungen"], "tomatoes": ["lycopene, less sun redness", "Lycopin, weniger Sonnenrötung"], "carrots": ["beta-carotene glow", "Beta-Carotin-Glow"], "sweetpotato": ["loads of beta-carotene", "viel Beta-Carotin"], "peppers": ["more vitamin C than oranges", "mehr Vitamin C als Orangen"], "kiwi": ["vitamin C → collagen", "Vitamin C → Kollagen"], "avocado": ["healthy fats + vitamin E", "gesunde Fette + Vitamin E"]}, "eyes": {"greens": ["#1 for lutein", "Nr. 1 bei Lutein"], "eggs": ["lutein, easy to absorb", "Lutein, gut aufnehmbar"], "carrots": ["vitamin A", "Vitamin A"], "sweetpotato": ["vitamin A", "Vitamin A"], "salmon": ["DHA for the retina", "DHA für die Netzhaut"], "peppers": ["zeaxanthin", "Zeaxanthin"]}, "mood": {"salmon": ["omega-3, studies: better mood", "Omega-3, Studien: bessere Stimmung"], "sardines": ["omega-3 + vitamin D", "Omega-3 + Vitamin D"], "chocolate": ["study: fewer low moods", "Studie: seltener Stimmungstiefs"], "walnuts": ["study: better mood scores", "Studie: bessere Stimmungswerte"], "yogurt": ["gut-brain axis", "Darm-Hirn-Achse"], "blueberries": ["study: better mood", "Studie: bessere Laune"]}, "hair": {"eggs": ["biotin + protein", "Biotin + Protein"], "oysters": ["most zinc of any food", "am meisten Zink"], "beef": ["iron + zinc", "Eisen + Zink"], "steak": ["iron + zinc", "Eisen + Zink"], "salmon": ["omega-3 + vitamin D", "Omega-3 + Vitamin D"], "pumpkinseeds": ["zinc", "Zink"], "sardines": ["omega-3 + protein", "Omega-3 + Protein"]}, "energy": {"oats": ["slow carbs, no crash", "langsame Kohlenhydrate, kein Crash"], "sweetpotato": ["slow carbs", "langsame Kohlenhydrate"], "beef": ["iron + B12", "Eisen + B12"], "steak": ["iron + B12", "Eisen + B12"], "eggs": ["B12 + protein", "B12 + Protein"], "lentils": ["iron + fiber", "Eisen + Ballaststoffe"], "banana": ["study: as good as a sports drink", "Studie: so gut wie ein Sportgetränk"]}, "strong": {"steak": ["protein + natural creatine", "Protein + natürliches Kreatin"], "beef": ["protein + natural creatine", "Protein + natürliches Kreatin"], "chicken": ["~30 g protein per 100 g", "~30 g Protein pro 100 g"], "eggs": ["complete protein", "vollständiges Protein"], "tuna": ["~25 g protein per 100 g", "~25 g Protein pro 100 g"], "salmon": ["protein + creatine", "Protein + Kreatin"], "milk": ["whey + casein", "Whey + Casein"]}, "calm": {"chamomile": ["apigenin, study: less anxiety", "Apigenin, Studie: weniger Angst"], "greentea": ["L-theanine = calm focus", "L-Theanin = ruhiger Fokus"], "chocolate": ["magnesium", "Magnesium"], "pumpkinseeds": ["lots of magnesium", "viel Magnesium"], "almonds": ["magnesium", "Magnesium"], "greens": ["magnesium", "Magnesium"], "salmon": ["omega-3, study: less anxiety", "Omega-3, Studie: weniger Angst"]}, "focus": {"eggs": ["choline for memory", "Cholin fürs Gedächtnis"], "salmon": ["DHA for the brain", "DHA fürs Gehirn"], "sardines": ["DHA", "DHA"], "walnuts": ["study: better memory", "Studie: besseres Gedächtnis"], "blueberries": ["studies: better memory", "Studien: besseres Gedächtnis"], "greentea": ["caffeine + L-theanine", "Koffein + L-Theanin"], "coffee": ["caffeine", "Koffein"], "chocolate": ["cocoa flavanols", "Kakao-Flavanole"]}, "lean": {"chicken": ["high protein, almost no fat", "viel Protein, kaum Fett"], "tuna": ["high protein, almost no fat", "viel Protein, kaum Fett"], "shrimp": ["24 g protein, <100 kcal", "24 g Protein, <100 kcal"], "eggs": ["protein keeps you full", "Protein macht satt"], "broccoli": ["low calorie, high fiber", "wenig Kalorien, viele Ballaststoffe"], "greens": ["almost zero calories", "fast keine Kalorien"], "yogurt": ["greek yogurt: high protein", "griech. Joghurt: viel Protein"]}, "young": {"blueberries": ["antioxidants", "Antioxidantien"], "tomatoes": ["lycopene = sun protection", "Lycopin = Sonnenschutz"], "greentea": ["EGCG antioxidant", "EGCG-Antioxidans"], "salmon": ["astaxanthin + omega-3", "Astaxanthin + Omega-3"], "oliveoil": ["polyphenols, study: less skin aging", "Polyphenole, Studie: weniger Hautalterung"], "pomegranate": ["ellagic acid", "Ellagsäure"], "avocado": ["vitamin E", "Vitamin E"]}, "testo": {"oysters": ["most zinc of any food", "am meisten Zink"], "beef": ["zinc + saturated fat", "Zink + gesättigte Fette"], "steak": ["zinc + saturated fat", "Zink + gesättigte Fette"], "eggs": ["cholesterol + vitamin D", "Cholesterin + Vitamin D"], "pumpkinseeds": ["zinc + magnesium", "Zink + Magnesium"], "salmon": ["vitamin D", "Vitamin D"], "sardines": ["vitamin D + omega-3", "Vitamin D + Omega-3"]}, "immune": {"peppers": ["more vitamin C than oranges", "mehr Vitamin C als Orangen"], "kiwi": ["loads of vitamin C", "viel Vitamin C"], "oranges": ["vitamin C", "Vitamin C"], "broccoli": ["vitamin C + sulforaphane", "Vitamin C + Sulforaphan"], "garlic": ["allicin, study: fewer colds", "Allicin, Studie: weniger Erkältungen"], "ginger": ["anti-inflammatory", "entzündungshemmend"], "kimchi": ["probiotics", "Probiotika"], "oysters": ["zinc for immune cells", "Zink für Immunzellen"]}, "gut": {"yogurt": ["live cultures", "lebende Kulturen"], "kimchi": ["fermented, study: more gut diversity", "fermentiert, Studie: mehr Vielfalt"], "kiwi": ["study: better digestion", "Studie: bessere Verdauung"], "oats": ["beta-glucan feeds good bacteria", "Beta-Glucan füttert gute Bakterien"], "lentils": ["lots of fiber", "viele Ballaststoffe"], "apples": ["prebiotic pectin", "präbiotisches Pektin"], "garlic": ["prebiotic inulin", "präbiotisches Inulin"]}, "pump": {"beets": ["nitrates → more blood flow", "Nitrat → mehr Durchblutung"], "greens": ["very high in nitrates", "sehr viel Nitrat"], "watermelon": ["citrulline", "Citrullin"], "pomegranate": ["study: better blood flow", "Studie: bessere Durchblutung"], "chocolate": ["flavanols widen vessels", "Flavanole weiten Gefäße"], "garlic": ["boosts nitric oxide", "fördert Stickstoffmonoxid"]}, "bones": {"milk": ["calcium + protein", "Calcium + Protein"], "cheese": ["lots of calcium", "viel Calcium"], "yogurt": ["calcium", "Calcium"], "sardines": ["calcium + vitamin D", "Calcium + Vitamin D"], "almonds": ["calcium + magnesium", "Calcium + Magnesium"], "broccoli": ["calcium + vitamin K", "Calcium + Vitamin K"]}};
 const why = k => Object.keys(CLAIMS[k]);
-const CLAIM_LABEL = { sleep: ['😴', 'Sleep', 'Schlaf'], skin: ['✨', 'Skin', 'Haut'], eyes: ['👁️', 'Eyes', 'Augen'], mood: ['😊', 'Mood', 'Laune'],
-  hair: ['💇', 'Hair', 'Haare'], energy: ['⚡', 'Energy', 'Energie'], strong: ['💪', 'Strength', 'Kraft'], calm: ['🧘', 'Calm', 'Ruhe'],
-  focus: ['🧠', 'Focus', 'Fokus'], lean: ['🔥', 'Lean', 'Definition'], young: ['⏳', 'Youth', 'Jugend'], testo: ['🦍', 'Testosterone', 'Testosteron'],
-  immune: ['🛡️', 'Immune system', 'Immunsystem'], gut: ['🦠', 'Gut', 'Darm'], pump: ['🩸', 'Pump', 'Pump'], bones: ['🦴', 'Bones', 'Knochen'] };
-// „Warum?“-Zeilen für die Beschreibung: pro Aussage die gezeigten Lebensmittel mit Kurzgrund
-function whyLines(specs, slides, lang) {
-  const li = lang === 'de' ? 1 : 0, by = new Map();
-  specs.forEach((sp, i) => {
-    if (!sp.claim || !WHY_SHORT[sp.claim]) return;
-    const ids = by.get(sp.claim) || [];
-    for (const it of slides[i].items) if (WHY_SHORT[sp.claim][it.food.id] && !ids.includes(it.food.id) && ids.length < 5) ids.push(it.food.id);
-    by.set(sp.claim, ids);
-  });
-  const lines = [...by].slice(0, 4).map(([c, ids]) => {
-    const [e, en, de] = CLAIM_LABEL[c];
-    return `${e} ${li ? de : en}: ` + ids.map(id => `${li ? FOODS[id].de : FOODS[id].en} (${WHY_SHORT[c][id][li]})`).join(', ');
-  });
-  return lines.length ? lines.join('\n') + '\n\n' : '';
-}
 const QUESTIONS = [
   { id: 'sleep', foods: why('sleep'), en: ['why is my sleep so deep?', 'why do I sleep like a baby?', 'why do I fall asleep so fast?'], de: ['warum schlafe ich so tief?', 'warum schlafe ich wie ein Baby?', 'warum schlafe ich so schnell ein?'], niche: ['#sleeptips', '#realfood'] },
   { id: 'skin', foods: why('skin'), en: ['why is my skin so clear?', 'why does my skin glow?', 'why is my skin glowing?'], de: ['warum ist meine Haut so rein?', 'warum strahlt meine Haut so?', 'warum habe ich keine Pickel?'], niche: ['#clearskin', '#glowup'] },
@@ -679,7 +657,7 @@ const pexels = f => `https://www.pexels.com/search/${encodeURIComponent(f.en)}/?
 
 /* ---------- Zustand ---------- */
 let W = 1080, H = 1440;
-const DEFAULTS = { series: 'random', count: '4', lang: 'en', res: '4k', gray: false, why: true };
+const DEFAULTS = { series: 'random', count: '4', lang: 'en', res: '4k', gray: false };
 const S = Object.assign({}, DEFAULTS, load('hm2-settings', {}));
 if (load('hm2-settings-v', 0) < 2) { Object.assign(S, { count: '4', res: '4k', gray: false }); save('hm2-settings', S); save('hm2-settings-v', 2); }
 let recent = load('hm2-recent', { series: [], hooks: [], q: [] });
@@ -1199,7 +1177,7 @@ function planPost(series, n, lang) {
   const niche = (SERIES[series].niche || slides[0].niche) || ['#realfood', '#wholefoods'];
   const broad = lang === 'de' ? ['#ernährung', '#gesundessen'] : ['#nutrition', '#healthtips'];
   const tags = ['#healthmaxxing', ...broad, ...niche].filter((t, i, a) => a.indexOf(t) === i).slice(0, 5);
-  const desc = `Follow for better Health/Looks 🤝\n\n${S.why ? whyLines(specs, slides, lang) : ''}${tags.join(' ')}`;
+  const desc = `Follow for better Health/Looks 🤝\n\n${tags.join(' ')}`;
   // fürs nächste Mal merken, was gerade dran war (mehr Abwechslung)
   recent.series = [series, ...recent.series.filter(x => x !== series)].slice(0, 4);
   recent.use = recent.use || {}; const now = Date.now() + Math.random();
@@ -1323,7 +1301,7 @@ function updateMissing() {
   }
 }
 // Entwürfe merken (ohne Bilder): Nach dem Neuladen kommt dieselbe Galerie zurück und wird neu gezeichnet
-const FEED_KEY = 'hm2-feed';
+const FEED_KEY = 'hm2-feed2';  // neu, damit alte Entwürfe mit Begründungstext verschwinden
 function saveFeed() {
   save(FEED_KEY, { t: Date.now(), drafts: feed.map(d => ({ id: d.id, series: d.series, lang: d.lang, desc: d.desc, W: d.W, H: d.H, gray: d.gray, saved: d.saved,
     fig: { strong: d.fig.strong ? d.fig.strong.id : null, sad: d.fig.sad ? d.fig.sad.id : null },
@@ -1599,7 +1577,7 @@ function bindSettings() {
   };
   seg('#sCount', 'count'); seg('#sLang', 'lang'); seg('#sRes', 'res');
   const chk = (id, key) => { const el = $(id); el.checked = !!S[key]; el.addEventListener('change', () => { S[key] = el.checked; persist(); newFeed(); }); };
-  chk('#sGray', 'gray'); chk('#sWhy', 'why');
+  chk('#sGray', 'gray');
   $('#btnGen').addEventListener('click', newFeed);
   $('#btnMore').addEventListener('click', () => addDrafts(FEED_N));
   $('#btnSaveAll').addEventListener('click', saveAllPhotos);
