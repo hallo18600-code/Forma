@@ -184,15 +184,15 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
   </details>
 
   <details>
-    <summary>Statuen <span class="count" id="figCount">0</span></summary>
+    <summary>Figuren <span class="count" id="figCount">0</span></summary>
     <div class="body">
       <div class="grid-ph" id="figGrid"></div>
       <div class="row">
-        <label class="btn upload">Statue hinzufügen<input type="file" id="upFig" accept="image/*"></label>
+        <label class="btn upload">Figur hinzufügen<input type="file" id="upFig" accept="image/*"></label>
         <label class="check"><input type="checkbox" id="figBlack" checked> Schwarzen Hintergrund entfernen</label>
       </div>
       <div class="status" id="figStatus"></div>
-      <p class="note">Starke Statuen kommen zu gutem Essen, traurige zu Fast Food und Junk. Pro Video bleibt es dieselbe Statue. Bei eigenen Statuen wählst du das unter dem Bild.</p>
+      <p class="note">Starke Figuren kommen zu gutem Essen, traurige (😢) zu Fast Food und Junk. In einem Post bleibt es immer dieselbe Art: Statue mit Statue oder Zeichnung mit Zeichnung. Zeichnungen gibt es nur bei Gut-gegen-Schlecht-Posts, Models nur bei Posts ohne Gegenüberstellung. Bei eigenen Figuren wählst du Art und Stimmung unter dem Bild.</p>
     </div>
   </details>
 
@@ -202,14 +202,14 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
       <div class="opt"><span>Slides pro Post</span><div class="seg" id="sCount"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
       <div class="opt"><span>Sprache auf den Slides</span><div class="seg" id="sLang"><button type="button" data-v="en">English</button><button type="button" data-v="de">Deutsch</button></div></div>
       <div class="opt"><span>Auflösung</span><div class="seg" id="sRes"><button type="button" data-v="hd">HD 1080 × 1440</button><button type="button" data-v="4k">4K 2160 × 2880</button></div></div>
-      <label class="check"><input type="checkbox" id="sGray"> Statuen schwarz-weiß</label>
+      <label class="check"><input type="checkbox" id="sGray"> Figuren schwarz-weiß</label>
       <p class="note">TikTok rechnet Bilder beim Hochladen kleiner. HD reicht meistens, 4K ist etwas schärfer, dauert aber länger.</p>
     </div>
   </details>
 </div>
 
 <script>
-const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp"}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp"}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true}, {"id": "locken", "name": "Locken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/locken.webp", "thumb": "fig/locken_t.webp"}, {"id": "model", "name": "Model", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/model.webp", "thumb": "fig/model_t.webp"}, {"id": "strand", "name": "Strand", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/strand.webp", "thumb": "fig/strand_t.webp"}, {"id": "laufsteg", "name": "Laufsteg", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/laufsteg.webp", "thumb": "fig/laufsteg_t.webp"}, {"id": "gigachad", "name": "Gigachad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/gigachad.webp", "thumb": "fig/gigachad_t.webp", "physique": true}, {"id": "yeschad", "name": "Yes Chad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/yeschad.webp", "thumb": "fig/yeschad_t.webp"}, {"id": "sie", "name": "Sie", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/sie.webp", "thumb": "fig/sie_t.webp"}, {"id": "manga", "name": "Manga", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/manga.webp", "thumb": "fig/manga_t.webp"}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp"}, {"id": "heulen", "name": "Heulen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/heulen.webp", "thumb": "fig/heulen_t.webp"}, {"id": "faust", "name": "Faust", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/faust.webp", "thumb": "fig/faust_t.webp"}, {"id": "muede", "name": "Müde", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/muede.webp", "thumb": "fig/muede_t.webp"}, {"id": "weinen", "name": "Weinen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/weinen.webp", "thumb": "fig/weinen_t.webp"}, {"id": "kind", "name": "Kind", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/kind.webp", "thumb": "fig/kind_t.webp"}];
+const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true, "kind": "statue"}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true, "kind": "statue"}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true, "kind": "statue"}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true, "kind": "statue"}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true, "kind": "statue"}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true, "kind": "statue"}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp", "kind": "statue"}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp", "kind": "statue"}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true, "kind": "statue"}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true, "kind": "statue"}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true, "kind": "statue"}, {"id": "locken", "name": "Locken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/locken.webp", "thumb": "fig/locken_t.webp", "kind": "photo"}, {"id": "model", "name": "Model", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/model.webp", "thumb": "fig/model_t.webp", "kind": "photo"}, {"id": "strand", "name": "Strand", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/strand.webp", "thumb": "fig/strand_t.webp", "kind": "photo"}, {"id": "laufsteg", "name": "Laufsteg", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/laufsteg.webp", "thumb": "fig/laufsteg_t.webp", "kind": "photo"}, {"id": "gigachad", "name": "Gigachad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/gigachad.webp", "thumb": "fig/gigachad_t.webp", "physique": true, "kind": "photo"}, {"id": "schwarz", "name": "Schwarz", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/schwarz.webp", "thumb": "fig/schwarz_t.webp", "kind": "photo"}, {"id": "spitze", "name": "Spitze", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/spitze.webp", "thumb": "fig/spitze_t.webp", "kind": "photo"}, {"id": "weiss", "name": "Weiß", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/weiss.webp", "thumb": "fig/weiss_t.webp", "kind": "photo"}, {"id": "lockig", "name": "Lockig", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/lockig.webp", "thumb": "fig/lockig_t.webp", "kind": "photo"}, {"id": "blick", "name": "Blick", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/blick.webp", "thumb": "fig/blick_t.webp", "kind": "photo"}, {"id": "yeschad", "name": "Yes Chad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/yeschad.webp", "thumb": "fig/yeschad_t.webp", "kind": "drawing"}, {"id": "sie", "name": "Sie", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/sie.webp", "thumb": "fig/sie_t.webp", "kind": "drawing"}, {"id": "manga", "name": "Manga", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/manga.webp", "thumb": "fig/manga_t.webp", "kind": "drawing"}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp", "kind": "statue"}, {"id": "heulen", "name": "Heulen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/heulen.webp", "thumb": "fig/heulen_t.webp", "kind": "drawing"}, {"id": "faust", "name": "Faust", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/faust.webp", "thumb": "fig/faust_t.webp", "kind": "drawing"}, {"id": "muede", "name": "Müde", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/muede.webp", "thumb": "fig/muede_t.webp", "kind": "drawing"}, {"id": "weinen", "name": "Weinen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/weinen.webp", "thumb": "fig/weinen_t.webp", "kind": "drawing"}, {"id": "kind", "name": "Kind", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/kind.webp", "thumb": "fig/kind_t.webp", "kind": "drawing"}];
 
 /* ---------- Lebensmittel ---------- */
 const F = (id, emoji, color, en, de, tags) => ({ id, emoji, color, en, de, tags });
@@ -621,6 +621,7 @@ function drawFlag(ctx, code, x, y, w, h) {
 function drawFigure(ctx, fig, st, top) {
   // Statue immer mittig, unten auf dem Bildrand.
   const im = (S.gray && fig.gray) || fig.img;
+  if (!im) return;
   const iw = im.width, ih = im.height;
   let sx = 0, sy = 0, sw = iw, sh = ih, tw, th, y;
   if (fig.anchor === 'panel') {
@@ -712,7 +713,9 @@ function drawFigureCell(ctx, fig, x, y, w, h) {
   const bg = ctx.createRadialGradient(x + w / 2, y + h * .45, 0, x + w / 2, y + h * .45, Math.max(w, h) * .75);
   bg.addColorStop(0, '#2c2c2c'); bg.addColorStop(1, '#050505');
   ctx.fillStyle = bg; ctx.fillRect(x, y, w, h);
-  const im = (S.gray && fig.gray) || fig.img, iw = im.width, ih = im.height;
+  const im = (S.gray && fig.gray) || fig.img;
+  if (!im) { ctx.restore(); return; }
+  const iw = im.width, ih = im.height;
   // ganze Figur, wenn sie hineinpasst; breite Büsten füllen die Zellenbreite und werden unten abgeschnitten
   const s = fig.anchor === 'panel' ? w / iw : Math.max(h * .95 / ih, w * 1.02 / iw), sh = Math.min(ih, h / s);
   const tw = iw * s, th = sh * s, dx = x + (w - tw) / 2, dy = y + h - th;
@@ -840,15 +843,29 @@ function makeStyle() {
     flip: rnd() < .35,
   };
 }
-function nextFigure(mood, physique) {
-  // eine Statue pro Video; über mehrere Videos reihum, die zuletzt benutzten kommen zuletzt dran
-  let pool = figures.filter(f => (f.mood || 'strong') === mood);
-  if (physique && pool.some(f => f.physique)) pool = pool.filter(f => f.physique);
+// Figuren-Familien: in einem Post nie Statue mit Model oder Zeichnung mischen.
+// Zeichnungen nur in Kontrast-Posts (gut vs. schlecht), Models nur in Posts ohne Kontrast.
+const KINDS = { statue: 'Statue', photo: 'Model', drawing: 'Zeichnung' };
+const kindOf = f => KINDS[f.kind] ? f.kind : 'statue';
+function pickKind(needStrong, needSad) {
+  if (!needStrong && !needSad) return null;
+  const allowed = needStrong && needSad ? { drawing: .65, statue: .35 } : needStrong ? { statue: .55, photo: .45 } : { statue: 1, drawing: 1 };
+  const has = (k, mood) => figures.some(f => kindOf(f) === k && (f.mood || 'strong') === mood);
+  let opts = Object.entries(allowed).filter(([k]) => (!needStrong || has(k, 'strong')) && (!needSad || has(k, 'sad')));
+  if (!opts.length) return null;
+  const k = weighted(opts.map(([k, w]) => [k, k === recent.kind ? w * .5 : w]));
+  recent.kind = k; return k;
+}
+function nextFigure(mood, physique, kind) {
+  // eine Figur pro Post; über mehrere Posts reihum, die zuletzt benutzten kommen zuletzt dran
+  let pool = figures.filter(f => (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind));
+  if (physique && kind === 'statue' && pool.some(f => f.physique)) pool = pool.filter(f => f.physique);
   if (!pool.length) return null;
-  const last = (recent.figs && recent.figs[mood]) || [];
+  const key = mood + '-' + (kind || 'all');
+  const last = (recent.figs && recent.figs[key]) || [];
   const fresh = pool.filter(f => !last.includes(f.id));
   const f = pick(fresh.length ? fresh : pool);
-  recent.figs = recent.figs || {}; recent.figs[mood] = [f.id, ...last.filter(x => x !== f.id)].slice(0, Math.max(1, pool.length - 1));
+  recent.figs = recent.figs || {}; recent.figs[key] = [f.id, ...last.filter(x => x !== f.id)].slice(0, Math.max(1, pool.length - 1));
   return f;
 }
 function pickFresh(list, key) {
@@ -948,8 +965,10 @@ function pickSeries(n) {
 function planPost(series, n, lang) {
   const specs = planSlides(series, n, lang);
   const duel = specs.some(s => s.mood === 'duel');
-  const fig = { strong: specs.some(s => s.mood === 'strong' || s.mood === 'duel') ? nextFigure('strong', duel || specs.some(s => s.big)) : null,
-    sad: specs.some(s => s.mood === 'sad' || s.mood === 'duel') ? nextFigure('sad') : null };
+  const needStrong = specs.some(s => s.mood === 'strong' || s.mood === 'duel'), needSad = specs.some(s => s.mood === 'sad' || s.mood === 'duel');
+  const kind = pickKind(needStrong, needSad);
+  const fig = { strong: needStrong && kind ? nextFigure('strong', duel || specs.some(s => s.big), kind) : null,
+    sad: needSad && kind ? nextFigure('sad', false, kind) : null };
   const base = makeStyle();  // gleiche Statuen-Größe/-Spiegelung im ganzen Video
   const used = new Set();
   const slides = [];
@@ -985,6 +1004,11 @@ function planPost(series, n, lang) {
 async function renderBlobs(slides, fig) {
   const used2 = [fig.strong, fig.sad].filter(Boolean);
   releaseFigs(used2);
+  used2.forEach(f => figBusy.set(f, (figBusy.get(f) || 0) + 1));
+  try { return await drawSlides(slides, used2); }
+  finally { used2.forEach(f => figBusy.set(f, figBusy.get(f) - 1)); }
+}
+async function drawSlides(slides, used2) {
   await Promise.all(used2.map(f => ensureFig(f).catch(() => {})));
   slides.forEach(sl => { if (sl.figure && !sl.figure.img) sl.figure = null; if (sl.figure2 && !sl.figure2.img) sl.figure2 = null;
     if (sl.layout === 'duel' && sl.figure && sl.figure2) sl.items = sl.items.slice(0, 2); });  // Reserve-Fotos nur ohne Statuen laden
@@ -1199,7 +1223,8 @@ async function ensureFig(f) {
   if (!f.img) f.img = await loadImg(f.src);
   if (S.gray && !f.gray) f.gray = grayCanvas(f.img);
 }
-function releaseFigs(keep) { figures.forEach(f => { if (!keep.includes(f)) { f.img = null; f.gray = null; } }); }
+const figBusy = new Map();  // Figuren, die gerade gezeichnet werden, nicht freigeben
+function releaseFigs(keep) { figures.forEach(f => { if (!keep.includes(f) && !figBusy.get(f)) { f.img = null; f.gray = null; } }); }
 function foodOptions(sel) {
   const all = Object.values(FOODS);
   const opt = f => `<option value="${f.id}"${f.id === sel ? ' selected' : ''}>${f.emoji} ${esc(f.de)}</option>`;
@@ -1241,13 +1266,16 @@ function renderFigGrid() {
       const sel = document.createElement('select'); sel.id = 'mood-' + f.id; sel.setAttribute('aria-label', 'Wofür passt die Statue?');
       sel.innerHTML = `<option value="strong">Stark (gutes Essen)</option><option value="sad">Traurig (schlechtes Essen)</option>`;
       sel.value = f.mood || 'strong'; sel.onchange = () => setMood(f, sel.value); d.append(sel);
+      const ks = document.createElement('select'); ks.id = 'kind-' + f.id; ks.setAttribute('aria-label', 'Was für eine Figur ist das?');
+      ks.innerHTML = Object.entries(KINDS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
+      ks.value = kindOf(f); ks.onchange = () => { f.kind = ks.value; STORE.patch('figures', f.id, { kind: ks.value }); renderFigGrid(); }; d.append(ks);
       const del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = '×'; del.setAttribute('aria-label', 'Statue löschen');
       del.onclick = () => armDelete(del, () => removeFigure(f)); d.append(del);
     }
     grid.append(d);
   }
-  const sad = figures.filter(f => f.mood === 'sad').length;
-  $('#figCount').textContent = `${figures.length - sad} stark · ${sad} traurig`;
+  const n = k => figures.filter(f => kindOf(f) === k).length;
+  $('#figCount').textContent = `${n('statue')} Statuen · ${n('photo')} Models · ${n('drawing')} Zeichnungen`;
 }
 async function setMood(f, mood) {
   f.mood = mood; renderFigGrid();
@@ -1268,7 +1296,7 @@ const STORE = (() => {
 async function loadLocal() {
   const ph = await STORE.all('photos'), fg = await STORE.all('figures');
   photos = ph.map(([id, v]) => ({ id, food: v.food || 'other', src: URL.createObjectURL(v.blob), createdAt: v.createdAt || 0 })).sort((a, b) => b.createdAt - a.createdAt);
-  fg.forEach(([id, v]) => addFigure({ id, name: v.name || 'Statue', mood: v.mood || 'strong', src: URL.createObjectURL(v.blob) }));
+  fg.forEach(([id, v]) => addFigure({ id, name: v.name || 'Statue', mood: v.mood || 'strong', kind: v.kind || 'statue', src: URL.createObjectURL(v.blob) }));
 }
 async function resizeBlob(file, max, type) {
   const url = URL.createObjectURL(file);
@@ -1327,16 +1355,16 @@ function cutBlack(canvas) {
   return out;
 }
 async function uploadFigure(file) {
-  const st = $('#figStatus'); setStatus(st, 'Bereite Statue vor…');
+  const st = $('#figStatus'); setStatus(st, 'Bereite Figur vor…');
   try {
     let { canvas } = await resizeBlob(file, 2400, 'image/png');
     if ($('#figBlack').checked) canvas = cutBlack(canvas);
     const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
     const name = file.name.replace(/\.[^.]+$/, '').slice(0, 20) || 'Statue';
     const id = 'own-' + Date.now();
-    await STORE.put('figures', id, { name, mood: 'strong', blob, createdAt: Date.now() });
-    addFigure({ id, name, src: URL.createObjectURL(blob) }); renderFigGrid();
-    setStatus(st, 'Statue hinzugefügt.', 'ok');
+    await STORE.put('figures', id, { name, mood: 'strong', kind: 'statue', blob, createdAt: Date.now() });
+    addFigure({ id, name, kind: 'statue', src: URL.createObjectURL(blob) }); renderFigGrid();
+    setStatus(st, 'Figur hinzugefügt.', 'ok');
   } catch (e) { setStatus(st, 'Das Bild ließ sich nicht verarbeiten. Versuche ein PNG oder JPG.', 'err'); }
 }
 async function removeFigure(f) {
