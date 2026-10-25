@@ -849,7 +849,7 @@ const KINDS = { statue: 'Statue', photo: 'Model', drawing: 'Zeichnung' };
 const kindOf = f => KINDS[f.kind] ? f.kind : 'statue';
 function pickKind(needStrong, needSad) {
   if (!needStrong && !needSad) return null;
-  const allowed = needStrong && needSad ? { drawing: .65, statue: .35 } : needStrong ? { statue: .55, photo: .45 } : { statue: 1, drawing: 1 };
+  const allowed = needStrong && needSad ? { drawing: .3, statue: .7 } : needStrong ? { statue: .55, photo: .45 } : { statue: 1, drawing: 1 };
   const has = (k, mood) => figures.some(f => kindOf(f) === k && (f.mood || 'strong') === mood);
   let opts = Object.entries(allowed).filter(([k]) => (!needStrong || has(k, 'strong')) && (!needSad || has(k, 'sad')));
   if (!opts.length) return null;
