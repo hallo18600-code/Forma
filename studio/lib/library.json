@@ -1,0 +1,346 @@
+{
+ "avocado": [
+  "avocado-1.jpg",
+  "avocado-2.jpg",
+  "avocado-4.jpg"
+ ],
+ "banana": [
+  "banana-1.jpg",
+  "banana-2.jpg",
+  "banana-5.jpg",
+  "banana-6.jpg"
+ ],
+ "beef": [
+  "beef-1.jpg",
+  "beef-2.jpg",
+  "beef-3.jpg",
+  "beef-4.jpg"
+ ],
+ "berries": [
+  "berries-1.jpg",
+  "berries-2.jpg",
+  "berries-3.jpg",
+  "berries-4.jpg"
+ ],
+ "blueberries": [
+  "blueberries-1.jpg",
+  "blueberries-2.jpg",
+  "blueberries-3.jpg",
+  "blueberries-4.jpg"
+ ],
+ "burger": [
+  "burger-1.jpg",
+  "burger-2.jpg",
+  "burger-3.jpg",
+  "burger-4.jpg"
+ ],
+ "butter": [
+  "butter-1.jpg"
+ ],
+ "candy": [
+  "candy-1.jpg",
+  "candy-3.jpg"
+ ],
+ "carrots": [
+  "carrots-1.jpg",
+  "carrots-2.jpg",
+  "carrots-3.jpg",
+  "carrots-4.jpg"
+ ],
+ "cheese": [
+  "cheese-1.jpg",
+  "cheese-2.jpg",
+  "cheese-3.jpg",
+  "cheese-4.jpg"
+ ],
+ "cherries": [
+  "cherries-1.jpg",
+  "cherries-2.jpg",
+  "cherries-3.jpg",
+  "cherries-4.jpg"
+ ],
+ "chicken": [
+  "chicken-1.jpg",
+  "chicken-2.jpg",
+  "chicken-3.jpg"
+ ],
+ "chocolate": [
+  "chocolate-1.jpg",
+  "chocolate-2.jpg",
+  "chocolate-3.jpg",
+  "chocolate-4.jpg"
+ ],
+ "cookies": [
+  "cookies-1.jpg",
+  "cookies-2.jpg",
+  "cookies-3.jpg",
+  "cookies-4.jpg"
+ ],
+ "dates": [
+  "dates-1.jpg",
+  "dates-2.jpg",
+  "dates-3.jpg",
+  "dates-4.jpg"
+ ],
+ "donut": [
+  "donut-1.jpg",
+  "donut-2.jpg",
+  "donut-3.jpg",
+  "donut-4.jpg"
+ ],
+ "eggs": [
+  "eggs-1.jpg",
+  "eggs-2.jpg",
+  "eggs-3.jpg",
+  "eggs-4.jpg"
+ ],
+ "fries": [
+  "fries-1.jpg",
+  "fries-2.jpg",
+  "fries-3.jpg"
+ ],
+ "greens": [
+  "greens-1.jpg",
+  "greens-2.jpg",
+  "greens-3.jpg",
+  "greens-4.jpg"
+ ],
+ "greentea": [
+  "greentea-1.jpg",
+  "greentea-2.jpg",
+  "greentea-3.jpg",
+  "greentea-4.jpg"
+ ],
+ "honey": [
+  "honey-1.jpg",
+  "honey-2.jpg",
+  "honey-3.jpg",
+  "honey-4.jpg"
+ ],
+ "kiwi": [
+  "kiwi-1.jpg",
+  "kiwi-2.jpg",
+  "kiwi-3.jpg",
+  "kiwi-4.jpg"
+ ],
+ "mango": [
+  "mango-1.jpg",
+  "mango-2.jpg",
+  "mango-3.jpg",
+  "mango-4.jpg"
+ ],
+ "milk": [
+  "milk-1.jpg",
+  "milk-2.jpg",
+  "milk-3.jpg"
+ ],
+ "oats": [
+  "oats-1.jpg",
+  "oats-2.jpg",
+  "oats-3.jpg",
+  "oats-4.jpg"
+ ],
+ "olives": [
+  "olives-1.jpg",
+  "olives-2.jpg",
+  "olives-3.jpg",
+  "olives-4.jpg"
+ ],
+ "oranges": [
+  "oranges-1.jpg",
+  "oranges-2.jpg",
+  "oranges-3.jpg",
+  "oranges-4.jpg"
+ ],
+ "oysters": [
+  "oysters-1.jpg",
+  "oysters-2.jpg",
+  "oysters-3.jpg"
+ ],
+ "pancakes": [
+  "pancakes-1.jpg",
+  "pancakes-2.jpg",
+  "pancakes-3.jpg",
+  "pancakes-4.jpg"
+ ],
+ "pizza": [
+  "pizza-2.jpg",
+  "pizza-3.jpg",
+  "pizza-4.jpg"
+ ],
+ "potatoes": [
+  "potatoes-1.jpg",
+  "potatoes-2.jpg",
+  "potatoes-3.jpg",
+  "potatoes-4.jpg"
+ ],
+ "rice": [
+  "rice-1.jpg",
+  "rice-2.jpg",
+  "rice-3.jpg",
+  "rice-4.jpg"
+ ],
+ "salmon": [
+  "salmon-1.jpg",
+  "salmon-2.jpg",
+  "salmon-3.jpg",
+  "salmon-4.jpg"
+ ],
+ "sardines": [
+  "sardines-1.jpg",
+  "sardines-2.jpg",
+  "sardines-3.jpg",
+  "sardines-4.jpg"
+ ],
+ "soda": [
+  "soda-1.jpg"
+ ],
+ "steak": [
+  "steak-1.jpg",
+  "steak-2.jpg",
+  "steak-3.jpg",
+  "steak-4.jpg"
+ ],
+ "sweetpotato": [
+  "sweetpotato-1.jpg",
+  "sweetpotato-2.jpg",
+  "sweetpotato-3.jpg"
+ ],
+ "tomatoes": [
+  "tomatoes-1.jpg",
+  "tomatoes-2.jpg",
+  "tomatoes-3.jpg",
+  "tomatoes-4.jpg"
+ ],
+ "walnuts": [
+  "walnuts-1.jpg",
+  "walnuts-2.jpg",
+  "walnuts-3.jpg",
+  "walnuts-4.jpg"
+ ],
+ "yogurt": [
+  "yogurt-1.jpg",
+  "yogurt-2.jpg",
+  "yogurt-3.jpg"
+ ],
+ "industry": [
+  "industry-1.jpg",
+  "industry-2.jpg",
+  "industry-3.jpg",
+  "industry-4.jpg",
+  "industry-5.jpg",
+  "industry-6.jpg",
+  "industry-7.jpg",
+  "industry-8.jpg"
+ ],
+ "nature": [
+  "nature-1.jpg",
+  "nature-10.jpg",
+  "nature-11.jpg",
+  "nature-2.jpg",
+  "nature-3.jpg",
+  "nature-4.jpg",
+  "nature-5.jpg",
+  "nature-6.jpg",
+  "nature-7.jpg",
+  "nature-8.jpg",
+  "nature-9.jpg"
+ ],
+ "pasture": [
+  "pasture-1.jpg",
+  "pasture-2.jpg",
+  "pasture-3.jpg",
+  "pasture-4.jpg",
+  "pasture-5.jpg"
+ ],
+ "processed": [
+  "processed-1.jpg",
+  "processed-2.jpg",
+  "processed-3.jpg",
+  "processed-4.jpg",
+  "processed-5.jpg"
+ ],
+ "apple_us": [
+  "apple_us-1.jpg",
+  "apple_us-2.jpg",
+  "apple_us-3.jpg"
+ ],
+ "apple_eu": [
+  "apple_eu-1.jpg",
+  "apple_eu-2.jpg",
+  "apple_eu-3.jpg"
+ ],
+ "bread_us": [
+  "bread_us-1.jpg",
+  "bread_us-2.jpg",
+  "bread_us-3.jpg"
+ ],
+ "bread_eu": [
+  "bread_eu-1.jpg",
+  "bread_eu-2.jpg",
+  "bread_eu-3.jpg",
+  "bread_eu-4.jpg"
+ ],
+ "yolk_us": [
+  "yolk_us-1.jpg",
+  "yolk_us-2.jpg"
+ ],
+ "yolk_eu": [
+  "yolk_eu-1.jpg",
+  "yolk_eu-2.jpg",
+  "yolk_eu-3.jpg"
+ ],
+ "tomato_us": [
+  "tomato_us-1.jpg",
+  "tomato_us-2.jpg",
+  "tomato_us-3.jpg"
+ ],
+ "tomato_eu": [
+  "tomato_eu-2.jpg",
+  "tomato_eu-3.jpg"
+ ],
+ "straw_us": [
+  "straw_us-1.jpg",
+  "straw_us-2.jpg",
+  "straw_us-3.jpg"
+ ],
+ "straw_eu": [
+  "straw_eu-1.jpg",
+  "straw_eu-2.jpg",
+  "straw_eu-3.jpg"
+ ],
+ "eggs_us": [
+  "eggs_us-1.jpg",
+  "eggs_us-2.jpg",
+  "eggs_us-3.jpg"
+ ],
+ "eggs_eu": [
+  "eggs_eu-1.jpg",
+  "eggs_eu-2.jpg",
+  "eggs_eu-3.jpg"
+ ],
+ "coldcuts": [
+  "coldcuts-1.jpg",
+  "coldcuts-2.jpg",
+  "coldcuts-3.jpg",
+  "coldcuts-4.jpg"
+ ],
+ "chips": [
+  "chips-3.jpg",
+  "chips-4.jpg",
+  "chips-5.jpg",
+  "chips-6.jpg",
+  "chips-7.jpg"
+ ],
+ "nuts": [
+  "nuts-1.jpg",
+  "nuts-2.jpg",
+  "nuts-3.jpg",
+  "nuts-4.jpg"
+ ],
+ "nuggets": [
+  "nuggets-1.jpg",
+  "nuggets-2.jpg",
+  "nuggets-3.jpg"
+ ]
+}

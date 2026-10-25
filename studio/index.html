@@ -1,0 +1,1398 @@
+<!doctype html>
+<html lang="de"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Slide-Studio</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Slide-Studio">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="theme-color" content="#0b0d0c">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" type="image/png" href="../icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Figtree:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: eine Spalte wie eine App. Oben die Slideshow, darunter ein großer Knopf, alles andere eingeklappt. */
+:root {
+  --bg: #0b0d0c;
+  --surface: #141816;
+  --raise: #1d2220;
+  --line: #2a312d;
+  --fg: #edf0ea;
+  --muted: #98a29b;
+  --accent: #3cff8f;
+  --accent-ink: #03140a;
+  --warn: #ffb547;
+  --danger: #ff6b5e;
+  --f-display: "Cinzel", Georgia, serif;
+  --f-body: "Figtree", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-top: calc(18px + env(safe-area-inset-top, 0px)); padding-bottom: calc(48px + env(safe-area-inset-bottom, 0px)); margin: 0; }
+.wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 18px; }
+header { display: flex; align-items: center; gap: 12px; }
+.mark { width: 40px; height: 40px; border-radius: 11px; background: #000; border: 1px solid var(--line); display: grid; place-items: center; flex: none; }
+.mark svg { width: 24px; height: 24px; filter: drop-shadow(0 0 6px rgba(60,255,143,.55)); }
+h1 { font-family: var(--f-display); font-size: 22px; letter-spacing: .06em; margin: 0; line-height: 1.1; }
+.sub { font-size: 13px; color: var(--muted); }
+.strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+.slide { flex: none; width: clamp(200px, 62vw, 300px); scroll-snap-align: start; margin: 0; position: relative; }
+.slide img { width: 100%; aspect-ratio: 3 / 4; height: auto; border-radius: 10px; display: block; background: var(--raise); border: 1px solid var(--line); object-fit: cover; }
+.slide .num { position: absolute; left: 8px; top: 8px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,.65); color: #fff; padding: 2px 7px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.slide .dl { position: absolute; right: 8px; bottom: 8px; min-height: 30px; padding: 4px 10px; font-size: 12px; border-radius: 8px; background: rgba(0,0,0,.7); border-color: rgba(255,255,255,.2); }
+.busy { display: grid; place-items: center; aspect-ratio: 3 / 4; width: clamp(200px, 62vw, 300px); border-radius: 10px; border: 1px dashed var(--line); color: var(--muted); font-size: 13px; }
+button, .btn { font: inherit; font-weight: 700; border-radius: 12px; border: 1px solid var(--line); background: var(--raise); color: var(--fg); padding: 12px 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; text-decoration: none; }
+button:focus-visible, .btn:focus-within, select:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button:disabled { opacity: .5; cursor: default; }
+.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-size: 17px; min-height: 54px; width: 100%; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.types { display: flex; gap: 8px; overflow-x: auto; scroll-snap-type: x proximity; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+.type { flex: none; width: 148px; scroll-snap-align: start; display: grid; gap: 2px; text-align: left; justify-content: stretch; align-content: start; padding: 9px 12px; min-height: 58px; border-radius: 12px; font-weight: 700; font-size: 14px; }
+.type small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.type small { font-weight: 500; font-size: 11.5px; color: var(--muted); line-height: 1.3; }
+.type[aria-pressed=true] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: rgba(60,255,143,.08); }
+.type[aria-pressed=true] small { color: var(--fg); }
+.label { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 -8px; }
+.warnline { font-size: 13px; color: var(--warn); margin: -6px 0 0; }
+.warnline button { min-height: 0; padding: 0; border: 0; background: none; color: inherit; text-decoration: underline; font-weight: 700; font-size: 13px; }
+.info { display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; }
+.chip { font-weight: 600; padding: 3px 9px; border-radius: 999px; background: var(--raise); border: 1px solid var(--line); color: var(--muted); }
+.chip b { color: var(--fg); }
+.desc { white-space: pre-wrap; font-size: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 0; color: var(--fg); overflow-wrap: anywhere; }
+.missing { background: rgba(255,181,71,.08); border: 1px solid rgba(255,181,71,.3); border-radius: 12px; padding: 12px 14px; display: grid; gap: 10px; }
+.missing p { margin: 0; font-size: 14px; }
+.foods { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.food label { flex: 1; min-width: 0; }
+.food { display: inline-flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--raise); font-size: 13px; }
+.food label { position: relative; padding: 7px 10px; cursor: pointer; font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.food label input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+.food a { padding: 7px 10px; color: var(--accent); border-left: 1px solid var(--line); display: flex; align-items: center; text-decoration: none; font-weight: 600; }
+.food .n { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+summary { cursor: pointer; list-style: none; padding: 14px 16px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: "+"; color: var(--muted); font-size: 20px; line-height: 1; }
+details[open] summary::after { content: "–"; }
+summary .count { color: var(--muted); font-weight: 600; font-size: 13px; margin-left: auto; }
+.body { padding: 0 16px 16px; display: grid; gap: 14px; }
+.note { font-size: 13px; color: var(--muted); margin: 0; }
+.grid-ph { display: grid; gap: 8px; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); }
+.ph { position: relative; display: grid; gap: 5px; min-width: 0; }
+.ph img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px; border: 1px solid var(--line); display: block; background: var(--raise); }
+.ph.fig img { object-fit: contain; background: repeating-conic-gradient(#202522 0 25%, #171a18 0 50%) 0 0 / 14px 14px; }
+.ph select { font: inherit; font-size: 12px; padding: 5px 6px; border-radius: 8px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); width: 100%; }
+.ph .name { font-size: 12px; color: var(--muted); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ph .del { position: absolute; top: 5px; right: 5px; min-height: 24px; padding: 2px 8px; font-size: 12px; border-radius: 7px; background: rgba(0,0,0,.72); border-color: rgba(255,255,255,.15); }
+.ph .del.armed { background: var(--danger); color: #1a0402; border-color: var(--danger); }
+.upload { position: relative; overflow: hidden; }
+.upload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.status { font-size: 13px; color: var(--muted); }
+.status:empty { display: none; }
+.status.ok { color: var(--accent); }
+.status.err { color: var(--danger); }
+.opt { display: grid; gap: 6px; }
+.opt > span { font-size: 12px; font-weight: 600; color: var(--muted); }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 3px; }
+.seg button { min-height: 38px; padding: 6px 4px; border: 0; background: transparent; color: var(--muted); border-radius: 8px; font-size: 14px; }
+.seg button[aria-pressed=true] { background: var(--raise); color: var(--fg); box-shadow: inset 0 0 0 1px var(--line); }
+select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; width: 100%; }
+.check { display: flex; align-items: center; gap: 9px; font-size: 14px; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ov { position: fixed; inset: 0; z-index: 50; background: #050706; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) max(16px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 32px) max(16px, env(safe-area-inset-left, 0px)); }
+.ov-in { max-width: 520px; margin: 0 auto; display: grid; gap: 14px; }
+.ov-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; position: sticky; top: 0; background: #050706; padding-block: 6px; z-index: 1; }
+.ov-head b { font-size: 16px; }
+.ov p { margin: 0; color: var(--muted); font-size: 14px; }
+.ov img { width: 100%; height: auto; border-radius: 10px; display: block; -webkit-touch-callout: default; -webkit-user-select: auto; user-select: auto; }
+.ov .lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: -8px; }
+/* Galerie: nur das erste Bild jedes Entwurfs, Tippen öffnet alle Slides */
+.feed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 640px) { .feed { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.tile { position: relative; border: 0; padding: 0; background: var(--raise); border-radius: 12px; overflow: hidden; cursor: pointer; aspect-ratio: 3 / 4; display: block; width: 100%; min-height: 0; }
+.tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tile .lab { position: absolute; left: 6px; top: 6px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,.68); color: #fff; padding: 2px 7px; border-radius: 6px; max-width: calc(100% - 12px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tile .ok { position: absolute; right: 6px; bottom: 6px; font-size: 11px; font-weight: 800; background: var(--accent); color: var(--accent-ink); padding: 2px 7px; border-radius: 6px; }
+.tile.wait { display: grid; place-items: center; color: var(--muted); font-size: 12px; border: 1px dashed var(--line); background: none; cursor: default; }
+
+.cover { position: relative; margin: 0 auto; width: min(100%, 360px); cursor: pointer; border: 0; padding: 0; background: none; display: block; border-radius: 14px; }
+.cover img { width: 100%; aspect-ratio: 3 / 4; border-radius: 14px; display: block; border: 1px solid var(--line); background: var(--raise); object-fit: cover; }
+.cover .tap { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); white-space: nowrap; font-size: 13px; font-weight: 700; background: rgba(0,0,0,.72); color: #fff; padding: 6px 12px; border-radius: 999px; }
+.cover .num { position: absolute; left: 10px; top: 10px; font-size: 12px; font-weight: 700; background: rgba(0,0,0,.65); color: #fff; padding: 2px 8px; border-radius: 6px; }
+.coverbusy { margin: 0 auto; width: min(100%, 360px); aspect-ratio: 3 / 4; display: grid; place-items: center; border-radius: 14px; border: 1px dashed var(--line); color: var(--muted); font-size: 14px; }
+.ov-actions { position: sticky; top: 52px; z-index: 1; display: grid; gap: 8px; background: #050706; padding-bottom: 8px; }
+</style>
+</head><body>
+<div class="wrap">
+  <header>
+    <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#3cff8f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l7-7 7 7"/><path d="M5 20l7-7 7 7"/></svg></div>
+    <div><h1>Slide-Studio</h1><div class="sub" id="sub">Health Maxxing · TikTok-Slideshows</div></div>
+  </header>
+
+  <p class="label">Content-Art</p>
+  <div class="types" id="types" role="group" aria-label="Content-Art"></div>
+
+  <div class="feed" id="feed" aria-live="polite"></div>
+  <p class="warnline" id="warn" hidden></p>
+
+  <button class="primary" id="btnGen" type="button">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+    Neue Entwürfe
+  </button>
+  <button id="btnMore" type="button">Mehr laden</button>
+  <div class="ov" id="ov" hidden role="dialog" aria-label="Alle Slides">
+    <div class="ov-in">
+      <div class="ov-head"><b id="ovTitle">Alle Slides</b><button id="ovClose" type="button">Fertig</button></div>
+      <div class="ov-actions">
+        <button class="primary" id="btnSaveAll" type="button">Alle in Fotos sichern</button>
+        <div class="pair"><button id="btnCopy" type="button">Text kopieren</button><button id="btnNext" type="button">Nächster ›</button></div>
+        <p class="status" id="saveStatus"></p>
+      </div>
+      <p class="desc" id="desc"></p>
+      <div id="ovList" style="display:grid;gap:14px"></div>
+      <p>Falls nichts passiert: jedes Bild <b>lange gedrückt halten</b> → <b>„Zu Fotos hinzufügen“</b>.</p>
+    </div>
+  </div>
+
+  <details id="dPhotos">
+    <summary>Essensfotos <span class="count" id="photoCount">0</span></summary>
+    <div class="body">
+      <div class="row">
+        <label class="btn upload">Fotos hinzufügen<input type="file" id="upFood" accept="image/*" multiple></label>
+      </div>
+      <div class="status" id="foodStatus"></div>
+      <div class="missing" id="missing" hidden>
+        <p><b>Fehlt für die aktuelle Slideshow.</b> Tippe auf ein Essen, um ein Foto dafür hinzuzufügen.</p>
+        <div class="foods" id="missingFoods"></div>
+      </div>
+      <p class="note" id="ownNote">Über 150 Fotos sind schon eingebaut. Eigene Fotos kommen hier dazu, werden mitgemischt und bleiben auf diesem Gerät gespeichert.</p>
+      <div class="grid-ph" id="foodGrid"></div>
+      <p class="note">Unter jedem Foto steht, was darauf ist. Stimmt es nicht, wähle das richtige Essen aus.</p>
+      <details id="dAll" style="background:var(--bg)">
+        <summary>Alle Lebensmittel <span class="count">Foto pro Essen hinzufügen</span></summary>
+        <div class="body"><div class="foods" id="allFoods"></div></div>
+      </details>
+    </div>
+  </details>
+
+  <details>
+    <summary>Statuen <span class="count" id="figCount">0</span></summary>
+    <div class="body">
+      <div class="grid-ph" id="figGrid"></div>
+      <div class="row">
+        <label class="btn upload">Statue hinzufügen<input type="file" id="upFig" accept="image/*"></label>
+        <label class="check"><input type="checkbox" id="figBlack" checked> Schwarzen Hintergrund entfernen</label>
+      </div>
+      <div class="status" id="figStatus"></div>
+      <p class="note">Starke Statuen kommen zu gutem Essen, traurige zu Fast Food und Junk. Pro Video bleibt es dieselbe Statue. Bei eigenen Statuen wählst du das unter dem Bild.</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>Optionen</summary>
+    <div class="body">
+      <div class="opt"><span>Slides pro Post</span><div class="seg" id="sCount"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
+      <div class="opt"><span>Sprache auf den Slides</span><div class="seg" id="sLang"><button type="button" data-v="en">English</button><button type="button" data-v="de">Deutsch</button></div></div>
+      <div class="opt"><span>Auflösung</span><div class="seg" id="sRes"><button type="button" data-v="hd">HD 1080 × 1440</button><button type="button" data-v="4k">4K 2160 × 2880</button></div></div>
+      <label class="check"><input type="checkbox" id="sGray"> Statuen schwarz-weiß</label>
+      <p class="note">TikTok rechnet Bilder beim Hochladen kleiner. HD reicht meistens, 4K ist etwas schärfer, dauert aber länger.</p>
+    </div>
+  </details>
+</div>
+
+<script>
+const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true}, {"id": "silber", "name": "Silber", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/silber.webp", "thumb": "fig/silber_t.webp", "physique": true}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true}, {"id": "helm", "name": "Helm", "mood": "strong", "anchor": "fill", "cut": 0.823, "tone": "dark", "src": "fig/helm.webp", "thumb": "fig/helm_t.webp"}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp"}, {"id": "schatten", "name": "Schatten", "mood": "strong", "anchor": "fill", "cut": 0.591, "tone": "dark", "src": "fig/schatten.webp", "thumb": "fig/schatten_t.webp"}, {"id": "schweigen", "name": "Schweigen", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/schweigen.webp", "thumb": "fig/schweigen_t.webp"}, {"id": "thron", "name": "Thron", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/thron.webp", "thumb": "fig/thron_t.webp"}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp"}, {"id": "bateman", "name": "Bruce Wayne", "mood": "strong", "anchor": "fill", "cut": 0.441, "tone": "dark", "src": "fig/bateman.webp", "thumb": "fig/bateman_t.webp"}, {"id": "goldhelm", "name": "Goldhelm", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/goldhelm.webp", "thumb": "fig/goldhelm_t.webp", "physique": true}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true}, {"id": "traene", "name": "Träne", "mood": "sad", "anchor": "panel", "cut": 0.0, "tone": "light", "src": "fig/traene.webp", "thumb": "fig/traene_t.webp"}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp"}];
+
+/* ---------- Lebensmittel ---------- */
+const F = (id, emoji, color, en, de, tags) => ({ id, emoji, color, en, de, tags });
+const FOODS = Object.fromEntries([
+  F('honey','🍯','#d99a2b','honey','Honig',['sleep','energy','sugar','mood','calm','breakfast','S','calm','gr','ancestral','godfood']),
+  F('kiwi','🥝','#7fb339','kiwi','Kiwi',['sleep','skin','mood','sugar','calm','breakfast','S','lean','young']),
+  F('cherries','🍒','#a3162b','cherries','Kirschen',['sleep','sugar','calm','snack','A','godfood']),
+  F('yogurt','🥛','#e9e4d6','greek yogurt','Joghurt',['sleep','protein','strong','gr','calm','breakfast','A','ancestral']),
+  F('milk','🥛','#f2efe6','milk','Milch',['sleep','protein','nl','strong','breakfast','B','no','ancestral']),
+  F('eggs','🥚','#e9c27a','eggs','Eier',['protein','strong','eyes','hair','fats','nl','no','energy','breakfast','S','focus','lean','jp','fr','ancestral','godfood']),
+  F('steak','🥩','#8c2b2b','steak','Steak',['protein','strong','energy','hair','dinner','S','fr','ancestral','godfood']),
+  F('beef','🥩','#9c2f2f','raw beef','Rindfleisch',['protein','strong','eyes','energy','lunch','dinner','S','ancestral','godfood']),
+  F('chicken','🍗','#c98a4a','chicken breast','Hähnchen',['protein','strong','lunch','A','lean']),
+  F('salmon','🍣','#f08a5d','salmon','Lachs',['skin','eyes','mood','fats','hair','no','jp','lunch','dinner','S','focus','lean','young','godfood']),
+  F('sardines','🐟','#8d9aa6','sardines','Sardinen',['eyes','fats','it','nl','gr','dinner','S','no','ancestral']),
+  F('carrots','🥕','#f07b1d','carrots','Karotten',['eyes','skin','lunch','A','young','nl','godfood']),
+  F('sweetpotato','🍠','#d9622b','sweet potato','Süßkartoffel',['skin','carbs','energy','eyes','lunch','dinner','A','jp']),
+  F('blueberries','🫐','#3d4f9c','blueberries','Heidelbeeren',['skin','mood','sugar','eyes','breakfast','S','focus','young','godfood']),
+  F('avocado','🥑','#6e9a3c','avocado','Avocado',['skin','fats','hair','breakfast','lunch','A','young']),
+  F('greens','🥬','#3f7d2c','spinach','Spinat',['eyes','energy','lunch','dinner','A','lean']),
+  F('banana','🍌','#e8c534','bananas','Bananen',['energy','mood','sugar','carbs','breakfast','A']),
+  F('mango','🥭','#f2a33a','mango','Mango',['mood','sugar','skin','snack','A']),
+  F('dates','🌴','#6b3a24','dates','Datteln',['energy','sugar','snack','A','godfood']),
+  F('oranges','🍊','#f08a1c','oranges','Orangen',['skin','energy','sugar','it','snack','A','lean','godfood']),
+  F('olives','🫒','#7f8f2a','olives','Oliven',['fats','it','gr','skin','snack','A']),
+  F('walnuts','🌰','#9b6a3c','walnuts','Walnüsse',['mood','fats','hair','nl','calm','snack','A','focus']),
+  F('cheese','🧀','#efc458','cheese','Käse',['protein','nl','fr','snack','A','no','it','gr','ancestral']),
+  F('rice','🍚','#d8d4c8','white rice','Reis',['carbs','energy','jp','lunch','B']),
+  F('potatoes','🥔','#b9894c','potatoes','Kartoffeln',['carbs','energy','dinner','B','no','nl','ancestral']),
+  F('oats','🌾','#c9ad78','oats','Haferflocken',['energy','carbs','breakfast','B','no','ancestral']),
+  F('chocolate','🍫','#4a2a1c','dark chocolate','Zartbitterschokolade',['mood','calm','snack','B','focus']),
+  F('oysters','🦪','#8a8f8c','oysters','Austern',['hair','strong','fr','dinner','S','jp','ancestral']),
+  F('tomatoes','🍅','#d63a2a','tomatoes','Tomaten',['skin','it','lunch','A','young','gr','godfood']),
+  F('greentea','🍵','#7da35a','matcha','Matcha',['calm','jp','energy','B','focus','young']),
+  F('butter','🧈','#f1d77a','butter','Butter',['fats','fr','dinner','B','ancestral']),
+  F('berries','🍓','#c8243c','strawberries','Erdbeeren',['skin','mood','sugar','breakfast','snack','S','lean','young','no','godfood']),
+  F('fries','🍟','#e8b03a','french fries','Pommes',['junk','F']),
+  F('donut','🍩','#c97b9a','donuts','Donuts',['junk','F']),
+  F('soda','🥤','#b8323a','soda','Softdrinks',['junk','F']),
+  F('pizza','🍕','#e0953a','pizza','Pizza',['junk','F']),
+  F('burger','🍔','#a8692e','fast food burger','Fast Food',['junk','F']),
+  F('candy','🍬','#e05aa0','candy','Süßigkeiten',['junk','F']),
+  F('cookies','🍪','#b07a3e','cookies','Kekse',['junk','F']),
+  F('pancakes','🥞','#d9a35a','pancakes with syrup','Pancakes',['junk','F']),
+  F('coldcuts','🥓','#a8424a','processed meat','Wurst & Aufschnitt',['junk','F']),
+  F('chips','🥔','#e0b04a','potato chips','Chips',['junk','F']),
+  F('nuggets','🍗','#c98a3a','chicken nuggets','Chicken Nuggets',['junk','F']),
+  F('nuts','🥜','#a8763e','mixed nuts','Nüsse',['fats','snack','A','calm','focus']),
+  // Vergleichsbilder (nur für „USA vs. Europa“)
+  F('apple_us','🍎','#c8243c','apples (USA / supermarket)','Äpfel (USA / Supermarkt)',['cmp']),
+  F('apple_eu','🍎','#a8462c','apples (Europe / farm)','Äpfel (Europa / Bauernhof)',['cmp']),
+  F('bread_us','🍞','#e2c48a','bread (USA / supermarket)','Brot (USA / Supermarkt)',['cmp']),
+  F('bread_eu','🍞','#9c6a3a','bread (Europe / bakery)','Brot (Europa / Bäcker)',['cmp']),
+  F('yolk_us','🍳','#f0c84a','egg yolk (USA / supermarket)','Eigelb (USA / Supermarkt)',['cmp']),
+  F('yolk_eu','🍳','#f08a1c','egg yolk (Europe / farm)','Eigelb (Europa / Bauernhof)',['cmp']),
+  F('tomato_us','🍅','#d63a2a','tomatoes (USA / supermarket)','Tomaten (USA / Supermarkt)',['cmp']),
+  F('tomato_eu','🍅','#c8301c','tomatoes (Europe / farm)','Tomaten (Europa / Bauernhof)',['cmp']),
+  F('straw_us','🍓','#d02a3a','strawberries (USA / supermarket)','Erdbeeren (USA / Supermarkt)',['cmp']),
+  F('straw_eu','🍓','#b81c2c','strawberries (Europe / garden)','Erdbeeren (Europa / Garten)',['cmp']),
+  F('eggs_us','🥚','#ecebe6','eggs (USA / supermarket)','Eier (USA / Supermarkt)',['cmp']),
+  F('eggs_eu','🥚','#c98a5a','eggs (Europe / farm)','Eier (Europa / Bauernhof)',['cmp']),
+  F('processed','🛒','#8a6a3a','supermarket snacks','Supermarkt-Snacks',['junk','F','human','scene']),
+  F('nature','🏔️','#4f7a5a','nature','Natur',['god','scene']),
+  F('pasture','🐄','#6e8f3a','cows on pasture','Weide',['ancestral','scene']),
+  F('industry','🏭','#5a5a5a','factory pollution','Fabrik & Müll',['human','scene']),
+  F('other','🍽️','#5a6a5e','food','Sonstiges',[]),
+].map(f => [f.id, f]));
+const isScene = f => f.tags.includes('scene');
+const isJunk = f => f.tags.includes('junk') && !f.tags.includes('scene');
+const isCmp = f => f.tags.includes('cmp');
+const notJunk = f => !isJunk(f) && !isScene(f) && !isCmp(f) && f.id !== 'other';
+const tagPred = tags => f => !isScene(f) && f.tags.some(t => tags.includes(t));
+const sceneOf = id => f => f.id === id;
+const idsPred = ids => f => ids.includes(f.id);
+
+/* ---------- Serien ---------- */
+const QUESTIONS = [
+  { id: 'sleep', foods: ['kiwi', 'cherries', 'honey', 'milk', 'yogurt', 'walnuts', 'oats'], en: ['why is my sleep so deep?', 'why do I sleep like a baby?'], de: ['warum schlafe ich so tief?'], niche: ['#sleeptips', '#realfood'] },
+  { id: 'skin', foods: ['salmon', 'avocado', 'blueberries', 'berries', 'carrots', 'tomatoes', 'sweetpotato', 'oranges'], en: ['why is my skin so clear?', 'why does my skin glow?'], de: ['warum ist meine Haut so rein?'], niche: ['#clearskin', '#glowup'] },
+  { id: 'eyes', foods: ['carrots', 'salmon', 'eggs', 'greens', 'sweetpotato', 'blueberries'], en: ['why are my eyes so bright?'], de: ['warum strahlen meine Augen so?'], niche: ['#glowup', '#realfood'] },
+  { id: 'mood', foods: ['chocolate', 'banana', 'salmon', 'blueberries', 'berries', 'walnuts', 'mango'], en: ['why am I so happy?', 'why am I always in a good mood?'], de: ['warum bin ich so glücklich?'], niche: ['#wellness', '#realfood'] },
+  { id: 'hair', foods: ['eggs', 'salmon', 'oysters', 'avocado', 'walnuts', 'steak'], en: ['why is my hair so thick?'], de: ['warum sind meine Haare so dicht?'], niche: ['#hairgrowth', '#glowup'] },
+  { id: 'energy', foods: ['banana', 'dates', 'honey', 'oats', 'eggs', 'oranges', 'sweetpotato'], en: ['why am I never tired?', 'why do I have so much energy?'], de: ['warum bin ich nie müde?'], niche: ['#energy', '#realfood'] },
+  { id: 'strong', foods: ['steak', 'beef', 'eggs', 'chicken', 'milk', 'yogurt', 'oysters'], en: ['why am I so strong?'], de: ['warum bin ich so stark?'], niche: ['#protein', '#gymtok'] },
+  { id: 'calm', foods: ['chocolate', 'greentea', 'kiwi', 'cherries', 'yogurt', 'walnuts', 'honey'], en: ['why am I so calm?'], de: ['warum bin ich so entspannt?'], niche: ['#wellness', '#realfood'] },
+  { id: 'focus', foods: ['eggs', 'blueberries', 'salmon', 'walnuts', 'greentea', 'chocolate'], en: ['why am I so focused?', 'why is my brain so sharp?'], de: ['warum bin ich so konzentriert?'], niche: ['#focus', '#realfood'] },
+  { id: 'lean', foods: ['eggs', 'chicken', 'salmon', 'greens', 'kiwi', 'berries', 'oranges'], en: ['why am I so lean?', 'why do I stay so lean?'], de: ['warum bin ich so definiert?'], niche: ['#fatloss', '#realfood'] },
+  { id: 'young', foods: ['blueberries', 'berries', 'salmon', 'tomatoes', 'avocado', 'greentea', 'carrots'], en: ['why do I look so young?'], de: ['warum sehe ich so jung aus?'], niche: ['#glowup', '#antiaging'] },
+  { id: 'testo', foods: ['oysters', 'eggs', 'steak', 'beef', 'avocado', 'honey', 'butter'], en: ['why is my testosterone so high?'], de: ['warum ist mein Testosteron so hoch?'], niche: ['#testosterone', '#gymtok'] },
+  { id: 'immune', foods: ['oranges', 'kiwi', 'honey', 'yogurt', 'berries', 'blueberries', 'greentea'], en: ['why do I never get sick?'], de: ['warum werde ich nie krank?'], niche: ['#immunesystem', '#realfood'] },
+  { id: 'gut', foods: ['yogurt', 'kiwi', 'banana', 'oats', 'olives', 'greens'], en: ['why is my gut so healthy?'], de: ['warum ist mein Darm so gesund?'], niche: ['#guthealth', '#realfood'] },
+];
+// "was es kaputt macht" / "was es repariert"
+const FIXES = [
+  { bad: ['candy', 'soda', 'donut', 'cookies', 'fries', 'pizza', 'chips'], good: ['salmon', 'avocado', 'blueberries', 'berries', 'carrots', 'tomatoes'], en: ['what ruins your skin…', '…and what fixes it'], de: ['was deine Haut ruiniert…', '…und was sie repariert'], niche: ['#clearskin', '#skincare'] },
+  { bad: ['soda', 'candy', 'cookies', 'pizza', 'donut'], good: ['kiwi', 'cherries', 'milk', 'honey', 'walnuts'], en: ['what ruins your sleep…', '…and what fixes it'], de: ['was deinen Schlaf ruiniert…', '…und was ihn repariert'], niche: ['#sleeptips', '#realfood'] },
+  { bad: ['soda', 'fries', 'burger', 'pizza', 'candy', 'coldcuts', 'nuggets'], good: ['oysters', 'eggs', 'steak', 'beef', 'avocado', 'honey'], en: ['what kills your testosterone…', '…and what boosts it'], de: ['was dein Testosteron killt…', '…und was es boostet'], niche: ['#testosterone', '#gymtok'] },
+  { bad: ['donut', 'soda', 'candy', 'pancakes', 'cookies'], good: ['banana', 'dates', 'honey', 'oats', 'eggs', 'oranges'], en: ['what drains your energy…', '…and what gives it back'], de: ['was dir Energie raubt…', '…und was sie zurückgibt'], niche: ['#energy', '#realfood'] },
+  { bad: ['burger', 'fries', 'pizza', 'soda', 'cookies', 'coldcuts', 'chips'], good: ['yogurt', 'kiwi', 'banana', 'oats', 'olives', 'greens'], en: ['what destroys your gut…', '…and what heals it'], de: ['was deinen Darm zerstört…', '…und was ihn heilt'], niche: ['#guthealth', '#realfood'] },
+];
+const QUIT = { en: ['foods I quit…', '…what I eat instead'], de: ['Essen, das ich aufgegeben habe…', '…was ich stattdessen esse'] };
+const ROUTINE = [
+  { foods: ['eggs', 'berries', 'oranges', 'greentea', 'yogurt', 'kiwi'], en: 'morning', de: 'morgens' },
+  { foods: ['banana', 'dates', 'honey', 'oats', 'rice'], en: 'pre-workout', de: 'vor dem Training' },
+  { foods: ['eggs', 'chicken', 'milk', 'rice', 'yogurt', 'steak'], en: 'post-workout', de: 'nach dem Training' },
+  { foods: ['kiwi', 'cherries', 'milk', 'honey', 'walnuts'], en: 'before bed', de: 'vor dem Schlafen' },
+];
+const TIERS = [
+  { tag: 'S', en: 'S tier foods', de: 'S-Tier Lebensmittel' },
+  { tag: 'A', en: 'A tier foods', de: 'A-Tier Lebensmittel' },
+  { tag: 'B', en: 'B tier foods', de: 'B-Tier Lebensmittel' },
+  { tag: 'F', en: 'F tier foods', de: 'F-Tier Lebensmittel' },
+];
+const MEALS = [
+  { tag: 'breakfast', foods: ['eggs', 'oats', 'yogurt', 'berries', 'blueberries', 'banana', 'honey', 'milk', 'kiwi'], en: 'breakfast', de: 'Frühstück' },
+  { tag: 'lunch', foods: ['chicken', 'rice', 'salmon', 'avocado', 'greens', 'tomatoes', 'sweetpotato'], en: 'lunch', de: 'Mittagessen' },
+  { tag: 'dinner', foods: ['steak', 'beef', 'salmon', 'potatoes', 'sweetpotato', 'greens', 'butter'], en: 'dinner', de: 'Abendessen' },
+  { tag: 'snack', foods: ['cherries', 'mango', 'dates', 'olives', 'walnuts', 'cheese', 'oranges', 'nuts'], en: 'snacks', de: 'Snacks' },
+];
+// passender Tausch: an derselben Stelle im Raster steht die gesunde Alternative
+const SWAPMAP = {
+  candy: ['berries', 'mango', 'cherries', 'dates'], soda: ['oranges', 'milk', 'greentea', 'kiwi'],
+  fries: ['potatoes', 'sweetpotato'], donut: ['honey', 'dates', 'banana'], cookies: ['dates', 'walnuts', 'chocolate'],
+  pancakes: ['oats', 'banana', 'berries'], pizza: ['tomatoes', 'cheese', 'olives'], burger: ['steak', 'beef'],
+  processed: ['walnuts', 'olives', 'cheese', 'nuts'],
+  chips: ['nuts', 'potatoes', 'sweetpotato'], coldcuts: ['steak', 'beef', 'chicken'], nuggets: ['chicken', 'steak'],
+};
+const SWAP = { en: ['swap this…', 'for this…', 'and this…', 'for this…'], de: ['tausch das…', 'gegen das…', 'und das…', 'gegen das…'] };
+const REALS = [
+  { foods: ['steak', 'beef', 'eggs', 'chicken', 'milk', 'yogurt', 'cheese', 'salmon'], en: 'real protein', de: 'echtes Protein' },
+  { foods: ['honey', 'dates', 'banana', 'mango', 'berries', 'cherries', 'oranges', 'kiwi'], en: 'real sugar', de: 'echter Zucker' },
+  { foods: ['avocado', 'olives', 'butter', 'walnuts', 'salmon', 'eggs', 'cheese', 'nuts'], en: 'real fats', de: 'echte Fette' },
+  { foods: ['potatoes', 'sweetpotato', 'rice', 'oats', 'banana'], en: 'real carbs', de: 'echte Kohlenhydrate' },
+];
+const RULES = {
+  en: ['if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.'],
+  de: ['Wenn es nicht verdirbt, iss es nicht.', 'Nur eine Zutat.', 'Kennt Oma es nicht, lass es weg.', 'Iss Lebensmittel, keine Produkte.', 'Hat es Fernsehwerbung, kauf es nicht.', 'Obst ist die Süßigkeit der Natur.', 'Protein zu jeder Mahlzeit.', 'Trink Wasser, keine Kalorien.'],
+  foods: [
+    ['berries', 'tomatoes', 'carrots', 'greens', 'kiwi', 'salmon', 'beef'],
+    ['eggs', 'steak', 'potatoes', 'honey', 'rice', 'avocado', 'oranges'],
+    ['butter', 'milk', 'eggs', 'potatoes', 'cheese', 'honey', 'oats'],
+    ['eggs', 'steak', 'salmon', 'berries', 'potatoes', 'honey', 'greens'],
+    ['eggs', 'potatoes', 'carrots', 'beef', 'olives', 'walnuts'],
+    ['mango', 'berries', 'cherries', 'dates', 'banana', 'kiwi', 'oranges'],
+    ['eggs', 'chicken', 'steak', 'salmon', 'yogurt', 'beef'],
+    ['oranges', 'kiwi', 'berries', 'greentea', 'milk'],
+  ],
+};
+const COUNTRIES = [
+  { flag: 'nl', foods: ['cheese', 'eggs', 'milk', 'potatoes', 'carrots', 'butter'], en: 'why are the Dutch so tall?', de: 'warum sind Niederländer so groß?' },
+  { flag: 'it', foods: ['olives', 'tomatoes', 'sardines', 'oranges', 'cheese'], en: 'why do Italians live so long?', de: 'warum leben Italiener so lange?' },
+  { flag: 'jp', foods: ['rice', 'salmon', 'greentea', 'sweetpotato', 'oysters', 'eggs'], en: 'why are the Japanese so lean?', de: 'warum sind Japaner so schlank?' },
+  { flag: 'gr', foods: ['olives', 'yogurt', 'sardines', 'honey', 'tomatoes', 'cheese'], en: 'why are Greeks so healthy?', de: 'warum sind Griechen so gesund?' },
+  { flag: 'no', foods: ['salmon', 'eggs', 'sardines', 'potatoes', 'milk', 'berries'], en: 'why are Norwegians so strong?', de: 'warum sind Norweger so stark?' },
+  { flag: 'es', foods: ['olives', 'tomatoes', 'sardines', 'oranges', 'eggs', 'cheese'], en: 'why do Spaniards live so long?', de: 'warum leben Spanier so lange?' },
+  { flag: 'de', foods: ['potatoes', 'cheese', 'milk', 'eggs', 'beef', 'butter', 'oats'], en: 'why are Germans so strong?', de: 'warum sind Deutsche so stark?' },
+  { flag: 'at', foods: ['milk', 'cheese', 'eggs', 'potatoes', 'honey', 'butter'], en: 'why do Austrians live so long?', de: 'warum leben Österreicher so lange?' },
+  { flag: 'ch', foods: ['cheese', 'milk', 'chocolate', 'potatoes', 'butter', 'eggs'], en: 'why are the Swiss so healthy?', de: 'warum sind Schweizer so gesund?' },
+  { flag: 'se', foods: ['salmon', 'berries', 'blueberries', 'potatoes', 'milk', 'oats'], en: 'why are Swedes so tall?', de: 'warum sind Schweden so groß?' },
+  { flag: 'dk', foods: ['salmon', 'cheese', 'butter', 'oats', 'berries', 'potatoes'], en: 'why are Danes so happy?', de: 'warum sind Dänen so glücklich?' },
+  { flag: 'fi', foods: ['blueberries', 'salmon', 'oats', 'milk', 'berries', 'potatoes'], en: 'why are Finns so tough?', de: 'warum sind Finnen so zäh?' },
+  { flag: 'is', foods: ['salmon', 'sardines', 'milk', 'yogurt', 'eggs', 'beef'], en: 'why are Icelanders so strong?', de: 'warum sind Isländer so stark?' },
+  { flag: 'ie', foods: ['potatoes', 'butter', 'beef', 'milk', 'oats', 'salmon'], en: 'why are the Irish so strong?', de: 'warum sind Iren so stark?' },
+  { flag: 'gb', foods: ['eggs', 'potatoes', 'beef', 'milk', 'oats', 'cheese'], en: 'what the British ate 100 years ago', de: 'was Briten vor 100 Jahren aßen' },
+  { flag: 'pt', foods: ['sardines', 'olives', 'tomatoes', 'oranges', 'eggs', 'honey'], en: 'why do the Portuguese live so long?', de: 'warum leben Portugiesen so lange?' },
+  { flag: 'pl', foods: ['potatoes', 'eggs', 'cheese', 'beef', 'carrots', 'milk'], en: 'why are Poles so strong?', de: 'warum sind Polen so stark?' },
+  { flag: 'bg', foods: ['yogurt', 'cheese', 'tomatoes', 'honey', 'walnuts'], en: 'why do Bulgarians live so long?', de: 'warum leben Bulgaren so lange?' },
+  { flag: 'ge', foods: ['walnuts', 'yogurt', 'cheese', 'honey', 'tomatoes'], en: 'why do Georgians live so long?', de: 'warum leben Georgier so lange?' },
+  { flag: 'tr', foods: ['yogurt', 'olives', 'honey', 'tomatoes', 'dates', 'walnuts', 'beef'], en: 'why are Turks so strong?', de: 'warum sind Türken so stark?' },
+  { flag: 'ma', foods: ['dates', 'olives', 'oranges', 'honey', 'tomatoes'], en: 'why are Moroccans so healthy?', de: 'warum sind Marokkaner so gesund?' },
+  { flag: 'br', foods: ['mango', 'banana', 'rice', 'beef', 'avocado', 'oranges'], en: 'why are Brazilians so fit?', de: 'warum sind Brasilianer so fit?' },
+  { flag: 'ar', foods: ['steak', 'beef', 'eggs', 'potatoes', 'cheese'], en: 'why are Argentinians so strong?', de: 'warum sind Argentinier so stark?' },
+  { flag: 'pe', foods: ['sweetpotato', 'potatoes', 'avocado', 'mango', 'rice', 'eggs'], en: 'why are Peruvians so healthy?', de: 'warum sind Peruaner so gesund?' },
+  { flag: 'cr', foods: ['rice', 'banana', 'mango', 'avocado', 'eggs', 'oranges'], en: 'why do Costa Ricans live so long?', de: 'warum leben Costa Ricaner so lange?' },
+  { flag: 'th', foods: ['rice', 'mango', 'banana', 'chicken', 'eggs'], en: 'why are Thais so lean?', de: 'warum sind Thailänder so schlank?' },
+  { flag: 'vn', foods: ['rice', 'greens', 'chicken', 'eggs', 'mango', 'greentea'], en: 'why are Vietnamese so slim?', de: 'warum sind Vietnamesen so schlank?' },
+  { flag: 'in', foods: ['rice', 'yogurt', 'dates', 'banana', 'mango', 'milk'], en: 'what Indians ate for 3000 years', de: 'was Inder seit 3000 Jahren essen' },
+  { flag: 'fr', foods: ['cheese', 'butter', 'oysters', 'steak', 'eggs'], en: 'why are the French so slim?', de: 'warum sind Franzosen so schlank?' },
+];
+const VS = {
+  en: { bad: ['this is not healthy…', 'also this isn’t healthy…', 'this neither…'], good: 'but this is…' },
+  de: { bad: ['das ist nicht gesund…', 'das auch nicht…', 'und das erst recht nicht…'], good: 'aber das ist es…' },
+};
+const GOD = [
+  { en: ['What God gave us', 'What humans made of it'], de: ['Was Gott uns gab', 'Was der Mensch daraus machte'] },
+  { en: ['What nature made', 'What factories made'], de: ['Was die Natur gemacht hat', 'Was Fabriken gemacht haben'] },
+  { en: ['Real food', 'Fake food'], de: ['Echtes Essen', 'Fake Essen'] },
+];
+const ANCESTORS = [
+  { en: ['What our ancestors ate', 'What we eat now'], de: ['Was unsere Vorfahren aßen', 'Was wir heute essen'] },
+  { en: ['Your great-grandparents ate this', 'You eat this'], de: ['Deine Urgroßeltern aßen das', 'Du isst das'] },
+];
+const EATLIKE = { en: ['eat like this…', '…to look like this'], de: ['iss so…', '…um so auszusehen'] };
+const NATURES = [
+  { foods: ['mango', 'dates', 'berries', 'cherries', 'banana', 'honey', 'kiwi'], en: 'nature’s candy', de: 'Süßigkeiten der Natur' },
+  { foods: ['oranges', 'banana', 'dates', 'honey', 'greentea'], en: 'nature’s energy drink', de: 'Energy-Drink der Natur' },
+  { foods: ['eggs', 'milk', 'yogurt', 'steak', 'beef'], en: 'nature’s protein shake', de: 'Proteinshake der Natur' },
+  { foods: ['avocado', 'carrots', 'tomatoes', 'salmon', 'blueberries', 'sweetpotato'], en: 'nature’s skincare', de: 'Hautpflege der Natur' },
+  { foods: ['kiwi', 'cherries', 'milk', 'honey', 'walnuts'], en: 'nature’s sleeping pill', de: 'Schlafmittel der Natur' },
+];
+// „american apples vs european apples“: zwei Versionen desselben Essens, oben/unten
+const COMPARE = [
+  { a: 'apple_us', b: 'apple_eu', en: 'apples', de: 'Äpfel', g: 'pl' },
+  { a: 'bread_us', b: 'bread_eu', en: 'bread', de: 'Brot', g: 'n' },
+  { a: 'yolk_us', b: 'yolk_eu', en: 'egg yolks', de: 'Eigelb', g: 'n' },
+  { a: 'tomato_us', b: 'tomato_eu', en: 'tomatoes', de: 'Tomaten', g: 'pl' },
+  { a: 'straw_us', b: 'straw_eu', en: 'strawberries', de: 'Erdbeeren', g: 'pl' },
+  { a: 'eggs_us', b: 'eggs_eu', en: 'eggs', de: 'Eier', g: 'pl' },
+];
+const CMP_THEMES = [
+  { id: 'us', w: 3, flags: ['us', 'eu'], niche: ['#usavseurope', '#realfood'],
+    en: c => [`american ${c.en}`, `european ${c.en}`],
+    de: c => c.g === 'n' ? [`amerikanisches ${c.de}`, `europäisches ${c.de}`] : [`amerikanische ${c.de}`, `europäische ${c.de}`] },
+  { id: 'farm', w: 1, flags: null, niche: ['#farmfresh', '#realfood'],
+    en: c => [`supermarket ${c.en}`, `farm ${c.en}`],
+    de: c => [`${c.de} aus dem Supermarkt`, `${c.de} vom Bauernhof`] },
+];
+// „CARBS VS CARBS“: oben Junk | gut, unten traurige | starke Statue
+const DUELS = [
+  { id: 'carbs', en: 'carbs', de: 'carbs', bad: ['chips', 'fries', 'donut', 'pancakes', 'cookies'], good: ['potatoes', 'sweetpotato', 'rice', 'oats', 'banana'] },
+  { id: 'protein', en: 'protein', de: 'protein', bad: ['coldcuts', 'nuggets', 'burger'], good: ['steak', 'beef', 'chicken', 'salmon', 'eggs'] },
+  { id: 'fats', en: 'fats', de: 'fett', bad: ['fries', 'chips', 'donut', 'nuggets'], good: ['avocado', 'olives', 'butter', 'nuts', 'salmon', 'walnuts'] },
+  { id: 'sugar', en: 'sugar', de: 'zucker', bad: ['candy', 'soda', 'donut', 'cookies'], good: ['berries', 'mango', 'dates', 'honey', 'cherries'] },
+  { id: 'snacks', en: 'snacks', de: 'snacks', bad: ['chips', 'candy', 'cookies'], good: ['nuts', 'walnuts', 'olives', 'cheese', 'dates'] },
+  { id: 'breakfast', en: 'breakfast', de: 'frühstück', bad: ['pancakes', 'donut', 'cookies'], good: ['eggs', 'yogurt', 'oats', 'berries'] },
+];
+const SERIES = {
+  questions: { label: 'Fragen', ex: 'why am I so happy?', w: 4, niche: null },
+  real: { label: 'Real', ex: 'real protein, real sugar', w: 2, niche: ['#realfood', '#wholefoods'] },
+  vs: { label: 'Ungesund vs. gesund', ex: 'this is not healthy… but this is…', w: 2, niche: ['#junkfood', '#realfood'] },
+  rules: { label: 'Regeln', ex: 'Rule 1: eat food, not products.', w: 1.5, niche: ['#realfood', '#wholefoods'] },
+  countries: { label: 'Länder', ex: 'why are the Dutch so tall?', w: 2.5, niche: ['#longevity', '#realfood'] },
+  tier: { label: 'Tier-Liste', ex: 'S tier foods … F tier foods', w: 2, niche: ['#tierlist', '#realfood'] },
+  day: { label: 'Ein Tag essen', ex: 'what I eat in a day: breakfast', w: 2, niche: ['#whatieatinaday', '#realfood'] },
+  swap: { label: 'Tausch', ex: 'swap this… for this…', w: 1.5, niche: ['#healthyswaps', '#realfood'] },
+  god: { label: 'Gott vs. Mensch', ex: 'What God gave us', w: 2.5, niche: ['#realfood', '#processedfood'] },
+  ancestors: { label: 'Früher vs. heute', ex: 'What our ancestors ate', w: 2, niche: ['#ancestral', '#realfood'] },
+  eatlike: { label: 'Iss so', ex: 'eat like this… to look like this', w: 1.5, niche: ['#physique', '#realfood'] },
+  nature: { label: 'Natur', ex: 'nature’s candy', w: 1.5, niche: ['#realfood', '#wholefoods'] },
+  fix: { label: 'Ruiniert vs. repariert', ex: 'what ruins your skin… and what fixes it', w: 2.5, niche: null },
+  quit: { label: 'Aufgegeben', ex: 'foods I quit… what I eat instead', w: 1.5, niche: ['#healthyswaps', '#realfood'] },
+  routine: { label: 'Timing', ex: 'pre-workout, post-workout, before bed', w: 1.5, niche: ['#gymtok', '#mealtiming'] },
+  compare: { label: 'USA vs. Europa', ex: 'american apples vs european apples', w: 2.5, niche: null },
+  duel: { label: 'Carbs vs. Carbs', ex: 'CARBS VS CARBS · PROTEIN VS PROTEIN', w: 2.5, niche: ['#junkfood', '#gymtok'] },
+};
+
+/* ---------- Hilfen ---------- */
+const $ = s => document.querySelector(s);
+const rnd = Math.random;
+const range = (a, b) => a + rnd() * (b - a);
+const pick = a => a[Math.floor(rnd() * a.length)];
+const shuffle = a => { a = [...a]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const weighted = list => { const t = list.reduce((s, x) => s + x[1], 0); let r = rnd() * t; for (const [v, w] of list) { if ((r -= w) <= 0) return v; } return list[0][0]; };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const load = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+const loadImg = src => new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function shade(hex, amt) {
+  const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255];
+  const f = v => Math.max(0, Math.min(255, Math.round(amt >= 0 ? v + (255 - v) * amt : v * (1 + amt))));
+  return `rgb(${c.map(f).join(',')})`;
+}
+const pexels = f => `https://www.pexels.com/search/${encodeURIComponent(f.en)}/?orientation=square`;
+
+/* ---------- Zustand ---------- */
+let W = 1080, H = 1440;
+const DEFAULTS = { series: 'random', count: '4', lang: 'en', res: '4k', gray: false };
+const S = Object.assign({}, DEFAULTS, load('hm2-settings', {}));
+if (load('hm2-settings-v', 0) < 2) { Object.assign(S, { count: '4', res: '4k', gray: false }); save('hm2-settings', S); save('hm2-settings-v', 2); }
+let recent = load('hm2-recent', { series: [], hooks: [], q: [] });
+let photos = [], library = [], figures = [];
+let busy = false;
+
+/* ---------- Zeichnen ---------- */
+function drawCover(ctx, img, x, y, w, h, z) {
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const s = Math.max(w / iw, h / ih) * z.z, sw = w / s, sh = h / s;
+  ctx.drawImage(img, (iw - sw) * z.fx, (ih - sh) * z.fy, sw, sh, x, y, w, h);
+}
+function drawDemo(ctx, food, x, y, w, h) {
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  const gr = ctx.createLinearGradient(x, y, x + w, y + h);
+  gr.addColorStop(0, shade(food.color, .28)); gr.addColorStop(1, shade(food.color, -.38));
+  ctx.fillStyle = gr; ctx.fillRect(x, y, w, h);
+  const s = Math.min(w, h) / 2.5;
+  ctx.font = `${s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  let r = 0;
+  for (let yy = y - s * .2; yy < y + h + s; yy += s * .8, r++)
+    for (let xx = x + (r % 2 ? s * .45 : 0) - s * .1; xx < x + w + s; xx += s * .92) {
+      ctx.save(); ctx.translate(xx, yy); ctx.rotate((((xx * 7 + yy * 13) % 50) - 25) * Math.PI / 180); ctx.fillText(food.emoji, 0, 0); ctx.restore();
+    }
+  ctx.restore();
+}
+function applyGrade(ctx, grade) {
+  if (grade === 'none') return;
+  ctx.save();
+  ctx.globalCompositeOperation = 'soft-light';
+  ctx.fillStyle = grade === 'warm' ? 'rgba(255,150,60,0.22)' : 'rgba(70,130,255,0.18)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.restore();
+}
+function drawFlag(ctx, code, x, y, w, h) {
+  const band = (cols, vertical) => cols.forEach((c, i) => { ctx.fillStyle = c; vertical ? ctx.fillRect(x + i * w / cols.length, y, w / cols.length + 1, h) : ctx.fillRect(x, y + i * h / cols.length, w, h / cols.length + 1); });
+  if (code === 'nl') band(['#AE1C28', '#FFFFFF', '#21468B'], false);
+  if (code === 'it') band(['#009246', '#FFFFFF', '#CE2B37'], true);
+  if (code === 'fr') band(['#0055A4', '#FFFFFF', '#EF4135'], true);
+  if (code === 'es') { band(['#AA151B', '#F1BF00', '#F1BF00', '#AA151B'], false); }
+  if (code === 'jp') { ctx.fillStyle = '#fff'; ctx.fillRect(x, y, w, h); ctx.fillStyle = '#BC002D'; ctx.beginPath(); ctx.arc(x + w / 2, y + h / 2, h * .3, 0, Math.PI * 2); ctx.fill(); }
+  if (code === 'gr') {
+    for (let i = 0; i < 9; i++) { ctx.fillStyle = i % 2 ? '#fff' : '#0D5EAF'; ctx.fillRect(x, y + i * h / 9, w, h / 9 + 1); }
+    const c = h * 5 / 9; ctx.fillStyle = '#0D5EAF'; ctx.fillRect(x, y, c, c); ctx.fillStyle = '#fff';
+    ctx.fillRect(x, y + c * 2 / 5, c, c / 5); ctx.fillRect(x + c * 2 / 5, y, c / 5, c);
+  }
+  if (code === 'no') {
+    ctx.fillStyle = '#BA0C2F'; ctx.fillRect(x, y, w, h); const u = h / 16;
+    ctx.fillStyle = '#fff'; ctx.fillRect(x, y + 6 * u, w, 4 * u); ctx.fillRect(x + 6 * u, y, 4 * u, h);
+    ctx.fillStyle = '#00205B'; ctx.fillRect(x, y + 7 * u, w, 2 * u); ctx.fillRect(x + 7 * u, y, 2 * u, h);
+  }
+  const H3 = (a, b, c) => band([a, b, c], false), V3 = (a, b, c) => band([a, b, c], true);
+  const nordic = (bg, cr, inner) => {
+    ctx.fillStyle = bg; ctx.fillRect(x, y, w, h); const u = h / (inner ? 16 : 10), cx0 = x + w * .36 - u * (inner ? 2 : 1.5);
+    const t = inner ? 4 : 2;
+    ctx.fillStyle = cr; ctx.fillRect(x, y + h / 2 - u * t / 2, w, u * t); ctx.fillRect(cx0 + u * (inner ? 0 : 0), y, u * t, h);
+    if (inner) { ctx.fillStyle = inner; ctx.fillRect(x, y + h / 2 - u, w, u * 2); ctx.fillRect(cx0 + u, y, u * 2, h); }
+  };
+  const star = (cx, cy, r, fill, outline) => {
+    ctx.beginPath();
+    for (let k = 0; k < 5; k++) { const a = -Math.PI / 2 + k * 4 * Math.PI / 5; ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r); }
+    ctx.closePath();
+    if (outline) { ctx.strokeStyle = fill; ctx.lineWidth = r * .16; ctx.stroke(); } else { ctx.fillStyle = fill; ctx.fill(); }
+  };
+  if (code === 'de') H3('#000000', '#DD0000', '#FFCE00');
+  if (code === 'at') H3('#ED2939', '#FFFFFF', '#ED2939');
+  if (code === 'pl') band(['#FFFFFF', '#DC143C'], false);
+  if (code === 'bg') H3('#FFFFFF', '#00966E', '#D62612');
+  if (code === 'ie') V3('#169B62', '#FFFFFF', '#FF883E');
+  if (code === 'pe') V3('#D91023', '#FFFFFF', '#D91023');
+  if (code === 'th') { band(['#A51931', '#F4F5F8', '#2D2A4A', '#2D2A4A', '#F4F5F8', '#A51931'], false); }
+  if (code === 'cr') { band(['#002B7F', '#FFFFFF', '#CE1126', '#CE1126', '#FFFFFF', '#002B7F'], false); }
+  if (code === 'se') nordic('#006AA7', '#FECC00');
+  if (code === 'dk') nordic('#C8102E', '#FFFFFF');
+  if (code === 'fi') nordic('#FFFFFF', '#002F6C');
+  if (code === 'is') nordic('#02529C', '#FFFFFF', '#DC1E35');
+  if (code === 'ch') {
+    ctx.fillStyle = '#DA291C'; ctx.fillRect(x, y, w, h); const u = h / 5;
+    ctx.fillStyle = '#fff'; ctx.fillRect(x + w / 2 - u * .5, y + h / 2 - u * 1.6, u, u * 3.2); ctx.fillRect(x + w / 2 - u * 1.6, y + h / 2 - u * .5, u * 3.2, u);
+  }
+  if (code === 'ge') {
+    ctx.fillStyle = '#fff'; ctx.fillRect(x, y, w, h); const u = h / 7;
+    ctx.fillStyle = '#FF0000'; ctx.fillRect(x, y + h / 2 - u / 2, w, u); ctx.fillRect(x + w / 2 - u / 2, y, u, h);
+    for (const [px, py] of [[.22, .22], [.78, .22], [.22, .78], [.78, .78]]) {
+      const cx = x + w * px, cy = y + h * py, a = u * .9, b = u * .28;
+      ctx.fillRect(cx - b / 2, cy - a / 2, b, a); ctx.fillRect(cx - a / 2, cy - b / 2, a, b);
+    }
+  }
+  if (code === 'pt') {
+    ctx.fillStyle = '#006600'; ctx.fillRect(x, y, w * .4, h); ctx.fillStyle = '#FF0000'; ctx.fillRect(x + w * .4, y, w * .6, h);
+    ctx.fillStyle = '#FFCC00'; ctx.beginPath(); ctx.arc(x + w * .4, y + h / 2, h * .22, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x + w * .4 - h * .09, y + h / 2 - h * .11, h * .18, h * .2);
+    ctx.fillStyle = '#FF0000'; ctx.fillRect(x + w * .4 - h * .07, y + h / 2 - h * .09, h * .14, h * .16);
+  }
+  if (code === 'tr') {
+    ctx.fillStyle = '#E30A17'; ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x + w * .36, y + h / 2, h * .25, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#E30A17'; ctx.beginPath(); ctx.arc(x + w * .395, y + h / 2, h * .2, 0, Math.PI * 2); ctx.fill();
+    ctx.save(); ctx.translate(x + w * .52, y + h / 2); ctx.rotate(-Math.PI / 10); star(0, 0, h * .12, '#fff'); ctx.restore();
+  }
+  if (code === 'ma') { ctx.fillStyle = '#C1272D'; ctx.fillRect(x, y, w, h); star(x + w / 2, y + h / 2 + h * .03, h * .3, '#006233', true); }
+  if (code === 'vn') { ctx.fillStyle = '#DA251D'; ctx.fillRect(x, y, w, h); star(x + w / 2, y + h / 2 + h * .03, h * .32, '#FFFF00'); }
+  if (code === 'br') {
+    ctx.fillStyle = '#009C3B'; ctx.fillRect(x, y, w, h);
+    ctx.fillStyle = '#FFDF00'; ctx.beginPath(); ctx.moveTo(x + w * .08, y + h / 2); ctx.lineTo(x + w / 2, y + h * .1); ctx.lineTo(x + w * .92, y + h / 2); ctx.lineTo(x + w / 2, y + h * .9); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#002776'; ctx.beginPath(); ctx.arc(x + w / 2, y + h / 2, h * .25, 0, Math.PI * 2); ctx.fill();
+    ctx.save(); ctx.beginPath(); ctx.arc(x + w / 2, y + h / 2, h * .25, 0, Math.PI * 2); ctx.clip();
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = h * .035; ctx.beginPath(); ctx.arc(x + w / 2 - h * .1, y + h, h * .55, -Math.PI * .62, -Math.PI * .2); ctx.stroke(); ctx.restore();
+  }
+  if (code === 'ar') {
+    H3('#74ACDF', '#FFFFFF', '#74ACDF');
+    ctx.fillStyle = '#F6B40E'; ctx.beginPath(); ctx.arc(x + w / 2, y + h / 2, h * .1, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#F6B40E'; ctx.lineWidth = h * .015;
+    for (let k = 0; k < 16; k++) { const a = k * Math.PI / 8; ctx.beginPath(); ctx.moveTo(x + w / 2 + Math.cos(a) * h * .11, y + h / 2 + Math.sin(a) * h * .11); ctx.lineTo(x + w / 2 + Math.cos(a) * h * .15, y + h / 2 + Math.sin(a) * h * .15); ctx.stroke(); }
+  }
+  if (code === 'in') {
+    H3('#FF9933', '#FFFFFF', '#138808');
+    ctx.strokeStyle = '#000080'; ctx.lineWidth = h * .02; ctx.beginPath(); ctx.arc(x + w / 2, y + h / 2, h * .13, 0, Math.PI * 2); ctx.stroke();
+    for (let k = 0; k < 24; k++) { const a = k * Math.PI / 12; ctx.lineWidth = h * .006; ctx.beginPath(); ctx.moveTo(x + w / 2, y + h / 2); ctx.lineTo(x + w / 2 + Math.cos(a) * h * .13, y + h / 2 + Math.sin(a) * h * .13); ctx.stroke(); }
+  }
+  if (code === 'gb') {
+    ctx.fillStyle = '#012169'; ctx.fillRect(x, y, w, h);
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    const diag = (lw, col) => { ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + w, y + h); ctx.moveTo(x + w, y); ctx.lineTo(x, y + h); ctx.stroke(); };
+    diag(h * .2, '#FFFFFF'); diag(h * .067, '#C8102E');
+    ctx.fillStyle = '#fff'; ctx.fillRect(x, y + h * .333, w, h * .334); ctx.fillRect(x + w / 2 - h * .167, y, h * .334, h);
+    ctx.fillStyle = '#C8102E'; ctx.fillRect(x, y + h * .4, w, h * .2); ctx.fillRect(x + w / 2 - h * .1, y, h * .2, h);
+    ctx.restore();
+  }
+  if (code === 'us') {
+    for (let i = 0; i < 13; i++) { ctx.fillStyle = i % 2 ? '#FFFFFF' : '#B22234'; ctx.fillRect(x, y + i * h / 13, w, h / 13 + 1); }
+    const cw = w * .4, chh = h * 7 / 13; ctx.fillStyle = '#3C3B6E'; ctx.fillRect(x, y, cw, chh);
+    for (let r = 0; r < 9; r++) for (let c = 0; c < (r % 2 ? 5 : 6); c++)
+      star(x + cw * ((r % 2 ? 2 : 1) + c * 2) / 12, y + chh * (r + 1) / 10, chh * .045, '#fff');
+  }
+  if (code === 'eu') {
+    ctx.fillStyle = '#003399'; ctx.fillRect(x, y, w, h);
+    for (let k = 0; k < 12; k++) { const a = k * Math.PI / 6; star(x + w / 2 + Math.cos(a) * h / 3, y + h / 2 + Math.sin(a) * h / 3, h / 17, '#FFCC00'); }
+  }
+}
+function drawFigure(ctx, fig, st, top) {
+  // Statue immer mittig, unten auf dem Bildrand.
+  const im = (S.gray && fig.gray) || fig.img;
+  const iw = im.width, ih = im.height;
+  let sx = 0, sy = 0, sw = iw, sh = ih, tw, th, y;
+  if (fig.anchor === 'panel') {
+    // Nahaufnahme: obere Schnittkante liegt genau auf der Rasterlinie in der Mitte
+    tw = W; th = H / 2; sh = Math.min(ih, th * iw / W); y = H / 2;
+  } else if (fig.anchor === 'fill') {
+    const avail = H - top, frac = Math.max(.4, fig.cut || 1);
+    // immer bis zur Schnittkante zeigen (Kopf + Schultern vollständig); zu breite Figuren
+    // werden links und rechts gleichmäßig vom Bildrand beschnitten, nie oben/unten
+    sh = ih * frac; let sc = avail / sh;
+    if (fig.fillW && iw * sc < W) { sc = W / iw; sh = Math.min(ih, avail / sc); }   // Seitenkanten an den Bildrand
+    tw = iw * sc; th = sh * sc; y = H - th;
+  } else {
+    th = H - top; tw = th * iw / ih;
+    if (tw > W * .86) { tw = W * .86; th = tw * ih / iw; }
+    y = H - th;
+  }
+  const x = (W - tw) / 2;
+  ctx.save();
+  if (st.flip) { ctx.translate(W, 0); ctx.scale(-1, 1); }
+  ctx.imageSmoothingQuality = 'high';
+  // weiche Kontur hinter der Statue (über Schatten, funktioniert in allen Browsern):
+  // dunkle Statuen bekommen einen hellen Schein, helle einen dunklen Schatten
+  const off = W * 4, dark = fig.tone === 'dark';
+  ctx.save();
+  ctx.shadowColor = dark ? 'rgba(255,255,255,.5)' : 'rgba(0,0,0,.85)';
+  ctx.shadowBlur = W * (dark ? .03 : .045); ctx.shadowOffsetX = st.flip ? -off : off; ctx.shadowOffsetY = 0;
+  for (let k = 0; k < 2; k++) ctx.drawImage(im, sx, sy, sw, sh, x - off, y, tw, th);
+  ctx.restore();
+  ctx.drawImage(im, sx, sy, sw, sh, x, y, tw, th);
+  ctx.restore();
+}
+const capFont = s => `800 ${s}px Figtree, "Helvetica Neue", Arial, sans-serif`;
+function wrapAt(ctx, text, max) {
+  const out = []; let line = '';
+  for (const w of text.split(/\s+/)) { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > max && line) { out.push(line); line = w; } else line = t; }
+  if (line) out.push(line); return out;
+}
+function wrap(ctx, text, max) {
+  const out = [];
+  for (const para of text.split('\n')) {
+    const base = wrapAt(ctx, para, max);
+    if (base.length < 2) { out.push(...base); continue; }
+    let lo = max * .4, hi = max;
+    for (let k = 0; k < 14; k++) { const mid = (lo + hi) / 2; if (wrapAt(ctx, para, mid).length > base.length) lo = mid; else hi = mid; }
+    out.push(...wrapAt(ctx, para, hi));
+  }
+  return out;
+}
+function layoutCaption(ctx, text) {
+  let size = W * .064; ctx.font = capFont(size);
+  let lines = wrap(ctx, text, W * .82);
+  while (lines.length > 3 && size > W * .045) { size *= .92; ctx.font = capFont(size); lines = wrap(ctx, text, W * .82); }
+  return { size, lines, lh: size * 1.1 };
+}
+function drawFlagBadge(ctx, code, cx, bottom) {
+  const fw = W * .3, fh = fw * 2 / 3, x = cx - fw / 2, y = bottom - fh, b = W * .008;
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = W * .03; ctx.shadowOffsetY = W * .006;
+  ctx.fillStyle = '#fff'; ctx.fillRect(x - b, y - b, fw + b * 2, fh + b * 2);
+  ctx.restore();
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, fw, fh); ctx.clip(); drawFlag(ctx, code, x, y, fw, fh); ctx.restore();
+}
+function drawCaption(ctx, text, y) {
+  const { size, lines, lh } = layoutCaption(ctx, text);
+  ctx.font = capFont(size);
+  const top = y - (lines.length - 1) * lh / 2;
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'; ctx.miterLimit = 2;
+  lines.forEach((l, i) => {
+    const ly = top + i * lh;
+    ctx.lineWidth = size * .17; ctx.strokeStyle = '#000'; ctx.strokeText(l, W / 2, ly);
+    ctx.fillStyle = '#fff'; ctx.fillText(l, W / 2, ly);
+  });
+  ctx.restore();
+}
+function strokeText(ctx, text, x, y, size) {
+  ctx.lineJoin = 'round'; ctx.miterLimit = 2;
+  ctx.lineWidth = size * .17; ctx.strokeStyle = '#000'; ctx.strokeText(text, x, y);
+  ctx.fillStyle = '#fff'; ctx.fillText(text, x, y);
+}
+function drawPhotoCell(ctx, it, x, y, w, h, z) {
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  if (it && it.img) drawCover(ctx, it.img, x, y, w, h, z); else if (it) drawDemo(ctx, it.food, x, y, w, h);
+  ctx.restore();
+}
+// Statue in einer Rasterzelle: dunkler Hintergrund, Statue unten mittig, Kopf bis Schnittkante sichtbar
+function drawFigureCell(ctx, fig, x, y, w, h) {
+  ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  const bg = ctx.createRadialGradient(x + w / 2, y + h * .45, 0, x + w / 2, y + h * .45, Math.max(w, h) * .75);
+  bg.addColorStop(0, '#2c2c2c'); bg.addColorStop(1, '#050505');
+  ctx.fillStyle = bg; ctx.fillRect(x, y, w, h);
+  const im = (S.gray && fig.gray) || fig.img, iw = im.width, ih = im.height;
+  // ganze Figur, wenn sie hineinpasst; breite Büsten füllen die Zellenbreite und werden unten abgeschnitten
+  const s = fig.anchor === 'panel' ? w / iw : Math.max(h * .95 / ih, w * 1.02 / iw), sh = Math.min(ih, h / s);
+  const tw = iw * s, th = sh * s, dx = x + (w - tw) / 2, dy = y + h - th;
+  const off = W * 4, dark = fig.tone === 'dark';
+  ctx.imageSmoothingQuality = 'high';
+  ctx.save();
+  ctx.shadowColor = dark ? 'rgba(255,255,255,.45)' : 'rgba(0,0,0,.85)';
+  ctx.shadowBlur = W * (dark ? .02 : .03); ctx.shadowOffsetX = off; ctx.shadowOffsetY = 0;
+  ctx.drawImage(im, 0, 0, iw, sh, dx - off, dy, tw, th);
+  ctx.restore();
+  ctx.drawImage(im, 0, 0, iw, sh, dx, dy, tw, th);
+  ctx.restore();
+}
+function renderCmp(ctx, sl) {
+  const st = sl.style, g = Math.round(W * .006), hh = (H - g) / 2;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  drawPhotoCell(ctx, sl.items[0], 0, 0, W, hh, st.zoom[0]);
+  drawPhotoCell(ctx, sl.items[1], 0, hh + g, W, hh, st.zoom[1]);
+  applyGrade(ctx, st.grade);
+  const size = W * .056;
+  [0, 1].forEach(i => {
+    const text = sl.labels[i], flag = sl.flags && sl.flags[i], cy = i * (hh + g) + H * .07;
+    ctx.save(); ctx.font = capFont(size); ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    const tw = ctx.measureText(text).width, fw = flag ? size * 1.5 : 0, fh = fw * 2 / 3, gap = flag ? size * .45 : 0;
+    const x0 = (W - tw - fw - gap) / 2;
+    if (flag) {
+      const fy = cy - fh / 2, b = W * .004;
+      ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = W * .015;
+      ctx.fillStyle = '#fff'; ctx.fillRect(x0 - b, fy - b, fw + b * 2, fh + b * 2); ctx.restore();
+      ctx.save(); ctx.beginPath(); ctx.rect(x0, fy, fw, fh); ctx.clip(); drawFlag(ctx, flag, x0, fy, fw, fh); ctx.restore();
+    }
+    strokeText(ctx, text, x0 + fw + gap, cy, size);
+    ctx.restore();
+  });
+}
+function renderDuel(ctx, sl) {
+  const st = sl.style, cw = W / 2, ch = H / 2;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  drawPhotoCell(ctx, sl.items[0], 0, 0, cw, ch, st.zoom[0]);
+  drawPhotoCell(ctx, sl.items[1], cw, 0, cw, ch, st.zoom[1]);
+  applyGrade(ctx, st.grade);
+  if (sl.figure2) drawFigureCell(ctx, sl.figure2, 0, ch, cw, ch); else drawPhotoCell(ctx, sl.items[2] || sl.items[0], 0, ch, cw, ch, st.zoom[2]);
+  if (sl.figure) drawFigureCell(ctx, sl.figure, cw, ch, cw, ch); else drawPhotoCell(ctx, sl.items[3] || sl.items[1], cw, ch, cw, ch, st.zoom[3]);
+  const text = sl.hook.toUpperCase();
+  let size = W * .088; ctx.font = `700 ${size}px Cinzel, Georgia, serif`;
+  while (ctx.measureText(text).width > W * .9 && size > W * .04) { size *= .95; ctx.font = `700 ${size}px Cinzel, Georgia, serif`; }
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = W * .02;
+  strokeText(ctx, text, W / 2, H / 2, size);
+  ctx.restore();
+}
+function renderGrid(ctx, sl) {
+  if (sl.layout === 'cmp') return renderCmp(ctx, sl);
+  if (sl.layout === 'duel') return renderDuel(ctx, sl);
+  const st = sl.style;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  const cw = W / 2, ch = H / 2;
+  sl.items.forEach((it, i) => {
+    const x = (i % 2) * cw, y = Math.floor(i / 2) * ch;
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, cw, ch); ctx.clip();
+    if (it.img) drawCover(ctx, it.img, x, y, cw, ch, st.zoom[i]); else drawDemo(ctx, it.food, x, y, cw, ch);
+    ctx.restore();
+  });
+  applyGrade(ctx, st.grade);
+  const cap = layoutCaption(ctx, sl.hook);
+  const capBottom = H * .5 + (cap.lines.length - 1) * cap.lh / 2 + cap.size * .55;
+  if (sl.figure) drawFigure(ctx, sl.figure, st, capBottom - H * (sl.big ? .06 : .015));
+  if (sl.flag) drawFlagBadge(ctx, sl.flag, W / 2, H * .5 - (cap.lines.length - 1) * cap.lh / 2 - cap.lh * .75);
+  drawCaption(ctx, sl.hook, H * .5);
+}
+/* ---------- Planung ---------- */
+const foodOf = p => FOODS[p.food] || FOODS.other;
+function swapItems(junk, used) {
+  const taken = new Set();
+  return junk.map(j => {
+    const opts = (SWAPMAP[j.food.id] || []).filter(id => !taken.has(id));
+    const id = opts.length ? opts[0] : null;
+    const one = fid => {
+      const useT = recent.use || {};
+      const p = shuffle([...photos, ...library].filter(p => p.src && p.food === fid && !used.has(p.id))).sort((a, b) => (useT[a.id] || 0) - (useT[b.id] || 0))[0]
+        || [...photos, ...library].find(p => p.src && p.food === fid);
+      if (!p) return null; used.add(p.id); return { src: p.src, food: foodOf(p), id: p.id };
+    };
+    let alt = null;
+    for (const o of shuffle(opts)) { alt = one(o); if (alt) break; }
+    alt = alt || one(id || 'berries') || chooseFour(notJunk, used)[0];
+    taken.add(alt.food.id); return alt;
+  });
+}
+function chooseItems(sp, used) {
+  if (!sp.scene) return chooseFour(sp.pred, used);
+  const sc = chooseFour(sp.scene, used).slice(0, 1);
+  const rest = chooseFour(sp.pred, used).slice(0, 3);
+  const out = [...rest]; out.splice(Math.floor(rnd() * 4), 0, sc[0]);
+  return out;
+}
+function chooseFour(pred, used) {
+  // echte Fotos zuerst, je Essen nur einmal; Fotos aus früheren Slides dieses Posts möglichst nicht wiederholen
+  const useT = recent.use || {};
+  const real = shuffle([...photos, ...library].filter(p => p.src && pred(foodOf(p)))).sort((a, b) => (useT[a.id] || 0) - (useT[b.id] || 0));
+  const out = [], foods = new Set();
+  const take = p => { out.push({ src: p.src, food: foodOf(p), id: p.id, pred }); foods.add(p.food); used.add(p.id); };
+  for (const p of real) if (out.length < 4 && !used.has(p.id) && !foods.has(p.food)) take(p);
+  for (const p of real) if (out.length < 4 && !foods.has(p.food)) take(p);
+  const hasPhoto = id => [...photos, ...library].some(p => p.food === id && p.src);
+  for (const f of shuffle(Object.values(FOODS).filter(f => pred(f) && f.id !== 'other' && !foods.has(f.id) && !hasPhoto(f.id)))) if (out.length < 4 && !real.length) { out.push({ food: f, demo: true }); foods.add(f.id); }
+  for (const p of real) if (out.length < 4 && !out.some(o => o.id === p.id)) take(p);
+  while (out.length < 4) out.push({ food: pick(Object.values(FOODS).filter(pred)), demo: true });
+  return shuffle(out);
+}
+function chooseOne(pred, used) {
+  const useT = recent.use || {};
+  const real = shuffle([...photos, ...library].filter(p => p.src && pred(foodOf(p)))).sort((a, b) => (useT[a.id] || 0) - (useT[b.id] || 0));
+  const p = real.find(p => !used.has(p.id)) || real[0];
+  if (!p) return { food: pick(Object.values(FOODS).filter(pred)) || FOODS.other, demo: true };
+  used.add(p.id); return { src: p.src, food: foodOf(p), id: p.id, pred };
+}
+function makeStyle() {
+  return {
+    grade: pick(['none', 'none', 'none', 'warm', 'cool']),
+    zoom: Array.from({ length: 4 }, () => ({ z: range(1, 1.18), fx: range(.3, .7), fy: range(.3, .7) })),
+    figScale: range(.54, .58),
+    figDx: 0,
+    figDrop: range(.01, .04),
+    flip: rnd() < .35,
+  };
+}
+function nextFigure(mood, physique) {
+  // eine Statue pro Video; über mehrere Videos reihum, die zuletzt benutzten kommen zuletzt dran
+  let pool = figures.filter(f => (f.mood || 'strong') === mood);
+  if (physique && pool.some(f => f.physique)) pool = pool.filter(f => f.physique);
+  if (!pool.length) return null;
+  const last = (recent.figs && recent.figs[mood]) || [];
+  const fresh = pool.filter(f => !last.includes(f.id));
+  const f = pick(fresh.length ? fresh : pool);
+  recent.figs = recent.figs || {}; recent.figs[mood] = [f.id, ...last.filter(x => x !== f.id)].slice(0, Math.max(1, pool.length - 1));
+  return f;
+}
+function pickFresh(list, key) {
+  const fresh = list.filter(x => !recent.hooks.includes(key(x)));
+  return shuffle(fresh).concat(shuffle(list.filter(x => recent.hooks.includes(key(x)))));
+}
+function planSlides(series, n, lang) {
+  const specs = [];
+  if (series === 'questions') {
+    const qs = pickFresh(QUESTIONS, q => q.id).slice(0, n);
+    qs.forEach(q => specs.push({ pred: idsPred(q.foods), hook: pick(q[lang]), mood: 'strong', key: q.id, niche: q.niche }));
+  }
+  if (series === 'real') {
+    shuffle(REALS).slice(0, n).forEach(r => specs.push({ pred: idsPred(r.foods), hook: r[lang], mood: 'strong', key: r.en }));
+  }
+  if (series === 'vs') {
+    const m = Math.max(2, n), v = VS[lang];
+    for (let i = 0; i < m - 1; i++) specs.push({ pred: isJunk, hook: v.bad[Math.min(i, v.bad.length - 1)], mood: 'sad' });
+    specs.push({ pred: notJunk, hook: v.good, mood: 'strong' });
+  }
+  if (series === 'rules') {
+    const list = RULES[lang], idx = shuffle(list.map((_, i) => i)).slice(0, n).sort((a, b) => a - b);
+    idx.forEach((ri, k) => specs.push({ pred: idsPred(RULES.foods[ri]), hook: `${lang === 'de' ? 'Regel' : 'Rule'} ${k + 1}:\n${list[ri]}`, mood: 'strong', key: 'rule' + ri }));
+  }
+  if (series === 'tier') {
+    const order = { 1: ['S'], 2: ['S', 'F'], 3: ['S', 'A', 'F'], 4: ['S', 'A', 'B', 'F'] }[n];
+    order.forEach(t => { const ti = TIERS.find(x => x.tag === t); specs.push({ pred: tagPred([t]), hook: ti[lang], mood: t === 'F' ? 'sad' : 'strong', key: 'tier' + t }); });
+  }
+  if (series === 'day') {
+    MEALS.slice(0, n).forEach((m, k) => specs.push({ pred: idsPred(m.foods), hook: k === 0 ? `${lang === 'de' ? 'was ich an einem Tag esse' : 'what I eat in a day'}:\n${m[lang]}` : m[lang], mood: 'strong', key: 'day' + m.tag }));
+  }
+  if (series === 'swap') {
+    const pairs = Math.max(1, Math.floor(n / 2)), sw = SWAP[lang];
+    for (let k = 0; k < pairs; k++) { specs.push({ pred: f => isJunk(f) && SWAPMAP[f.id], hook: sw[k * 2], mood: 'sad' }); specs.push({ pred: notJunk, hook: sw[k * 2 + 1], mood: 'strong', swapOf: specs.length - 1 }); }
+  }
+  if (series === 'countries') {
+    pickFresh(COUNTRIES, c => c.flag).slice(0, n).forEach(c => specs.push({ pred: idsPred(c.foods), hook: c[lang], mood: 'strong', flag: c.flag, key: c.flag }));
+  }
+  if (series === 'god') {
+    const g = pickFresh(GOD.map((x, i) => ({ ...x, i })), x => 'god' + x.i)[0];
+    const pairs = Math.max(1, Math.floor(n / 2));
+    for (let k = 0; k < pairs; k++) {
+      specs.push({ pred: tagPred(['godfood']), scene: sceneOf('nature'), hook: g[lang][0], mood: 'none', key: 'god' + g.i });
+      specs.push({ pred: isJunk, scene: sceneOf('industry'), hook: g[lang][1], mood: 'none' });
+    }
+  }
+  if (series === 'ancestors') {
+    const a = pickFresh(ANCESTORS.map((x, i) => ({ ...x, i })), x => 'anc' + x.i)[0];
+    const pairs = Math.max(1, Math.floor(n / 2));
+    for (let k = 0; k < pairs; k++) {
+      specs.push({ pred: tagPred(['ancestral']), scene: sceneOf('pasture'), hook: a[lang][0], mood: 'strong', key: 'anc' + a.i });
+      specs.push({ pred: isJunk, scene: sceneOf('processed'), hook: a[lang][1], mood: 'sad' });
+    }
+  }
+  if (series === 'eatlike') {
+    const q = pick(QUESTIONS.filter(x => ['strong', 'lean'].includes(x.id)));
+    const pred = idsPred(q.foods);
+    specs.push({ pred, hook: EATLIKE[lang][0], mood: 'none' });
+    specs.push({ pred, hook: EATLIKE[lang][1], mood: 'strong', big: true });
+  }
+  if (series === 'fix') {
+    const f = pickFresh(FIXES.map((x, i) => ({ ...x, i })), x => 'fix' + x.i)[0];
+    specs.push({ pred: idsPred(f.bad), hook: f[lang][0], mood: 'sad', key: 'fix' + f.i, niche: f.niche });
+    specs.push({ pred: idsPred(f.good), hook: f[lang][1], mood: 'strong', niche: f.niche });
+  }
+  if (series === 'quit') {
+    specs.push({ pred: f => isJunk(f) && SWAPMAP[f.id], hook: QUIT[lang][0], mood: 'sad' });
+    specs.push({ pred: notJunk, hook: QUIT[lang][1], mood: 'strong', swapOf: 0 });
+  }
+  if (series === 'routine') {
+    const r = n >= 4 ? ROUTINE : n === 3 ? [ROUTINE[1], ROUTINE[2], ROUTINE[3]] : n === 2 ? [ROUTINE[1], ROUTINE[2]] : [pick(ROUTINE)];
+    r.forEach(x => specs.push({ pred: idsPred(x.foods), hook: x[lang], mood: 'strong', key: 'rt' + x.en }));
+  }
+  if (series === 'compare') {
+    const th = weighted(CMP_THEMES.map(t => [t, t.w]));
+    pickFresh(COMPARE, c => 'cmp' + c.a).filter((c, i, arr) => !(c.a === 'yolk_us' && arr.slice(0, i).some(x => x.a === 'eggs_us')) && !(c.a === 'eggs_us' && arr.slice(0, i).some(x => x.a === 'yolk_us'))).slice(0, n).forEach(c => specs.push({ layout: 'cmp', a: c.a, b: c.b, labels: th[lang](c), flags: th.flags,
+      hook: th[lang](c).join(' vs '), mood: 'none', key: 'cmp' + c.a, niche: th.niche }));
+  }
+  if (series === 'duel') {
+    pickFresh(DUELS, d => 'duel' + d.id).slice(0, n).forEach(d => specs.push({ layout: 'duel', bad: d.bad, good: d.good,
+      hook: `${d[lang]} vs ${d[lang]}`, mood: 'duel', key: 'duel' + d.id }));
+  }
+  if (series === 'nature') {
+    pickFresh(NATURES, x => x.en).slice(0, n).forEach(x => specs.push({ pred: idsPred(x.foods), hook: x[lang], mood: 'none', key: x.en }));
+  }
+  return specs;
+}
+
+/* ---------- Entwürfe planen und zeichnen ---------- */
+const SHORT = ['eatlike', 'fix', 'quit'];   // Arten mit nur 2 Slides – bei Zufall nicht nehmen
+function pickSeries(n) {
+  if (S.series !== 'random') return S.series;
+  return weighted(Object.entries(SERIES).filter(([id]) => n < 3 || !SHORT.includes(id))
+    .map(([id, s]) => [id, recent.series.slice(0, 3).includes(id) ? s.w * .15 : s.w]));
+}
+// Plant einen Post (Texte, Fotos, Statuen) – ohne zu zeichnen
+function planPost(series, n, lang) {
+  const specs = planSlides(series, n, lang);
+  const duel = specs.some(s => s.mood === 'duel');
+  const fig = { strong: specs.some(s => s.mood === 'strong' || s.mood === 'duel') ? nextFigure('strong', duel || specs.some(s => s.big)) : null,
+    sad: specs.some(s => s.mood === 'sad' || s.mood === 'duel') ? nextFigure('sad') : null };
+  const base = makeStyle();  // gleiche Statuen-Größe/-Spiegelung im ganzen Video
+  const used = new Set();
+  const slides = [];
+  const duelFoods = new Set();
+  const itemsFor = sp => sp.layout === 'cmp' ? [chooseOne(idsPred([sp.a]), used), chooseOne(idsPred([sp.b]), used)]
+    : sp.layout === 'duel' ? (() => {
+        const fresh = ids => { const f = ids.filter(id => !duelFoods.has(id)); return f.length ? f : ids; };
+        const b = chooseOne(idsPred(fresh(sp.bad)), used), g = chooseOne(idsPred(fresh(sp.good)), used);
+        duelFoods.add(b.food.id); duelFoods.add(g.food.id);
+        return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
+    : sp.swapOf != null ? swapItems(slides[sp.swapOf].items, used) : chooseItems(sp, used);
+  specs.forEach(sp => slides.push({
+    kind: 'grid', layout: sp.layout || 'grid', hook: sp.hook, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags,
+    style: { ...makeStyle(), figScale: base.figScale, flip: base.flip, figDrop: base.figDrop },
+    items: itemsFor(sp),
+    figure: sp.mood === 'duel' ? fig.strong : sp.mood === 'none' ? null : fig[sp.mood] || null,
+    figure2: sp.mood === 'duel' ? fig.sad : null,
+    niche: sp.niche,
+  }));
+  const niche = (SERIES[series].niche || slides[0].niche) || ['#realfood', '#wholefoods'];
+  const broad = lang === 'de' ? ['#ernährung', '#gesundessen'] : ['#nutrition', '#healthtips'];
+  const tags = ['#healthmaxxing', ...broad, ...niche].filter((t, i, a) => a.indexOf(t) === i).slice(0, 5);
+  const desc = `Follow for better Health/Looks 🤝\n\n${tags.join(' ')}`;
+  // fürs nächste Mal merken, was gerade dran war (mehr Abwechslung)
+  recent.series = [series, ...recent.series.filter(x => x !== series)].slice(0, 4);
+  recent.use = recent.use || {}; const now = Date.now() + Math.random();
+  slides.forEach(sl => sl.items.forEach(it => { if (it.id) recent.use[it.id] = now; }));
+  recent.hooks = [...specs.map(s => s.key).filter(Boolean), ...recent.hooks].slice(0, 20);
+  save('hm2-recent', recent);
+  return { series, lang, slides, desc, fig };
+}
+// Lädt Fotos/Statuen und zeichnet die Slides als JPG
+async function renderBlobs(slides, fig) {
+  const used2 = [fig.strong, fig.sad].filter(Boolean);
+  releaseFigs(used2);
+  await Promise.all(used2.map(f => ensureFig(f).catch(() => {})));
+  slides.forEach(sl => { if (sl.figure && !sl.figure.img) sl.figure = null; if (sl.figure2 && !sl.figure2.img) sl.figure2 = null;
+    if (sl.layout === 'duel' && sl.figure && sl.figure2) sl.items = sl.items.slice(0, 2); });  // Reserve-Fotos nur ohne Statuen laden
+  const tryLoad = async src => { for (let k = 0; k < 2; k++) { try { return await loadImg(src); } catch (e) { await new Promise(r => setTimeout(r, 300)); } } return null; };
+  await Promise.all(slides.flatMap(sl => sl.items).map(async it => { if (it.src) it.img = await tryLoad(it.src); }));
+  // Ein Foto lädt nicht? Erst ein anderes Foto desselben Essens, dann ein anderes passendes Essen.
+  const bad = new Set();
+  for (const sl of slides) for (const it of sl.items) {
+    if (it.img || !it.src) continue;
+    bad.add(it.src);
+    const inSlide = new Set(sl.items.filter(x => x !== it).map(x => x.food.id));
+    const pool = [...photos, ...library].filter(p => p.src && !bad.has(p.src));
+    const same = shuffle(pool.filter(p => p.food === it.food.id));
+    const other = it.pred ? shuffle(pool.filter(p => p.food !== it.food.id && !inSlide.has(p.food) && it.pred(foodOf(p)))) : [];
+    for (const p of [...same, ...other].slice(0, 12)) {
+      const im = await tryLoad(p.src);
+      if (im) { it.img = im; it.src = p.src; it.id = p.id; it.food = foodOf(p); break; }
+      bad.add(p.src);
+    }
+    if (!it.img) it.demo = true;
+  }
+  const canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const blobs = [];
+  for (const sl of slides) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, W, H);
+    renderGrid(ctx, sl);
+    let blob = await new Promise(r => canvas.toBlob(r, 'image/jpeg', .93));
+    if (!blob) {  // manche Handys schaffen große Bilder nicht: als Datenbild versuchen
+      const d = atob(canvas.toDataURL('image/jpeg', .9).split(',')[1]), u8 = new Uint8Array(d.length); for (let k = 0; k < d.length; k++) u8[k] = d.charCodeAt(k); blob = new Blob([u8], { type: 'image/jpeg' });
+    }
+    blobs.push(blob);
+    await new Promise(r => setTimeout(r, 0));
+  }
+  canvas.width = canvas.height = 1;
+  slides.forEach(sl => sl.items.forEach(it => { it.img = null; }));
+  return blobs;
+}
+
+/* ---------- Galerie: mehrere Entwürfe, zuerst nur das erste Bild ---------- */
+const FEED_N = 6;
+let feed = [], feedGen = 0, working = false, priority = null;
+const isFull = d => d.slides.length > 0 && d.blobs.length === d.slides.length && d.blobs.every(Boolean);
+function newDraft() {
+  const n = +S.count, series = pickSeries(n);
+  const P = planPost(series, n, S.lang);
+  return { id: Math.random().toString(36).slice(2, 9), series, lang: S.lang, desc: P.desc, slides: P.slides, fig: P.fig,
+    W: S.res === '4k' ? 2160 : 1080, H: S.res === '4k' ? 2880 : 1440, gray: S.gray, blobs: [], urls: [], files: null, saved: false };
+}
+function addDrafts(k) { for (let i = 0; i < k; i++) feed.push(newDraft()); saveFeed(); renderFeed(); pump(); }
+function newFeed() {
+  feedGen++; feed.forEach(d => d.urls.forEach(u => u && URL.revokeObjectURL(u)));
+  feed = []; priority = null; closeViewer();
+  addDrafts(FEED_N);
+}
+// Arbeitet nacheinander: erst alle Vorschaubilder, dann die übrigen Slides. Ein geöffneter Entwurf kommt vor.
+async function pump() {
+  if (working) return; working = true;
+  try {
+    for (;;) {
+      const gen = feedGen;
+      let d = priority && feed.includes(priority) && !isFull(priority) ? priority : null, cover = false;
+      if (!d) { d = feed.find(x => !x.blobs[0]); cover = !!d; }
+      if (!d) d = feed.find(x => !isFull(x));
+      if (!d) break;
+      const from = d.blobs.length, to = cover ? 1 : d.slides.length;
+      [W, H] = [d.W, d.H];
+      const keepGray = S.gray; S.gray = d.gray;
+      let bl;
+      try { bl = await renderBlobs(d.slides.slice(from, to), d.fig); } finally { S.gray = keepGray; }
+      if (gen !== feedGen || !feed.includes(d)) continue;   // inzwischen neue Entwürfe angefordert
+      bl.forEach((b, k) => { d.blobs[from + k] = b; d.urls[from + k] = URL.createObjectURL(b); });
+      if (isFull(d)) { const base = `hm-${d.series}-${d.id}`; d.files = d.blobs.map((b, i) => new File([b], `${base}-${i + 1}.jpg`, { type: 'image/jpeg' })); }
+      updateTile(d); updateMissing();
+      if (openDraft === d) fillViewer(d);
+    }
+  } catch (e) {
+    console.error(e); const w = $('#warn'); w.hidden = false; w.textContent = 'Da ist etwas schiefgelaufen. Tippe auf „Neue Entwürfe“.';
+  } finally { working = false; }
+}
+function renderFeed() {
+  $('#feed').replaceChildren(...feed.map(d => { const t = document.createElement('button'); t.type = 'button'; t.id = 'tile-' + d.id; return t; }));
+  feed.forEach(updateTile);
+}
+function updateTile(d) {
+  const t = $('#tile-' + d.id); if (!t) return;
+  if (!d.urls[0]) { t.className = 'tile wait'; t.textContent = 'wird erstellt…'; t.onclick = null; return; }
+  t.className = 'tile'; t.setAttribute('aria-label', `${SERIES[d.series].label}: alle ${d.slides.length} Slides öffnen`);
+  const img = document.createElement('img'); img.src = d.urls[0]; img.alt = '';
+  const lab = document.createElement('span'); lab.className = 'lab'; lab.textContent = `${SERIES[d.series].label} · ${d.slides.length}`;
+  t.replaceChildren(img, lab);
+  if (d.saved) { const ok = document.createElement('span'); ok.className = 'ok'; ok.textContent = 'gesichert ✓'; t.append(ok); }
+  t.onclick = () => openViewer(d);
+}
+function updateMissing() {
+  const miss = new Map();
+  feed.forEach(d => d.slides.forEach(s => s.items?.forEach(it => { if (it.demo) miss.set(it.food.id, it.food); })));
+  $('#missing').hidden = miss.size === 0;
+  $('#missingFoods').replaceChildren(...[...miss.values()].map(foodChip));
+  const warn = $('#warn'); warn.hidden = miss.size === 0;
+  if (miss.size) {
+    warn.innerHTML = `${miss.size} Essen noch als Emoji-Platzhalter. <button type="button">Fotos hinzufügen</button>`;
+    warn.querySelector('button').onclick = () => { $('#dPhotos').open = true; $('#dPhotos').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  }
+}
+// Entwürfe merken (ohne Bilder): Nach dem Neuladen kommt dieselbe Galerie zurück und wird neu gezeichnet
+const FEED_KEY = 'hm2-feed';
+function saveFeed() {
+  save(FEED_KEY, { t: Date.now(), drafts: feed.map(d => ({ id: d.id, series: d.series, lang: d.lang, desc: d.desc, W: d.W, H: d.H, gray: d.gray, saved: d.saved,
+    fig: { strong: d.fig.strong ? d.fig.strong.id : null, sad: d.fig.sad ? d.fig.sad.id : null },
+    slides: d.slides.map(sl => ({ hook: sl.hook, flag: sl.flag || null, big: !!sl.big, style: sl.style, niche: sl.niche || null,
+      layout: sl.layout || 'grid', labels: sl.labels || null, flags: sl.flags || null,
+      figure: sl.figure ? sl.figure.id : null, figure2: sl.figure2 ? sl.figure2.id : null,
+      items: sl.items.map(it => ({ src: it.src && !it.src.startsWith('blob:') ? it.src : null, food: it.food.id, id: it.id || null, demo: !!it.demo })) })) })) });
+}
+function restoreFeed() {
+  const p = load(FEED_KEY, null);
+  if (!p || !p.drafts || !p.drafts.length || Date.now() - p.t > 12 * 3600e3) return false;
+  try {
+    const byId = id => figures.find(f => f.id === id) || null;
+    feed = p.drafts.map(d => ({ ...d, blobs: [], urls: [], files: null,
+      fig: { strong: byId(d.fig.strong), sad: byId(d.fig.sad) },
+      slides: d.slides.map(sl => ({ kind: 'grid', layout: sl.layout || 'grid', labels: sl.labels, flags: sl.flags, hook: sl.hook, flag: sl.flag, big: sl.big, style: sl.style, niche: sl.niche,
+        figure: sl.figure ? byId(sl.figure) : null, figure2: sl.figure2 ? byId(sl.figure2) : null,
+        items: sl.items.map(it => ({ src: it.src, food: FOODS[it.food] || FOODS.other, id: it.id, demo: it.demo })) })) }));
+    renderFeed(); pump(); return true;
+  } catch (e) { console.error(e); feed = []; return false; }
+}
+
+/* ---------- Anzeige ---------- */
+function foodChip(f) {
+  const d = document.createElement('div'); d.className = 'food';
+  const n = photos.filter(p => p.food === f.id).length + library.filter(p => p.food === f.id).length;
+  const lab = document.createElement('label');
+  lab.innerHTML = `${f.emoji} ${esc(f.de)}${n ? ` <span class="n">${n}</span>` : ''} <span aria-hidden="true">+</span>`;
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*'; inp.multiple = true; inp.setAttribute('aria-label', `Foto für ${f.de} hinzufügen`);
+  inp.onchange = () => { if (inp.files.length) uploadFoods(inp.files, f.id); inp.value = ''; };
+  lab.append(inp);
+  const a = document.createElement('a'); a.href = pexels(f); a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Suchen';
+  d.append(lab, a); return d;
+}
+function renderAllFoods() {
+  $('#allFoods').replaceChildren(...Object.values(FOODS).filter(f => f.id !== 'other').map(foodChip));
+}
+
+// Speichern in Fotos: Das Teilen-Menü des Handys bekommt alle Bilder auf einmal → „4 Bilder sichern“.
+// Wichtig fürs iPhone: navigator.share muss direkt im Tipp aufgerufen werden (kein await davor),
+// deshalb liegen die Dateien schon fertig im Entwurf (d.files).
+let openDraft = null;
+const canShareAll = files => { try { return !!(navigator.share && navigator.canShare && navigator.canShare({ files })); } catch (e) { return false; } };
+function saveLabel(d) { return !d || !d.files ? 'Wird erstellt…' : d.saved ? 'Nochmal in Fotos sichern' : `Alle ${d.files.length} in Fotos sichern`; }
+function saveAllPhotos() {
+  const d = openDraft, b = $('#btnSaveAll'), st = $('#saveStatus');
+  if (!d || !d.files) return;
+  const files = d.files;
+  if (canShareAll(files)) {
+    setStatus(st, `Im Menü auf „${files.length} Bilder sichern“ tippen.`);
+    navigator.share({ files }).then(
+      () => { d.saved = true; saveFeed(); updateTile(d); b.textContent = 'In Fotos gesichert ✓'; setStatus(st, ''); setTimeout(() => b.textContent = saveLabel(d), 2500); },
+      e => { if (e && e.name === 'AbortError') { setStatus(st, ''); return; }
+        setStatus(st, 'Teilen ging nicht. Jedes Bild lange drücken → „Zu Fotos hinzufügen“.', 'err'); });
+    return;
+  }
+  // Computer ohne Teilen-Menü: alle Bilder als Downloads
+  files.forEach((f, i) => setTimeout(() => { const a = document.createElement('a'); a.href = URL.createObjectURL(f); a.download = f.name; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }, i * 400));
+  d.saved = true; saveFeed(); updateTile(d);
+  setStatus(st, `${files.length} Bilder werden heruntergeladen.`, 'ok');
+}
+const toData = b => new Promise(r => { const fr = new FileReader(); fr.onload = () => r(fr.result); fr.readAsDataURL(b); });
+function openViewer(d) {
+  if (!d) return;
+  openDraft = d; priority = d; pump();
+  $('#ovTitle').textContent = `${SERIES[d.series].label} · ${d.slides.length} Slides`;
+  $('#desc').textContent = d.desc;
+  setStatus($('#saveStatus'), '');
+  const i = feed.indexOf(d); $('#btnNext').disabled = i < 0 || i >= feed.length - 1;
+  $('#ov').hidden = false; document.body.style.overflow = 'hidden'; $('#ov').scrollTop = 0;
+  fillViewer(d);
+}
+let fillToken = 0;
+async function fillViewer(d) {
+  const tok = ++fillToken, list = $('#ovList');
+  $('#btnSaveAll').disabled = !d.files; $('#btnSaveAll').textContent = saveLabel(d);
+  const items = [];
+  for (let i = 0; i < d.slides.length; i++) {
+    const l = document.createElement('div'); l.className = 'lbl'; l.textContent = `Bild ${i + 1} von ${d.slides.length}`;
+    let el;
+    if (d.blobs[i]) { el = document.createElement('img'); el.alt = `Slide ${i + 1}`; el.src = await toData(d.blobs[i]); }   // Datenbild: lange drücken → „Zu Fotos“ klappt
+    else { el = document.createElement('div'); el.className = 'coverbusy'; el.textContent = 'wird erstellt…'; }
+    if (tok !== fillToken) return;
+    items.push(l, el);
+  }
+  list.replaceChildren(...items);
+}
+function closeViewer() { $('#ov').hidden = true; document.body.style.overflow = ''; $('#ovList').replaceChildren(); openDraft = null; fillToken++; }
+
+/* ---------- Fotos & Statuen ---------- */
+function grayCanvas(img) {
+  const c = document.createElement('canvas'); c.width = img.naturalWidth || img.width; c.height = img.naturalHeight || img.height;
+  const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+  try {
+    const d = ctx.getImageData(0, 0, c.width, c.height), p = d.data;
+    for (let i = 0; i < p.length; i += 4) { let l = .3 * p[i] + .59 * p[i + 1] + .11 * p[i + 2]; l = Math.max(0, Math.min(255, (l - 128) * 1.1 + 128)); p[i] = p[i + 1] = p[i + 2] = l; }
+    ctx.putImageData(d, 0, 0);
+  } catch (e) {}
+  return c;
+}
+function addFigure(f) { figures.push({ mood: 'strong', ...f }); }
+// Statuen erst laden, wenn sie gebraucht werden (spart Speicher am Handy)
+async function ensureFig(f) {
+  if (!f) return;
+  if (!f.img) f.img = await loadImg(f.src);
+  if (S.gray && !f.gray) f.gray = grayCanvas(f.img);
+}
+function releaseFigs(keep) { figures.forEach(f => { if (!keep.includes(f)) { f.img = null; f.gray = null; } }); }
+function foodOptions(sel) {
+  const all = Object.values(FOODS);
+  const opt = f => `<option value="${f.id}"${f.id === sel ? ' selected' : ''}>${f.emoji} ${esc(f.de)}</option>`;
+  return `<optgroup label="Gesund">${all.filter(f => !isJunk(f)).map(opt).join('')}</optgroup><optgroup label="Junk Food">${all.filter(isJunk).map(opt).join('')}</optgroup>`;
+}
+function guessFood(name) {
+  const n = name.toLowerCase();
+  for (const f of Object.values(FOODS)) if (f.id !== 'other' && [f.id, ...f.en.split(' '), f.de.toLowerCase()].some(k => k.length > 3 && n.includes(k))) return f.id;
+  return 'other';
+}
+function armDelete(btn, fn) {
+  if (btn.classList.contains('armed')) { fn(); return; }
+  btn.classList.add('armed'); btn.textContent = 'Löschen?';
+  setTimeout(() => { btn.classList.remove('armed'); btn.textContent = '×'; }, 3000);
+}
+function renderPhotoGrid() {
+  const grid = $('#foodGrid'); grid.replaceChildren();
+  for (const p of photos) {
+    const d = document.createElement('div'); d.className = 'ph';
+    const img = document.createElement('img'); img.alt = foodOf(p).de; img.src = p.src; img.loading = 'lazy';
+    const sel = document.createElement('select'); sel.id = 'food-' + p.id; sel.setAttribute('aria-label', 'Was ist auf dem Foto?'); sel.innerHTML = foodOptions(p.food);
+    sel.onchange = () => setFood(p, sel.value);
+    const del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = '×'; del.setAttribute('aria-label', 'Foto löschen');
+    del.onclick = () => armDelete(del, () => removePhoto(p));
+    d.append(img, sel, del); grid.append(d);
+  }
+  $('#photoCount').textContent = `${photos.length} eigene · ${library.length} eingebaut`;
+  $('#ownNote').hidden = photos.length > 0;
+  renderAllFoods();
+}
+function renderFigGrid() {
+  const grid = $('#figGrid'); grid.replaceChildren();
+  for (const f of figures) {
+    const d = document.createElement('div'); d.className = 'ph fig';
+    const img = document.createElement('img'); img.alt = f.name; img.src = f.thumb || f.src; img.loading = 'lazy';
+    const nm = document.createElement('div'); nm.className = 'name'; nm.textContent = (f.mood === 'sad' ? '😢 ' : '') + f.name;
+    d.append(img, nm);
+    if (!f.builtin) {
+      const sel = document.createElement('select'); sel.id = 'mood-' + f.id; sel.setAttribute('aria-label', 'Wofür passt die Statue?');
+      sel.innerHTML = `<option value="strong">Stark (gutes Essen)</option><option value="sad">Traurig (schlechtes Essen)</option>`;
+      sel.value = f.mood || 'strong'; sel.onchange = () => setMood(f, sel.value); d.append(sel);
+      const del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = '×'; del.setAttribute('aria-label', 'Statue löschen');
+      del.onclick = () => armDelete(del, () => removeFigure(f)); d.append(del);
+    }
+    grid.append(d);
+  }
+  const sad = figures.filter(f => f.mood === 'sad').length;
+  $('#figCount').textContent = `${figures.length - sad} stark · ${sad} traurig`;
+}
+async function setMood(f, mood) {
+  f.mood = mood; renderFigGrid();
+  if (!f.builtin) STORE.patch('figures', f.id, { mood });
+}
+// Eigene Fotos und Statuen bleiben auf diesem Gerät (IndexedDB)
+const STORE = (() => {
+  let dbp = null;
+  const open = () => dbp || (dbp = new Promise((res, rej) => { const r = indexedDB.open('slide-studio', 1); r.onupgradeneeded = () => { r.result.createObjectStore('photos'); r.result.createObjectStore('figures'); }; r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }));
+  const tx = async (st, mode, fn) => { const db = await open(); return new Promise((res, rej) => { const t = db.transaction(st, mode), o = t.objectStore(st); const r = fn(o); t.oncomplete = () => res(r && r.result); t.onerror = () => rej(t.error); }); };
+  return {
+    put: (st, k, v) => tx(st, 'readwrite', o => o.put(v, k)).catch(() => {}),
+    del: (st, k) => tx(st, 'readwrite', o => o.delete(k)).catch(() => {}),
+    patch: async (st, k, v) => { try { const db = await open(); await new Promise((res, rej) => { const t = db.transaction(st, 'readwrite'), o = t.objectStore(st), g = o.get(k); g.onsuccess = () => { if (g.result) o.put({ ...g.result, ...v }, k); }; t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch (e) {} },
+    all: async st => { try { const db = await open(); return await new Promise((res, rej) => { const out = [], t = db.transaction(st), c = t.objectStore(st).openCursor(); c.onsuccess = () => { const x = c.result; if (x) { out.push([x.key, x.value]); x.continue(); } }; t.oncomplete = () => res(out); t.onerror = () => rej(t.error); }); } catch (e) { return []; } },
+  };
+})();
+async function loadLocal() {
+  const ph = await STORE.all('photos'), fg = await STORE.all('figures');
+  photos = ph.map(([id, v]) => ({ id, food: v.food || 'other', src: URL.createObjectURL(v.blob), createdAt: v.createdAt || 0 })).sort((a, b) => b.createdAt - a.createdAt);
+  fg.forEach(([id, v]) => addFigure({ id, name: v.name || 'Statue', mood: v.mood || 'strong', src: URL.createObjectURL(v.blob) }));
+}
+async function resizeBlob(file, max, type) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await loadImg(url);
+    const s = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight));
+    const c = document.createElement('canvas'); c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+    const cx = c.getContext('2d'); cx.imageSmoothingQuality = 'high'; cx.drawImage(img, 0, 0, c.width, c.height);
+    return { canvas: c, blob: await new Promise(r => c.toBlob(r, type, .92)), w: img.naturalWidth, h: img.naturalHeight };
+  } finally { URL.revokeObjectURL(url); }
+}
+function setStatus(el, text, cls = '') { el.textContent = text; el.className = 'status ' + cls; }
+async function uploadFoods(files, forced) {
+  const st = $('#foodStatus'); $('#dPhotos').open = true;
+  let ok = 0, fail = 0, small = 0;
+  for (const [i, file] of [...files].entries()) {
+    setStatus(st, `Lade Foto ${i + 1} von ${files.length}…`);
+    try {
+      const { blob, w, h } = await resizeBlob(file, 3840, 'image/jpeg');
+      if (Math.min(w, h) < 1100) small++;
+      const food = forced || guessFood(file.name);
+      const id = 'own-' + Date.now() + '-' + i;
+      await STORE.put('photos', id, { food, blob, createdAt: Date.now() });
+      photos.unshift({ id, food, src: URL.createObjectURL(blob), createdAt: Date.now() });
+      ok++;
+    } catch (e) { fail++; }
+  }
+  renderPhotoGrid();
+  let msg = fail ? `${ok} hinzugefügt, ${fail} fehlgeschlagen.` : `${ok} Foto${ok === 1 ? '' : 's'} hinzugefügt.`;
+  if (!forced && ok) msg += ' Prüfe unter jedem Foto, was darauf ist.';
+  if (small) msg += ` ${small} davon ${small === 1 ? 'ist' : 'sind'} klein und ${small === 1 ? 'wirkt' : 'wirken'} in 4K unscharf.`;
+  setStatus(st, msg, fail ? 'err' : 'ok');
+}
+async function setFood(p, food) {
+  p.food = food; STORE.patch('photos', p.id, { food });
+  renderAllFoods();
+}
+async function removePhoto(p) {
+  await STORE.del('photos', p.id); photos = photos.filter(x => x !== p); renderPhotoGrid();
+}
+function cutBlack(canvas) {
+  const w = canvas.width, h = canvas.height, ctx = canvas.getContext('2d');
+  const d = ctx.getImageData(0, 0, w, h), p = d.data;
+  const lum = i => .3 * p[i * 4] + .59 * p[i * 4 + 1] + .11 * p[i * 4 + 2];
+  const seen = new Uint8Array(w * h), stack = [];
+  const push = i => { if (!seen[i] && lum(i) < 30) { seen[i] = 1; stack.push(i); } };
+  for (let x = 0; x < w; x++) { push(x); push((h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { push(y * w); push(y * w + w - 1); }
+  while (stack.length) { const i = stack.pop(), x = i % w, y = (i / w) | 0; p[i * 4 + 3] = 0; if (x > 0) push(i - 1); if (x < w - 1) push(i + 1); if (y > 0) push(i - w); if (y < h - 1) push(i + w); }
+  let x0 = w, y0 = h, x1 = 0, y1 = 0;
+  for (let i = 0; i < w * h; i++) if (p[i * 4 + 3] > 10) { const x = i % w, y = (i / w) | 0; if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+  ctx.putImageData(d, 0, 0);
+  if (x1 <= x0 || y1 <= y0) return canvas;
+  const out = document.createElement('canvas'); out.width = x1 - x0 + 1; out.height = y1 - y0 + 1;
+  out.getContext('2d').drawImage(canvas, x0, y0, out.width, out.height, 0, 0, out.width, out.height);
+  return out;
+}
+async function uploadFigure(file) {
+  const st = $('#figStatus'); setStatus(st, 'Bereite Statue vor…');
+  try {
+    let { canvas } = await resizeBlob(file, 2400, 'image/png');
+    if ($('#figBlack').checked) canvas = cutBlack(canvas);
+    const blob = await new Promise(r => canvas.toBlob(r, 'image/png'));
+    const name = file.name.replace(/\.[^.]+$/, '').slice(0, 20) || 'Statue';
+    const id = 'own-' + Date.now();
+    await STORE.put('figures', id, { name, mood: 'strong', blob, createdAt: Date.now() });
+    addFigure({ id, name, src: URL.createObjectURL(blob) }); renderFigGrid();
+    setStatus(st, 'Statue hinzugefügt.', 'ok');
+  } catch (e) { setStatus(st, 'Das Bild ließ sich nicht verarbeiten. Versuche ein PNG oder JPG.', 'err'); }
+}
+async function removeFigure(f) {
+  await STORE.del('figures', f.id); figures = figures.filter(x => x !== f); renderFigGrid();
+}
+
+/* ---------- Einstellungen ---------- */
+function syncTypes(shown) {
+  document.querySelectorAll('#types .type').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S.series)));
+}
+function bindSettings() {
+  const persist = () => save('hm2-settings', S);
+  const types = [['random', 'Zufall', 'wechselt jedes Mal'], ...Object.entries(SERIES).map(([id, s]) => [id, s.label, s.ex])];
+  $('#types').innerHTML = types.map(([id, l, ex]) => `<button type="button" class="type" data-v="${id}">${esc(l)}<small>${esc(ex)}</small></button>`).join('');
+  $('#types').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S.series = b.dataset.v; persist(); syncTypes(); newFeed(); });
+  syncTypes();
+  const seg = (id, key) => {
+    const el = $(id), sync = () => el.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S[key])));
+    el.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S[key] = b.dataset.v; sync(); persist(); newFeed(); });
+    sync();
+  };
+  seg('#sCount', 'count'); seg('#sLang', 'lang'); seg('#sRes', 'res');
+  const chk = (id, key) => { const el = $(id); el.checked = !!S[key]; el.addEventListener('change', () => { S[key] = el.checked; persist(); newFeed(); }); };
+  chk('#sGray', 'gray');
+  $('#btnGen').addEventListener('click', newFeed);
+  $('#btnMore').addEventListener('click', () => addDrafts(FEED_N));
+  $('#btnSaveAll').addEventListener('click', saveAllPhotos);
+  $('#btnNext').addEventListener('click', () => { const i = feed.indexOf(openDraft); if (i >= 0 && feed[i + 1]) openViewer(feed[i + 1]); });
+  $('#ovClose').addEventListener('click', closeViewer);
+  $('#btnCopy').addEventListener('click', async () => {
+    const b = $('#btnCopy');
+    try { await navigator.clipboard.writeText(openDraft.desc); b.textContent = 'Kopiert'; }
+    catch (e) { const r = document.createRange(); r.selectNodeContents($('#desc')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Markiert'; }
+    setTimeout(() => b.textContent = 'Text kopieren', 1800);
+  });
+  $('#upFood').addEventListener('change', e => { if (e.target.files.length) uploadFoods(e.target.files); e.target.value = ''; });
+  $('#upFig').addEventListener('change', e => { if (e.target.files[0]) uploadFigure(e.target.files[0]); e.target.value = ''; });
+}
+
+async function init() {
+  bindSettings();
+  await Promise.all([
+    ...BUILTIN_FIGS.map(f => addFigure({ ...f, builtin: true })),
+    document.fonts ? Promise.all(['800 40px Figtree', '600 40px Figtree', '700 40px Cinzel'].map(f => document.fonts.load(f).catch(() => {}))) : null,
+  ]);
+  figures.sort((a, b) => BUILTIN_FIGS.findIndex(x => x.id === a.id) - BUILTIN_FIGS.findIndex(x => x.id === b.id));
+  try {
+    const r = await fetch('lib/library.json');
+    const lib = await r.json();
+    library = Object.entries(lib).flatMap(([food, files]) => files.map(f => ({ id: 'lib/' + f, food, src: 'lib/' + f, builtin: true })));
+  } catch (e) { library = []; }
+  await loadLocal();
+  renderFigGrid(); renderPhotoGrid();
+  if (!restoreFeed()) newFeed();
+}
+init();
+</script>
+
+</body></html>

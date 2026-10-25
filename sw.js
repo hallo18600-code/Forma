@@ -1,7 +1,7 @@
 // Health Maxxing – Service Worker: macht die App offline nutzbar.
 // C = App-Dateien (Version bei jeder Änderung an index.html/JS hochzählen).
 // D = Produktdatenbank (bleibt über App-Updates erhalten, wird im Hintergrund aktualisiert).
-const C="forma-v84", D="forma-data",
+const C="forma-v85", D="forma-data",
   A=["./","index.html","styles.css","data.js","foods-search.js","portionen.js","texterkennung.js","scanner.js","tagebuch.js","coach.js","onboarding.js","training.js","verlauf.js","profil.js","figur.js","uebungen.js","bewertung.js","i18n.js","app.js","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting()));});
 // Alte Versionen löschen. foods.json aus einer alten Version vorher übernehmen (kein neuer 9-MB-Download).
@@ -10,6 +10,7 @@ self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>{ const o
 self.addEventListener("fetch",e=>{
   const u=new URL(e.request.url);
   if(e.request.method!=="GET"||u.hostname.endsWith("openfoodfacts.org")) return;
+  if(u.pathname.includes("/studio/")) return;   // Slide-Studio (Marketing) gehört nicht in den App-Speicher
   // Produktdatenbank: sofort aus dem Speicher, im Hintergrund auffrischen
   if(u.origin===location.origin&&u.pathname.endsWith("/foods.json")){
     e.respondWith(caches.open(D).then(c=>c.match(e.request).then(h=>{
