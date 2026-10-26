@@ -239,7 +239,6 @@ const FOODS = Object.fromEntries([
   F('oats','🌾','#c9ad78','oats','Haferflocken',['B','ancestral']),
   F('lentils','🫘','#b5652a','lentils','Linsen',['A','ancestral']),
   F('greens','🥬','#3f7d2c','spinach','Spinat',['S']),
-  F('broccoli','🥦','#4f8a2f','broccoli','Brokkoli',['S','godfood']),
   F('peppers','🫑','#e04a2a','bell peppers','Paprika',['A','godfood']),
   F('tomatoes','🍅','#d63a2a','tomatoes','Tomaten',['A','godfood']),
   F('beets','🟣','#8a1f4a','beetroot','Rote Bete',['A','ancestral']),
@@ -261,7 +260,6 @@ const FOODS = Object.fromEntries([
   F('nuts','🥜','#a8763e','mixed nuts','Nüsse',['A']),
   F('pumpkinseeds','🎃','#8a9a4a','pumpkin seeds','Kürbiskerne',['A']),
   F('chocolate','🍫','#4a2a1c','dark chocolate','Zartbitterschokolade',['B']),
-  F('greentea','🍵','#7da35a','matcha','Matcha',['B','minor']),
   F('coffee','☕','#4a2e1e','black coffee','schwarzer Kaffee',['B','minor']),
   F('water','💧','#7fb3d9','water','Wasser',['minor']),
   F('chamomile','🌼','#e8d27a','chamomile tea','Kamillentee',['minor']),
@@ -395,7 +393,6 @@ const CLAIMS = {
   },
   calm: {
     chamomile: 'Apigenin – Studie: weniger Angstsymptome',
-    greentea: 'L-Theanin → ruhiger Fokus statt Nervosität',
     chocolate: 'viel Magnesium',
     pumpkinseeds: 'sehr viel Magnesium',
     almonds: 'viel Magnesium',
@@ -408,7 +405,6 @@ const CLAIMS = {
     sardines: 'DHA',
     walnuts: 'Omega-3 (ALA) – Studie: besseres Gedächtnis',
     blueberries: 'Studien: bessere Gedächtnisleistung',
-    greentea: 'Koffein + L-Theanin → Fokus ohne Zittern',
     coffee: 'Koffein – mehr Wachheit und Reaktion',
     chocolate: 'Kakao-Flavanole – Studien: bessere Denkleistung',
     mackerel: 'DHA',
@@ -418,7 +414,6 @@ const CLAIMS = {
     tuna: 'viel Protein, kaum Fett',
     shrimp: 'rund 24 g Protein bei unter 100 kcal',
     eggs: 'Protein macht lange satt',
-    broccoli: 'kaum Kalorien, viele Ballaststoffe',
     greens: 'fast keine Kalorien, viel Volumen',
     yogurt: 'griechischer Joghurt/Skyr: viel Protein, wenig Fett',
     cauliflower: 'kaum Kalorien, viele Ballaststoffe',
@@ -427,7 +422,6 @@ const CLAIMS = {
   young: {
     blueberries: 'Antioxidantien (Anthocyane)',
     tomatoes: 'Lycopin – Sonnenschutz von innen',
-    greentea: 'EGCG – starkes Antioxidans',
     salmon: 'Astaxanthin und Omega-3',
     oliveoil: 'Polyphenole – Studie: weniger Hautalterung',
     pomegranate: 'Ellagsäure – Antioxidans',
@@ -448,7 +442,6 @@ const CLAIMS = {
     peppers: 'mehr Vitamin C als Orangen',
     kiwi: 'sehr viel Vitamin C',
     oranges: 'Vitamin C',
-    broccoli: 'Vitamin C und Sulforaphan',
     garlic: 'Allicin – Studie: weniger Erkältungen',
     ginger: 'Gingerol – entzündungshemmend',
     kimchi: 'Probiotika – ein großer Teil des Immunsystems sitzt im Darm',
@@ -481,7 +474,6 @@ const CLAIMS = {
     yogurt: 'Calcium',
     sardines: 'Calcium (mit Gräten) und Vitamin D',
     almonds: 'Calcium und Magnesium',
-    broccoli: 'Calcium und Vitamin K',
   },
 };
 const why = k => Object.keys(CLAIMS[k]);
@@ -515,7 +507,7 @@ const FIXES = [
 ];
 const QUIT = { en: ['foods I quit…', '…what I eat instead'], de: ['Essen, das ich aufgegeben habe…', '…was ich stattdessen esse'] };
 const ROUTINE = [
-  { foods: ['eggs', 'oats', 'yogurt', 'blueberries', 'coffee', 'greentea'], en: 'morning', de: 'morgens' },
+  { foods: ['eggs', 'oats', 'yogurt', 'blueberries', 'coffee'], en: 'morning', de: 'morgens' },
   { foods: ['banana', 'dates', 'oats', 'rice', 'honey', 'beets', 'coffee'], en: 'pre-workout', de: 'vor dem Training' },   // schnelle Kohlenhydrate, Koffein, Nitrat
   { foods: ['chicken', 'rice', 'eggs', 'milk', 'steak', 'potatoes', 'tuna'], en: 'post-workout', de: 'nach dem Training' }, // Protein + Kohlenhydrate
   { foods: ['kiwi', 'cherries', 'chamomile', 'pumpkinseeds', 'almonds', 'milk'], en: 'before bed', de: 'vor dem Schlafen' }, // Schlaf + Casein über Nacht
@@ -528,13 +520,13 @@ const TIERS = [
 ];
 const MEALS = [
   { tag: 'breakfast', foods: ['eggs', 'oats', 'yogurt', 'berries', 'blueberries', 'banana', 'kiwi', 'coffee'], en: 'breakfast', de: 'Frühstück' },
-  { tag: 'lunch', foods: ['chicken', 'rice', 'salmon', 'avocado', 'greens', 'sweetpotato', 'broccoli', 'tuna', 'tomatoes'], en: 'lunch', de: 'Mittagessen' },
-  { tag: 'dinner', foods: ['steak', 'salmon', 'potatoes', 'sweetpotato', 'broccoli', 'greens', 'shrimp', 'beef', 'peppers', 'lamb', 'mackerel', 'asparagus', 'cauliflower'], en: 'dinner', de: 'Abendessen' },
+  { tag: 'lunch', foods: ['chicken', 'rice', 'salmon', 'avocado', 'greens', 'sweetpotato', 'tuna', 'tomatoes'], en: 'lunch', de: 'Mittagessen' },
+  { tag: 'dinner', foods: ['steak', 'salmon', 'potatoes', 'sweetpotato', 'greens', 'shrimp', 'beef', 'peppers', 'lamb', 'mackerel', 'asparagus', 'cauliflower'], en: 'dinner', de: 'Abendessen' },
   { tag: 'snack', foods: ['almonds', 'walnuts', 'nuts', 'dates', 'apples', 'cheese', 'olives', 'blueberries', 'cherries', 'mango', 'figs', 'grapes', 'pears', 'raspberries'], en: 'snacks', de: 'Snacks' },
 ];
 // passender Tausch: an derselben Stelle im Raster steht die gesunde Alternative
 const SWAPMAP = {
-  candy: ['berries', 'mango', 'cherries', 'dates', 'blueberries', 'grapes', 'raspberries', 'figs'], soda: ['greentea', 'water', 'coffee', 'milk'], beer: ['water', 'greentea', 'chamomile'],
+  candy: ['berries', 'mango', 'cherries', 'dates', 'blueberries', 'grapes', 'raspberries', 'figs'], soda: ['water', 'coffee', 'milk'], beer: ['water', 'chamomile'],
   fries: ['potatoes', 'sweetpotato'], donut: ['oats', 'yogurt', 'dates'], cookies: ['dates', 'walnuts', 'chocolate', 'almonds'],
   pancakes: ['oats', 'eggs', 'yogurt'], pizza: ['steak', 'salmon', 'chicken'], burger: ['steak', 'beef'],
   processed: ['nuts', 'almonds', 'walnuts', 'olives', 'cheese'],
@@ -546,27 +538,27 @@ const REALS = [
   { foods: ['honey', 'dates', 'banana', 'mango', 'berries', 'cherries', 'oranges', 'apples', 'blueberries', 'watermelon', 'figs', 'grapes', 'raspberries', 'pears'], en: 'real sugar', de: 'echter Zucker' },
   { foods: ['avocado', 'olives', 'oliveoil', 'butter', 'walnuts', 'almonds', 'salmon', 'nuts', 'coconut', 'mackerel'], en: 'real fats', de: 'echte Fette' },
   { foods: ['potatoes', 'sweetpotato', 'rice', 'oats', 'banana', 'lentils'], en: 'real carbs', de: 'echte Kohlenhydrate' },
-  { foods: ['water', 'greentea', 'coffee', 'milk', 'chamomile'], en: 'real drinks', de: 'echte Getränke' },
+  { foods: ['water', 'coffee', 'milk', 'chamomile'], en: 'real drinks', de: 'echte Getränke' },
 ];
 const RULES = {
   en: ['if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.'],
   de: ['Wenn es nicht verdirbt, iss es nicht.', 'Nur eine Zutat.', 'Kennt Oma es nicht, lass es weg.', 'Iss Lebensmittel, keine Produkte.', 'Hat es Fernsehwerbung, kauf es nicht.', 'Obst ist die Süßigkeit der Natur.', 'Protein zu jeder Mahlzeit.', 'Trink Wasser, keine Kalorien.'],
   foods: [
-    ['berries', 'tomatoes', 'greens', 'salmon', 'beef', 'broccoli', 'peppers', 'eggs'],
+    ['berries', 'tomatoes', 'greens', 'salmon', 'beef', 'peppers', 'eggs'],
     ['eggs', 'steak', 'potatoes', 'honey', 'rice', 'avocado', 'oranges', 'almonds'],
     ['butter', 'milk', 'eggs', 'potatoes', 'cheese', 'honey', 'oats', 'apples'],
-    ['eggs', 'steak', 'salmon', 'berries', 'potatoes', 'greens', 'broccoli'],
-    ['eggs', 'potatoes', 'carrots', 'beef', 'broccoli', 'lentils', 'apples'],
+    ['eggs', 'steak', 'salmon', 'berries', 'potatoes', 'greens'],
+    ['eggs', 'potatoes', 'carrots', 'beef', 'lentils', 'apples'],
     ['mango', 'berries', 'cherries', 'dates', 'banana', 'kiwi', 'oranges', 'blueberries', 'pomegranate', 'watermelon'],
     ['eggs', 'chicken', 'steak', 'salmon', 'yogurt', 'beef', 'tuna'],
-    ['water', 'greentea', 'coffee', 'chamomile'],
+    ['water', 'coffee', 'milk', 'chamomile'],
   ],
 };
 // typische Lebensmittel des Landes
 const COUNTRIES = [
   { flag: 'nl', foods: ['cheese', 'milk', 'yogurt', 'eggs', 'butter'], en: 'why are the Dutch so tall?', de: 'warum sind Niederländer so groß?' },
   { flag: 'it', foods: ['olives', 'oliveoil', 'tomatoes', 'sardines', 'oranges', 'cheese', 'garlic'], en: 'why do Italians live so long?', de: 'warum leben Italiener so lange?' },
-  { flag: 'jp', foods: ['rice', 'salmon', 'greentea', 'sweetpotato', 'oysters', 'eggs', 'tuna'], en: 'why are the Japanese so lean?', de: 'warum sind Japaner so schlank?' },
+  { flag: 'jp', foods: ['rice', 'salmon', 'sweetpotato', 'oysters', 'eggs', 'tuna'], en: 'why are the Japanese so lean?', de: 'warum sind Japaner so schlank?' },
   { flag: 'gr', foods: ['olives', 'oliveoil', 'yogurt', 'sardines', 'honey', 'tomatoes', 'cheese', 'figs', 'lamb', 'lemons'], en: 'why are Greeks so healthy?', de: 'warum sind Griechen so gesund?' },
   { flag: 'no', foods: ['salmon', 'sardines', 'eggs', 'milk', 'potatoes', 'mackerel'], en: 'why are Norwegians so strong?', de: 'warum sind Norweger so stark?' },
   { flag: 'es', foods: ['olives', 'oliveoil', 'tomatoes', 'sardines', 'oranges', 'eggs', 'shrimp', 'garlic'], en: 'why do Spaniards live so long?', de: 'warum leben Spanier so lange?' },
@@ -594,7 +586,7 @@ const COUNTRIES = [
   { flag: 'in', foods: ['rice', 'yogurt', 'lentils', 'banana', 'mango', 'milk', 'ginger'], en: 'what Indians ate for 3000 years', de: 'was Inder seit 3000 Jahren essen' },
   { flag: 'fr', foods: ['cheese', 'butter', 'oysters', 'steak', 'eggs', 'mussels'], en: 'why are the French so slim?', de: 'warum sind Franzosen so schlank?' },
   // Blue Zones: Regionen, in denen besonders viele Menschen sehr alt werden
-  { flag: 'jp', foods: ['sweetpotato', 'greentea', 'greens', 'rice', 'salmon', 'ginger'], en: 'why do Okinawans live so long?', de: 'warum leben Menschen auf Okinawa so lange?' },
+  { flag: 'jp', foods: ['sweetpotato', 'greens', 'rice', 'salmon', 'ginger'], en: 'why do Okinawans live so long?', de: 'warum leben Menschen auf Okinawa so lange?' },
   { flag: 'it', foods: ['cheese', 'milk', 'potatoes', 'tomatoes', 'oliveoil', 'lentils'], en: 'why do Sardinians live so long?', de: 'warum leben Sarden so lange?' },
   { flag: 'gr', foods: ['olives', 'oliveoil', 'honey', 'greens', 'potatoes', 'yogurt', 'lentils'], en: 'why do people on Ikaria live so long?', de: 'warum leben die Menschen auf Ikaria so lange?' },
   // traditionelle Küche – "so kochen Omas"
@@ -626,11 +618,11 @@ const ANCESTORS = [
 const EATLIKE = { en: ['eat like this…', '…to look like this'], de: ['iss so…', '…um so auszusehen'] };
 const NATURES = [
   { foods: ['mango', 'dates', 'berries', 'cherries', 'watermelon', 'honey', 'blueberries', 'pomegranate', 'figs', 'grapes', 'raspberries'], en: 'nature’s candy', de: 'Süßigkeiten der Natur' },
-  { foods: ['coffee', 'greentea', 'banana', 'dates', 'honey'], en: 'nature’s energy drink', de: 'Energy-Drink der Natur' },
+  { foods: ['coffee', 'banana', 'dates', 'honey'], en: 'nature’s energy drink', de: 'Energy-Drink der Natur' },
   { foods: ['eggs', 'milk', 'steak', 'beef', 'chicken', 'tuna'], en: 'nature’s protein shake', de: 'Proteinshake der Natur' },
   { foods: why('skin'), claim: 'skin', en: 'nature’s skincare', de: 'Hautpflege der Natur' },
   { foods: why('sleep'), claim: 'sleep', en: 'nature’s sleeping pill', de: 'Schlafmittel der Natur' },
-  { foods: ['eggs', 'greens', 'broccoli', 'sardines', 'oysters', 'salmon', 'mussels', 'mackerel'], en: 'nature’s multivitamin', de: 'Multivitamin der Natur' },
+  { foods: ['eggs', 'greens', 'sardines', 'oysters', 'salmon', 'mussels', 'mackerel'], en: 'nature’s multivitamin', de: 'Multivitamin der Natur' },
   { foods: ['beets', 'banana', 'dates', 'coffee', 'watermelon'], en: 'nature’s pre-workout', de: 'Pre-Workout der Natur' },
   { foods: why('gut'), claim: 'gut', en: 'nature’s probiotic', de: 'Probiotikum der Natur' },
 ];
@@ -639,14 +631,14 @@ const PLATE = [
   { foods: ['steak', 'beef', 'eggs', 'salmon', 'chicken', 'sardines', 'tuna', 'lamb', 'mackerel'], en: 'the perfect plate:\nprotein', de: 'der perfekte Teller:\nProtein' },
   { foods: ['butter', 'oliveoil', 'avocado', 'olives', 'cheese', 'walnuts'], en: 'healthy fats', de: 'gesunde Fette' },
   { foods: ['potatoes', 'sweetpotato', 'rice', 'banana', 'oats'], en: 'real carbs', de: 'echte Kohlenhydrate' },
-  { foods: ['broccoli', 'peppers', 'tomatoes', 'carrots', 'greens', 'blueberries', 'beets', 'cauliflower', 'asparagus', 'pumpkin', 'raspberries'], en: 'color', de: 'Farbe' },
+  { foods: ['peppers', 'tomatoes', 'carrots', 'greens', 'blueberries', 'beets', 'cauliflower', 'asparagus', 'pumpkin', 'raspberries'], en: 'color', de: 'Farbe' },
 ];
 // echtes Essen mit wenig Geld (Grundnahrungsmittel, keine Preise – die ändern sich)
 const BUDGET = [
   { foods: ['eggs', 'lentils', 'sardines', 'milk', 'yogurt'], en: 'real food on a budget:\ncheap protein', de: 'echtes Essen für wenig Geld:\ngünstiges Protein' },
   { foods: ['potatoes', 'oats', 'rice', 'banana'], en: 'cheap carbs', de: 'günstige Kohlenhydrate' },
   { foods: ['butter', 'eggs', 'sardines', 'cheese'], en: 'cheap fats', de: 'günstige Fette' },
-  { foods: ['carrots', 'apples', 'beets', 'greens', 'broccoli', 'oranges', 'onions', 'pumpkin'], en: 'cheap vitamins', de: 'günstige Vitamine' },
+  { foods: ['carrots', 'apples', 'beets', 'greens', 'oranges', 'onions', 'pumpkin'], en: 'cheap vitamins', de: 'günstige Vitamine' },
 ];
 // saisonal in Mitteleuropa
 const SEASONS = [
@@ -665,7 +657,7 @@ const UNDERRATED = [
 // „average European“ usw.: typisches Essen der Region/Tradition, dazu eine Statue. Nur positiv.
 const ORIGINS = [
   { foods: ['potatoes', 'cheese', 'butter', 'eggs', 'apples', 'milk', 'oats', 'pears', 'asparagus'], en: 'average European', de: 'der typische Europäer' },
-  { foods: ['rice', 'salmon', 'greentea', 'kimchi', 'tuna', 'sweetpotato', 'eggs', 'mushrooms', 'mackerel'], en: 'average Asian', de: 'der typische Asiate' },
+  { foods: ['rice', 'salmon', 'kimchi', 'tuna', 'sweetpotato', 'eggs', 'mushrooms', 'mackerel'], en: 'average Asian', de: 'der typische Asiate' },
   { foods: ['dates', 'olives', 'oliveoil', 'pomegranate', 'lentils', 'yogurt', 'honey', 'figs', 'lamb'], en: 'average Arab', de: 'der typische Araber' },
   { foods: ['sweetpotato', 'peppers', 'mango', 'banana', 'beef', 'tomatoes', 'nuts'], en: 'average African', de: 'der typische Afrikaner' },
   { foods: ['lentils', 'rice', 'ginger', 'garlic', 'yogurt', 'mango', 'milk', 'cauliflower', 'lemons'], en: 'average Indian', de: 'der typische Inder' },
@@ -678,7 +670,7 @@ const FAITHS = [
   { foods: ['salmon', 'eggs', 'honey', 'pomegranate', 'dates', 'olives', 'figs', 'grapes'], en: 'average Jewish diet', de: 'jüdische Küche' },
   { foods: ['lentils', 'rice', 'yogurt', 'milk', 'mango', 'ginger', 'banana', 'coconut', 'cauliflower'], en: 'average Hindu diet', de: 'so isst ein Hindu' },
   { foods: ['lentils', 'rice', 'yogurt', 'milk', 'butter', 'greens', 'cauliflower'], en: 'average Sikh diet', de: 'so isst ein Sikh' },
-  { foods: ['rice', 'greentea', 'greens', 'broccoli', 'lentils', 'mango', 'mushrooms'], en: 'average Buddhist diet', de: 'so isst ein Buddhist' },
+  { foods: ['rice', 'greens', 'lentils', 'mango', 'mushrooms'], en: 'average Buddhist diet', de: 'so isst ein Buddhist' },
 ];
 // „american apples vs european apples“: zwei Versionen desselben Essens, oben/unten
 const COMPARE = [
