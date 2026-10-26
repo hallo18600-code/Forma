@@ -566,6 +566,22 @@ const COUNTRIES = [
   { flag: 'vn', foods: ['rice', 'greens', 'chicken', 'eggs', 'mango', 'shrimp', 'ginger'], en: 'why are Vietnamese so slim?', de: 'warum sind Vietnamesen so schlank?' },
   { flag: 'in', foods: ['rice', 'yogurt', 'lentils', 'banana', 'mango', 'milk', 'ginger'], en: 'what Indians ate for 3000 years', de: 'was Inder seit 3000 Jahren essen' },
   { flag: 'fr', foods: ['cheese', 'butter', 'oysters', 'steak', 'eggs'], en: 'why are the French so slim?', de: 'warum sind Franzosen so schlank?' },
+  // Blue Zones: Regionen, in denen besonders viele Menschen sehr alt werden
+  { flag: 'jp', foods: ['sweetpotato', 'greentea', 'greens', 'rice', 'salmon', 'ginger'], en: 'why do Okinawans live so long?', de: 'warum leben Menschen auf Okinawa so lange?' },
+  { flag: 'it', foods: ['cheese', 'milk', 'potatoes', 'tomatoes', 'oliveoil', 'lentils'], en: 'why do Sardinians live so long?', de: 'warum leben Sarden so lange?' },
+  { flag: 'gr', foods: ['olives', 'oliveoil', 'honey', 'greens', 'potatoes', 'yogurt', 'lentils'], en: 'why do people on Ikaria live so long?', de: 'warum leben die Menschen auf Ikaria so lange?' },
+  // traditionelle Küche – "so kochen Omas"
+  { flag: 'de', foods: ['beef', 'potatoes', 'cheese', 'butter', 'eggs', 'milk', 'apples'], en: 'what Bavarian grandmas cook', de: 'so kochen bayerische Omas' },
+  { flag: 'hu', foods: ['peppers', 'beef', 'potatoes', 'eggs', 'garlic', 'tomatoes'], en: 'what Hungarian grandmas cook', de: 'so kochen ungarische Omas' },
+  { flag: 'ro', foods: ['cheese', 'yogurt', 'potatoes', 'eggs', 'walnuts', 'honey'], en: 'what Romanian grandmas cook', de: 'so kochen rumänische Omas' },
+  { flag: 'ua', foods: ['beets', 'potatoes', 'garlic', 'eggs', 'butter', 'honey'], en: 'what Ukrainian grandmas cook', de: 'so kochen ukrainische Omas' },
+  { flag: 'lt', foods: ['potatoes', 'beets', 'milk', 'cheese', 'eggs', 'berries'], en: 'what Lithuanian grandmas cook', de: 'so kochen litauische Omas' },
+  { flag: 'lv', foods: ['potatoes', 'milk', 'cheese', 'berries', 'eggs', 'oats'], en: 'what Latvian grandmas cook', de: 'so kochen lettische Omas' },
+  { flag: 'ee', foods: ['potatoes', 'salmon', 'milk', 'blueberries', 'eggs', 'oats'], en: 'what Estonians eat', de: 'was Esten essen' },
+  { flag: 'be', foods: ['potatoes', 'butter', 'cheese', 'eggs', 'beef', 'chocolate'], en: 'what Belgians eat', de: 'was Belgier essen' },
+  { flag: 'ng', foods: ['sweetpotato', 'peppers', 'tomatoes', 'beef', 'banana', 'eggs'], en: 'what Nigerians eat', de: 'was Nigerianer essen' },
+  { flag: 'id', foods: ['rice', 'chicken', 'eggs', 'peppers', 'banana', 'mango', 'ginger'], en: 'what Indonesians eat', de: 'was Indonesier essen' },
+  { flag: 'co', foods: ['avocado', 'potatoes', 'beef', 'eggs', 'banana', 'rice', 'mango'], en: 'what Colombians eat', de: 'was Kolumbianer essen' },
 ];
 const VS = {
   en: { bad: ['this is not healthy…', 'also this isn’t healthy…', 'this neither…'], good: 'but this is…' },
@@ -590,6 +606,34 @@ const NATURES = [
   { foods: ['eggs', 'greens', 'broccoli', 'sardines', 'oysters', 'salmon'], en: 'nature’s multivitamin', de: 'Multivitamin der Natur' },
   { foods: ['beets', 'banana', 'dates', 'coffee', 'watermelon'], en: 'nature’s pre-workout', de: 'Pre-Workout der Natur' },
   { foods: why('gut'), claim: 'gut', en: 'nature’s probiotic', de: 'Probiotikum der Natur' },
+];
+// „der perfekte Teller“: feste Reihenfolge, der erste Slide trägt die Überschrift
+const PLATE = [
+  { foods: ['steak', 'beef', 'eggs', 'salmon', 'chicken', 'sardines', 'tuna'], en: 'the perfect plate:\nprotein', de: 'der perfekte Teller:\nProtein' },
+  { foods: ['butter', 'oliveoil', 'avocado', 'olives', 'cheese', 'walnuts'], en: 'healthy fats', de: 'gesunde Fette' },
+  { foods: ['potatoes', 'sweetpotato', 'rice', 'banana', 'oats'], en: 'real carbs', de: 'echte Kohlenhydrate' },
+  { foods: ['broccoli', 'peppers', 'tomatoes', 'carrots', 'greens', 'blueberries', 'beets'], en: 'color', de: 'Farbe' },
+];
+// echtes Essen mit wenig Geld (Grundnahrungsmittel, keine Preise – die ändern sich)
+const BUDGET = [
+  { foods: ['eggs', 'lentils', 'sardines', 'milk', 'yogurt'], en: 'real food on a budget:\ncheap protein', de: 'echtes Essen für wenig Geld:\ngünstiges Protein' },
+  { foods: ['potatoes', 'oats', 'rice', 'banana'], en: 'cheap carbs', de: 'günstige Kohlenhydrate' },
+  { foods: ['butter', 'eggs', 'sardines', 'cheese'], en: 'cheap fats', de: 'günstige Fette' },
+  { foods: ['carrots', 'apples', 'beets', 'greens', 'broccoli', 'oranges'], en: 'cheap vitamins', de: 'günstige Vitamine' },
+];
+// saisonal in Mitteleuropa
+const SEASONS = [
+  { foods: ['greens', 'berries', 'carrots', 'potatoes', 'eggs'], en: 'eat with the seasons:\nspring', de: 'iss saisonal:\nFrühling' },
+  { foods: ['blueberries', 'cherries', 'tomatoes', 'peppers', 'watermelon', 'berries'], en: 'summer', de: 'Sommer' },
+  { foods: ['apples', 'beets', 'walnuts', 'potatoes', 'sweetpotato'], en: 'autumn', de: 'Herbst' },
+  { foods: ['oranges', 'kiwi', 'carrots', 'beets', 'apples', 'kimchi'], en: 'winter', de: 'Winter' },
+];
+// unterschätzt: Lebensmittel, die kaum einer isst, obwohl sie sehr nährstoffreich sind
+const UNDERRATED = [
+  { foods: ['sardines', 'oysters', 'eggs', 'lentils'], en: 'underrated protein', de: 'unterschätztes Protein' },
+  { foods: ['butter', 'olives', 'walnuts', 'sardines'], en: 'underrated fats', de: 'unterschätzte Fette' },
+  { foods: ['potatoes', 'beets', 'sweetpotato', 'oats'], en: 'underrated carbs', de: 'unterschätzte Kohlenhydrate' },
+  { foods: ['kimchi', 'oysters', 'pumpkinseeds', 'kiwi', 'beets'], en: 'underrated superfoods', de: 'unterschätzte Superfoods' },
 ];
 // „average European“ usw.: typisches Essen der Region/Tradition, dazu eine Statue. Nur positiv.
 const ORIGINS = [
@@ -653,6 +697,10 @@ const SERIES = {
   routine: { label: 'Timing', ex: 'pre-workout, post-workout, before bed', w: 1.5, niche: ['#gymtok', '#mealtiming'] },
   compare: { label: 'USA vs. Europa', ex: 'american apples vs european apples', w: 2.5, niche: null },
   duel: { label: 'Carbs vs. Carbs', ex: 'CARBS VS CARBS · PROTEIN VS PROTEIN', w: 2.5, niche: ['#junkfood', '#gymtok'] },
+  plate: { label: 'Perfekter Teller', ex: 'the perfect plate: 1. protein, 2. healthy fats', w: 1.5, niche: ['#realfood', '#mealprep'] },
+  budget: { label: 'Günstig & echt', ex: 'real food on a budget', w: 1.5, niche: ['#budgetmeals', '#realfood'] },
+  season: { label: 'Saisonal', ex: 'eat with the seasons: spring', w: 1.2, niche: ['#seasonal', '#realfood'] },
+  underrated: { label: 'Unterschätzt', ex: 'underrated protein, underrated fats', w: 2, niche: ['#realfood', '#nutrition'] },
   origin: { label: 'Herkunft', ex: 'average European, average Asian', w: 2, niche: ['#realfood', '#culture'] },
   faith: { label: 'Religion', ex: 'average Christian diet', w: 1.5, niche: ['#realfood', '#tradition'] },
 };
@@ -744,6 +792,16 @@ function drawFlag(ctx, code, x, y, w, h) {
     if (outline) { ctx.strokeStyle = fill; ctx.lineWidth = r * .16; ctx.stroke(); } else { ctx.fillStyle = fill; ctx.fill(); }
   };
   if (code === 'de') H3('#000000', '#DD0000', '#FFCE00');
+  if (code === 'hu') H3('#CE2939', '#FFFFFF', '#477050');
+  if (code === 'ro') V3('#002B7F', '#FCD116', '#CE1126');
+  if (code === 'ua') band(['#0057B7', '#FFD700'], false);
+  if (code === 'lt') H3('#FDB913', '#006A44', '#C1272D');
+  if (code === 'lv') band(['#9E3039', '#9E3039', '#FFFFFF', '#9E3039', '#9E3039'], false);
+  if (code === 'ee') H3('#0072CE', '#000000', '#FFFFFF');
+  if (code === 'be') V3('#000000', '#FDDA24', '#EF3340');
+  if (code === 'ng') V3('#008751', '#FFFFFF', '#008751');
+  if (code === 'id') band(['#FF0000', '#FFFFFF'], false);
+  if (code === 'co') band(['#FCD116', '#FCD116', '#003893', '#CE1126'], false);
   if (code === 'at') H3('#ED2939', '#FFFFFF', '#ED2939');
   if (code === 'pl') band(['#FFFFFF', '#DC143C'], false);
   if (code === 'bg') H3('#FFFFFF', '#00966E', '#D62612');
@@ -1107,6 +1165,19 @@ function planSlides(series, n, lang) {
   }
   if (series === 'countries') {
     pickFresh(COUNTRIES, c => c.flag).slice(0, n).forEach(c => specs.push({ pred: idsPred(c.foods), hook: c[lang], mood: 'strong', flag: c.flag, key: c.flag }));
+  }
+  if (series === 'plate' || series === 'budget' || series === 'season') {
+    const L = series === 'plate' ? PLATE : series === 'budget' ? BUDGET : SEASONS;
+    // bei weniger Slides: Überschrift des ersten Slides trotzdem behalten
+    const pick = n >= L.length ? L : [L[0], ...shuffle(L.slice(1)).slice(0, n - 1).sort((a, b) => L.indexOf(a) - L.indexOf(b))];
+    pick.forEach((x, k) => {
+      let hook = k === 0 ? x[lang] : x[lang].replace(/^.*\n/, '');
+      if (series === 'plate') hook = hook.replace(/([^\n]*)$/, `${k + 1}. $1`);   // Nummer nach Position, nie mit Lücke
+      specs.push({ pred: idsPred(x.foods), hook, mood: 'strong', key: series + k });
+    });
+  }
+  if (series === 'underrated') {
+    pickFresh(UNDERRATED, x => 'ur' + x.en).slice(0, n).forEach(x => specs.push({ pred: idsPred(x.foods), hook: x[lang], mood: 'strong', key: 'ur' + x.en }));
   }
   if (series === 'origin' || series === 'faith') {
     pickFresh(series === 'origin' ? ORIGINS : FAITHS, x => 'grp' + x.en).slice(0, n).forEach(x => specs.push({ pred: idsPred(x.foods), hook: x[lang], mood: 'strong', key: 'grp' + x.en }));
