@@ -235,13 +235,13 @@ function hautProblem(st,a,c){
       P.pm.push("BHA"); P.am.push("Niacinamid"); P.photo=true; P.note="Erste Ergebnisse nach 6–12 Wochen. Sonst zum Hautarzt.";
     } else if(art==="Tiefe, schmerzhafte Knoten"){
       P.items=[tip(null,"Zum Hautarzt","Knoten können Narben hinterlassen und brauchen oft verschreibungspflichtige Mittel.",{must:1}),
-        aze("10–20 %","Als Unterstützung bis zum Termin."), tip(null,"Nie ausdrücken","Das kann Narben hinterlassen.",{must:1})];
+        aze("10 %","Als Unterstützung bis zum Termin."), tip(null,"Nie ausdrücken","Das kann Narben hinterlassen.",{must:1})];
       P.pm.push("Azelainsäure");
     } else if(art==="Rote/braune Male"){
-      P.items=[lsf("UV-Strahlung macht Flecken dunkler."), aze("10–20 %","Kann dunkle Flecken aufhellen."), nia("morgens","Kann neuen Flecken vorbeugen.")];
+      P.items=[lsf("UV-Strahlung macht Flecken dunkler."), aze("10 %","Kann dunkle Flecken aufhellen."), nia("morgens","Kann neuen Flecken vorbeugen.")];
       P.am.push("Niacinamid"); P.pm.push("Azelainsäure"); P.note="Dunkle Flecken verblassen meist in 3–6 Monaten.";
     } else {
-      P.items=[aze(sens?"10 %":"10–20 %","Hemmt Bakterien und Entzündungen."),
+      P.items=[aze("10 %","Kann Unreinheiten sichtbar verringern."),
         tip("Zink punktuell","Zinksalbe nur auf entzündete Pickel","Flächig verstopft sie Poren.",{product:"zink"}),
         tip(null,"Nicht ausdrücken","Das kann dunkle Flecken hinterlassen.")];
       P.pm.push("Azelainsäure"); P.spot.push("Zink auf Pickel"); P.note="Nach 8–12 Wochen nicht besser: Hautarzt.";
@@ -254,9 +254,9 @@ function hautProblem(st,a,c){
     const rot=a.rot||"Brennt / spannt schnell";
     if(rot==="Wangen & Nase, oft mit Pickelchen"){
       P.spf="Mineral-LSF"; P.wash="Waschmilch"; P.cream="Panthenol-Creme";
-      P.items=[tip("Azelainsäure",`Azelainsäure 10–15 % abends${slow?", jeden 2. Tag":""}`,"Kann Rötungen und kleine Pickel verringern.",{product:"azelain"}),
+      P.items=[tip(null,"Zum Hautarzt","Dauerhafte Rötung mit Pickelchen an Wangen und Nase sollte ärztlich abgeklärt werden.",{must:1}),
         tip(null,"Hitze, Alkohol, Scharfes meiden","Das sind häufige Auslöser für Rötungen."), lsf("Sonne ist der häufigste Auslöser.")];
-      P.pm.push("Azelainsäure"); P.note="Rötung bleibt: Hautarzt.";
+      P.note="Bis zum Termin nur milde Produkte ohne Duft.";
     } else if(rot==="Schuppig an Nase / Brauen"){
       P.cream="Creme ohne Öle";
       P.items=[tip("Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche drauf","Mit Zink oder Piroctone Olamine, 3 Minuten einwirken lassen, dann abwaschen."),
@@ -278,7 +278,7 @@ function hautProblem(st,a,c){
     P.spf="getönter LSF";
     P.items=[tip("Getönter LSF","Getönter LSF 50, mittags nachcremen","Schützt zusätzlich vor sichtbarem Licht.",{product:"spf"}),
       sens?nia("morgens","Kann neuen Flecken vorbeugen."):tip("Vitamin C","Vitamin-C-Serum morgens","Kann Pigmentflecken aufhellen.",{product:"vitc"}),
-      aze("10–20 %","Bremst die Bildung von Pigmentflecken.")];
+      aze("10 %","Kann Pigmentflecken mildern.")];
     P.am.push(sens?"Niacinamid":"Vitamin C"); P.pm.push("Azelainsäure"); P.note="Wenn ein Fleck wächst oder sich verändert: zum Hautarzt.";
   } else if(st==="Wirkt stumpf"){
     P.items=[sens?nia("morgens","Gleicht den Teint aus."):tip("Vitamin C","Vitamin-C-Serum morgens","Lässt die Haut frischer aussehen.",{product:"vitc"}),
@@ -510,7 +510,7 @@ function muskelTips(a,lvl,g,fatGoal,prot,lifts){
     tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wiederholungen oder eine schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche eine Wiederholung mehr.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
     tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:"1,6–2,2 g pro kg Körpergewicht gelten als ideal für den Muskelaufbau.",Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
     tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher","Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
-    tip("Kreatin","3–5 g Kreatin täglich","Gut untersucht für mehr Kraft. Fehlt Protein im Essen, hilft Whey.",Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
+    tip("Kreatin","3–5 g Kreatin täglich","Erhöht die Leistung bei kurzem, intensivem Krafttraining. Fehlt Protein im Essen, hilft Whey.",Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
   ];
 }
 function aussehenAdvice(a){

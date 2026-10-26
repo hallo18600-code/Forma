@@ -17,7 +17,7 @@ const SLOTS = [
 const BASE_FOODS = [
   { id:"skyr", type:"food", name:"Skyr Natur", brand:"Arla", emoji:"🥛", kcal:63, protein:11, carbs:4, fat:0.2, sugar:3.5, processed:false },
   { id:"hafer", type:"food", name:"Haferflocken", brand:"Kölln", emoji:"🥣", kcal:372, protein:14, carbs:59, fat:7, sugar:1.1, processed:false },
-  { id:"banane", type:"food", name:"Banane", brand:"Natur", emoji:"🍌", kcal:89, protein:1.1, carbs:23, fat:0.3, sugar:12, processed:false },
+  { id:"banane", type:"food", name:"Banane", brand:"Natur", emoji:"🍌", kcal:90, protein:1.1, carbs:20, fat:0.2, sugar:17, processed:false },
   { id:"ei", type:"food", name:"Ei", brand:"Frisch", emoji:"🥚", kcal:143, protein:13, carbs:1, fat:10, sugar:0.4, processed:false },
   { id:"huhn", type:"food", name:"Hähnchenbrust", brand:"Frisch", emoji:"🍗", kcal:110, protein:23, carbs:0, fat:1.5, sugar:0, processed:false },
   { id:"reis", type:"food", name:"Reis gekocht", brand:"Küche", emoji:"🍚", kcal:130, protein:2.7, carbs:28, fat:0.3, sugar:0.1, processed:false },
@@ -34,14 +34,14 @@ joghurt|Naturjoghurt 3,5 %|Natur|🥛|66,4,5,3.5,5,0,0,0.1,2.3
 kaese|Gouda|Käse|🧀|356,25,0,28,0,0,0,1.8,18
 thunfisch|Thunfisch Dose|Natur|🐟|116,26,0,1,0,0,0,1,0.3
 tofu|Tofu Natur|Pflanzlich|🫘|120,13,2,7,0.5,0,1,0,1
-linsen|Linsen gekocht|Küche|🫘|116,9,20,0.4,1,0,8,0,0.1
+linsen|Linsen gekocht|Küche|🫘|105,9,12,0.4,1,0,8,0,0.1
 kartoffel|Kartoffeln gekocht|Küche|🥔|77,2,17,0.1,0.8,0,2,0,0
 nudeln|Nudeln gekocht|Küche|🍝|158,6,31,0.9,1,0,2,0,0.2
-apfel|Apfel|Natur|🍎|52,0.3,14,0.2,10,0,2.4,0,0
-beeren|Blaubeeren|Natur|🫐|57,0.7,14,0.3,10,0,2.4,0,0
-brokkoli|Brokkoli|Natur|🥦|34,2.8,7,0.4,1.7,0,2.6,0,0.1
-avocado|Avocado|Natur|🥑|160,2,9,15,0.7,0,7,0,2.1
-mandeln|Mandeln|Natur|🌰|579,21,22,50,4,0,12,0,3.8
+apfel|Apfel|Natur|🍎|52,0.3,11.4,0.2,10,0,2.4,0,0
+beeren|Blaubeeren|Natur|🫐|57,0.7,12,0.3,10,0,2.4,0,0
+brokkoli|Brokkoli|Natur|🥦|34,2.8,4.4,0.4,1.7,0,2.6,0,0.1
+avocado|Avocado|Natur|🥑|160,2,1.8,15,0.7,0,6.7,0,2.1
+mandeln|Mandeln|Natur|🌰|579,21,9,50,4,0,12.5,0,3.8
 erdnuss|Erdnussbutter|Glas|🥜|600,25,12,50,6,1,6,0.8,10
 rind|Rinderhack|Frisch|🥩|220,19,0,16,0,0,0,0.2,7
 haferdrink|Haferdrink|Pflanzlich|🥛|46,1,7,1.5,4,1,0.8,0.1,0.2
@@ -78,7 +78,7 @@ Bratkartoffeln;;130;2.5;18;5.5;1;2;;;
 Kartoffelpüree;Püree|Kartoffelbrei;85;2;14;2.5;1.5;1.5;;;
 Pommes frites;Pommes|Fritten;280;3.5;38;13;0.5;3;150;;1
 Couscous gekocht;Couscous;115;4;22;0.5;0.5;1.5;;;
-Quinoa gekocht;Quinoa;120;4.5;21;1.9;1;2.8;;;
+Quinoa gekocht;Quinoa;120;4.4;18.5;1.9;0.9;2.8;;;
 Pfannkuchen;Eierkuchen|Palatschinken|Crêpe;190;6;25;7;5;1;80;;
 Pizza Margherita;Pizza;250;11;31;9;3;2;300;;1
 Pizza Salami;;270;11;30;12;3;2;300;;1
@@ -178,7 +178,7 @@ Haselnüsse;Haselnuss;640;14;10;60;4;10;;;
 Cashewkerne;Cashews;570;18;30;42;6;3;;;
 Erdnüsse;Erdnuss;600;26;8;49;4;8;;;
 Pistazien;;570;21;17;45;8;10;;;
-Sonnenblumenkerne;;580;21;19;49;3;9;;;
+Sonnenblumenkerne;;584;21;11;51;2.6;8.6;;;
 Chiasamen;Chia;490;17;8;31;0;34;;;
 Leinsamen;;500;18;2;42;1;27;;;
 Zartbitterschokolade;Bitterschokolade|Edelbitter;550;7;40;38;30;10;;;1
@@ -219,8 +219,8 @@ Proteinriegel;Proteinbar;350;30;35;10;5;5;45;;1
 Proteinpulver;Whey|Whey Protein|Proteinshake|Eiweißpulver|Proteinpulver Shake;380;75;8;5;5;0;30;;1
 Butter;Süßrahmbutter|Sauerrahmbutter|Markenbutter;741;0.7;0.6;83;0.6;0;;;
 Haferdrink;Hafermilch|Oat Drink;46;1;7;1.5;4;0.8;200;;
-Blaubeeren;Heidelbeeren|Heidelbeere|Blaubeere;57;0.7;14;0.3;10;2.4;;;
-Brokkoli;Broccoli|Brokkoliröschen;34;2.8;7;0.4;1.7;2.6;;;
+Blaubeeren;Heidelbeeren|Heidelbeere|Blaubeere;57;0.7;12;0.3;10;2.4;;;
+Brokkoli;Broccoli|Brokkoliröschen;34;2.8;4.4;0.4;1.7;2.6;;;
 Kartoffelchips;Chips|Crisps;536;6;50;34;0.5;4;;;1
 Energy Drink;Red Bull|Energydrink|Monster Energy;45;0;11;0;11;0;250;;1
 Vollkornbrötchen;Körnerbrötchen|Dinkelbrötchen|Mehrkornbrötchen;250;10;42;3.5;2;6;70;;
@@ -261,7 +261,7 @@ Zitrone;Zitronen;35;0.7;3;0.6;2.5;1;100;;
 Grapefruit;Pampelmuse;40;0.6;8;0.1;7;1.5;300;;
 Pflaumen;Pflaume|Zwetschgen|Zwetschge;47;0.6;10;0.2;9;1.6;35;;
 Aprikose;Aprikosen|Marille;43;0.9;9;0.1;8;1.5;40;;
-Granatapfel;;83;1.7;19;1.2;14;4;250;;
+Granatapfel;;83;1.7;14.7;1.2;13.7;4;250;;
 Feigen;Feige;70;1;16;0.3;16;2.5;50;;
 Apfelmus;Kompott;75;0.3;18;0.2;16;1.5;;;
 Rotkohl;Rotkraut|Blaukraut;60;1.5;11;0.5;9;2.5;;;
@@ -274,7 +274,7 @@ Radieschen;;16;1;2;0.1;2;1.5;10;;
 Rucola;Rauke;25;2.6;2;0.7;2;1.6;;;
 Feldsalat;;21;2;1;0.4;0.7;1.5;;;
 Knoblauch;Knoblauchzehe;140;6;28;0.1;1;2;4;;
-Bulgur gekocht;Bulgur;83;3;19;0.2;0.1;4.5;;;
+Bulgur gekocht;Bulgur;83;3.1;14;0.2;0.1;4.5;;;
 Kokosöl;Kokosfett;860;0;0;99;0;0;;;
 Leinöl;;884;0;0;100;0;0;;;
 Schmand;;240;2.5;3.5;24;3.5;0;;;
@@ -303,7 +303,7 @@ Eistee;Ice Tea;28;0;6.8;0;6.5;0;330;;1
 Limonade;Limo|Zitronenlimonade;40;0;10;0;10;0;330;;1
 Sekt;Prosecco|Champagner;85;0.2;3;0;3;0;;;
 Radler;Alster;35;0.3;6;0;5.5;0;500;;
-Aperol Spritz;Spritz|Hugo;110;0;12;0;10;0;;;
+Aperol Spritz;Spritz|Hugo;90;0;8;0;7;0;;;
 Schnaps;Wodka|Korn|Obstler|Whisky|Gin|Rum;230;0;0;0;0;0;;;`;
 (function(){
   // Format: Name;Alias|Alias;kcal;Eiweiss;KH;Fett;Zucker;Ballaststoffe;Stueck-g;Scheibe-g;verarbeitet
@@ -343,7 +343,7 @@ CARE.push(
   {id:"cleanser",type:"care",name:"Mildes Reinigungsgel",emoji:"🧼",skin:["fettig","unrein","normal","sensibel"],fragrance:false,alcohol:false,actives:[]},
   {id:"shampoo",type:"care",name:"Mildes Shampoo",emoji:"🚿",skin:["normal","sensibel","trocken"],fragrance:false,alcohol:false,actives:[]},
   {id:"duft",type:"care",name:"Duschgel parfümiert",emoji:"🧴",skin:["normal"],fragrance:true,alcohol:false,actives:[]},
-  {id:"azelain",type:"care",name:"Azelainsäure 10–20 %",emoji:"🧪",skin:["fettig","unrein","sensibel","normal","trocken"],fragrance:false,alcohol:false,actives:["Azelainsäure"]},
+  {id:"azelain",type:"care",name:"Azelainsäure 10 %",emoji:"🧪",skin:["fettig","unrein","sensibel","normal","trocken"],fragrance:false,alcohol:false,actives:["Azelainsäure"]},
   {id:"bha",type:"care",name:"BHA 2 % (Salicylsäure)",emoji:"🫧",skin:["fettig","unrein","normal"],fragrance:false,alcohol:false,actives:["Salicylsäure"]},
   {id:"zink",type:"care",name:"Zinksalbe (nur punktuell)",emoji:"⚪",skin:["fettig","unrein","normal","sensibel","trocken"],fragrance:false,alcohol:false,actives:["Zinkoxid"]},
   {id:"retinol",type:"care",name:"Retinol 0,2–0,3 %",emoji:"🌙",skin:["normal","trocken","fettig"],fragrance:false,alcohol:false,actives:["Retinol"]},

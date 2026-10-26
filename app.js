@@ -203,13 +203,13 @@ function insight(){
 // Alle hier sind gute, verbreitete Supplements, deshalb hohe Grundwerte. Je Ziel und Profil wird angepasst.
 // [Muskeln, Abnehmen, Haut & Look, Energie], dazu kurze Pros/Cons (keine Heilversprechen)
 const SUP_RATE={
-  crea:{g:[95,84,74,82], good:["Mehr Kraft und Leistung im Training","Eines der am besten untersuchten Supplements","Günstig und einfach: 3–5 g am Tag"], bad:["Wirkt nur bei täglicher Einnahme"]},
+  crea:{g:[95,84,74,82], good:["Erhöht die Leistung bei kurzem, intensivem Krafttraining","Eines der am besten untersuchten Supplements","Günstig und einfach: 3–5 g am Tag"], bad:["Wirkt nur bei täglicher Einnahme"]},
   whey:{g:[92,87,72,76], good:["Schnell viel Eiweiß, wenig Kalorien","Hilft, den Protein-Richtwert zu schaffen"], bad:["Echtes Essen bleibt die beste Eiweißquelle"]},
-  d3:{g:[86,84,88,91], good:["Fehlt vielen bei wenig Sonne","Oktober bis März besonders sinnvoll","Trägt zu Knochen, Muskeln und Immunsystem bei"], bad:["Dosis nicht selbst hochdrehen"]},
-  o3:{g:[88,88,95,90], good:["Wichtige Fettsäuren (EPA/DHA), die oft fehlen","Trägt zu normaler Herz- und Gehirnfunktion bei","Beliebt für Haut und Look"], bad:[]},
-  mg:{g:[86,80,78,88], good:["Trägt zu normaler Muskel- und Nervenfunktion bei","Beim Sport schnell verbraucht","Abends beliebt zum Runterkommen"], bad:["Wirkung auf Schlaf kaum belegt"]},
-  b12:{g:[76,76,78,82], good:["Trägt zu Energie und Nerven bei","Für Veganer ein Muss"], bad:[]},
-  col:{g:[76,72,86,70], good:["Beliebt für Haut, Haare und Gelenke","Zusätzliches Eiweiß"], bad:["Nutzen noch nicht sicher belegt","Schlaf, LSF und Essen wirken stärker"]},
+  d3:{g:[86,84,88,91], good:["Fehlt vielen bei wenig Sonne","Oktober bis März besonders sinnvoll","Trägt zu normalen Knochen, Muskelfunktion und Immunsystem bei"], bad:["Dosis nicht selbst hochdrehen"]},
+  o3:{g:[88,88,95,90], good:["Wichtige Fettsäuren (EPA/DHA), die oft fehlen","Trägt zu normaler Herz- und Gehirnfunktion bei"], bad:[]},
+  mg:{g:[86,80,78,88], good:["Trägt zu normaler Muskel- und Nervenfunktion bei","Trägt zur Verringerung von Müdigkeit bei"], bad:["Wirkung auf Schlaf kaum belegt"]},
+  b12:{g:[76,76,78,82], good:["Trägt zu normalem Energiestoffwechsel und Nervensystem bei","Bei veganer Ernährung empfohlen"], bad:[]},
+  col:{g:[76,72,86,70], good:["Zusätzliches Eiweiß"], bad:["Nutzen noch nicht sicher belegt","Schlaf, LSF und Essen wirken stärker"]},
   // Sonstige aus der Datenbank (Zink, Multivitamin, Vitamin C …)
   gen:{g:[76,76,80,80], good:["Kann Lücken in der Ernährung schließen"], bad:["Ersetzt keine ausgewogene Ernährung","Nicht über der Packungsdosis einnehmen"]}
 };
@@ -232,9 +232,9 @@ function supScore(id,goal){
   }
   if(id==="d3"&&winter){ sc+=3; why="Gerade jetzt (Oktober bis März) gibt es wenig Sonne."; }
   if(id==="o3"){ if(hasFish){ sc-=8; bad.unshift("Du isst schon oft Fisch"); } else { sc+=2; why="Du isst wenig Fisch."; } }
-  if(id==="mg"&&((day().sleep!=null&&day().sleep<6.5)||(sa.ein&&sa.ein!=="Geht schnell"))){ sc+=3; why="Viele nehmen es abends, wenn der Schlaf hakt."; }
+  if(id==="mg"&&((day().sleep!=null&&day().sleep<6.5)||(sa.ein&&sa.ein!=="Geht schnell"))){ sc+=3; why="Viele nehmen es abends."; }
   if(id==="b12"){ if(vegan){ sc=97; why="Vegan: B12 steckt fast nur in tierischen Lebensmitteln."; } else bad.push("Mit Fleisch, Ei und Milch meist genug"); }
-  if(id==="col"&&g==="skin") why="Beliebt für Haut und Look.";
+  if(id==="col"&&g==="skin") why="Viele nutzen es für die Haut. Ein Nutzen ist nicht sicher belegt.";
   return {score:Math.max(40,Math.min(99,Math.round(sc))), good, bad, notes, why:why||R.good[0]+"."};
 }
 function supAllGoals(id){ const o={}; ["muscle","lose","skin","energy"].forEach(g=>o[g]=supScore(id,g).score); return o; }
