@@ -373,40 +373,7 @@ function renderDash(){
 }
 
 function dashSheet(id){ return ""; }
-// Anbieter-Angaben für Impressum und Datenschutz (hier zentral pflegen)
-// strasse/ort: KEINE Wohnadresse eintragen. Sobald es eine Adresse von einem Impressum-Service gibt,
-// hier eintragen (z. B. strasse:"c/o Firma XY, Musterstr. 1", ort:"12345 Stadt"). Leere Felder werden nicht angezeigt.
-const ANBIETER={ name:"Simon Spieß", strasse:"", ort:"", land:"Deutschland", mail:"health.maxxing10@gmail.com" };
-const anbieterHtml=()=>[ANBIETER.name,ANBIETER.strasse,ANBIETER.ort,ANBIETER.land].filter(Boolean).join("<br>");
-// Impressum (Angaben nach § 5 DDG)
-function impressumSheet(){
-  const li=(t,d)=>`<div class="li"><b>${t}</b><div class="sub">${d}</div></div>`;
-  return `<h2>Impressum</h2>
-    ${li("Anbieter",anbieterHtml())}
-    ${li("Kontakt","E-Mail: "+ANBIETER.mail)}
-    ${li("Verantwortlich für den Inhalt",ANBIETER.name+(ANBIETER.strasse?", Anschrift wie oben":""))}
-    ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org). Angaben ohne Gewähr, sie können Fehler enthalten. Maßgeblich ist die Packung.")}
-    ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte für gesunde Erwachsene und keine medizinische Beratung. Sie ersetzen keinen Arzt. Nicht geeignet bei Essstörungen, in Schwangerschaft oder Stillzeit.")}
-    ${li("Bewertungen","Die Scores sind eine Einschätzung der App nach eigenen Regeln. Sie sind kein Test und kein Urteil über einzelne Marken.")}
-    <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
-}
-// Datenschutzerklärung in kurzen Punkten (Apple verlangt den Text in der App)
-function privacySheet(){
-  const li=(t,d)=>`<div class="li"><b>${t}</b><div class="sub">${d}</div></div>`;
-  return `<h2>Datenschutz</h2>
-    ${li("Verantwortlich",anbieterHtml()+"<br>E-Mail: "+ANBIETER.mail)}
-    ${li("Nur auf deinem Gerät","Profil, Essen, Training, Gewicht und Routine speichert die App nur auf diesem Gerät. Kein Konto, kein eigener Server, keine Werbung, kein Tracking, keine Analyse-Tools.")}
-    ${li("Gesundheitsdaten","Angaben wie Gewicht, Essen oder Haut verlassen dein Gerät nicht. Wir haben keinen Zugriff darauf.")}
-    ${li("Barcode-Suche","Fehlt ein Produkt in der eingebauten Liste, fragt die App die Barcode-Nummer bei Open Food Facts (openfoodfacts.org, Frankreich) ab. Gesendet wird nur die Nummer und, wie bei jeder Internet-Anfrage, deine IP-Adresse. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.")}
-    ${li("Kamera","Nur zum Scannen von Barcodes. Bilder werden nicht gespeichert oder gesendet.")}
-    ${li("Sprache","Nur wenn du „Sprechen“ tippst. Die Erkennung übernimmt dein Browser bzw. Handy; dessen Anbieter kann die Aufnahme dafür verarbeiten.")}
-    ${li("Hosting","Die Web-Version liegt bei GitHub Pages (GitHub Inc., USA). Beim Laden speichert GitHub technisch nötige Daten wie die IP-Adresse kurz in Server-Protokollen. Hat dein Gerät keinen eingebauten Barcode-Scanner, lädt die App beim ersten Scannen eine Scan-Bibliothek nach (falls nicht mitgeliefert: von cdn.jsdelivr.net, dabei wird die IP-Adresse übertragen). Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO (sicherer Betrieb).")}
-    ${li("Exportieren und löschen","Profil → Daten exportieren. Profil → Alles löschen entfernt alles sofort und endgültig.")}
-    ${li("Deine Rechte","Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragung und Widerspruch. Schreib dafür an die E-Mail oben. Du kannst dich auch beim Bayerischen Landesamt für Datenschutzaufsicht (lda.bayern.de) beschweren.")}
-    ${li("Alter","Die App ist nur für Erwachsene ab 18 Jahren gedacht.")}
-    <p class="sub">Stand: Oktober 2026</p>
-    <div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
-}
+// Impressum + Datenschutz stehen in recht.js (gleicher Text wie auf den Webseiten)
 // Sicherheitsabfrage vor "Alles löschen"
 function resetSheet(){
   const ok=(ui.resetTxt||"").trim().toUpperCase()==="LÖSCHEN";

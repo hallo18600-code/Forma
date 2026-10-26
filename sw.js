@@ -2,7 +2,7 @@
 // C = App-Dateien (Version bei jeder Änderung an index.html/JS hochzählen).
 // D = Produktdatenbank (bleibt über App-Updates erhalten, wird im Hintergrund aktualisiert).
 const C="forma-v86", D="forma-data",
-  A=["./","index.html","styles.css","data.js","foods-search.js","portionen.js","texterkennung.js","scanner.js","tagebuch.js","coach.js","onboarding.js","training.js","verlauf.js","profil.js","figur.js","uebungen.js","bewertung.js","i18n.js","app.js","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
+  A=["./","index.html","styles.css","data.js","foods-search.js","portionen.js","texterkennung.js","scanner.js","tagebuch.js","coach.js","onboarding.js","training.js","verlauf.js","profil.js","figur.js","uebungen.js","bewertung.js","recht.js","i18n.js","app.js","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting()));});
 // Alte Versionen löschen. foods.json aus einer alten Version vorher übernehmen (kein neuer 9-MB-Download).
 async function keepFoods(old){ const d=await caches.open(D); if(await d.match("foods.json")) return; for(const k of old){ const h=await (await caches.open(k)).match("foods.json"); if(h){ await d.put("foods.json",h); return; } } }

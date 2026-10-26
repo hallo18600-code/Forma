@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Datenschutz – Health Maxxing</title>
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <!-- Öffentliche Seite für die Links in App Store und Google Play. Text kommt aus recht.js (gleich wie in der App). -->
+  <style>
+    :root{color-scheme:light dark;--bg:#f3f4f6;--card:#fff;--tx:#111;--sub:#555;--line:#e5e7eb}
+    @media (prefers-color-scheme:dark){:root{--bg:#0b0b0c;--card:#17181a;--tx:#f2f2f2;--sub:#a3a3a3;--line:#2a2b2e}}
+    body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}
+    main{max-width:640px;margin:0 auto;padding:24px 16px 48px}
+    .card{background:var(--card);border-radius:16px;padding:8px 20px 16px}
+    h2{font-size:26px;margin:16px 0 8px}
+    .li{padding:12px 0;border-bottom:1px solid var(--line)} .li:last-of-type{border-bottom:0}
+    .sub{color:var(--sub);font-size:15px;margin-top:2px}
+    nav{margin-top:20px;font-size:15px} a{color:inherit}
+  </style>
+</head>
+<body>
+<main>
+  <div class="card" id="text"></div>
+  <nav><a href="impressum.html">Impressum</a> · <a href="./">Zur App</a></nav>
+</main>
+<script src="recht.js"></script>
+<script>document.getElementById("text").innerHTML=privacySheet(false);</script>
+</body>
+</html>
