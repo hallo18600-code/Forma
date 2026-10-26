@@ -209,7 +209,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
 </div>
 
 <script>
-const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true, "kind": "statue"}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true, "kind": "statue"}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true, "kind": "statue"}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true, "kind": "statue"}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true, "kind": "statue"}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true, "kind": "statue"}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp", "kind": "statue"}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp", "kind": "statue"}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true, "kind": "statue"}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true, "kind": "statue"}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true, "kind": "statue"}, {"id": "yeschad", "name": "Yes Chad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/yeschad.webp", "thumb": "fig/yeschad_t.webp", "kind": "drawing"}, {"id": "sie", "name": "Sie", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/sie.webp", "thumb": "fig/sie_t.webp", "kind": "drawing"}, {"id": "manga", "name": "Manga", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/manga.webp", "thumb": "fig/manga_t.webp", "kind": "drawing"}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp", "kind": "statue"}, {"id": "heulen", "name": "Heulen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/heulen.webp", "thumb": "fig/heulen_t.webp", "kind": "drawing"}, {"id": "faust", "name": "Faust", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/faust.webp", "thumb": "fig/faust_t.webp", "kind": "drawing"}, {"id": "muede", "name": "Müde", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/muede.webp", "thumb": "fig/muede_t.webp", "kind": "drawing"}, {"id": "weinen", "name": "Weinen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/weinen.webp", "thumb": "fig/weinen_t.webp", "kind": "drawing"}, {"id": "kind", "name": "Kind", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/kind.webp", "thumb": "fig/kind_t.webp", "kind": "drawing"}, {"id": "avg_eu", "name": "Europäer", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/avg_eu.webp", "thumb": "fig/avg_eu_t.webp", "kind": "drawing", "only": "group"}, {"id": "avg_asia", "name": "Asiate", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/avg_asia.webp", "thumb": "fig/avg_asia_t.webp", "kind": "drawing", "only": "group"}, {"id": "avg_arab", "name": "Araber", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/avg_arab.webp", "thumb": "fig/avg_arab_t.webp", "kind": "drawing", "only": "group"}, {"id": "avg_africa", "name": "Afrikaner", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/avg_africa.webp", "thumb": "fig/avg_africa_t.webp", "kind": "drawing", "only": "group"}, {"id": "avg_india", "name": "Inder", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/avg_india.webp", "thumb": "fig/avg_india_t.webp", "kind": "drawing", "only": "group"}, {"id": "avg_latino", "name": "Latino", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/avg_latino.webp", "thumb": "fig/avg_latino_t.webp", "kind": "drawing", "only": "group"}, {"id": "rel_christian", "name": "Christ", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/rel_christian.webp", "thumb": "fig/rel_christian_t.webp", "kind": "drawing", "only": "group"}, {"id": "rel_muslim", "name": "Muslim", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/rel_muslim.webp", "thumb": "fig/rel_muslim_t.webp", "kind": "drawing", "only": "group"}, {"id": "rel_jewish", "name": "Jude", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/rel_jewish.webp", "thumb": "fig/rel_jewish_t.webp", "kind": "drawing", "only": "group"}, {"id": "rel_hindu", "name": "Hindu", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/rel_hindu.webp", "thumb": "fig/rel_hindu_t.webp", "kind": "drawing", "only": "group"}, {"id": "rel_sikh", "name": "Sikh", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/rel_sikh.webp", "thumb": "fig/rel_sikh_t.webp", "kind": "drawing", "only": "group"}, {"id": "rel_buddhist", "name": "Buddhist", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/rel_buddhist.webp", "thumb": "fig/rel_buddhist_t.webp", "kind": "drawing", "only": "group"}];
+const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true, "kind": "statue"}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true, "kind": "statue"}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true, "kind": "statue"}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true, "kind": "statue"}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true, "kind": "statue"}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true, "kind": "statue"}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp", "kind": "statue"}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp", "kind": "statue"}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true, "kind": "statue"}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true, "kind": "statue"}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true, "kind": "statue"}, {"id": "schatten", "name": "Schatten", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/schatten.webp", "thumb": "fig/schatten_t.webp", "physique": true, "kind": "statue"}, {"id": "zeus", "name": "Zeus", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/zeus.webp", "thumb": "fig/zeus_t.webp", "physique": true, "kind": "statue"}, {"id": "david", "name": "David", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/david.webp", "thumb": "fig/david_t.webp", "physique": true, "kind": "statue"}, {"id": "yeschad", "name": "Yes Chad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/yeschad.webp", "thumb": "fig/yeschad_t.webp", "kind": "drawing"}, {"id": "sie", "name": "Sie", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/sie.webp", "thumb": "fig/sie_t.webp", "kind": "drawing"}, {"id": "manga", "name": "Manga", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/manga.webp", "thumb": "fig/manga_t.webp", "kind": "drawing"}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp", "kind": "statue"}, {"id": "heulen", "name": "Heulen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/heulen.webp", "thumb": "fig/heulen_t.webp", "kind": "drawing"}, {"id": "faust", "name": "Faust", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/faust.webp", "thumb": "fig/faust_t.webp", "kind": "drawing"}, {"id": "muede", "name": "Müde", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/muede.webp", "thumb": "fig/muede_t.webp", "kind": "drawing"}, {"id": "weinen", "name": "Weinen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/weinen.webp", "thumb": "fig/weinen_t.webp", "kind": "drawing"}, {"id": "kind", "name": "Kind", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/kind.webp", "thumb": "fig/kind_t.webp", "kind": "drawing"}];
 
 /* ---------- Lebensmittel ---------- */
 const F = (id, emoji, color, en, de, tags) => ({ id, emoji, color, en, de, tags });
@@ -591,23 +591,23 @@ const NATURES = [
   { foods: ['beets', 'banana', 'dates', 'coffee', 'watermelon'], en: 'nature’s pre-workout', de: 'Pre-Workout der Natur' },
   { foods: why('gut'), claim: 'gut', en: 'nature’s probiotic', de: 'Probiotikum der Natur' },
 ];
-// „average European“ usw.: eigene Chad-Zeichnung + typisches Essen der Region/Tradition. Nur positiv.
+// „average European“ usw.: typisches Essen der Region/Tradition, dazu eine Statue. Nur positiv.
 const ORIGINS = [
-  { fig: 'avg_eu', foods: ['potatoes', 'cheese', 'butter', 'eggs', 'apples', 'milk', 'oats'], en: 'average European', de: 'der typische Europäer' },
-  { fig: 'avg_asia', foods: ['rice', 'salmon', 'greentea', 'kimchi', 'tuna', 'sweetpotato', 'eggs'], en: 'average Asian', de: 'der typische Asiate' },
-  { fig: 'avg_arab', foods: ['dates', 'olives', 'oliveoil', 'pomegranate', 'lentils', 'yogurt', 'honey'], en: 'average Arab', de: 'der typische Araber' },
-  { fig: 'avg_africa', foods: ['sweetpotato', 'peppers', 'mango', 'banana', 'beef', 'tomatoes', 'nuts'], en: 'average African', de: 'der typische Afrikaner' },
-  { fig: 'avg_india', foods: ['lentils', 'rice', 'ginger', 'garlic', 'yogurt', 'mango', 'milk'], en: 'average Indian', de: 'der typische Inder' },
-  { fig: 'avg_latino', foods: ['avocado', 'peppers', 'tomatoes', 'beef', 'eggs', 'mango'], en: 'average Latino', de: 'der typische Latino' },
+  { foods: ['potatoes', 'cheese', 'butter', 'eggs', 'apples', 'milk', 'oats'], en: 'average European', de: 'der typische Europäer' },
+  { foods: ['rice', 'salmon', 'greentea', 'kimchi', 'tuna', 'sweetpotato', 'eggs'], en: 'average Asian', de: 'der typische Asiate' },
+  { foods: ['dates', 'olives', 'oliveoil', 'pomegranate', 'lentils', 'yogurt', 'honey'], en: 'average Arab', de: 'der typische Araber' },
+  { foods: ['sweetpotato', 'peppers', 'mango', 'banana', 'beef', 'tomatoes', 'nuts'], en: 'average African', de: 'der typische Afrikaner' },
+  { foods: ['lentils', 'rice', 'ginger', 'garlic', 'yogurt', 'mango', 'milk'], en: 'average Indian', de: 'der typische Inder' },
+  { foods: ['avocado', 'peppers', 'tomatoes', 'beef', 'eggs', 'mango'], en: 'average Latino', de: 'der typische Latino' },
 ];
 // Religion: nur Essen, das zur Tradition passt (z. B. kein Schwein/Alkohol, vegetarisch bei Hindu/Sikh/Buddhist)
 const FAITHS = [
-  { fig: 'rel_christian', foods: ['salmon', 'sardines', 'eggs', 'honey', 'olives', 'milk'], en: 'average Christian diet', de: 'so isst ein Christ' },
-  { fig: 'rel_muslim', foods: ['dates', 'honey', 'yogurt', 'olives', 'pomegranate', 'lentils', 'beef'], en: 'average Muslim diet', de: 'so isst ein Muslim' },
-  { fig: 'rel_jewish', foods: ['salmon', 'eggs', 'honey', 'pomegranate', 'dates', 'olives'], en: 'average Jewish diet', de: 'jüdische Küche' },
-  { fig: 'rel_hindu', foods: ['lentils', 'rice', 'yogurt', 'milk', 'mango', 'ginger', 'banana'], en: 'average Hindu diet', de: 'so isst ein Hindu' },
-  { fig: 'rel_sikh', foods: ['lentils', 'rice', 'yogurt', 'milk', 'butter', 'greens'], en: 'average Sikh diet', de: 'so isst ein Sikh' },
-  { fig: 'rel_buddhist', foods: ['rice', 'greentea', 'greens', 'broccoli', 'lentils', 'mango'], en: 'average Buddhist diet', de: 'so isst ein Buddhist' },
+  { foods: ['salmon', 'sardines', 'eggs', 'honey', 'olives', 'milk'], en: 'average Christian diet', de: 'so isst ein Christ' },
+  { foods: ['dates', 'honey', 'yogurt', 'olives', 'pomegranate', 'lentils', 'beef'], en: 'average Muslim diet', de: 'so isst ein Muslim' },
+  { foods: ['salmon', 'eggs', 'honey', 'pomegranate', 'dates', 'olives'], en: 'average Jewish diet', de: 'jüdische Küche' },
+  { foods: ['lentils', 'rice', 'yogurt', 'milk', 'mango', 'ginger', 'banana'], en: 'average Hindu diet', de: 'so isst ein Hindu' },
+  { foods: ['lentils', 'rice', 'yogurt', 'milk', 'butter', 'greens'], en: 'average Sikh diet', de: 'so isst ein Sikh' },
+  { foods: ['rice', 'greentea', 'greens', 'broccoli', 'lentils', 'mango'], en: 'average Buddhist diet', de: 'so isst ein Buddhist' },
 ];
 // „american apples vs european apples“: zwei Versionen desselben Essens, oben/unten
 const COMPARE = [
@@ -1054,7 +1054,7 @@ const kindOf = f => KINDS[f.kind] ? f.kind : 'statue';
 function pickKind(needStrong, needSad) {
   if (!needStrong && !needSad) return null;
   const allowed = needStrong && needSad ? { drawing: .3, statue: .7 } : needStrong ? { statue: .55, photo: .45 } : { statue: 1, drawing: 1 };
-  const has = (k, mood) => figures.some(f => !f.only && kindOf(f) === k && (f.mood || 'strong') === mood);
+  const has = (k, mood) => figures.some(f => kindOf(f) === k && (f.mood || 'strong') === mood);
   let opts = Object.entries(allowed).filter(([k]) => (!needStrong || has(k, 'strong')) && (!needSad || has(k, 'sad')));
   if (!opts.length) return null;
   const k = weighted(opts.map(([k, w]) => [k, k === recent.kind ? w * .5 : w]));
@@ -1062,7 +1062,7 @@ function pickKind(needStrong, needSad) {
 }
 function nextFigure(mood, physique, kind) {
   // eine Figur pro Post; über mehrere Posts reihum, die zuletzt benutzten kommen zuletzt dran
-  let pool = figures.filter(f => !f.only && (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind));
+  let pool = figures.filter(f => (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind));
   if (physique && kind === 'statue' && pool.some(f => f.physique)) pool = pool.filter(f => f.physique);
   if (!pool.length) return null;
   const key = mood + '-' + (kind || 'all');
@@ -1109,7 +1109,7 @@ function planSlides(series, n, lang) {
     pickFresh(COUNTRIES, c => c.flag).slice(0, n).forEach(c => specs.push({ pred: idsPred(c.foods), hook: c[lang], mood: 'strong', flag: c.flag, key: c.flag }));
   }
   if (series === 'origin' || series === 'faith') {
-    pickFresh(series === 'origin' ? ORIGINS : FAITHS, x => x.fig).slice(0, n).forEach(x => specs.push({ pred: idsPred(x.foods), hook: x[lang], mood: 'strong', figId: x.fig, key: x.fig }));
+    pickFresh(series === 'origin' ? ORIGINS : FAITHS, x => 'grp' + x.en).slice(0, n).forEach(x => specs.push({ pred: idsPred(x.foods), hook: x[lang], mood: 'strong', key: 'grp' + x.en }));
   }
   if (series === 'god') {
     const gs = pickFresh(GOD.map((x, i) => ({ ...x, i })), x => 'god' + x.i);  // jedes Paar mit anderem Text
@@ -1175,8 +1175,7 @@ function planPost(series, n, lang) {
   const specs = planSlides(series, n, lang);
   const duel = specs.some(s => s.mood === 'duel');
   const needStrong = specs.some(s => s.mood === 'strong' || s.mood === 'duel'), needSad = specs.some(s => s.mood === 'sad' || s.mood === 'duel');
-  const ownFigs = specs.length && specs.every(s => s.figId);
-  const kind = ownFigs ? null : pickKind(needStrong, needSad);
+  const kind = pickKind(needStrong, needSad);
   const fig = { strong: needStrong && kind ? nextFigure('strong', duel || specs.some(s => s.big), kind) : null,
     sad: needSad && kind ? nextFigure('sad', false, kind) : null };
   const base = makeStyle();  // gleiche Statuen-Größe/-Spiegelung im ganzen Video
@@ -1194,7 +1193,7 @@ function planPost(series, n, lang) {
     kind: 'grid', layout: sp.layout || 'grid', hook: sp.hook, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags,
     style: { ...makeStyle(), figScale: base.figScale, flip: base.flip, figDrop: base.figDrop },
     items: itemsFor(sp),
-    figure: sp.figId ? figures.find(f => f.id === sp.figId) || null : sp.mood === 'duel' ? fig.strong : sp.mood === 'none' ? null : fig[sp.mood] || null,
+    figure: sp.mood === 'duel' ? fig.strong : sp.mood === 'none' ? null : fig[sp.mood] || null,
     figure2: sp.mood === 'duel' ? fig.sad : null,
     niche: sp.niche,
   }));
