@@ -16,6 +16,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Figtree:wght@400;500;600;700;800&display=swap">
 <style>
+/* TikTok Sans (TikToks eigene Schrift, Open Font License) – liegt im Ordner fonts/ */
+@font-face { font-family: 'TikTok Sans'; font-weight: 700; font-display: swap; src: url(fonts/tiktok-sans-latin-700-normal.woff2) format('woff2'); }
+@font-face { font-family: 'TikTok Sans'; font-weight: 800; font-display: swap; src: url(fonts/tiktok-sans-latin-800-normal.woff2) format('woff2'); }
+@font-face { font-family: 'TikTok Sans'; font-weight: 900; font-display: swap; src: url(fonts/tiktok-sans-latin-900-normal.woff2) format('woff2'); }
 /* Layout: eine Spalte wie eine App. Oben die Slideshow, darunter ein großer Knopf, alles andere eingeklappt. */
 :root {
   --bg: #0b0d0c;
@@ -173,7 +177,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
         <p><b>Fehlt für die aktuelle Slideshow.</b> Tippe auf ein Essen, um ein Foto dafür hinzuzufügen.</p>
         <div class="foods" id="missingFoods"></div>
       </div>
-      <p class="note" id="ownNote">Über 150 Fotos sind schon eingebaut. Eigene Fotos kommen hier dazu, werden mitgemischt und bleiben auf diesem Gerät gespeichert.</p>
+      <p class="note" id="ownNote">Über 850 Fotos sind schon eingebaut. Eigene Fotos kommen hier dazu, werden mitgemischt und bleiben auf diesem Gerät gespeichert.</p>
       <div class="grid-ph" id="foodGrid"></div>
       <p class="note">Unter jedem Foto steht, was darauf ist. Stimmt es nicht, wähle das richtige Essen aus.</p>
       <details id="dAll" style="background:var(--bg)">
@@ -202,6 +206,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
       <div class="opt"><span>Slides pro Post</span><div class="seg" id="sCount"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
       <div class="opt"><span>Sprache auf den Slides</span><div class="seg" id="sLang"><button type="button" data-v="en">English</button><button type="button" data-v="de">Deutsch</button></div></div>
       <div class="opt"><span>Auflösung</span><div class="seg" id="sRes"><button type="button" data-v="hd">HD 1080 × 1440</button><button type="button" data-v="4k">4K 2160 × 2880</button></div></div>
+      <div class="opt"><span>Schrift auf den Slides</span><div class="seg" id="sFont"><button type="button" data-v="tiktok">TikTok Sans</button><button type="button" data-v="figtree">Figtree (alt)</button></div></div>
       <label class="check"><input type="checkbox" id="sGray"> Figuren schwarz-weiß</label>
       <p class="note">TikTok rechnet Bilder beim Hochladen kleiner. HD reicht meistens, 4K ist etwas schärfer, dauert aber länger.</p>
     </div>
@@ -291,6 +296,12 @@ const FOODS = Object.fromEntries([
   F('chips','🥔','#e0b04a','potato chips','Chips',['junk','F']),
   F('nuggets','🍗','#c98a3a','chicken nuggets','Chicken Nuggets',['junk','F']),
   F('beer','🍺','#d9a23a','beer','Bier',['junk','F']),
+  // „sieht gesund aus, ist es aber nicht“
+  F('granola','🥣','#c49a5a','granola','Knuspermüsli',['junk','F','fake']),
+  F('juice','🧃','#f2a33a','fruit juice','Fruchtsaft',['junk','F','fake']),
+  F('cerealbar','🍫','#a8763e','cereal bars','Müsliriegel',['junk','F','fake']),
+  F('cereal','🥣','#e0b04a','breakfast cereal','Frühstücksflocken',['junk','F','fake']),
+  F('ricecakes','🍘','#e8dcc0','rice cakes','Reiswaffeln',['junk','F','fake']),
   // Vergleichsbilder (nur für „USA vs. Europa“)
   F('apple_us','🍎','#c8243c','apples (USA / supermarket)','Äpfel (USA / Supermarkt)',['cmp']),
   F('apple_eu','🍎','#a8462c','apples (Europe / farm)','Äpfel (Europa / Bauernhof)',['cmp']),
@@ -540,6 +551,7 @@ const SWAPMAP = {
   pancakes: ['oats', 'eggs', 'yogurt'], pizza: ['steak', 'salmon', 'chicken'], burger: ['steak', 'beef'],
   processed: ['nuts', 'almonds', 'walnuts', 'olives', 'cheese'],
   chips: ['nuts', 'almonds', 'potatoes', 'sweetpotato'], coldcuts: ['steak', 'beef', 'chicken'], nuggets: ['chicken'],
+  granola: ['oats', 'yogurt', 'berries'], juice: ['oranges', 'water'], cerealbar: ['nuts', 'dates', 'almonds'], cereal: ['oats', 'eggs', 'yogurt'], ricecakes: ['potatoes', 'rice', 'sweetpotato'],
 };
 const SWAP = { en: ['swap this…', 'for this…', 'and this…', 'for this…'], de: ['tausch das…', 'gegen das…', 'und das…', 'gegen das…'] };
 const REALS = [
@@ -707,7 +719,40 @@ const DUELS = [
   { id: 'snacks', en: 'snacks', de: 'snacks', bad: ['chips', 'candy', 'cookies'], good: ['nuts', 'almonds', 'walnuts', 'olives', 'cheese', 'dates', 'apples'] },
   { id: 'breakfast', en: 'breakfast', de: 'frühstück', bad: ['pancakes', 'donut', 'cookies'], good: ['eggs', 'yogurt', 'oats', 'berries'] },
 ];
+// Kurze Gründe für die neuen Einzelbild-Formate (max. ~6 Wörter, nur Nährstoff-Fakten, keine Heilversprechen)
+const SHORTWHY = {
+  skin: { salmon: ['omega-3 calms inflammation', 'Omega-3 bremst Entzündungen'], tomatoes: ['lycopene: less sun redness', 'Lycopin: weniger Sonnenrötung'], carrots: ['beta-carotene: warmer skin tone', 'Beta-Carotin: wärmerer Hautton'], sweetpotato: ['loaded with beta-carotene', 'voller Beta-Carotin'], peppers: ['more vitamin C than oranges', 'mehr Vitamin C als Orangen'], kiwi: ['vitamin C builds collagen', 'Vitamin C für Kollagen'], avocado: ['vitamin E + healthy fats', 'Vitamin E + gute Fette'] },
+  sleep: { kiwi: ['2 kiwis, 1 hour before bed', '2 Kiwis, 1 Std. vorm Schlafen'], cherries: ['natural melatonin', 'natürliches Melatonin'], pumpkinseeds: ['magnesium + tryptophan', 'Magnesium + Tryptophan'], almonds: ['magnesium + melatonin', 'Magnesium + Melatonin'], salmon: ['omega-3 + vitamin D', 'Omega-3 + Vitamin D'], chamomile: ['apigenin calms you down', 'Apigenin beruhigt'] },
+  energy: { oats: ['slow carbs, no sugar crash', 'langsame Carbs, kein Crash'], sweetpotato: ['slow carbs', 'langsame Kohlenhydrate'], beef: ['iron + B12', 'Eisen + B12'], steak: ['iron + B12', 'Eisen + B12'], eggs: ['B12 + protein', 'B12 + Protein'], lentils: ['iron + fiber', 'Eisen + Ballaststoffe'], banana: ['fast fuel before training', 'schnelle Energie vorm Training'], mussels: ['huge amounts of B12 + iron', 'extrem viel B12 + Eisen'] },
+  testo: { oysters: ['more zinc than any other food', 'mehr Zink als jedes andere Essen'], beef: ['zinc + saturated fat', 'Zink + gesättigte Fette'], steak: ['zinc + saturated fat', 'Zink + gesättigte Fette'], eggs: ['cholesterol + vitamin D', 'Cholesterin + Vitamin D'], pumpkinseeds: ['zinc + magnesium', 'Zink + Magnesium'], salmon: ['vitamin D', 'Vitamin D'], sardines: ['vitamin D + omega-3', 'Vitamin D + Omega-3'], lamb: ['loaded with zinc', 'viel Zink'], mackerel: ['vitamin D', 'Vitamin D'] },
+  focus: { eggs: ['choline for memory', 'Cholin fürs Gedächtnis'], salmon: ['DHA for your brain', 'DHA fürs Gehirn'], sardines: ['DHA for your brain', 'DHA fürs Gehirn'], walnuts: ['omega-3 (ALA)', 'Omega-3 (ALA)'], blueberries: ['better memory in studies', 'Studien: besseres Gedächtnis'], coffee: ['caffeine: sharper + faster', 'Koffein: wacher + schneller'], chocolate: ['cocoa flavanols', 'Kakao-Flavanole'], mackerel: ['DHA for your brain', 'DHA fürs Gehirn'] },
+  hair: { eggs: ['biotin + protein', 'Biotin + Protein'], oysters: ['tons of zinc', 'sehr viel Zink'], beef: ['iron + zinc', 'Eisen + Zink'], steak: ['iron + zinc', 'Eisen + Zink'], salmon: ['omega-3 + vitamin D', 'Omega-3 + Vitamin D'], pumpkinseeds: ['zinc', 'Zink'], sardines: ['omega-3 + protein', 'Omega-3 + Protein'] },
+  gut: { yogurt: ['live cultures', 'lebende Kulturen'], kimchi: ['fermented: more gut diversity', 'fermentiert: mehr Darmvielfalt'], kiwi: ['better digestion in studies', 'Studie: bessere Verdauung'], oats: ['beta-glucan feeds good bacteria', 'Beta-Glucan füttert gute Bakterien'], lentils: ['loads of fiber', 'viele Ballaststoffe'], apples: ['pectin: a prebiotic', 'Pektin: ein Präbiotikum'], garlic: ['inulin: a prebiotic', 'Inulin: ein Präbiotikum'], onions: ['inulin: a prebiotic', 'Inulin: ein Präbiotikum'], asparagus: ['inulin: a prebiotic', 'Inulin: ein Präbiotikum'], raspberries: ['one of the most fibrous berries', 'eine der faserreichsten Beeren'] },
+  mood: { salmon: ['omega-3 for your mood', 'Omega-3 für die Stimmung'], sardines: ['omega-3 + vitamin D', 'Omega-3 + Vitamin D'], chocolate: ['linked to better mood', 'Studie: bessere Stimmung'], walnuts: ['better mood scores in a study', 'Studie: bessere Laune'], yogurt: ['gut-brain axis', 'Darm-Hirn-Achse'], blueberries: ['better mood in a study', 'Studie: bessere Laune'], mackerel: ['omega-3 + vitamin D', 'Omega-3 + Vitamin D'] },
+  calm: { chamomile: ['apigenin calms you down', 'Apigenin beruhigt'], chocolate: ['lots of magnesium', 'viel Magnesium'], pumpkinseeds: ['huge amounts of magnesium', 'sehr viel Magnesium'], almonds: ['magnesium', 'Magnesium'], greens: ['spinach: lots of magnesium', 'Spinat: viel Magnesium'], salmon: ['omega-3', 'Omega-3'] },
+  immune: { peppers: ['more vitamin C than oranges', 'mehr Vitamin C als Orangen'], kiwi: ['loads of vitamin C', 'sehr viel Vitamin C'], oranges: ['vitamin C', 'Vitamin C'], garlic: ['allicin: fewer colds in a study', 'Allicin: Studie: seltener erkältet'], ginger: ['gingerol: anti-inflammatory', 'Gingerol: entzündungshemmend'], kimchi: ['probiotics for your gut', 'Probiotika für den Darm'], oysters: ['zinc for immune cells', 'Zink für Immunzellen'], lemons: ['vitamin C', 'Vitamin C'] },
+  pump: { beets: ['nitrate → more blood flow', 'Nitrat → mehr Durchblutung'], greens: ['spinach: loads of nitrate', 'Spinat: viel Nitrat'], watermelon: ['citrulline → nitric oxide', 'Citrullin → Stickstoffmonoxid'], pomegranate: ['better blood flow in a study', 'Studie: bessere Durchblutung'], chocolate: ['cocoa widens blood vessels', 'Kakao weitet die Gefäße'], garlic: ['boosts nitric oxide', 'fördert Stickstoffmonoxid'] },
+  eyes: { greens: ['top source of lutein', 'Spitzenreiter bei Lutein'], eggs: ['lutein from the yolk', 'Lutein aus dem Eigelb'], carrots: ['vitamin A for your eyes', 'Vitamin A fürs Sehen'], sweetpotato: ['loads of vitamin A', 'sehr viel Vitamin A'], salmon: ['DHA for the retina', 'DHA für die Netzhaut'], peppers: ['zeaxanthin', 'Zeaxanthin'], pumpkin: ['loads of vitamin A', 'sehr viel Vitamin A'] },
+  strong: { steak: ['protein + natural creatine', 'Protein + natürliches Kreatin'], beef: ['protein + natural creatine', 'Protein + natürliches Kreatin'], chicken: ['~30 g protein per 100 g', '~30 g Protein pro 100 g'], eggs: ['complete protein', 'vollständiges Protein'], tuna: ['~25 g protein per 100 g', '~25 g Protein pro 100 g'], salmon: ['protein + creatine', 'Protein + Kreatin'], milk: ['whey + casein', 'Whey + Casein'], lamb: ['protein + natural creatine', 'Protein + natürliches Kreatin'] },
+};
+// „Problem → Essen“
+const PROBLEMS = [
+  { id: 'energy', en: 'always tired?', de: 'immer müde?' }, { id: 'skin', en: 'bad skin?', de: 'unreine Haut?' },
+  { id: 'sleep', en: 'can’t fall asleep?', de: 'kannst nicht einschlafen?' }, { id: 'calm', en: 'always stressed?', de: 'immer gestresst?' },
+  { id: 'focus', en: 'brain fog?', de: 'Kopf wie im Nebel?' }, { id: 'hair', en: 'thin hair?', de: 'dünne Haare?' },
+  { id: 'gut', en: 'always bloated?', de: 'ständig Blähbauch?' }, { id: 'mood', en: 'always in a bad mood?', de: 'ständig schlechte Laune?' },
+  { id: 'immune', en: 'always sick?', de: 'ständig krank?' }, { id: 'pump', en: 'no pump in the gym?', de: 'kein Pump im Gym?' },
+  { id: 'testo', en: 'low testosterone?', de: 'wenig Testosteron?' }, { id: 'strong', en: 'not building muscle?', de: 'baust keine Muskeln auf?' },
+];
+// „sieht gesund aus, ist es aber nicht“
+const LOOKSGOOD = {
+  hook: { en: ['foods that look healthy but aren’t', '“healthy” foods that aren’t', 'stop calling these healthy'], de: ['Essen, das gesund aussieht – es aber nicht ist', '„gesunde“ Lebensmittel, die es nicht sind', 'hör auf, das gesund zu nennen'] },
+  foods: { granola: ['loaded with added sugar + oil', 'viel zugesetzter Zucker + Öl'], juice: ['the sugar without the fiber', 'der Zucker ohne die Ballaststoffe'],
+    cerealbar: ['mostly sugar + syrup', 'meist Zucker + Sirup'], cereal: ['refined starch + added sugar', 'Stärke + zugesetzter Zucker'], ricecakes: ['spikes your blood sugar fast', 'lässt den Blutzucker schnell steigen'] },
+};
 const SERIES = {
+  looksgood: { label: 'Sieht gesund aus', ex: 'foods that look healthy but aren’t', w: 3, niche: ['#nutritionmyths', '#realfood'], min: 2 },
+  problem: { label: 'Problem → Essen', ex: 'always tired? → mussels', w: 3, niche: ['#healthtips', '#realfood'] },
   questions: { label: 'Fragen', ex: 'why am I so happy?', w: 4, niche: null },
   real: { label: 'Real', ex: 'real protein, real sugar', w: 2, niche: ['#realfood', '#wholefoods'] },
   vs: { label: 'Ungesund vs. gesund', ex: 'this is not healthy… but this is…', w: 2, niche: ['#junkfood', '#realfood'] },
@@ -750,11 +795,18 @@ function shade(hex, amt) {
   const f = v => Math.max(0, Math.min(255, Math.round(amt >= 0 ? v + (255 - v) * amt : v * (1 + amt))));
   return `rgb(${c.map(f).join(',')})`;
 }
+// fast gleiche Lebensmittel nie direkt hintereinander (Steak + Rindfleisch wirkt doppelt)
+const TWINS = [['steak', 'beef', 'lamb'], ['salmon', 'mackerel'], ['sardines', 'mackerel'], ['berries', 'raspberries'], ['nuts', 'almonds', 'walnuts'], ['oysters', 'mussels'], ['garlic', 'onions']];
+const noTwins = ids => ids.filter((id, i) => !ids.slice(0, i).some(o => TWINS.some(g => g.includes(o) && g.includes(id))));
+const hasPhoto = id => [...photos, ...library].some(p => p.food === id && p.src);
+let sizes = {};   // Pixelmaße der eingebauten Fotos (lib/sizes.json)
+// Für Vollbild-Slides: hochkante, große Fotos zuerst (werden nicht unscharf hochgezogen)
+const heroScore = p => { const s = sizes[p.id.replace(/^lib\//, '')]; if (!s) return p.builtin ? 1 : 2.2; const [w, h] = s; return Math.min(h / 1440, w / 1080) * (h >= w ? 1.25 : 1); };
 const pexels = f => `https://www.pexels.com/search/${encodeURIComponent(f.en)}/?orientation=square`;
 
 /* ---------- Zustand ---------- */
 let W = 1080, H = 1440;
-const DEFAULTS = { series: 'random', count: '4', lang: 'en', res: '4k', gray: false };
+const DEFAULTS = { series: 'random', count: '4', lang: 'en', res: '4k', gray: false, font: 'tiktok' };
 const S = Object.assign({}, DEFAULTS, load('hm2-settings', {}));
 if (load('hm2-settings-v', 0) < 2) { Object.assign(S, { count: '4', res: '4k', gray: false }); save('hm2-settings', S); save('hm2-settings-v', 2); }
 let recent = load('hm2-recent', { series: [], hooks: [], q: [] });
@@ -942,7 +994,10 @@ function drawFigure(ctx, fig, st, top) {
   ctx.drawImage(im, sx, sy, sw, sh, x, y, tw, th);
   ctx.restore();
 }
-const capFont = s => `800 ${s}px Figtree, "Helvetica Neue", Arial, sans-serif`;
+// Schrift auf den Slides: TikTok Sans (wie TikToks eigener Text) oder Figtree
+const FONTFAM = () => S.font === 'figtree' ? 'Figtree' : '"TikTok Sans", Figtree';
+const capFont = s => `800 ${s}px ${FONTFAM()}, "Helvetica Neue", Arial, sans-serif`;
+const subFont = s => `700 ${s}px ${FONTFAM()}, "Helvetica Neue", Arial, sans-serif`;
 function wrapAt(ctx, text, max) {
   const out = []; let line = '';
   for (const w of text.split(/\s+/)) { const t = line ? line + ' ' + w : w; if (ctx.measureText(t).width > max && line) { out.push(line); line = w; } else line = t; }
@@ -1055,7 +1110,34 @@ function renderDuel(ctx, sl) {
   strokeText(ctx, text, W / 2, H / 2, size);
   ctx.restore();
 }
+// Vollbild: ein großes Foto, Text in der Mitte (Nummer / Frage, Titel, kurzer Grund)
+function renderHero(ctx, sl) {
+  const st = sl.style, t = sl.t || { title: sl.hook };
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  drawPhotoCell(ctx, sl.items[0], 0, 0, W, H, { z: Math.min(1.06, st.zoom[0].z), fx: st.zoom[0].fx, fy: .5 });
+  applyGrade(ctx, st.grade);
+  // leichte Abdunklung nur in der Mitte, damit der Text immer lesbar ist
+  const g = ctx.createLinearGradient(0, H * .22, 0, H * .78);
+  g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(.5, 'rgba(0,0,0,.34)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const rows = [];
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const fit = (text, font, size, max) => { ctx.font = font(size); while (ctx.measureText(text).width > max && size > W * .03) { size *= .94; ctx.font = font(size); } return size; };
+  const serif = s => `700 ${s}px Cinzel, Georgia, serif`;
+  if (t.num) rows.push({ text: t.num, font: serif, size: fit(t.num, serif, W * .2, W * .8), gap: .95 });
+  if (t.top) { ctx.font = capFont(W * .07); const ls = wrap(ctx, t.top, W * .84); ls.forEach(l => rows.push({ text: l, font: capFont, size: W * .07, gap: 1.12 })); }
+  if (t.title) rows.push({ text: t.title, font: capFont, size: fit(t.title, capFont, W * (t.top ? .1 : .115), W * .88), gap: 1.15 });
+  if (t.sub) { ctx.font = subFont(W * .052); wrap(ctx, t.sub, W * .8).forEach(l => rows.push({ text: l, font: subFont, size: W * .052, gap: 1.2, sub: true })); }
+  const hgt = rows.reduce((a, r) => a + r.size * r.gap, 0);
+  let y = H * .5 - hgt / 2;
+  rows.forEach((r, i) => {
+    if (r.sub && !rows[i - 1].sub) y += W * .012;
+    y += r.size * r.gap / 2; ctx.font = r.font(r.size); strokeText(ctx, r.text, W / 2, y, r.size); y += r.size * r.gap / 2;
+  });
+  ctx.restore();
+}
 function renderGrid(ctx, sl) {
+  if (sl.layout === 'hero') return renderHero(ctx, sl);
   if (sl.layout === 'cmp') return renderCmp(ctx, sl);
   if (sl.layout === 'duel') return renderDuel(ctx, sl);
   const st = sl.style;
@@ -1101,7 +1183,7 @@ function chooseItems(sp, used) {
   const out = [...rest]; out.splice(Math.floor(rnd() * 4), 0, sc[0]);
   return out;
 }
-function chooseFour(pred, used) {
+function chooseFour(pred, used, k = 4) {
   // echte Fotos zuerst, je Essen nur einmal; Fotos aus früheren Slides dieses Posts möglichst nicht wiederholen
   const useT = recent.use || {};
   // Essen, das in diesem Post schon zu sehen war, kommt nach hinten (mehr Abwechslung von Folie zu Folie)
@@ -1109,13 +1191,22 @@ function chooseFour(pred, used) {
   const real = shuffle([...photos, ...library].filter(p => p.src && pred(foodOf(p)))).sort((a, b) => seen(a) - seen(b) || (useT[a.id] || 0) - (useT[b.id] || 0));
   const out = [], foods = new Set();
   const take = p => { out.push({ src: p.src, food: foodOf(p), id: p.id, pred }); foods.add(p.food); used.add(p.id); used.add('food:' + p.food); };
-  for (const p of real) if (out.length < 4 && !used.has(p.id) && !foods.has(p.food)) take(p);
-  for (const p of real) if (out.length < 4 && !foods.has(p.food)) take(p);
-  const hasPhoto = id => [...photos, ...library].some(p => p.food === id && p.src);
-  for (const f of shuffle(Object.values(FOODS).filter(f => pred(f) && f.id !== 'other' && !foods.has(f.id) && !hasPhoto(f.id)))) if (out.length < 4 && !real.length) { out.push({ food: f, demo: true }); foods.add(f.id); }
-  for (const p of real) if (out.length < 4 && !out.some(o => o.id === p.id)) take(p);
-  while (out.length < 4) out.push({ food: pick(Object.values(FOODS).filter(pred)), demo: true });
+  for (const p of real) if (out.length < k && !used.has(p.id) && !foods.has(p.food)) take(p);
+  for (const p of real) if (out.length < k && !foods.has(p.food)) take(p);
+  for (const f of shuffle(Object.values(FOODS).filter(f => pred(f) && f.id !== 'other' && !foods.has(f.id) && !hasPhoto(f.id)))) if (out.length < k && !real.length) { out.push({ food: f, demo: true }); foods.add(f.id); }
+  for (const p of real) if (out.length < k && !out.some(o => o.id === p.id)) take(p);
+  while (out.length < k) out.push({ food: pick(Object.values(FOODS).filter(pred)), demo: true });
   return shuffle(out);
+}
+function chooseHero(id, used) {
+  // bestes (größtes, hochkantes) Foto, das zuletzt am wenigsten benutzt wurde
+  const useT = recent.use || {};
+  const real = shuffle([...photos, ...library].filter(p => p.src && p.food === id));
+  if (!real.length) return { food: FOODS[id] || FOODS.other, demo: true };
+  const fresh = real.filter(p => !used.has(p.id));
+  const pool = (fresh.length ? fresh : real).map(p => ({ p, s: Math.min(1.25, heroScore(p)) - (useT[p.id] ? .35 : 0) + rnd() * .3 })).sort((a, b) => b.s - a.s);
+  const p = pool[0].p; used.add(p.id); used.add('food:' + id);
+  return { src: p.src, food: foodOf(p), id: p.id, pred: idsPred([id]) };
 }
 function chooseOne(pred, used) {
   const useT = recent.use || {};
@@ -1263,6 +1354,23 @@ function planSlides(series, n, lang) {
   if (series === 'nature') {
     pickFresh(NATURES, x => x.en).slice(0, n).forEach(x => specs.push({ pred: idsPred(x.foods), hook: x[lang], mood: 'none', key: x.en, claim: x.claim }));
   }
+  const L = lang === 'de' ? 1 : 0;
+  const fname = id => lang === 'de' ? FOODS[id].de : FOODS[id].en;
+  if (series === 'looksgood') {
+    const fs = shuffle(Object.keys(LOOKSGOOD.foods).filter(hasPhoto)).slice(0, Math.max(1, n - 1));
+    specs.push({ pred: idsPred(Object.keys(LOOKSGOOD.foods)), hook: pick(LOOKSGOOD.hook[lang]), mood: 'sad', key: 'lg' });
+    fs.slice(0, n - 1).forEach(f => specs.push({ layout: 'hero', one: f, hook: fname(f), t: { title: fname(f) + ' ✗', sub: LOOKSGOOD.foods[f][L] } }));
+  }
+  if (series === 'problem') {
+    const usedF = new Set();
+    pickFresh(PROBLEMS, x => 'pr' + x.id).slice(0, n).forEach(p => {
+      const opts = Object.keys(SHORTWHY[p.id]).filter(f => hasPhoto(f) && !usedF.has(f));
+      const f = opts.slice(0, 3)[Math.floor(rnd() * Math.min(3, opts.length))] || Object.keys(SHORTWHY[p.id])[0];
+      usedF.add(f);
+      specs.push({ layout: 'hero', one: f, hook: `${p[lang]} → ${fname(f)}`, key: 'pr' + p.id,
+        t: { top: p[lang], title: (lang === 'de' ? '→ ' : '→ eat ') + fname(f), sub: SHORTWHY[p.id][f][L] }, niche: (QUESTIONS.find(q => q.id === p.id) || {}).niche });
+    });
+  }
   return specs;
 }
 
@@ -1270,7 +1378,7 @@ function planSlides(series, n, lang) {
 const SHORT = ['eatlike', 'fix', 'quit'];   // Arten mit nur 2 Slides – bei Zufall nicht nehmen
 function pickSeries(n) {
   if (S.series !== 'random') return S.series;
-  return weighted(Object.entries(SERIES).filter(([id]) => n < 3 || !SHORT.includes(id))
+  return weighted(Object.entries(SERIES).filter(([id, s]) => (n < 3 || !SHORT.includes(id)) && (!s.min || n >= s.min))
     .map(([id, s]) => [id, recent.series.slice(0, 3).includes(id) ? s.w * .15 : s.w]));
 }
 // Plant einen Post (Texte, Fotos, Statuen) – ohne zu zeichnen
@@ -1291,9 +1399,10 @@ function planPost(series, n, lang) {
         const b = chooseOne(idsPred(fresh(sp.bad)), used), g = chooseOne(idsPred(fresh(sp.good)), used);
         duelFoods.add(b.food.id); duelFoods.add(g.food.id);
         return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
+    : sp.layout === 'hero' ? [chooseHero(sp.one, used)]
     : sp.swapOf != null ? swapItems(slides[sp.swapOf].items, used) : chooseItems(sp, used);
   specs.forEach(sp => slides.push({
-    kind: 'grid', layout: sp.layout || 'grid', hook: sp.hook, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags,
+    kind: 'grid', lang, layout: sp.layout || 'grid', hook: sp.hook, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags, t: sp.t,
     style: { ...makeStyle(), figScale: base.figScale, flip: base.flip, figDrop: base.figDrop },
     items: itemsFor(sp),
     figure: sp.mood === 'duel' ? fig.strong : sp.mood === 'none' ? null : fig[sp.mood] || null,
@@ -1431,7 +1540,7 @@ const FEED_KEY = 'hm2-feed2';  // neu, damit alte Entwürfe mit Begründungstext
 function saveFeed() {
   save(FEED_KEY, { t: Date.now(), drafts: feed.map(d => ({ id: d.id, series: d.series, lang: d.lang, desc: d.desc, W: d.W, H: d.H, gray: d.gray, saved: d.saved,
     fig: { strong: d.fig.strong ? d.fig.strong.id : null, sad: d.fig.sad ? d.fig.sad.id : null },
-    slides: d.slides.map(sl => ({ hook: sl.hook, flag: sl.flag || null, big: !!sl.big, style: sl.style, niche: sl.niche || null,
+    slides: d.slides.map(sl => ({ hook: sl.hook, t: sl.t || null, flag: sl.flag || null, big: !!sl.big, style: sl.style, niche: sl.niche || null,
       layout: sl.layout || 'grid', labels: sl.labels || null, flags: sl.flags || null,
       figure: sl.figure ? sl.figure.id : null, figure2: sl.figure2 ? sl.figure2.id : null,
       items: sl.items.map(it => ({ src: it.src && !it.src.startsWith('blob:') ? it.src : null, food: it.food.id, id: it.id || null, demo: !!it.demo })) })) })) });
@@ -1443,7 +1552,7 @@ function restoreFeed() {
     const byId = id => figures.find(f => f.id === id) || null;
     feed = p.drafts.map(d => ({ ...d, blobs: [], urls: [], files: null,
       fig: { strong: byId(d.fig.strong), sad: byId(d.fig.sad) },
-      slides: d.slides.map(sl => ({ kind: 'grid', layout: sl.layout || 'grid', labels: sl.labels, flags: sl.flags, hook: sl.hook, flag: sl.flag, big: sl.big, style: sl.style, niche: sl.niche,
+      slides: d.slides.map(sl => ({ kind: 'grid', lang: d.lang, layout: sl.layout || 'grid', t: sl.t || null, labels: sl.labels, flags: sl.flags, hook: sl.hook, flag: sl.flag, big: sl.big, style: sl.style, niche: sl.niche,
         figure: sl.figure ? byId(sl.figure) : null, figure2: sl.figure2 ? byId(sl.figure2) : null,
         items: sl.items.map(it => ({ src: it.src, food: FOODS[it.food] || FOODS.other, id: it.id, demo: it.demo })) })) }));
     renderFeed(); pump(); return true;
@@ -1701,7 +1810,7 @@ function bindSettings() {
     el.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S[key] = b.dataset.v; sync(); persist(); newFeed(); });
     sync();
   };
-  seg('#sCount', 'count'); seg('#sLang', 'lang'); seg('#sRes', 'res');
+  seg('#sCount', 'count'); seg('#sLang', 'lang'); seg('#sRes', 'res'); seg('#sFont', 'font');
   const chk = (id, key) => { const el = $(id); el.checked = !!S[key]; el.addEventListener('change', () => { S[key] = el.checked; persist(); newFeed(); }); };
   chk('#sGray', 'gray');
   $('#btnGen').addEventListener('click', newFeed);
@@ -1723,7 +1832,7 @@ async function init() {
   bindSettings();
   await Promise.all([
     ...BUILTIN_FIGS.map(f => addFigure({ ...f, builtin: true })),
-    document.fonts ? Promise.all(['800 40px Figtree', '600 40px Figtree', '700 40px Cinzel'].map(f => document.fonts.load(f).catch(() => {}))) : null,
+    document.fonts ? Promise.all(['800 40px Figtree', '700 40px Figtree', '700 40px Cinzel', '800 40px "TikTok Sans"', '700 40px "TikTok Sans"'].map(f => document.fonts.load(f).catch(() => {}))) : null,
   ]);
   figures.sort((a, b) => BUILTIN_FIGS.findIndex(x => x.id === a.id) - BUILTIN_FIGS.findIndex(x => x.id === b.id));
   try {
@@ -1731,6 +1840,7 @@ async function init() {
     const lib = await r.json();
     library = Object.entries(lib).flatMap(([food, files]) => files.map(f => ({ id: 'lib/' + f, food, src: 'lib/' + f, builtin: true })));
   } catch (e) { library = []; }
+  try { sizes = await (await fetch('lib/sizes.json')).json(); } catch (e) { sizes = {}; }
   await loadLocal();
   renderFigGrid(); renderPhotoGrid();
   if (!restoreFeed()) newFeed();
