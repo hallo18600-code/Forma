@@ -214,7 +214,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
 </div>
 
 <script>
-const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true, "kind": "statue"}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true, "kind": "statue"}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true, "kind": "statue"}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true, "kind": "statue"}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true, "kind": "statue"}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true, "kind": "statue"}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp", "kind": "statue"}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp", "kind": "statue"}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true, "kind": "statue"}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true, "kind": "statue"}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true, "kind": "statue"}, {"id": "schatten", "name": "Schatten", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/schatten.webp", "thumb": "fig/schatten_t.webp", "physique": true, "kind": "statue"}, {"id": "zeus", "name": "Zeus", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/zeus.webp", "thumb": "fig/zeus_t.webp", "physique": true, "kind": "statue"}, {"id": "david", "name": "David", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/david.webp", "thumb": "fig/david_t.webp", "physique": true, "kind": "statue"}, {"id": "yeschad", "name": "Yes Chad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/yeschad.webp", "thumb": "fig/yeschad_t.webp", "kind": "drawing"}, {"id": "sie", "name": "Sie", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/sie.webp", "thumb": "fig/sie_t.webp", "kind": "drawing"}, {"id": "manga", "name": "Manga", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/manga.webp", "thumb": "fig/manga_t.webp", "kind": "drawing"}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp", "kind": "statue"}, {"id": "heulen", "name": "Heulen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/heulen.webp", "thumb": "fig/heulen_t.webp", "kind": "drawing"}, {"id": "faust", "name": "Faust", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/faust.webp", "thumb": "fig/faust_t.webp", "kind": "drawing"}, {"id": "muede", "name": "Müde", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/muede.webp", "thumb": "fig/muede_t.webp", "kind": "drawing"}, {"id": "weinen", "name": "Weinen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/weinen.webp", "thumb": "fig/weinen_t.webp", "kind": "drawing"}, {"id": "kind", "name": "Kind", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/kind.webp", "thumb": "fig/kind_t.webp", "kind": "drawing"}];
+const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true, "kind": "statue"}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true, "kind": "statue"}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true, "kind": "statue"}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true, "kind": "statue"}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true, "kind": "statue"}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true, "kind": "statue"}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp", "kind": "statue"}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp", "kind": "statue"}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true, "kind": "statue"}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true, "kind": "statue"}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true, "kind": "statue"}, {"id": "schatten", "name": "Schatten", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/schatten.webp", "thumb": "fig/schatten_t.webp", "physique": true, "kind": "statue"}, {"id": "zeus", "name": "Zeus", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/zeus.webp", "thumb": "fig/zeus_t.webp", "physique": true, "kind": "statue"}, {"id": "david", "name": "David", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/david.webp", "thumb": "fig/david_t.webp", "physique": true, "kind": "statue"}, {"id": "yeschad", "name": "Yes Chad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/yeschad.webp", "thumb": "fig/yeschad_t.webp", "kind": "drawing"}, {"id": "sie", "name": "Sie", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/sie.webp", "thumb": "fig/sie_t.webp", "kind": "drawing"}, {"id": "manga", "name": "Manga", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/manga.webp", "thumb": "fig/manga_t.webp", "kind": "drawing"}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp", "kind": "statue"}, {"id": "heulen", "name": "Heulen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/heulen.webp", "thumb": "fig/heulen_t.webp", "kind": "drawing"}, {"id": "faust", "name": "Faust", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/faust.webp", "thumb": "fig/faust_t.webp", "kind": "drawing"}, {"id": "muede", "name": "Müde", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/muede.webp", "thumb": "fig/muede_t.webp", "kind": "drawing"}];
 
 /* ---------- Lebensmittel ---------- */
 const F = (id, emoji, color, en, de, tags) => ({ id, emoji, color, en, de, tags });
@@ -296,12 +296,12 @@ const FOODS = Object.fromEntries([
   F('chips','🥔','#e0b04a','potato chips','Chips',['junk','F']),
   F('nuggets','🍗','#c98a3a','chicken nuggets','Chicken Nuggets',['junk','F']),
   F('beer','🍺','#d9a23a','beer','Bier',['junk','F']),
-  // „sieht gesund aus, ist es aber nicht“
-  F('granola','🥣','#c49a5a','granola','Knuspermüsli',['junk','F','fake']),
-  F('juice','🧃','#f2a33a','fruit juice','Fruchtsaft',['junk','F','fake']),
-  F('cerealbar','🍫','#a8763e','cereal bars','Müsliriegel',['junk','F','fake']),
-  F('cereal','🥣','#e0b04a','breakfast cereal','Frühstücksflocken',['junk','F','fake']),
-  F('ricecakes','🍘','#e8dcc0','rice cakes','Reiswaffeln',['junk','F','fake']),
+  // „sieht gesund aus“ – Format vorerst abgelehnt, Fotos bleiben für später (nicht in Rotation)
+  F('granola','🥣','#c49a5a','granola','Knuspermüsli',['fake']),
+  F('juice','🧃','#f2a33a','fruit juice','Fruchtsaft',['fake']),
+  F('cerealbar','🍫','#a8763e','cereal bars','Müsliriegel',['fake']),
+  F('cereal','🥣','#e0b04a','breakfast cereal','Frühstücksflocken',['fake']),
+  F('ricecakes','🍘','#e8dcc0','rice cakes','Reiswaffeln',['fake']),
   // Vergleichsbilder (nur für „USA vs. Europa“)
   F('apple_us','🍎','#c8243c','apples (USA / supermarket)','Äpfel (USA / Supermarkt)',['cmp']),
   F('apple_eu','🍎','#a8462c','apples (Europe / farm)','Äpfel (Europa / Bauernhof)',['cmp']),
@@ -324,7 +324,8 @@ const FOODS = Object.fromEntries([
 const isScene = f => f.tags.includes('scene');
 const isJunk = f => f.tags.includes('junk') && !f.tags.includes('scene');
 const isCmp = f => f.tags.includes('cmp');
-const notJunk = f => !isJunk(f) && !isScene(f) && !isCmp(f) && f.id !== 'other';
+const isFake = f => f.tags.includes('fake');
+const notJunk = f => !isJunk(f) && !isScene(f) && !isCmp(f) && !isFake(f) && f.id !== 'other';
 const isCore = f => notJunk(f) && !f.tags.includes('minor');   // „etwas Gesundes“ ohne Gewürze/Getränke
 const tagPred = tags => f => !isScene(f) && f.tags.some(t => tags.includes(t));
 const sceneOf = id => f => f.id === id;
@@ -489,21 +490,21 @@ const CLAIMS = {
 };
 const why = k => Object.keys(CLAIMS[k]);
 const QUESTIONS = [
-  { id: 'sleep', foods: why('sleep'), en: ['why is my sleep so deep?', 'why do I sleep like a baby?', 'why do I fall asleep so fast?'], de: ['warum schlafe ich so tief?', 'warum schlafe ich wie ein Baby?', 'warum schlafe ich so schnell ein?'], niche: ['#sleeptips', '#realfood'] },
-  { id: 'skin', foods: why('skin'), en: ['why is my skin so clear?', 'why does my skin glow?', 'why is my skin glowing?'], de: ['warum ist meine Haut so rein?', 'warum strahlt meine Haut so?', 'warum habe ich keine Pickel?'], niche: ['#clearskin', '#glowup'] },
+  { id: 'sleep', foods: why('sleep'), en: ['why is my sleep so deep?', 'why do I sleep like a baby?', 'why do I fall asleep so fast?', 'why do I wake up so refreshed?', 'why don’t I need an alarm?'], de: ['warum schlafe ich so tief?', 'warum schlafe ich wie ein Baby?', 'warum schlafe ich so schnell ein?', 'warum wache ich so erholt auf?', 'warum brauche ich keinen Wecker?'], niche: ['#sleeptips', '#realfood'] },
+  { id: 'skin', foods: why('skin'), en: ['why is my skin so clear?', 'why does my skin glow?', 'why is my skin glowing?', 'why is my skin so clear without skincare?', 'why does everyone ask about my skincare?'], de: ['warum ist meine Haut so rein?', 'warum strahlt meine Haut so?', 'warum habe ich keine Pickel?', 'warum ist meine Haut ohne Skincare so rein?', 'warum fragen mich alle nach meiner Skincare?'], niche: ['#clearskin', '#glowup'] },
   { id: 'eyes', foods: why('eyes'), en: ['why are my eyes so bright?', 'why are my eyes so clear?'], de: ['warum strahlen meine Augen so?', 'warum sind meine Augen so klar?'], niche: ['#glowup', '#realfood'] },
-  { id: 'mood', foods: why('mood'), en: ['why am I so happy?', 'why am I always in a good mood?'], de: ['warum bin ich so glücklich?', 'warum habe ich immer gute Laune?'], niche: ['#wellness', '#realfood'] },
-  { id: 'hair', foods: why('hair'), en: ['why is my hair so thick?', 'why is my hair so healthy?'], de: ['warum sind meine Haare so dicht?', 'warum sind meine Haare so gesund?'], niche: ['#hairgrowth', '#glowup'] },
-  { id: 'energy', foods: why('energy'), en: ['why am I never tired?', 'why do I have so much energy?'], de: ['warum bin ich nie müde?', 'warum habe ich so viel Energie?'], niche: ['#energy', '#realfood'] },
-  { id: 'strong', foods: why('strong'), en: ['why am I so strong?', 'why do I build muscle so fast?'], de: ['warum bin ich so stark?', 'warum baue ich so schnell Muskeln auf?'], niche: ['#protein', '#gymtok'] },
-  { id: 'calm', foods: why('calm'), en: ['why am I so calm?', 'why am I never stressed?'], de: ['warum bin ich so entspannt?', 'warum bin ich nie gestresst?'], niche: ['#wellness', '#realfood'] },
-  { id: 'focus', foods: why('focus'), en: ['why am I so focused?', 'why is my brain so sharp?'], de: ['warum bin ich so konzentriert?', 'warum ist mein Kopf so klar?'], niche: ['#focus', '#realfood'] },
-  { id: 'lean', foods: why('lean'), en: ['why am I so lean?', 'why do I stay so lean?'], de: ['warum bin ich so definiert?', 'warum bleibe ich so schlank?'], niche: ['#fatloss', '#realfood'] },
-  { id: 'young', foods: why('young'), en: ['why do I look so young?', 'why don’t I age?'], de: ['warum sehe ich so jung aus?', 'warum altere ich nicht?'], niche: ['#glowup', '#antiaging'] },
-  { id: 'testo', foods: why('testo'), en: ['why is my testosterone so high?'], de: ['warum ist mein Testosteron so hoch?'], niche: ['#testosterone', '#gymtok'] },
-  { id: 'immune', foods: why('immune'), en: ['why do I never get sick?', 'why is my immune system so strong?'], de: ['warum werde ich nie krank?', 'warum ist mein Immunsystem so stark?'], niche: ['#immunesystem', '#realfood'] },
-  { id: 'gut', foods: why('gut'), en: ['why is my gut so healthy?', 'why is my digestion so good?'], de: ['warum ist mein Darm so gesund?', 'warum ist meine Verdauung so gut?'], niche: ['#guthealth', '#realfood'] },
-  { id: 'pump', foods: why('pump'), en: ['why is my pump so crazy?'], de: ['warum ist mein Pump so krass?'], niche: ['#gymtok', '#pump'] },
+  { id: 'mood', foods: why('mood'), en: ['why am I so happy?', 'why am I always in a good mood?', 'why am I always so positive?'], de: ['warum bin ich so glücklich?', 'warum habe ich immer gute Laune?', 'warum bin ich immer so positiv?'], niche: ['#wellness', '#realfood'] },
+  { id: 'hair', foods: why('hair'), en: ['why is my hair so thick?', 'why is my hair so healthy?', 'why is my hair so shiny?'], de: ['warum sind meine Haare so dicht?', 'warum sind meine Haare so gesund?', 'warum glänzen meine Haare so?'], niche: ['#hairgrowth', '#glowup'] },
+  { id: 'energy', foods: why('energy'), en: ['why am I never tired?', 'why do I have so much energy?', 'why don’t I need coffee?', 'why am I awake at 6am without coffee?'], de: ['warum bin ich nie müde?', 'warum habe ich so viel Energie?', 'warum brauche ich keinen Kaffee?', 'warum bin ich um 6 Uhr ohne Kaffee wach?'], niche: ['#energy', '#realfood'] },
+  { id: 'strong', foods: why('strong'), en: ['why am I so strong?', 'why do I build muscle so fast?', 'why do I recover so fast?'], de: ['warum bin ich so stark?', 'warum baue ich so schnell Muskeln auf?', 'warum regeneriere ich so schnell?'], niche: ['#protein', '#gymtok'] },
+  { id: 'calm', foods: why('calm'), en: ['why am I so calm?', 'why am I never stressed?', 'why am I so calm under pressure?'], de: ['warum bin ich so entspannt?', 'warum bin ich nie gestresst?', 'warum bleibe ich unter Druck so ruhig?'], niche: ['#wellness', '#realfood'] },
+  { id: 'focus', foods: why('focus'), en: ['why am I so focused?', 'why is my brain so sharp?', 'why can I focus for hours?'], de: ['warum bin ich so konzentriert?', 'warum ist mein Kopf so klar?', 'warum kann ich mich stundenlang konzentrieren?'], niche: ['#focus', '#realfood'] },
+  { id: 'lean', foods: why('lean'), en: ['why am I so lean?', 'why do I stay so lean?', 'why is my jawline so sharp?', 'why do I have abs all year?'], de: ['warum bin ich so definiert?', 'warum bleibe ich so schlank?', 'warum ist meine Jawline so scharf?', 'warum habe ich das ganze Jahr ein Sixpack?'], niche: ['#fatloss', '#realfood'] },
+  { id: 'young', foods: why('young'), en: ['why do I look so young?', 'why don’t I age?', 'why does everyone think I’m younger?'], de: ['warum sehe ich so jung aus?', 'warum altere ich nicht?', 'warum schätzen mich alle jünger?'], niche: ['#glowup', '#antiaging'] },
+  { id: 'testo', foods: why('testo'), en: ['why is my testosterone so high?', 'why do I have so much drive?'], de: ['warum ist mein Testosteron so hoch?', 'warum habe ich so viel Antrieb?'], niche: ['#testosterone', '#gymtok'] },
+  { id: 'immune', foods: why('immune'), en: ['why do I never get sick?', 'why is my immune system so strong?', 'why haven’t I been sick in years?'], de: ['warum werde ich nie krank?', 'warum ist mein Immunsystem so stark?', 'warum war ich seit Jahren nicht krank?'], niche: ['#immunesystem', '#realfood'] },
+  { id: 'gut', foods: why('gut'), en: ['why is my gut so healthy?', 'why is my digestion so good?', 'why am I never bloated?'], de: ['warum ist mein Darm so gesund?', 'warum ist meine Verdauung so gut?', 'warum habe ich nie Blähbauch?'], niche: ['#guthealth', '#realfood'] },
+  { id: 'pump', foods: why('pump'), en: ['why is my pump so crazy?', 'why are my veins so visible?'], de: ['warum ist mein Pump so krass?', 'warum sieht man meine Adern so?'], niche: ['#gymtok', '#pump'] },
   { id: 'bones', foods: why('bones'), en: ['why are my bones so strong?'], de: ['warum sind meine Knochen so stark?'], niche: ['#realfood', '#longevity'] },
 ];
 // "was es kaputt macht" / "was es repariert"
@@ -514,6 +515,8 @@ const FIXES = [
   { bad: ['donut', 'soda', 'candy', 'pancakes', 'cookies'], good: why('energy'), claim: 'energy', en: ['what drains your energy…', '…and what gives it back'], de: ['was dir Energie raubt…', '…und was sie zurückgibt'], niche: ['#energy', '#realfood'] },
   { bad: ['burger', 'fries', 'pizza', 'soda', 'coldcuts', 'chips', 'nuggets', 'beer'], good: why('gut'), claim: 'gut', en: ['what destroys your gut…', '…and what heals it'], de: ['was deinen Darm zerstört…', '…und was ihn heilt'], niche: ['#guthealth', '#realfood'] },
   { bad: ['soda', 'candy', 'donut', 'cookies', 'chips', 'beer'], good: why('focus'), claim: 'focus', en: ['what kills your focus…', '…and what sharpens it'], de: ['was deine Konzentration killt…', '…und was sie schärft'], niche: ['#focus', '#realfood'] },
+  { bad: ['soda', 'candy', 'donut', 'beer', 'chips'], good: why('mood'), claim: 'mood', en: ['what kills your mood…', '…and what lifts it'], de: ['was deine Laune killt…', '…und was sie hebt'], niche: ['#wellness', '#realfood'] },
+  { bad: ['soda', 'beer', 'candy', 'cookies', 'donut'], good: why('calm'), claim: 'calm', en: ['what stresses your body…', '…and what calms it'], de: ['was deinen Körper stresst…', '…und was ihn beruhigt'], niche: ['#stressrelief', '#realfood'] },
   { bad: ['soda', 'candy', 'donut', 'cookies', 'pizza', 'fries'], good: why('young'), claim: 'young', en: ['what ages you…', '…and what keeps you young'], de: ['was dich alt aussehen lässt…', '…und was dich jung hält'], niche: ['#antiaging', '#glowup'] },
 ];
 // „NEVER …“: pro Slide ein Thema, 4 passende Lebensmittel, starke Statue davor
@@ -524,6 +527,10 @@ const NEVERS = [
   { id: 'focus', en: 'never unfocused', de: 'nie unkonzentriert', niche: ['#focus', '#realfood'] },
   { id: 'mood', en: 'never in a bad mood', de: 'nie schlecht gelaunt', niche: ['#wellness', '#realfood'] },
   { id: 'strong', en: 'never weak', de: 'nie schwach', niche: ['#protein', '#gymtok'] },
+  { id: 'gut', en: 'never bloated', de: 'nie Blähbauch', niche: ['#guthealth', '#realfood'] },
+  { id: 'immune', en: 'never sick', de: 'nie krank', niche: ['#immunesystem', '#realfood'] },
+  { id: 'skin', en: 'never breakouts', de: 'nie Pickel', niche: ['#clearskin', '#glowup'] },
+  { id: 'lean', en: 'never soft', de: 'nie schwammig', niche: ['#fatloss', '#looksmaxxing'] },
 ];
 const QUIT = { en: ['foods I quit…', '…what I eat instead'], de: ['Essen, das ich aufgegeben habe…', '…was ich stattdessen esse'] };
 const ROUTINE = [
@@ -562,9 +569,13 @@ const REALS = [
   { foods: ['water', 'coffee', 'milk', 'chamomile'], en: 'real drinks', de: 'echte Getränke' },
 ];
 const RULES = {
-  en: ['if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.'],
-  de: ['Wenn es nicht verdirbt, iss es nicht.', 'Nur eine Zutat.', 'Kennt Oma es nicht, lass es weg.', 'Iss Lebensmittel, keine Produkte.', 'Hat es Fernsehwerbung, kauf es nicht.', 'Obst ist die Süßigkeit der Natur.', 'Protein zu jeder Mahlzeit.', 'Trink Wasser, keine Kalorien.'],
+  en: ['shop the edges of the supermarket.', 'chew your calories, don’t drink them.', 'eat like your great-grandma.', 'if it has a cartoon on it, skip it.', 'if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.'],
+  de: ['Kauf am Rand des Supermarkts ein.', 'Kau deine Kalorien, trink sie nicht.', 'Iss wie deine Urgroßmutter.', 'Ist ein Comic drauf, lass es liegen.', 'Wenn es nicht verdirbt, iss es nicht.', 'Nur eine Zutat.', 'Kennt Oma es nicht, lass es weg.', 'Iss Lebensmittel, keine Produkte.', 'Hat es Fernsehwerbung, kauf es nicht.', 'Obst ist die Süßigkeit der Natur.', 'Protein zu jeder Mahlzeit.', 'Trink Wasser, keine Kalorien.'],
   foods: [
+    ['steak', 'eggs', 'milk', 'apples', 'carrots', 'salmon', 'cheese', 'tomatoes'],
+    ['steak', 'eggs', 'salmon', 'potatoes', 'apples', 'berries'],
+    ['butter', 'eggs', 'potatoes', 'beef', 'milk', 'apples', 'honey', 'beets'],
+    ['eggs', 'apples', 'oranges', 'potatoes', 'banana', 'carrots', 'steak'],
     ['berries', 'tomatoes', 'greens', 'salmon', 'beef', 'peppers', 'eggs'],
     ['eggs', 'steak', 'potatoes', 'honey', 'rice', 'avocado', 'oranges', 'almonds'],
     ['butter', 'milk', 'eggs', 'potatoes', 'cheese', 'honey', 'oats', 'apples'],
@@ -624,19 +635,26 @@ const COUNTRIES = [
   { flag: 'co', foods: ['avocado', 'potatoes', 'beef', 'eggs', 'banana', 'rice', 'mango'], en: 'what Colombians eat', de: 'was Kolumbianer essen' },
 ];
 const VS = {
-  en: { bad: ['this is not healthy…', 'also this isn’t healthy…', 'this neither…'], good: 'but this is…' },
-  de: { bad: ['das ist nicht gesund…', 'das auch nicht…', 'und das erst recht nicht…'], good: 'aber das ist es…' },
+  en: [{ bad: ['this is not healthy…', 'also this isn’t healthy…', 'this neither…'], good: 'but this is…' },
+    { bad: ['not healthy…', 'not healthy either…', 'still not healthy…'], good: 'actually healthy…' },
+    { bad: ['this ruins your body…', 'this too…', 'and this…'], good: 'this builds it…' }],
+  de: [{ bad: ['das ist nicht gesund…', 'das auch nicht…', 'und das erst recht nicht…'], good: 'aber das ist es…' },
+    { bad: ['nicht gesund…', 'auch nicht gesund…', 'immer noch nicht gesund…'], good: 'wirklich gesund…' },
+    { bad: ['das ruiniert deinen Körper…', 'das auch…', 'und das…'], good: 'das baut ihn auf…' }],
 };
 const GOD = [
   { en: ['What God gave us', 'What humans made of it'], de: ['Was Gott uns gab', 'Was der Mensch daraus machte'] },
   { en: ['What nature made', 'What factories made'], de: ['Was die Natur gemacht hat', 'Was Fabriken gemacht haben'] },
   { en: ['Real food', 'Fake food'], de: ['Echtes Essen', 'Fake Essen'] },
+  { en: ['Made by nature', 'Made in a lab'], de: ['Von der Natur', 'Aus dem Labor'] },
 ];
 const ANCESTORS = [
   { en: ['What our ancestors ate', 'What we eat now'], de: ['Was unsere Vorfahren aßen', 'Was wir heute essen'] },
   { en: ['Your great-grandparents ate this', 'You eat this'], de: ['Deine Urgroßeltern aßen das', 'Du isst das'] },
+  { en: ['Grandpa ate this', 'You eat this'], de: ['Opa aß das', 'Du isst das'] },
+  { en: ['100 years ago', 'today'], de: ['vor 100 Jahren', 'heute'] },
 ];
-const EATLIKE = { en: ['eat like this…', '…to look like this'], de: ['iss so…', '…um so auszusehen'] };
+const EATLIKE = [{ en: ['eat like this…', '…to look like this'], de: ['iss so…', '…um so auszusehen'] }, { en: ['eat like a king…', '…look like a god'], de: ['iss wie ein König…', '…sieh aus wie ein Gott'] }];
 const NATURES = [
   { foods: ['mango', 'dates', 'berries', 'cherries', 'watermelon', 'honey', 'blueberries', 'pomegranate', 'figs', 'grapes', 'raspberries'], en: 'nature’s candy', de: 'Süßigkeiten der Natur' },
   { foods: ['coffee', 'banana', 'dates', 'honey'], en: 'nature’s energy drink', de: 'Energy-Drink der Natur' },
@@ -646,6 +664,8 @@ const NATURES = [
   { foods: ['eggs', 'greens', 'sardines', 'oysters', 'salmon', 'mussels', 'mackerel'], en: 'nature’s multivitamin', de: 'Multivitamin der Natur' },
   { foods: ['beets', 'banana', 'dates', 'coffee', 'watermelon'], en: 'nature’s pre-workout', de: 'Pre-Workout der Natur' },
   { foods: why('gut'), claim: 'gut', en: 'nature’s probiotic', de: 'Probiotikum der Natur' },
+  { foods: why('testo'), claim: 'testo', en: 'nature’s testosterone booster', de: 'Testo-Booster der Natur' },
+  { foods: why('young'), claim: 'young', en: 'nature’s anti-aging', de: 'Anti-Aging der Natur' },
 ];
 // „der perfekte Teller“: feste Reihenfolge, der erste Slide trägt die Überschrift
 const PLATE = [
@@ -744,14 +764,7 @@ const PROBLEMS = [
   { id: 'immune', en: 'always sick?', de: 'ständig krank?' }, { id: 'pump', en: 'no pump in the gym?', de: 'kein Pump im Gym?' },
   { id: 'testo', en: 'low testosterone?', de: 'wenig Testosteron?' }, { id: 'strong', en: 'not building muscle?', de: 'baust keine Muskeln auf?' },
 ];
-// „sieht gesund aus, ist es aber nicht“
-const LOOKSGOOD = {
-  hook: { en: ['foods that look healthy but aren’t', '“healthy” foods that aren’t', 'stop calling these healthy'], de: ['Essen, das gesund aussieht – es aber nicht ist', '„gesunde“ Lebensmittel, die es nicht sind', 'hör auf, das gesund zu nennen'] },
-  foods: { granola: ['loaded with added sugar + oil', 'viel zugesetzter Zucker + Öl'], juice: ['the sugar without the fiber', 'der Zucker ohne die Ballaststoffe'],
-    cerealbar: ['mostly sugar + syrup', 'meist Zucker + Sirup'], cereal: ['refined starch + added sugar', 'Stärke + zugesetzter Zucker'], ricecakes: ['spikes your blood sugar fast', 'lässt den Blutzucker schnell steigen'] },
-};
 const SERIES = {
-  looksgood: { label: 'Sieht gesund aus', ex: 'foods that look healthy but aren’t', w: 3, niche: ['#nutritionmyths', '#realfood'], min: 2 },
   problem: { label: 'Problem → Essen', ex: 'always tired? → mussels', w: 3, niche: ['#healthtips', '#realfood'] },
   questions: { label: 'Fragen', ex: 'why am I so happy?', w: 4, niche: null },
   real: { label: 'Real', ex: 'real protein, real sugar', w: 2, niche: ['#realfood', '#wholefoods'] },
@@ -1264,7 +1277,7 @@ function planSlides(series, n, lang) {
     shuffle(REALS).slice(0, n).forEach(r => specs.push({ pred: idsPred(r.foods), hook: r[lang], mood: 'strong', key: r.en }));
   }
   if (series === 'vs') {
-    const m = Math.max(2, n), v = VS[lang];
+    const m = Math.max(2, n), v = pick(VS[lang]);
     for (let i = 0; i < m - 1; i++) specs.push({ pred: isJunk, hook: v.bad[Math.min(i, v.bad.length - 1)], mood: 'sad' });
     specs.push({ pred: isCore, hook: v.good, mood: 'strong' });
   }
@@ -1323,8 +1336,9 @@ function planSlides(series, n, lang) {
   if (series === 'eatlike') {
     const q = pick(QUESTIONS.filter(x => ['strong', 'lean'].includes(x.id)));
     const pred = idsPred(q.foods);
-    specs.push({ pred, hook: EATLIKE[lang][0], mood: 'none', claim: q.id });
-    specs.push({ pred, hook: EATLIKE[lang][1], mood: 'strong', big: true, claim: q.id });
+    const el = pick(EATLIKE);
+    specs.push({ pred, hook: el[lang][0], mood: 'none', claim: q.id });
+    specs.push({ pred, hook: el[lang][1], mood: 'strong', big: true, claim: q.id });
   }
   if (series === 'fix') {
     const f = pickFresh(FIXES.map((x, i) => ({ ...x, i })), x => 'fix' + x.i)[0];
@@ -1356,11 +1370,6 @@ function planSlides(series, n, lang) {
   }
   const L = lang === 'de' ? 1 : 0;
   const fname = id => lang === 'de' ? FOODS[id].de : FOODS[id].en;
-  if (series === 'looksgood') {
-    const fs = shuffle(Object.keys(LOOKSGOOD.foods).filter(hasPhoto)).slice(0, Math.max(1, n - 1));
-    specs.push({ pred: idsPred(Object.keys(LOOKSGOOD.foods)), hook: pick(LOOKSGOOD.hook[lang]), mood: 'sad', key: 'lg' });
-    fs.slice(0, n - 1).forEach(f => specs.push({ layout: 'hero', one: f, hook: fname(f), t: { title: fname(f) + ' ✗', sub: LOOKSGOOD.foods[f][L] } }));
-  }
   if (series === 'problem') {
     const usedF = new Set();
     pickFresh(PROBLEMS, x => 'pr' + x.id).slice(0, n).forEach(p => {
@@ -1649,7 +1658,7 @@ function releaseFigs(keep) { figures.forEach(f => { if (!keep.includes(f) && !fi
 function foodOptions(sel) {
   const all = Object.values(FOODS);
   const opt = f => `<option value="${f.id}"${f.id === sel ? ' selected' : ''}>${f.emoji} ${esc(f.de)}</option>`;
-  return `<optgroup label="Gesund">${all.filter(f => !isJunk(f)).map(opt).join('')}</optgroup><optgroup label="Junk Food">${all.filter(isJunk).map(opt).join('')}</optgroup>`;
+  return `<optgroup label="Gesund">${all.filter(f => !isJunk(f) && !isFake(f)).map(opt).join('')}</optgroup><optgroup label="Junk Food">${all.filter(f => isJunk(f) || isFake(f)).map(opt).join('')}</optgroup>`;
 }
 function guessFood(name) {
   const n = name.toLowerCase();
