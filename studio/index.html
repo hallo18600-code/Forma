@@ -19,6 +19,7 @@
 /* TikTok Sans (TikToks eigene Schrift, Open Font License) – liegt im Ordner fonts/ */
 @font-face { font-family: 'TikTok Sans'; font-weight: 700; font-display: swap; src: url(fonts/tiktok-sans-latin-700-normal.woff2) format('woff2'); }
 @font-face { font-family: 'TikTok Sans'; font-weight: 800; font-display: swap; src: url(fonts/tiktok-sans-latin-800-normal.woff2) format('woff2'); }
+@font-face { font-family: 'DM Serif Display'; font-weight: 400; font-display: swap; src: url(fonts/dm-serif-display-latin-400-normal.woff2) format('woff2'); }
 @font-face { font-family: 'TikTok Sans'; font-weight: 900; font-display: swap; src: url(fonts/tiktok-sans-latin-900-normal.woff2) format('woff2'); }
 /* Layout: eine Spalte wie eine App. Oben die Slideshow, darunter ein großer Knopf, alles andere eingeklappt. */
 :root {
@@ -346,6 +347,9 @@ const CLAIMS = {
     chamomile: 'Apigenin – wirkt leicht beruhigend',
     almonds: 'Magnesium und Melatonin',
     salmon: 'Studie: Lachs 3× pro Woche → besserer Schlaf (Omega-3, Vitamin D)',
+    walnuts: 'enthalten natürliches Melatonin',
+    chocolate: 'Zartbitter: viel Magnesium',
+    milk: 'Tryptophan – Baustein für Melatonin',
   },
   skin: {
     salmon: 'Omega-3 bremst Entzündungen (Pickel, Rötungen)',
@@ -430,6 +434,7 @@ const CLAIMS = {
     yogurt: 'griechischer Joghurt/Skyr: viel Protein, wenig Fett',
     cauliflower: 'kaum Kalorien, viele Ballaststoffe',
     asparagus: 'kaum Kalorien',
+    potatoes: 'Studie: das sättigendste von 38 Lebensmitteln',
   },
   young: {
     blueberries: 'Antioxidantien (Anthocyane)',
@@ -532,7 +537,6 @@ const NEVERS = [
   { id: 'skin', en: 'never breakouts', de: 'nie Pickel', niche: ['#clearskin', '#glowup'] },
   { id: 'lean', en: 'never soft', de: 'nie schwammig', niche: ['#fatloss', '#looksmaxxing'] },
 ];
-const QUIT = { en: ['foods I quit…', '…what I eat instead'], de: ['Essen, das ich aufgegeben habe…', '…was ich stattdessen esse'] };
 const ROUTINE = [
   { foods: ['eggs', 'oats', 'yogurt', 'blueberries', 'coffee'], en: 'morning', de: 'morgens' },
   { foods: ['banana', 'dates', 'oats', 'rice', 'honey', 'beets', 'coffee'], en: 'pre-workout', de: 'vor dem Training' },   // schnelle Kohlenhydrate, Koffein, Nitrat
@@ -569,12 +573,10 @@ const REALS = [
   { foods: ['water', 'coffee', 'milk', 'chamomile'], en: 'real drinks', de: 'echte Getränke' },
 ];
 const RULES = {
-  en: ['shop the edges of the supermarket.', 'chew your calories, don’t drink them.', 'eat like your great-grandma.', 'if it has a cartoon on it, skip it.', 'if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.'],
-  de: ['Kauf am Rand des Supermarkts ein.', 'Kau deine Kalorien, trink sie nicht.', 'Iss wie deine Urgroßmutter.', 'Ist ein Comic drauf, lass es liegen.', 'Wenn es nicht verdirbt, iss es nicht.', 'Nur eine Zutat.', 'Kennt Oma es nicht, lass es weg.', 'Iss Lebensmittel, keine Produkte.', 'Hat es Fernsehwerbung, kauf es nicht.', 'Obst ist die Süßigkeit der Natur.', 'Protein zu jeder Mahlzeit.', 'Trink Wasser, keine Kalorien.'],
+  en: ['shop the edges of the supermarket.', 'if it has a cartoon on it, skip it.', 'if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.'],
+  de: ['Kauf am Rand des Supermarkts ein.', 'Ist ein Comic drauf, lass es liegen.', 'Wenn es nicht verdirbt, iss es nicht.', 'Nur eine Zutat.', 'Kennt Oma es nicht, lass es weg.', 'Iss Lebensmittel, keine Produkte.', 'Hat es Fernsehwerbung, kauf es nicht.', 'Obst ist die Süßigkeit der Natur.', 'Protein zu jeder Mahlzeit.', 'Trink Wasser, keine Kalorien.'],
   foods: [
     ['steak', 'eggs', 'milk', 'apples', 'carrots', 'salmon', 'cheese', 'tomatoes'],
-    ['steak', 'eggs', 'salmon', 'potatoes', 'apples', 'berries'],
-    ['butter', 'eggs', 'potatoes', 'beef', 'milk', 'apples', 'honey', 'beets'],
     ['eggs', 'apples', 'oranges', 'potatoes', 'banana', 'carrots', 'steak'],
     ['berries', 'tomatoes', 'greens', 'salmon', 'beef', 'peppers', 'eggs'],
     ['eggs', 'steak', 'potatoes', 'honey', 'rice', 'avocado', 'oranges', 'almonds'],
@@ -583,7 +585,7 @@ const RULES = {
     ['eggs', 'potatoes', 'carrots', 'beef', 'lentils', 'apples'],
     ['mango', 'berries', 'cherries', 'dates', 'banana', 'kiwi', 'oranges', 'blueberries', 'pomegranate', 'watermelon'],
     ['eggs', 'chicken', 'steak', 'salmon', 'yogurt', 'beef', 'tuna'],
-    ['water', 'coffee', 'milk', 'chamomile'],
+    ['water', 'coffee', 'chamomile'],
   ],
 };
 // typische Lebensmittel des Landes
@@ -654,7 +656,6 @@ const ANCESTORS = [
   { en: ['Grandpa ate this', 'You eat this'], de: ['Opa aß das', 'Du isst das'] },
   { en: ['100 years ago', 'today'], de: ['vor 100 Jahren', 'heute'] },
 ];
-const EATLIKE = [{ en: ['eat like this…', '…to look like this'], de: ['iss so…', '…um so auszusehen'] }, { en: ['eat like a king…', '…look like a god'], de: ['iss wie ein König…', '…sieh aus wie ein Gott'] }];
 const NATURES = [
   { foods: ['mango', 'dates', 'berries', 'cherries', 'watermelon', 'honey', 'blueberries', 'pomegranate', 'figs', 'grapes', 'raspberries'], en: 'nature’s candy', de: 'Süßigkeiten der Natur' },
   { foods: ['coffee', 'banana', 'dates', 'honey'], en: 'nature’s energy drink', de: 'Energy-Drink der Natur' },
@@ -666,27 +667,6 @@ const NATURES = [
   { foods: why('gut'), claim: 'gut', en: 'nature’s probiotic', de: 'Probiotikum der Natur' },
   { foods: why('testo'), claim: 'testo', en: 'nature’s testosterone booster', de: 'Testo-Booster der Natur' },
   { foods: why('young'), claim: 'young', en: 'nature’s anti-aging', de: 'Anti-Aging der Natur' },
-];
-// „der perfekte Teller“: feste Reihenfolge, der erste Slide trägt die Überschrift
-const PLATE = [
-  { foods: ['steak', 'beef', 'eggs', 'salmon', 'chicken', 'sardines', 'tuna', 'lamb', 'mackerel'], en: 'the perfect plate:\nprotein', de: 'der perfekte Teller:\nProtein' },
-  { foods: ['butter', 'oliveoil', 'avocado', 'olives', 'cheese', 'walnuts'], en: 'healthy fats', de: 'gesunde Fette' },
-  { foods: ['potatoes', 'sweetpotato', 'rice', 'banana', 'oats'], en: 'real carbs', de: 'echte Kohlenhydrate' },
-  { foods: ['peppers', 'tomatoes', 'carrots', 'greens', 'blueberries', 'beets', 'cauliflower', 'asparagus', 'pumpkin', 'raspberries'], en: 'color', de: 'Farbe' },
-];
-// echtes Essen mit wenig Geld (Grundnahrungsmittel, keine Preise – die ändern sich)
-const BUDGET = [
-  { foods: ['eggs', 'lentils', 'sardines', 'milk', 'yogurt'], en: 'real food on a budget:\ncheap protein', de: 'echtes Essen für wenig Geld:\ngünstiges Protein' },
-  { foods: ['potatoes', 'oats', 'rice', 'banana'], en: 'cheap carbs', de: 'günstige Kohlenhydrate' },
-  { foods: ['butter', 'eggs', 'sardines', 'cheese'], en: 'cheap fats', de: 'günstige Fette' },
-  { foods: ['carrots', 'apples', 'beets', 'greens', 'oranges', 'onions', 'pumpkin'], en: 'cheap vitamins', de: 'günstige Vitamine' },
-];
-// saisonal in Mitteleuropa
-const SEASONS = [
-  { foods: ['greens', 'berries', 'carrots', 'potatoes', 'eggs', 'asparagus'], en: 'eat with the seasons:\nspring', de: 'iss saisonal:\nFrühling' },
-  { foods: ['blueberries', 'cherries', 'tomatoes', 'peppers', 'watermelon', 'berries', 'raspberries'], en: 'summer', de: 'Sommer' },
-  { foods: ['apples', 'beets', 'walnuts', 'potatoes', 'sweetpotato', 'pumpkin', 'pears', 'mushrooms', 'grapes'], en: 'autumn', de: 'Herbst' },
-  { foods: ['oranges', 'kiwi', 'carrots', 'beets', 'apples', 'kimchi', 'lemons', 'onions'], en: 'winter', de: 'Winter' },
 ];
 // unterschätzt: Lebensmittel, die kaum einer isst, obwohl sie sehr nährstoffreich sind
 const UNDERRATED = [
@@ -706,12 +686,10 @@ const ORIGINS = [
 ];
 // Religion: nur Essen, das zur Tradition passt (z. B. kein Schwein/Alkohol, vegetarisch bei Hindu/Sikh/Buddhist)
 const FAITHS = [
-  { foods: ['salmon', 'sardines', 'eggs', 'honey', 'olives', 'milk', 'lamb', 'grapes'], en: 'average Christian diet', de: 'so isst ein Christ' },
-  { foods: ['dates', 'honey', 'yogurt', 'olives', 'pomegranate', 'lentils', 'beef', 'figs', 'lamb'], en: 'average Muslim diet', de: 'so isst ein Muslim' },
-  { foods: ['salmon', 'eggs', 'honey', 'pomegranate', 'dates', 'olives', 'figs', 'grapes'], en: 'average Jewish diet', de: 'jüdische Küche' },
-  { foods: ['lentils', 'rice', 'yogurt', 'milk', 'mango', 'ginger', 'banana', 'coconut', 'cauliflower'], en: 'average Hindu diet', de: 'so isst ein Hindu' },
-  { foods: ['lentils', 'rice', 'yogurt', 'milk', 'butter', 'greens', 'cauliflower'], en: 'average Sikh diet', de: 'so isst ein Sikh' },
-  { foods: ['rice', 'greens', 'lentils', 'mango', 'mushrooms'], en: 'average Buddhist diet', de: 'so isst ein Buddhist' },
+  { foods: ['salmon', 'sardines', 'eggs', 'honey', 'olives', 'milk', 'lamb', 'grapes'], en: 'average Christian', de: 'der typische Christ' },
+  { foods: ['dates', 'honey', 'yogurt', 'olives', 'pomegranate', 'lentils', 'beef', 'figs', 'lamb'], en: 'average Muslim', de: 'der typische Muslim' },
+  { foods: ['lentils', 'rice', 'yogurt', 'milk', 'mango', 'ginger', 'banana', 'coconut', 'cauliflower'], en: 'average Hindu', de: 'der typische Hindu' },
+  { foods: ['rice', 'greens', 'lentils', 'mango', 'mushrooms'], en: 'average Buddhist', de: 'der typische Buddhist' },
 ];
 // „american apples vs european apples“: zwei Versionen desselben Essens, oben/unten
 const COMPARE = [
@@ -742,7 +720,7 @@ const DUELS = [
 // Kurze Gründe für die neuen Einzelbild-Formate (max. ~6 Wörter, nur Nährstoff-Fakten, keine Heilversprechen)
 const SHORTWHY = {
   skin: { salmon: ['omega-3 calms inflammation', 'Omega-3 bremst Entzündungen'], tomatoes: ['lycopene: less sun redness', 'Lycopin: weniger Sonnenrötung'], carrots: ['beta-carotene: warmer skin tone', 'Beta-Carotin: wärmerer Hautton'], sweetpotato: ['loaded with beta-carotene', 'voller Beta-Carotin'], peppers: ['more vitamin C than oranges', 'mehr Vitamin C als Orangen'], kiwi: ['vitamin C builds collagen', 'Vitamin C für Kollagen'], avocado: ['vitamin E + healthy fats', 'Vitamin E + gute Fette'] },
-  sleep: { kiwi: ['2 kiwis, 1 hour before bed', '2 Kiwis, 1 Std. vorm Schlafen'], cherries: ['natural melatonin', 'natürliches Melatonin'], pumpkinseeds: ['magnesium + tryptophan', 'Magnesium + Tryptophan'], almonds: ['magnesium + melatonin', 'Magnesium + Melatonin'], salmon: ['omega-3 + vitamin D', 'Omega-3 + Vitamin D'], chamomile: ['apigenin calms you down', 'Apigenin beruhigt'] },
+  sleep: { kiwi: ['2 kiwis, 1 hour before bed', '2 Kiwis, 1 Std. vorm Schlafen'], cherries: ['natural melatonin', 'natürliches Melatonin'], pumpkinseeds: ['magnesium + tryptophan', 'Magnesium + Tryptophan'], walnuts: ['natural melatonin', 'natürliches Melatonin'], milk: ['tryptophan → melatonin', 'Tryptophan → Melatonin'], chocolate: ['dark: lots of magnesium', 'zartbitter: viel Magnesium'], almonds: ['magnesium + melatonin', 'Magnesium + Melatonin'], salmon: ['omega-3 + vitamin D', 'Omega-3 + Vitamin D'], chamomile: ['apigenin calms you down', 'Apigenin beruhigt'] },
   energy: { oats: ['slow carbs, no sugar crash', 'langsame Carbs, kein Crash'], sweetpotato: ['slow carbs', 'langsame Kohlenhydrate'], beef: ['iron + B12', 'Eisen + B12'], steak: ['iron + B12', 'Eisen + B12'], eggs: ['B12 + protein', 'B12 + Protein'], lentils: ['iron + fiber', 'Eisen + Ballaststoffe'], banana: ['fast fuel before training', 'schnelle Energie vorm Training'], mussels: ['huge amounts of B12 + iron', 'extrem viel B12 + Eisen'] },
   testo: { oysters: ['more zinc than any other food', 'mehr Zink als jedes andere Essen'], beef: ['zinc + saturated fat', 'Zink + gesättigte Fette'], steak: ['zinc + saturated fat', 'Zink + gesättigte Fette'], eggs: ['cholesterol + vitamin D', 'Cholesterin + Vitamin D'], pumpkinseeds: ['zinc + magnesium', 'Zink + Magnesium'], salmon: ['vitamin D', 'Vitamin D'], sardines: ['vitamin D + omega-3', 'Vitamin D + Omega-3'], lamb: ['loaded with zinc', 'viel Zink'], mackerel: ['vitamin D', 'Vitamin D'] },
   focus: { eggs: ['choline for memory', 'Cholin fürs Gedächtnis'], salmon: ['DHA for your brain', 'DHA fürs Gehirn'], sardines: ['DHA for your brain', 'DHA fürs Gehirn'], walnuts: ['omega-3 (ALA)', 'Omega-3 (ALA)'], blueberries: ['better memory in studies', 'Studien: besseres Gedächtnis'], coffee: ['caffeine: sharper + faster', 'Koffein: wacher + schneller'], chocolate: ['cocoa flavanols', 'Kakao-Flavanole'], mackerel: ['DHA for your brain', 'DHA fürs Gehirn'] },
@@ -753,6 +731,8 @@ const SHORTWHY = {
   immune: { peppers: ['more vitamin C than oranges', 'mehr Vitamin C als Orangen'], kiwi: ['loads of vitamin C', 'sehr viel Vitamin C'], oranges: ['vitamin C', 'Vitamin C'], garlic: ['allicin: fewer colds in a study', 'Allicin: Studie: seltener erkältet'], ginger: ['gingerol: anti-inflammatory', 'Gingerol: entzündungshemmend'], kimchi: ['probiotics for your gut', 'Probiotika für den Darm'], oysters: ['zinc for immune cells', 'Zink für Immunzellen'], lemons: ['vitamin C', 'Vitamin C'] },
   pump: { beets: ['nitrate → more blood flow', 'Nitrat → mehr Durchblutung'], greens: ['spinach: loads of nitrate', 'Spinat: viel Nitrat'], watermelon: ['citrulline → nitric oxide', 'Citrullin → Stickstoffmonoxid'], pomegranate: ['better blood flow in a study', 'Studie: bessere Durchblutung'], chocolate: ['cocoa widens blood vessels', 'Kakao weitet die Gefäße'], garlic: ['boosts nitric oxide', 'fördert Stickstoffmonoxid'] },
   eyes: { greens: ['top source of lutein', 'Spitzenreiter bei Lutein'], eggs: ['lutein from the yolk', 'Lutein aus dem Eigelb'], carrots: ['vitamin A for your eyes', 'Vitamin A fürs Sehen'], sweetpotato: ['loads of vitamin A', 'sehr viel Vitamin A'], salmon: ['DHA for the retina', 'DHA für die Netzhaut'], peppers: ['zeaxanthin', 'Zeaxanthin'], pumpkin: ['loads of vitamin A', 'sehr viel Vitamin A'] },
+  lean: { eggs: ['protein keeps you full for hours', 'Protein hält stundenlang satt'], potatoes: ['most filling food in a study', 'Studie: das sättigendste Essen'], chicken: ['lots of protein, little fat', 'viel Protein, wenig Fett'], yogurt: ['greek yogurt: high protein', 'griechischer Joghurt: viel Protein'], tuna: ['lots of protein, little fat', 'viel Protein, wenig Fett'], shrimp: ['24 g protein, under 100 kcal', '24 g Protein, unter 100 kcal'] },
+  young: { tomatoes: ['lycopene: less sun damage', 'Lycopin: weniger Sonnenschäden'], salmon: ['astaxanthin + omega-3', 'Astaxanthin + Omega-3'], blueberries: ['loaded with antioxidants', 'voller Antioxidantien'], oliveoil: ['polyphenols', 'Polyphenole'], pomegranate: ['ellagic acid', 'Ellagsäure'], avocado: ['vitamin E + healthy fats', 'Vitamin E + gute Fette'] },
   strong: { steak: ['protein + natural creatine', 'Protein + natürliches Kreatin'], beef: ['protein + natural creatine', 'Protein + natürliches Kreatin'], chicken: ['~30 g protein per 100 g', '~30 g Protein pro 100 g'], eggs: ['complete protein', 'vollständiges Protein'], tuna: ['~25 g protein per 100 g', '~25 g Protein pro 100 g'], salmon: ['protein + creatine', 'Protein + Kreatin'], milk: ['whey + casein', 'Whey + Casein'], lamb: ['protein + natural creatine', 'Protein + natürliches Kreatin'] },
 };
 // „Problem → Essen“
@@ -763,8 +743,36 @@ const PROBLEMS = [
   { id: 'gut', en: 'always bloated?', de: 'ständig Blähbauch?' }, { id: 'mood', en: 'always in a bad mood?', de: 'ständig schlechte Laune?' },
   { id: 'immune', en: 'always sick?', de: 'ständig krank?' }, { id: 'pump', en: 'no pump in the gym?', de: 'kein Pump im Gym?' },
   { id: 'testo', en: 'low testosterone?', de: 'wenig Testosteron?' }, { id: 'strong', en: 'not building muscle?', de: 'baust keine Muskeln auf?' },
+  { id: 'lean', en: 'always hungry on a diet?', de: 'auf Diät ständig Hunger?' }, { id: 'eyes', en: 'staring at screens all day?', de: 'den ganzen Tag am Handy?' },
+  { id: 'young', en: 'want to age slower?', de: 'willst du langsamer altern?' },
 ];
+// „Eat like a king / Not like a peasant“: freigestellte Lebensmittel auf hellem Grund
+const KING = [
+  { id: 'all', en: ['Eat like a king:', 'Not like a peasant:'], de: ['Iss wie ein König:', 'Nicht wie ein Untertan:'],
+    good: ['steak', 'oysters', 'salmon', 'eggs', 'cheese', 'honey', 'milk', 'mango', 'grapes', 'olives', 'oranges', 'shrimp', 'lamb', 'butter', 'figs', 'pomegranate', 'dates', 'berries', 'avocado', 'mackerel', 'cherries'],
+    bad: ['cereal', 'juice', 'granola', 'cerealbar', 'ricecakes', 'chips', 'soda', 'cookies', 'nuggets', 'candy', 'donut', 'fries', 'coldcuts', 'pizza', 'bread_us'] },
+  { id: 'breakfast', en: ['A king’s breakfast:', 'A peasant’s breakfast:'], de: ['Frühstück eines Königs:', 'Frühstück eines Untertans:'],
+    good: ['eggs', 'steak', 'honey', 'berries', 'butter', 'milk', 'oranges', 'yogurt', 'blueberries', 'cheese', 'mango', 'kiwi', 'dates', 'banana'],
+    bad: ['cereal', 'juice', 'granola', 'cerealbar', 'pancakes', 'donut', 'bread_us', 'cookies', 'coldcuts'] },
+  { id: 'snacks', en: ['A king’s snacks:', 'A peasant’s snacks:'], de: ['Snacks eines Königs:', 'Snacks eines Untertans:'],
+    good: ['dates', 'cheese', 'olives', 'walnuts', 'almonds', 'berries', 'mango', 'honey', 'grapes', 'figs', 'cherries', 'blueberries', 'kiwi'],
+    bad: ['chips', 'candy', 'cookies', 'cerealbar', 'ricecakes', 'donut', 'soda', 'nuggets'] },
+  { id: 'dinner', en: ['A king’s dinner:', 'A peasant’s dinner:'], de: ['Abendessen eines Königs:', 'Abendessen eines Untertans:'],
+    good: ['steak', 'salmon', 'lamb', 'potatoes', 'sweetpotato', 'shrimp', 'oysters', 'butter', 'asparagus', 'mushrooms', 'mussels', 'garlic', 'tomatoes'],
+    bad: ['pizza', 'burger', 'fries', 'nuggets', 'coldcuts', 'beer', 'soda', 'chips'] },
+  { id: 'dessert', en: ['A king’s dessert:', 'A peasant’s dessert:'], de: ['Nachtisch eines Königs:', 'Nachtisch eines Untertans:'],
+    good: ['honey', 'berries', 'dates', 'figs', 'chocolate', 'mango', 'yogurt', 'cherries', 'raspberries', 'blueberries', 'grapes', 'pomegranate', 'watermelon'],
+    bad: ['donut', 'candy', 'cookies', 'pancakes', 'cerealbar', 'soda', 'chips'] },
+];
+// „why do I feel so good all the time?“ – Collage auf Weiß, unten rechts durchgestrichenes Junk Food
+const FEELGOOD = {
+  en: 'why do I feel so good all the time?', de: 'warum geht es mir die ganze Zeit so gut?',
+  foods: ['honey', 'milk', 'steak', 'eggs', 'dates', 'berries', 'kiwi', 'mango', 'blueberries', 'salmon', 'oysters', 'oranges', 'avocado', 'beef'],
+  bad: ['soda', 'candy', 'chips', 'donut', 'cookies'],
+};
 const SERIES = {
+  king: { label: 'König vs. Untertan', ex: 'Eat like a king: … Not like a peasant:', w: 4, niche: ['#eatlikeaking', '#primal'], min: 2 },
+  feel: { label: 'Feel-good-Collage', ex: '“why do I feel so good all the time?”', w: 3.5, niche: ['#realfood', '#wellness'] },
   problem: { label: 'Problem → Essen', ex: 'always tired? → mussels', w: 3, niche: ['#healthtips', '#realfood'] },
   questions: { label: 'Fragen', ex: 'why am I so happy?', w: 4, niche: null },
   real: { label: 'Real', ex: 'real protein, real sugar', w: 2, niche: ['#realfood', '#wholefoods'] },
@@ -776,20 +784,15 @@ const SERIES = {
   swap: { label: 'Tausch', ex: 'swap this… for this…', w: 1.5, niche: ['#healthyswaps', '#realfood'] },
   god: { label: 'Gott vs. Mensch', ex: 'What God gave us', w: 2.5, niche: ['#realfood', '#processedfood'] },
   ancestors: { label: 'Früher vs. heute', ex: 'What our ancestors ate', w: 2, niche: ['#ancestral', '#realfood'] },
-  eatlike: { label: 'Iss so', ex: 'eat like this… to look like this', w: 1.5, niche: ['#physique', '#realfood'] },
   nature: { label: 'Natur', ex: 'nature’s candy', w: 1.5, niche: ['#realfood', '#wholefoods'] },
   fix: { label: 'Ruiniert vs. repariert', ex: 'what ruins your skin… and what fixes it', w: 2.5, niche: null },
   never: { label: 'Never …', ex: 'never stressed, never tired', w: 2, niche: null },
-  quit: { label: 'Aufgegeben', ex: 'foods I quit… what I eat instead', w: 1.5, niche: ['#healthyswaps', '#realfood'] },
   routine: { label: 'Timing', ex: 'pre-workout, post-workout, before bed', w: 1.5, niche: ['#gymtok', '#mealtiming'] },
   compare: { label: 'USA vs. Europa', ex: 'american apples vs european apples', w: 2.5, niche: null },
   duel: { label: 'Carbs vs. Carbs', ex: 'CARBS VS CARBS · PROTEIN VS PROTEIN', w: 2.5, niche: ['#junkfood', '#gymtok'] },
-  plate: { label: 'Perfekter Teller', ex: 'the perfect plate: 1. protein, 2. healthy fats', w: 1.5, niche: ['#realfood', '#mealprep'] },
-  budget: { label: 'Günstig & echt', ex: 'real food on a budget', w: 1.5, niche: ['#budgetmeals', '#realfood'] },
-  season: { label: 'Saisonal', ex: 'eat with the seasons: spring', w: 1.2, niche: ['#seasonal', '#realfood'] },
   underrated: { label: 'Unterschätzt', ex: 'underrated protein, underrated fats', w: 2, niche: ['#realfood', '#nutrition'] },
   origin: { label: 'Herkunft', ex: 'average European, average Asian', w: 2, niche: ['#realfood', '#culture'] },
-  faith: { label: 'Religion', ex: 'average Christian diet', w: 1.5, niche: ['#realfood', '#tradition'] },
+  faith: { label: 'Religion', ex: 'average Christian, average Muslim', w: 1.5, niche: ['#realfood', '#tradition'] },
 };
 
 /* ---------- Hilfen ---------- */
@@ -1149,7 +1152,105 @@ function renderHero(ctx, sl) {
   });
   ctx.restore();
 }
+// Freigestelltes Bild in eine Box einpassen (mittig), mit weichem Schatten
+function drawCut(ctx, img, x, y, w, h, opt = {}) {
+  if (!img) return;
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  const pad = opt.pad == null ? .06 : opt.pad, bw = w * (1 - pad * 2), bh = h * (1 - pad * 2);
+  const s = Math.min(bw / iw, bh / ih) * (opt.scale || 1), dw = iw * s, dh = ih * s;
+  const dx = x + (w - dw) / 2 + (opt.dx || 0) * w, dy = y + (h - dh) / 2 + (opt.dy || 0) * h;
+  ctx.save();
+  ctx.imageSmoothingQuality = 'high';
+  if (opt.rot) { ctx.translate(dx + dw / 2, dy + dh / 2); ctx.rotate(opt.rot); ctx.translate(-(dx + dw / 2), -(dy + dh / 2)); }
+  ctx.shadowColor = 'rgba(40,30,20,.28)'; ctx.shadowBlur = W * .018; ctx.shadowOffsetY = W * .008;
+  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.restore();
+}
+// Figur (Statue/Zeichnung) in eine Box, unten bündig; Büsten werden an ihrer Schnittkante gekappt
+function drawFigureBox(ctx, fig, x, y, w, h, align) {
+  const im = fig && ((S.gray && fig.gray) || fig.img); if (!im) return;
+  const iw = im.width, ih = im.height, sh = ih * Math.max(.4, fig.anchor === 'fill' ? fig.cut || 1 : 1);
+  const s = Math.min(w / iw, h / sh), dw = iw * s, dh = sh * s;
+  const dx = align === 'left' ? x : x + (w - dw) / 2, dy = y + h - dh;
+  ctx.save(); ctx.imageSmoothingQuality = 'high';
+  ctx.shadowColor = 'rgba(30,20,10,.35)'; ctx.shadowBlur = W * .03; ctx.shadowOffsetX = W * .006;
+  ctx.drawImage(im, 0, 0, iw, sh, dx, dy, dw, dh);
+  ctx.restore();
+}
+const serifFont = s => `400 ${s}px "DM Serif Display", Georgia, "Times New Roman", serif`;
+// Plätze für die Lebensmittel (Anteile von Breite/Höhe): x, y, w, h
+const SLOTS = {
+  royal: [[.01, .185, .33, .21], [.335, .185, .33, .21], [.665, .185, .33, .21], [.01, .395, .33, .2], [.335, .395, .33, .2], [.665, .395, .33, .2],
+    [.49, .6, .26, .2], [.745, .6, .25, .2], [.49, .8, .26, .19], [.745, .8, .25, .19]],
+  plain: [[.03, .03, .45, .17], [.52, .03, .45, .17], [.02, .21, .31, .15], [.345, .21, .31, .15], [.67, .21, .31, .15],
+    [.01, .50, .28, .16], [.71, .50, .28, .16], [.01, .67, .28, .16], [.71, .67, .28, .16], [.02, .84, .28, .15], [.70, .84, .28, .15]],
+};
+function renderCollage(ctx, sl) {
+  const royal = sl.variant !== 'plain', st = sl.style, foods = sl.items.filter(it => it.img);
+  // Hintergrund: royal = warmes Papier-Beige, plain = Weiß
+  if (royal) {
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#f3efe9'); g.addColorStop(1, '#e8e2d9');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    const v = ctx.createRadialGradient(W / 2, H * .45, W * .3, W / 2, H * .5, H * .8);
+    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(60,40,20,.10)'); ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+  } else { ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H); }
+  const slots = SLOTS[royal ? 'royal' : 'plain'];
+  // gleichmäßig über die Plätze verteilen (bei weniger Fotos bleiben Lücken verteilt statt gesammelt)
+  const pickSlots = (n, all) => n >= all.length ? all : Array.from({ length: n }, (_, i) => all[Math.round(i * (all.length - 1) / Math.max(1, n - 1))]);
+  const use = pickSlots(foods.length, slots);
+  foods.slice(0, use.length).forEach((it, i) => {
+    const [x, y, w, h] = use[i], z = st.zoom[i % 4];
+    drawCut(ctx, it.img, x * W, y * H, w * W, h * H, { pad: .03, scale: .94 + (z.z - 1) * .35, dx: (z.fx - .5) * .04, dy: (z.fy - .5) * .04 });
+  });
+  if (royal) {
+    if (sl.figure) drawFigureBox(ctx, sl.figure, -W * .02, H * .55, W * .52, H * .45, 'left');
+    // Titelband
+    const bx = W * .05, by = H * .072, bw = W * .9, bh = H * .1;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.08)'; ctx.shadowBlur = W * .01;
+    ctx.fillStyle = 'rgba(255,255,255,.94)'; ctx.fillRect(bx, by, bw, bh); ctx.restore();
+    let size = W * .092; ctx.font = serifFont(size);
+    while (ctx.measureText(sl.hook).width > bw * .9 && size > W * .04) { size *= .95; ctx.font = serifFont(size); }
+    ctx.save(); ctx.fillStyle = '#5b1322'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(sl.hook, W / 2, by + bh * .53); ctx.restore();
+  } else {
+    if (sl.figure) drawFigureBox(ctx, sl.figure, W * .28, H * .49, W * .44, H * .51, 'center');
+    let size = W * .085; ctx.font = capFont(size);
+    while (ctx.measureText(sl.hook).width > W * .9 && size > W * .04) { size *= .95; ctx.font = capFont(size); }
+    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; strokeText(ctx, sl.hook, W / 2, H * .435, size); ctx.restore();
+  }
+}
+// „why do I feel so good?“: Titel oben, Raster aus freigestellten Lebensmitteln, letzte Zelle durchgestrichenes Junk Food
+function renderFeel(ctx, sl) {
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  const good = sl.items.filter(it => it.img && it.role !== 'x'), bad = sl.items.filter(it => it.img && it.role === 'x');
+  const cols = 3, cells = good.length + (bad.length ? 1 : 0), rows = Math.max(2, Math.ceil(cells / cols));
+  // Titel
+  let size = W * .078; ctx.font = capFont(size);
+  let lines = wrap(ctx, sl.hook, W * .9);
+  while (lines.length > 2 && size > W * .05) { size *= .94; ctx.font = capFont(size); lines = wrap(ctx, sl.hook, W * .9); }
+  const lh = size * 1.12, top = H * .14 - (lines.length - 1) * lh / 2;
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  lines.forEach((l, i) => strokeText(ctx, l, W / 2, top + i * lh, size)); ctx.restore();
+  const gy0 = H * .14 + (lines.length) * lh / 2 + H * .035, gh0 = H * .985 - gy0, cw = W / cols, ch = Math.min(gh0 / rows, H * .27);
+  const gy = gy0 + (gh0 - ch * rows) / 2;   // Raster mittig im freien Bereich
+  const st = sl.style;
+  good.forEach((it, i) => {
+    const c = i % cols, r = Math.floor(i / cols), z = st.zoom[i % 4];
+    drawCut(ctx, it.img, c * cw, gy + r * ch, cw, ch, { pad: .07, scale: .95 + (z.z - 1) * .3 });
+  });
+  if (bad.length) {
+    const i = good.length, c = i % cols, r = Math.floor(i / cols), x = c * cw, y = gy + r * ch;
+    const sub = [[0, 0], [.5, 0], [0, .5], [.5, .5]];
+    bad.slice(0, 4).forEach((it, k) => drawCut(ctx, it.img, x + sub[k][0] * cw, y + sub[k][1] * ch, cw / 2, ch / 2, { pad: .08 }));
+    ctx.save(); ctx.strokeStyle = '#e3241b'; ctx.lineWidth = W * .016; ctx.lineCap = 'round';
+    const m = .1; ctx.beginPath();
+    ctx.moveTo(x + cw * m, y + ch * m); ctx.lineTo(x + cw * (1 - m), y + ch * (1 - m));
+    ctx.moveTo(x + cw * (1 - m), y + ch * m); ctx.lineTo(x + cw * m, y + ch * (1 - m)); ctx.stroke(); ctx.restore();
+  }
+}
 function renderGrid(ctx, sl) {
+  if (sl.layout === 'collage') return renderCollage(ctx, sl);
+  if (sl.layout === 'fg') return renderFeel(ctx, sl);
   if (sl.layout === 'hero') return renderHero(ctx, sl);
   if (sl.layout === 'cmp') return renderCmp(ctx, sl);
   if (sl.layout === 'duel') return renderDuel(ctx, sl);
@@ -1204,12 +1305,31 @@ function chooseFour(pred, used, k = 4) {
   const real = shuffle([...photos, ...library].filter(p => p.src && pred(foodOf(p)))).sort((a, b) => seen(a) - seen(b) || (useT[a.id] || 0) - (useT[b.id] || 0));
   const out = [], foods = new Set();
   const take = p => { out.push({ src: p.src, food: foodOf(p), id: p.id, pred }); foods.add(p.food); used.add(p.id); used.add('food:' + p.food); };
-  for (const p of real) if (out.length < k && !used.has(p.id) && !foods.has(p.food)) take(p);
+  const twin = id => [...foods].some(o => TWINS.some(g => g.includes(o) && g.includes(id)));
+  for (const p of real) if (out.length < k && !used.has(p.id) && !foods.has(p.food) && !twin(p.food)) take(p);
+  for (const p of real) if (out.length < k && !foods.has(p.food) && !twin(p.food)) take(p);
   for (const p of real) if (out.length < k && !foods.has(p.food)) take(p);
   for (const f of shuffle(Object.values(FOODS).filter(f => pred(f) && f.id !== 'other' && !foods.has(f.id) && !hasPhoto(f.id)))) if (out.length < k && !real.length) { out.push({ food: f, demo: true }); foods.add(f.id); }
   for (const p of real) if (out.length < k && !out.some(o => o.id === p.id)) take(p);
   while (out.length < k) out.push({ food: pick(Object.values(FOODS).filter(pred)), demo: true });
   return shuffle(out);
+}
+// freigestellte Lebensmittel (cut/cut.json): je Essen mehrere Ausschnitte, bewertet nach Qualität
+let CUTS = {};
+const hasCut = id => !!(CUTS[id] && CUTS[id].length);
+function chooseCuts(ids, used, k) {
+  const useT = recent.use || {};
+  const foods = [];
+  const twin = id => foods.some(o => TWINS.some(g => g.includes(o) && g.includes(id)));
+  // zuletzt wenig benutzte Lebensmittel zuerst, aber mit Zufall
+  const order = shuffle(ids.filter(hasCut)).sort((a, b) => (used.has('food:' + a) ? 1 : 0) - (used.has('food:' + b) ? 1 : 0));
+  for (const id of order) if (foods.length < k && !twin(id)) foods.push(id);
+  for (const id of order) if (foods.length < k && !foods.includes(id)) foods.push(id);
+  return foods.map(id => {
+    const opts = shuffle(CUTS[id]).sort((a, b) => (used.has(a.f) ? 1 : 0) - (used.has(b.f) ? 1 : 0) || (useT[a.f] || 0) - (useT[b.f] || 0));
+    const c = opts[0]; used.add(c.f); used.add('food:' + id);
+    return { src: c.f, id: c.f, food: FOODS[id], cut: true };
+  });
 }
 function chooseHero(id, used) {
   // bestes (größtes, hochkantes) Foto, das zuletzt am wenigsten benutzt wurde
@@ -1299,16 +1419,6 @@ function planSlides(series, n, lang) {
   if (series === 'countries') {
     pickFresh(COUNTRIES, c => c.flag).slice(0, n).forEach(c => specs.push({ pred: idsPred(c.foods), hook: c[lang], mood: 'strong', flag: c.flag, key: c.flag }));
   }
-  if (series === 'plate' || series === 'budget' || series === 'season') {
-    const L = series === 'plate' ? PLATE : series === 'budget' ? BUDGET : SEASONS;
-    // bei weniger Slides: Überschrift des ersten Slides trotzdem behalten
-    const pick = n >= L.length ? L : [L[0], ...shuffle(L.slice(1)).slice(0, n - 1).sort((a, b) => L.indexOf(a) - L.indexOf(b))];
-    pick.forEach((x, k) => {
-      let hook = k === 0 ? x[lang] : x[lang].replace(/^.*\n/, '');
-      if (series === 'plate') hook = hook.replace(/([^\n]*)$/, `${k + 1}. $1`);   // Nummer nach Position, nie mit Lücke
-      specs.push({ pred: idsPred(x.foods), hook, mood: 'strong', key: series + k });
-    });
-  }
   if (series === 'underrated') {
     pickFresh(UNDERRATED, x => 'ur' + x.en).slice(0, n).forEach(x => specs.push({ pred: idsPred(x.foods), hook: x[lang], mood: 'strong', key: 'ur' + x.en }));
   }
@@ -1333,13 +1443,6 @@ function planSlides(series, n, lang) {
       specs.push({ pred: isJunk, scene: sceneOf('processed'), hook: a[lang][1], mood: 'sad' });
     }
   }
-  if (series === 'eatlike') {
-    const q = pick(QUESTIONS.filter(x => ['strong', 'lean'].includes(x.id)));
-    const pred = idsPred(q.foods);
-    const el = pick(EATLIKE);
-    specs.push({ pred, hook: el[lang][0], mood: 'none', claim: q.id });
-    specs.push({ pred, hook: el[lang][1], mood: 'strong', big: true, claim: q.id });
-  }
   if (series === 'fix') {
     const f = pickFresh(FIXES.map((x, i) => ({ ...x, i })), x => 'fix' + x.i)[0];
     specs.push({ pred: idsPred(f.bad), hook: f[lang][0], mood: 'sad', key: 'fix' + f.i, niche: f.niche });
@@ -1347,10 +1450,6 @@ function planSlides(series, n, lang) {
   }
   if (series === 'never') {
     pickFresh(NEVERS, x => 'nv' + x.id).slice(0, n).forEach(x => specs.push({ pred: idsPred(why(x.id)), hook: x[lang], mood: 'strong', key: 'nv' + x.id, niche: x.niche, claim: x.id }));
-  }
-  if (series === 'quit') {
-    specs.push({ pred: f => isJunk(f) && SWAPMAP[f.id], hook: QUIT[lang][0], mood: 'sad' });
-    specs.push({ pred: isCore, hook: QUIT[lang][1], mood: 'strong', swapOf: 0 });
   }
   if (series === 'routine') {
     const r = n >= 4 ? ROUTINE : n === 3 ? [ROUTINE[1], ROUTINE[2], ROUTINE[3]] : n === 2 ? [ROUTINE[1], ROUTINE[2]] : [pick(ROUTINE)];
@@ -1380,14 +1479,36 @@ function planSlides(series, n, lang) {
         t: { top: p[lang], title: (lang === 'de' ? '→ ' : '→ eat ') + fname(f), sub: SHORTWHY[p.id][f][L] }, niche: (QUESTIONS.find(q => q.id === p.id) || {}).niche });
     });
   }
+  if (series === 'king') {
+    // Paare König → Untertan; erstes Paar meist das allgemeine „Eat like a king“
+    const variant = window.FORCE_VARIANT || (rnd() < .8 ? 'royal' : 'plain');
+    const rest = pickFresh(KING.slice(1), x => 'king' + x.id);
+    const pairs = [rnd() < .7 ? KING[0] : rest.shift(), ...rest.filter(x => x !== KING[0])].filter(Boolean);
+    const out = [];
+    for (const k of pairs) { out.push({ k, good: true }, { k, good: false }); if (out.length >= n) break; }
+    out.slice(0, Math.max(1, n)).forEach((x, i) => specs.push({ layout: 'collage', variant, pool: x.good ? x.k.good : x.k.bad, cnt: variant === 'royal' ? 10 : 11,
+      hook: x.k[lang][x.good ? 0 : 1], mood: x.good ? 'strong' : 'sad', key: i === 0 ? 'king' + x.k.id : undefined }));
+  }
+  if (series === 'feel') {
+    // erste Folie oft die allgemeine Frage, danach konkrete Fragen mit den passenden Lebensmitteln
+    const qs = pickFresh(QUESTIONS.filter(q => why(q.id).filter(hasCut).length >= 5), q => 'fg' + q.id);
+    const list = rnd() < .65 || !qs.length ? [null, ...qs] : qs;
+    const quote = t => lang === 'de' ? `„${t}“` : `“${t}”`;
+    list.slice(0, n).forEach(q => {
+      const fix = q && FIXES.find(f => f.claim === q.id);
+      specs.push({ layout: 'fg', pool: q ? why(q.id) : FEELGOOD.foods, bad: fix ? fix.bad : FEELGOOD.bad,
+        hook: quote(q ? pick(q[lang]) : FEELGOOD[lang]), mood: 'none', key: q ? 'fg' + q.id : 'fgall', niche: q && q.niche, claim: q && q.id });
+    });
+  }
   return specs;
 }
 
 /* ---------- Entwürfe planen und zeichnen ---------- */
-const SHORT = ['eatlike', 'fix', 'quit'];   // Arten mit nur 2 Slides – bei Zufall nicht nehmen
+const SHORT = ['fix'];   // Arten mit nur 2 Slides – bei Zufall nicht nehmen
 function pickSeries(n) {
-  if (S.series !== 'random') return S.series;
-  return weighted(Object.entries(SERIES).filter(([id, s]) => (n < 3 || !SHORT.includes(id)) && (!s.min || n >= s.min))
+  if (S.series !== 'random' && SERIES[S.series]) return S.series;   // gelöschte Arten → Zufall
+  const cutsOk = Object.keys(CUTS).length > 20;   // Collagen nur, wenn die freigestellten Bilder geladen sind
+  return weighted(Object.entries(SERIES).filter(([id, s]) => (n < 3 || !SHORT.includes(id)) && (!s.min || n >= s.min) && (cutsOk || !['king', 'feel'].includes(id)))
     .map(([id, s]) => [id, recent.series.slice(0, 3).includes(id) ? s.w * .15 : s.w]));
 }
 // Plant einen Post (Texte, Fotos, Statuen) – ohne zu zeichnen
@@ -1395,8 +1516,8 @@ function planPost(series, n, lang) {
   const specs = planSlides(series, n, lang);
   const duel = specs.some(s => s.mood === 'duel');
   const needStrong = specs.some(s => s.mood === 'strong' || s.mood === 'duel'), needSad = specs.some(s => s.mood === 'sad' || s.mood === 'duel');
-  const kind = pickKind(needStrong, needSad);
-  const fig = { strong: needStrong && kind ? nextFigure('strong', duel || specs.some(s => s.big), kind) : null,
+  const kind = series === 'king' && figures.some(f => kindOf(f) === 'statue' && f.mood === 'sad') ? 'statue' : pickKind(needStrong, needSad);   // König/Untertan: klassische Statuen
+  const fig = { strong: needStrong && kind ? nextFigure('strong', duel || series === 'king' || specs.some(s => s.big), kind) : null,
     sad: needSad && kind ? nextFigure('sad', false, kind) : null };
   const base = makeStyle();  // gleiche Statuen-Größe/-Spiegelung im ganzen Video
   const used = new Set();
@@ -1409,9 +1530,12 @@ function planPost(series, n, lang) {
         duelFoods.add(b.food.id); duelFoods.add(g.food.id);
         return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
     : sp.layout === 'hero' ? [chooseHero(sp.one, used)]
+    : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
+    : sp.layout === 'fg' ? (() => { const g = chooseCuts(sp.pool, used, sp.pool.filter(hasCut).length >= 8 ? 8 : 5);
+        return [...g, ...chooseCuts(sp.bad, used, 4).map(it => ({ ...it, role: 'x' }))]; })()
     : sp.swapOf != null ? swapItems(slides[sp.swapOf].items, used) : chooseItems(sp, used);
   specs.forEach(sp => slides.push({
-    kind: 'grid', lang, layout: sp.layout || 'grid', hook: sp.hook, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags, t: sp.t,
+    kind: 'grid', lang, variant: sp.variant, layout: sp.layout || 'grid', hook: sp.hook, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags, t: sp.t,
     style: { ...makeStyle(), figScale: base.figScale, flip: base.flip, figDrop: base.figDrop },
     items: itemsFor(sp),
     figure: sp.mood === 'duel' ? fig.strong : sp.mood === 'none' ? null : fig[sp.mood] || null,
@@ -1447,7 +1571,7 @@ async function drawSlides(slides, used2) {
   // Ein Foto lädt nicht? Erst ein anderes Foto desselben Essens, dann ein anderes passendes Essen.
   const bad = new Set();
   for (const sl of slides) for (const it of sl.items) {
-    if (it.img || !it.src) continue;
+    if (it.img || !it.src || it.cut) continue;   // fehlender Ausschnitt: einfach weglassen, nie ein falsches Foto
     bad.add(it.src);
     const inSlide = new Set(sl.items.filter(x => x !== it).map(x => x.food.id));
     const pool = [...photos, ...library].filter(p => p.src && !bad.has(p.src));
@@ -1545,14 +1669,15 @@ function updateMissing() {
   }
 }
 // Entwürfe merken (ohne Bilder): Nach dem Neuladen kommt dieselbe Galerie zurück und wird neu gezeichnet
-const FEED_KEY = 'hm2-feed2';  // neu, damit alte Entwürfe mit Begründungstext verschwinden
+const FEED_KEY = 'hm2-feed3';  // neu: alte Entwürfe (mit gelöschten Arten) verschwinden
 function saveFeed() {
   save(FEED_KEY, { t: Date.now(), drafts: feed.map(d => ({ id: d.id, series: d.series, lang: d.lang, desc: d.desc, W: d.W, H: d.H, gray: d.gray, saved: d.saved,
     fig: { strong: d.fig.strong ? d.fig.strong.id : null, sad: d.fig.sad ? d.fig.sad.id : null },
     slides: d.slides.map(sl => ({ hook: sl.hook, t: sl.t || null, flag: sl.flag || null, big: !!sl.big, style: sl.style, niche: sl.niche || null,
       layout: sl.layout || 'grid', labels: sl.labels || null, flags: sl.flags || null,
       figure: sl.figure ? sl.figure.id : null, figure2: sl.figure2 ? sl.figure2.id : null,
-      items: sl.items.map(it => ({ src: it.src && !it.src.startsWith('blob:') ? it.src : null, food: it.food.id, id: it.id || null, demo: !!it.demo })) })) })) });
+      variant: sl.variant || null,
+      items: sl.items.map(it => ({ src: it.src && !it.src.startsWith('blob:') ? it.src : null, food: it.food.id, id: it.id || null, demo: !!it.demo, cut: !!it.cut, role: it.role || null })) })) })) });
 }
 function restoreFeed() {
   const p = load(FEED_KEY, null);
@@ -1563,7 +1688,8 @@ function restoreFeed() {
       fig: { strong: byId(d.fig.strong), sad: byId(d.fig.sad) },
       slides: d.slides.map(sl => ({ kind: 'grid', lang: d.lang, layout: sl.layout || 'grid', t: sl.t || null, labels: sl.labels, flags: sl.flags, hook: sl.hook, flag: sl.flag, big: sl.big, style: sl.style, niche: sl.niche,
         figure: sl.figure ? byId(sl.figure) : null, figure2: sl.figure2 ? byId(sl.figure2) : null,
-        items: sl.items.map(it => ({ src: it.src, food: FOODS[it.food] || FOODS.other, id: it.id, demo: it.demo })) })) }));
+        variant: sl.variant || null,
+        items: sl.items.map(it => ({ src: it.src, food: FOODS[it.food] || FOODS.other, id: it.id, demo: it.demo, cut: it.cut, role: it.role })) })) }));
     renderFeed(); pump(); return true;
   } catch (e) { console.error(e); feed = []; return false; }
 }
@@ -1809,6 +1935,7 @@ function syncTypes(shown) {
   document.querySelectorAll('#types .type').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S.series)));
 }
 function bindSettings() {
+  if (S.series !== 'random' && !SERIES[S.series]) { S.series = 'random'; save('hm2-settings', S); }
   const persist = () => save('hm2-settings', S);
   const types = [['random', 'Zufall', 'wechselt jedes Mal'], ...Object.entries(SERIES).map(([id, s]) => [id, s.label, s.ex])];
   $('#types').innerHTML = types.map(([id, l, ex]) => `<button type="button" class="type" data-v="${id}">${esc(l)}<small>${esc(ex)}</small></button>`).join('');
@@ -1841,7 +1968,7 @@ async function init() {
   bindSettings();
   await Promise.all([
     ...BUILTIN_FIGS.map(f => addFigure({ ...f, builtin: true })),
-    document.fonts ? Promise.all(['800 40px Figtree', '700 40px Figtree', '700 40px Cinzel', '800 40px "TikTok Sans"', '700 40px "TikTok Sans"'].map(f => document.fonts.load(f).catch(() => {}))) : null,
+    document.fonts ? Promise.all(['800 40px Figtree', '700 40px Figtree', '700 40px Cinzel', '800 40px "TikTok Sans"', '700 40px "TikTok Sans"', '400 40px "DM Serif Display"'].map(f => document.fonts.load(f).catch(() => {}))) : null,
   ]);
   figures.sort((a, b) => BUILTIN_FIGS.findIndex(x => x.id === a.id) - BUILTIN_FIGS.findIndex(x => x.id === b.id));
   try {
@@ -1850,6 +1977,7 @@ async function init() {
     library = Object.entries(lib).flatMap(([food, files]) => files.map(f => ({ id: 'lib/' + f, food, src: 'lib/' + f, builtin: true })));
   } catch (e) { library = []; }
   try { sizes = await (await fetch('lib/sizes.json')).json(); } catch (e) { sizes = {}; }
+  try { CUTS = await (await fetch('cut/cut.json')).json(); } catch (e) { CUTS = {}; }
   await loadLocal();
   renderFigGrid(); renderPhotoGrid();
   if (!restoreFeed()) newFeed();
