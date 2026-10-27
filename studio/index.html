@@ -505,6 +505,15 @@ const FIXES = [
   { bad: ['soda', 'candy', 'donut', 'cookies', 'chips', 'beer'], good: why('focus'), claim: 'focus', en: ['what kills your focus…', '…and what sharpens it'], de: ['was deine Konzentration killt…', '…und was sie schärft'], niche: ['#focus', '#realfood'] },
   { bad: ['soda', 'candy', 'donut', 'cookies', 'pizza', 'fries'], good: why('young'), claim: 'young', en: ['what ages you…', '…and what keeps you young'], de: ['was dich alt aussehen lässt…', '…und was dich jung hält'], niche: ['#antiaging', '#glowup'] },
 ];
+// „NEVER …“: pro Slide ein Thema, 4 passende Lebensmittel, starke Statue davor
+const NEVERS = [
+  { id: 'calm', en: 'never stressed', de: 'nie gestresst', niche: ['#stressrelief', '#realfood'] },
+  { id: 'energy', en: 'never tired', de: 'nie müde', niche: ['#energy', '#realfood'] },
+  { id: 'sleep', en: 'never sleep badly', de: 'nie schlecht schlafen', niche: ['#sleeptips', '#realfood'] },
+  { id: 'focus', en: 'never unfocused', de: 'nie unkonzentriert', niche: ['#focus', '#realfood'] },
+  { id: 'mood', en: 'never in a bad mood', de: 'nie schlecht gelaunt', niche: ['#wellness', '#realfood'] },
+  { id: 'strong', en: 'never weak', de: 'nie schwach', niche: ['#protein', '#gymtok'] },
+];
 const QUIT = { en: ['foods I quit…', '…what I eat instead'], de: ['Essen, das ich aufgegeben habe…', '…was ich stattdessen esse'] };
 const ROUTINE = [
   { foods: ['eggs', 'oats', 'yogurt', 'blueberries', 'coffee'], en: 'morning', de: 'morgens' },
@@ -712,6 +721,7 @@ const SERIES = {
   eatlike: { label: 'Iss so', ex: 'eat like this… to look like this', w: 1.5, niche: ['#physique', '#realfood'] },
   nature: { label: 'Natur', ex: 'nature’s candy', w: 1.5, niche: ['#realfood', '#wholefoods'] },
   fix: { label: 'Ruiniert vs. repariert', ex: 'what ruins your skin… and what fixes it', w: 2.5, niche: null },
+  never: { label: 'Never …', ex: 'never stressed, never tired', w: 2, niche: null },
   quit: { label: 'Aufgegeben', ex: 'foods I quit… what I eat instead', w: 1.5, niche: ['#healthyswaps', '#realfood'] },
   routine: { label: 'Timing', ex: 'pre-workout, post-workout, before bed', w: 1.5, niche: ['#gymtok', '#mealtiming'] },
   compare: { label: 'USA vs. Europa', ex: 'american apples vs european apples', w: 2.5, niche: null },
@@ -1229,6 +1239,9 @@ function planSlides(series, n, lang) {
     const f = pickFresh(FIXES.map((x, i) => ({ ...x, i })), x => 'fix' + x.i)[0];
     specs.push({ pred: idsPred(f.bad), hook: f[lang][0], mood: 'sad', key: 'fix' + f.i, niche: f.niche });
     specs.push({ pred: idsPred(f.good), hook: f[lang][1], mood: 'strong', niche: f.niche, claim: f.claim });
+  }
+  if (series === 'never') {
+    pickFresh(NEVERS, x => 'nv' + x.id).slice(0, n).forEach(x => specs.push({ pred: idsPred(why(x.id)), hook: x[lang], mood: 'strong', key: 'nv' + x.id, niche: x.niche, claim: x.id }));
   }
   if (series === 'quit') {
     specs.push({ pred: f => isJunk(f) && SWAPMAP[f.id], hook: QUIT[lang][0], mood: 'sad' });
