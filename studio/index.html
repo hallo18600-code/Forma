@@ -215,7 +215,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
 </div>
 
 <script>
-const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true, "kind": "statue"}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true, "kind": "statue"}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true, "kind": "statue"}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true, "kind": "statue"}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true, "kind": "statue"}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true, "kind": "statue"}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp", "kind": "statue"}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp", "kind": "statue"}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true, "kind": "statue"}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true, "kind": "statue"}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true, "kind": "statue"}, {"id": "schatten", "name": "Schatten", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/schatten.webp", "thumb": "fig/schatten_t.webp", "physique": true, "kind": "statue"}, {"id": "zeus", "name": "Zeus", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/zeus.webp", "thumb": "fig/zeus_t.webp", "physique": true, "kind": "statue"}, {"id": "david", "name": "David", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/david.webp", "thumb": "fig/david_t.webp", "physique": true, "kind": "statue"}, {"id": "yeschad", "name": "Yes Chad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/yeschad.webp", "thumb": "fig/yeschad_t.webp", "kind": "drawing"}, {"id": "sie", "name": "Sie", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/sie.webp", "thumb": "fig/sie_t.webp", "kind": "drawing"}, {"id": "manga", "name": "Manga", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/manga.webp", "thumb": "fig/manga_t.webp", "kind": "drawing"}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp", "kind": "statue"}, {"id": "heulen", "name": "Heulen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/heulen.webp", "thumb": "fig/heulen_t.webp", "kind": "drawing"}, {"id": "faust", "name": "Faust", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/faust.webp", "thumb": "fig/faust_t.webp", "kind": "drawing"}, {"id": "muede", "name": "Müde", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/muede.webp", "thumb": "fig/muede_t.webp", "kind": "drawing"}];
+const BUILTIN_FIGS = [{"id": "spartaner", "name": "Spartaner", "mood": "strong", "anchor": "fill", "cut": 0.46, "tone": "dark", "src": "fig/spartaner.webp", "thumb": "fig/spartaner_t.webp", "physique": true, "kind": "statue", "light": false}, {"id": "marmor", "name": "Marmor", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/marmor.webp", "thumb": "fig/marmor_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "ruecken", "name": "Rücken", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/ruecken.webp", "thumb": "fig/ruecken_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "held", "name": "Held", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/held.webp", "thumb": "fig/held_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "hoplit", "name": "Hoplit", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/hoplit.webp", "thumb": "fig/hoplit_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "bart", "name": "Bart", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/bart.webp", "thumb": "fig/bart_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "chrom", "name": "Chrom", "mood": "strong", "anchor": "fill", "cut": 0.653, "tone": "light", "src": "fig/chrom.webp", "thumb": "fig/chrom_t.webp", "kind": "statue", "light": false}, {"id": "orakel", "name": "Orakel", "mood": "strong", "anchor": "fill", "cut": 0.694, "tone": "light", "src": "fig/orakel.webp", "thumb": "fig/orakel_t.webp", "kind": "statue", "light": true}, {"id": "fluegel", "name": "Flügel", "mood": "strong", "anchor": "fill", "cut": 0.5, "tone": "dark", "src": "fig/fluegel.webp", "thumb": "fig/fluegel_t.webp", "physique": true, "fillW": true, "kind": "statue", "light": false}, {"id": "parkplatz", "name": "Athlet", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/parkplatz.webp", "thumb": "fig/parkplatz_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "gym", "name": "Gym", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/gym.webp", "thumb": "fig/gym_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "schatten", "name": "Schatten", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "dark", "src": "fig/schatten.webp", "thumb": "fig/schatten_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "david", "name": "David", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/david.webp", "thumb": "fig/david_t.webp", "physique": true, "kind": "statue", "light": true}, {"id": "yeschad", "name": "Yes Chad", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/yeschad.webp", "thumb": "fig/yeschad_t.webp", "kind": "drawing", "light": true}, {"id": "sie", "name": "Sie", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/sie.webp", "thumb": "fig/sie_t.webp", "kind": "drawing", "light": true}, {"id": "manga", "name": "Manga", "mood": "strong", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/manga.webp", "thumb": "fig/manga_t.webp", "kind": "drawing", "light": true}, {"id": "klage", "name": "Klage", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/klage.webp", "thumb": "fig/klage_t.webp", "kind": "statue", "light": true}, {"id": "heulen", "name": "Heulen", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/heulen.webp", "thumb": "fig/heulen_t.webp", "kind": "drawing", "light": true}, {"id": "faust", "name": "Faust", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/faust.webp", "thumb": "fig/faust_t.webp", "kind": "drawing", "light": true}, {"id": "muede", "name": "Müde", "mood": "sad", "anchor": "center", "cut": 1.0, "tone": "light", "src": "fig/muede.webp", "thumb": "fig/muede_t.webp", "kind": "drawing", "light": true}];
 
 /* ---------- Lebensmittel ---------- */
 const F = (id, emoji, color, en, de, tags) => ({ id, emoji, color, en, de, tags });
@@ -807,7 +807,58 @@ const FEELGOOD = {
   foods: ['honey', 'milk', 'steak', 'eggs', 'dates', 'berries', 'kiwi', 'mango', 'blueberries', 'salmon', 'oysters', 'oranges', 'avocado', 'beef'],
   bad: ['soda', 'candy', 'chips', 'donut', 'cookies'],
 };
+// Ring aus freigestellten Lebensmitteln um einen Text (wie „Dad why am I never sick?“)
+const DAD = [
+  { id: 'immune', en: 'Dad why am I never sick?', de: 'Papa, warum werde ich nie krank?' },
+  { id: 'sleep', en: 'Dad why do I always sleep so well?', de: 'Papa, warum schlafe ich immer so gut?' },
+  { id: 'energy', en: 'Dad why am I never tired?', de: 'Papa, warum bin ich nie müde?' },
+  { id: 'skin', en: 'Dad why is my skin so clear?', de: 'Papa, warum ist meine Haut so rein?' },
+  { id: 'strong', en: 'Dad why am I so strong?', de: 'Papa, warum bin ich so stark?' },
+  { id: 'calm', en: 'Dad why am I never stressed?', de: 'Papa, warum bin ich nie gestresst?' },
+  { id: 'bloat', en: 'Dad why am I never bloated?', de: 'Papa, warum habe ich nie Blähbauch?' },
+  { id: 'focus', en: 'Dad why is my brain so sharp?', de: 'Papa, warum ist mein Kopf so klar?' },
+  { id: 'mood', en: 'Dad why am I always happy?', de: 'Papa, warum bin ich immer gut gelaunt?' },
+  { id: 'hair', en: 'Dad why is my hair so thick?', de: 'Papa, warum sind meine Haare so dicht?' },
+];
+// Grundnahrungsmittel, mit denen ein Ring aufgefüllt wird (primal: Fleisch, Eier, Milch, Honig, Obst)
+const STAPLES = ['steak', 'eggs', 'milk', 'honey', 'butter', 'salmon', 'berries', 'kiwi', 'oranges', 'cheese', 'oysters', 'banana', 'potatoes', 'beef'];
+// „zero stress diet“: Ring um schlichten schwarzen Text
+const DIETS = [
+  { id: 'calm', en: 'zero stress diet', de: 'Zero-Stress-\nDiät', foods: ['steak', 'oysters', 'honey', 'milk', 'potatoes', 'oranges', 'lemons', 'pomegranate', 'apples', 'chocolate', 'pumpkinseeds', 'chamomile', 'kiwi', 'banana'], niche: ['#lowcortisol', '#stressrelief'] },
+  { id: 'sleep', en: 'deep sleep diet', de: 'Tiefschlaf-\nDiät', foods: [...Object.keys(CLAIMS.sleep), 'honey', 'banana', 'oranges', 'eggs'], niche: ['#sleeptips', '#primal'] },
+  { id: 'testo', en: 'high testosterone diet', de: 'Testosteron-\nDiät', foods: [...Object.keys(CLAIMS.testo), 'honey', 'potatoes', 'milk', 'oranges', 'butter', 'cheese'], niche: ['#testosterone', '#primal'] },
+  { id: 'skin', en: 'clear skin diet', de: 'Reine-Haut-\nDiät', foods: [...Object.keys(CLAIMS.skin), 'eggs', 'berries', 'oranges', 'pomegranate', 'water'], niche: ['#clearskin', '#glowup'] },
+  { id: 'bloat', en: 'zero bloat diet', de: 'Anti-Blähbauch-\nDiät', foods: Object.keys(CLAIMS.bloat), niche: ['#debloat', '#guthealth'] },
+  { id: 'energy', en: 'all day energy diet', de: 'Energie-\nDiät', foods: [...Object.keys(CLAIMS.energy), 'honey', 'dates', 'oranges', 'coffee', 'mango'], niche: ['#energy', '#primal'] },
+  { id: 'young', en: 'anti aging diet', de: 'Anti-Aging-\nDiät', foods: [...Object.keys(CLAIMS.young), 'berries', 'eggs', 'kiwi', 'sardines', 'greentea', 'chocolate'], niche: ['#antiaging', '#longevity'] },
+  { id: 'strong', en: 'muscle building diet', de: 'Muskelaufbau-\nDiät', foods: [...Object.keys(CLAIMS.strong), 'potatoes', 'rice', 'honey', 'banana', 'cheese', 'oats'], niche: ['#gymtok', '#protein'] },
+];
+// „Mog“: gutes Essen um eine selbstbewusste Zeichnung, Junk & Fake-Health-Produkte um eine weinende
+const MOG = {
+  good: ['steak', 'eggs', 'honey', 'milk', 'chocolate', 'oranges', 'butter', 'salmon', 'oysters', 'berries', 'cheese', 'kiwi', 'dates', 'beef', 'pomegranate'],
+  bad: ['cerealbar', 'juice', 'ricecakes', 'granola', 'cereal', 'soda', 'candy', 'chips', 'donut', 'cookies', 'nuggets', 'pizza'],
+};
+// „Everyday / 3-4 times a week / Never“: 2×2 freigestellte Lebensmittel, schlichter Serif-Text in der Mitte
+const FREQ = [
+  { en: 'Everyday', de: 'Jeden Tag', foods: ['milk', 'steak', 'eggs', 'kiwi', 'beef', 'honey', 'butter', 'oranges', 'banana', 'potatoes', 'berries', 'water'] },
+  { en: '3-4 times a week', de: '3–4× pro Woche', foods: ['cheese', 'berries', 'honey', 'salmon', 'oysters', 'sardines', 'dates', 'yogurt', 'sweetpotato', 'chocolate', 'mango', 'avocado', 'lamb'] },
+  { en: 'Once a week', de: 'Einmal pro Woche', foods: ['chocolate', 'rice', 'coffee', 'shrimp', 'mussels', 'figs', 'pomegranate', 'pineapple'] },
+  { en: 'Never', de: 'Nie', foods: ['soda', 'cerealbar', 'juice', 'cereal', 'nuggets', 'burger', 'fries', 'donut', 'candy', 'ricecakes', 'granola', 'coldcuts', 'chips', 'pizza'] },
+];
+// „I love carbs“: drei Streifen – weinend (Junk), weinend (Fake-Health), Chad (echt)
+const LOVE = [
+  { id: 'carbs', en: '"I love carbs"', de: '„Ich liebe Carbs“', junk: ['pizza', 'soda', 'donut', 'fries', 'bread_us', 'cookies', 'chips'], fake: ['cereal', 'granola', 'ricecakes', 'cerealbar', 'juice'], real: ['milk', 'honey', 'potatoes', 'berries', 'mango', 'banana', 'dates', 'oranges', 'sweetpotato'] },
+  { id: 'sugar', en: '"I love sugar"', de: '„Ich liebe Zucker“', junk: ['candy', 'soda', 'donut', 'cookies', 'pancakes'], fake: ['juice', 'cerealbar', 'granola', 'cereal'], real: ['honey', 'mango', 'dates', 'berries', 'figs', 'cherries', 'pineapple', 'watermelon'] },
+  { id: 'protein', en: '"I love protein"', de: '„Ich liebe Protein“', junk: ['nuggets', 'burger', 'coldcuts', 'pizza'], fake: ['cerealbar', 'granola', 'cereal', 'ricecakes'], real: ['steak', 'eggs', 'salmon', 'milk', 'oysters', 'cheese', 'beef', 'sardines'] },
+  { id: 'snacks', en: '"I love snacks"', de: '„Ich liebe Snacks“', junk: ['chips', 'candy', 'cookies', 'donut', 'nuggets'], fake: ['ricecakes', 'cerealbar', 'granola', 'juice'], real: ['cheese', 'dates', 'berries', 'almonds', 'walnuts', 'kiwi', 'honey', 'olives'] },
+  { id: 'breakfast', en: '"I love breakfast"', de: '„Ich liebe Frühstück“', junk: ['pancakes', 'donut', 'cookies', 'soda', 'coldcuts'], fake: ['cereal', 'granola', 'juice', 'cerealbar'], real: ['eggs', 'milk', 'honey', 'berries', 'steak', 'butter', 'banana', 'oranges', 'yogurt'] },
+];
 const SERIES = {
+  freq: { label: 'Everyday / Never', ex: 'Everyday · 3-4 times a week · Never', w: 4, niche: ['#primal', '#rawmilk'], min: 2 },
+  love: { label: '„I love carbs“', ex: 'weinend · weinend · Chad', w: 3.5, niche: ['#carbs', '#primal'] },
+  dad: { label: 'Dad, warum …?', ex: '„Dad why am I never sick?“ – Essen im Kreis', w: 4, niche: ['#primal', '#realfood'] },
+  diet: { label: 'Diät-Kreis', ex: 'zero stress diet, deep sleep diet', w: 3.5, niche: null },
+  mog: { label: 'Mog-Edit', ex: 'Zeichnung in der Mitte, Essen drumherum', w: 3, niche: ['#primal', '#looksmaxxing'], min: 2 },
   king: { label: 'König vs. Untertan', ex: 'Eat like a king: … Not like a peasant:', w: 4, niche: ['#eatlikeaking', '#primal'], min: 2 },
   feel: { label: 'Feel-good-Collage', ex: '“why do I feel so good all the time?”', w: 3.5, niche: ['#realfood', '#wellness'] },
   problem: { label: 'Problem → Essen', ex: 'always tired? → mussels', w: 3, niche: ['#healthtips', '#realfood'] },
@@ -867,11 +918,32 @@ let photos = [], library = [], figures = [];
 let busy = false;
 
 /* ---------- Zeichnen ---------- */
-function drawCover(ctx, img, x, y, w, h, z) {
+// Foto in eine Zelle einpassen. Mit bekanntem Motiv (lib/focus.json) wird so geschnitten, dass das Essen
+// sicher im Bild bleibt (nicht nur Tellerrand oder Tischplatte).
+function drawCover(ctx, img, x, y, w, h, z, src) {
   const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
-  const s = Math.max(w / iw, h / ih) * z.z, sw = w / s, sh = h / s;
-  ctx.drawImage(img, (iw - sw) * z.fx, (ih - sh) * z.fy, sw, sh, x, y, w, h);
+  const fo = src && FOCUS[String(src).replace(/^lib\//, '')];
+  let zz = z.z;
+  if (fo) {
+    // Motiv-Rahmen in Pixeln; Zoom so begrenzen, dass er (mit etwas Luft) hineinpasst
+    const bw = (fo[4] - fo[2]) * iw, bh = (fo[5] - fo[3]) * ih, base = Math.max(w / iw, h / ih);
+    const maxZ = Math.max(1, Math.min(w / (bw * base * .92), h / (bh * base * .92)));
+    zz = Math.min(zz, maxZ);
+  }
+  const s = Math.max(w / iw, h / ih) * zz, sw = w / s, sh = h / s;
+  let sx = (iw - sw) * z.fx, sy = (ih - sh) * z.fy;
+  if (fo) {
+    const cx = fo[0] * iw, cy = fo[1] * ih;
+    sx = cx - sw / 2 + (z.fx - .5) * sw * .1; sy = cy - sh / 2 + (z.fy - .5) * sh * .1;
+    // Motivrand nicht abschneiden, wo möglich
+    const x0 = fo[2] * iw, x1 = fo[4] * iw, y0 = fo[3] * ih, y1 = fo[5] * ih;
+    if (x1 - x0 < sw) { sx = Math.min(sx, x0 - (sw - (x1 - x0)) * .15); sx = Math.max(sx, x1 - sw + (sw - (x1 - x0)) * .15); }
+    if (y1 - y0 < sh) { sy = Math.min(sy, y0 - (sh - (y1 - y0)) * .15); sy = Math.max(sy, y1 - sh + (sh - (y1 - y0)) * .15); }
+    sx = Math.max(0, Math.min(iw - sw, sx)); sy = Math.max(0, Math.min(ih - sh, sy));
+  }
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
 }
+let FOCUS = {};
 function drawDemo(ctx, food, x, y, w, h) {
   ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
   const gr = ctx.createLinearGradient(x, y, x + w, y + h);
@@ -1100,7 +1172,7 @@ function strokeText(ctx, text, x, y, size) {
 }
 function drawPhotoCell(ctx, it, x, y, w, h, z) {
   ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
-  if (it && it.img) drawCover(ctx, it.img, x, y, w, h, z); else if (it) drawDemo(ctx, it.food, x, y, w, h);
+  if (it && it.img) drawCover(ctx, it.img, x, y, w, h, z, it.src); else if (it) drawDemo(ctx, it.food, x, y, w, h);
   ctx.restore();
 }
 // Statue in einer Rasterzelle: dunkler Hintergrund, Statue unten mittig, Kopf bis Schnittkante sichtbar
@@ -1285,7 +1357,81 @@ function renderFeel(ctx, sl) {
     ctx.moveTo(x + cw * (1 - m), y + ch * m); ctx.lineTo(x + cw * m, y + ch * (1 - m)); ctx.stroke(); ctx.restore();
   }
 }
+// Ring: Lebensmittel am Rand, Text oder Zeichnung in der Mitte, weißer Hintergrund
+const RING = {
+  // cx, cy, w, h (Anteile)
+  12: [[.17, .115, .32, .2], [.5, .115, .3, .2], [.83, .115, .32, .2],
+       [.15, .315, .29, .19], [.85, .315, .29, .19], [.15, .5, .29, .18], [.85, .5, .29, .18], [.15, .685, .29, .19], [.85, .685, .29, .19],
+       [.17, .885, .32, .2], [.5, .885, .3, .2], [.83, .885, .32, .2]],
+  7: [[.2, .14, .36, .22], [.8, .14, .36, .22], [.14, .42, .27, .2], [.86, .42, .27, .2],
+      [.18, .84, .34, .24], [.5, .87, .3, .2], [.82, .84, .34, .24]],
+};
+function renderRing(ctx, sl) {
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  const foods = sl.items.filter(it => it.img), slots = RING[sl.variant === 'mog' ? 7 : 12];
+  foods.slice(0, slots.length).forEach((it, i) => {
+    const [cx, cy, w, h] = slots[i], z = sl.style.zoom[i % 4];
+    drawCut(ctx, it.img, (cx - w / 2) * W, (cy - h / 2) * H, w * W, h * H, { pad: .02, scale: 1 + (z.z - 1) * .2 });
+  });
+  if (sl.variant === 'mog') {
+    if (sl.figure) drawFigureBox(ctx, sl.figure, W * .29, H * .29, W * .42, H * .38, 'center');
+    return;
+  }
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  if (sl.variant === 'diet') {
+    // schlichter schwarzer Text wie TikToks „Klassisch“
+    let size = W * .085; ctx.font = capFont(size);
+    let lines = wrap(ctx, sl.hook, W * .38);
+    while ((lines.length > 3 || lines.some(l => ctx.measureText(l).width > W * .4)) && size > W * .04) { size *= .94; ctx.font = capFont(size); lines = wrap(ctx, sl.hook, W * .38); }
+    ctx.fillStyle = '#111'; const lh = size * 1.08;
+    lines.forEach((l, i) => ctx.fillText(l, W / 2, H * .5 + (i - (lines.length - 1) / 2) * lh));
+  } else {
+    let size = W * .058; ctx.font = capFont(size);
+    let lines = wrap(ctx, sl.hook, W * .4);
+    while ((lines.length > 3 || lines.some(l => ctx.measureText(l).width > W * .42)) && size > W * .038) { size *= .94; ctx.font = capFont(size); lines = wrap(ctx, sl.hook, W * .4); }
+    const lh = size * 1.1;
+    lines.forEach((l, i) => strokeText(ctx, l, W / 2, H * .5 + (i - (lines.length - 1) / 2) * lh, size));
+  }
+  ctx.restore();
+}
+const editFont = s => `400 ${s}px "DM Serif Display", Georgia, "Times New Roman", serif`;
+// 2×2 große freigestellte Lebensmittel auf Weiß, Text klein in der Mitte (wie „Everyday“)
+function renderFreq(ctx, sl) {
+  ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, W, H);
+  const foods = sl.items.filter(it => it.img);
+  const cells = [[0, .03, .5, .45], [.5, .03, .5, .45], [0, .52, .5, .45], [.5, .52, .5, .45]];
+  foods.slice(0, 4).forEach((it, i) => { const [x, y, w, h] = cells[i]; drawCut(ctx, it.img, x * W, y * H, w * W, h * H, { pad: .07 }); });
+  let size = W * .085; ctx.font = editFont(size);
+  while (ctx.measureText(sl.hook).width > W * .62 && size > W * .035) { size *= .95; ctx.font = editFont(size); }
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  // dünner weißer Schein, damit der Text auch über einem Bildrand lesbar bleibt
+  ctx.lineWidth = size * .22; ctx.strokeStyle = 'rgba(255,255,255,.9)'; ctx.lineJoin = 'round'; ctx.strokeText(sl.hook, W / 2, H * .5);
+  ctx.fillStyle = '#111'; ctx.fillText(sl.hook, W / 2, H * .5); ctx.restore();
+}
+// drei Streifen: Zeichnung links, Text oben rechts, Lebensmittel rechts (2 Reihen)
+function renderLove(ctx, sl) {
+  ctx.fillStyle = '#111'; ctx.fillRect(0, 0, W, H);
+  const g = W * .008, ph = (H - g * 4) / 3;
+  const rows = [['a', sl.figure2], ['b', sl.figure3], ['c', sl.figure]];
+  rows.forEach(([role, fig], r) => {
+    const y = g + r * (ph + g), x = g, w = W - g * 2;
+    ctx.fillStyle = '#fff'; ctx.fillRect(x, y, w, ph);
+    ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, ph); ctx.clip();
+    if (fig) drawFigureBox(ctx, fig, x + w * .005, y + ph * .06, w * .35, ph * .94, 'center');
+    let size = W * .06; ctx.font = capFont(size);
+    while (ctx.measureText(sl.hook).width > w * .6 && size > W * .035) { size *= .95; ctx.font = capFont(size); }
+    ctx.fillStyle = '#111'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(sl.hook, x + w * .68, y + ph * .12);
+    const foods = sl.items.filter(it => it.img && it.role === role);
+    const slots = foods.length >= 5 ? [[.37, .2, .21, .44], [.58, .2, .2, .44], [.78, .2, .21, .44], [.42, .6, .28, .4], [.7, .6, .28, .4]]
+      : [[.37, .2, .31, .42], [.68, .2, .31, .42], [.37, .59, .31, .41], [.68, .59, .31, .41]];
+    foods.slice(0, slots.length).forEach((it, i) => { const [sx, sy, sw, sh] = slots[i]; drawCut(ctx, it.img, x + sx * w, y + sy * ph, sw * w, sh * ph, { pad: .01, scale: 1.04 }); });
+    ctx.restore();
+  });
+}
 function renderGrid(ctx, sl) {
+  if (sl.layout === 'freq') return renderFreq(ctx, sl);
+  if (sl.layout === 'love') return renderLove(ctx, sl);
+  if (sl.layout === 'ring') return renderRing(ctx, sl);
   if (sl.layout === 'collage') return renderCollage(ctx, sl);
   if (sl.layout === 'fg') return renderFeel(ctx, sl);
   if (sl.layout === 'hero') return renderHero(ctx, sl);
@@ -1297,7 +1443,7 @@ function renderGrid(ctx, sl) {
   sl.items.forEach((it, i) => {
     const x = (i % 2) * cw, y = Math.floor(i / 2) * ch;
     ctx.save(); ctx.beginPath(); ctx.rect(x, y, cw, ch); ctx.clip();
-    if (it.img) drawCover(ctx, it.img, x, y, cw, ch, st.zoom[i]); else drawDemo(ctx, it.food, x, y, cw, ch);
+    if (it.img) drawCover(ctx, it.img, x, y, cw, ch, st.zoom[i], it.src); else drawDemo(ctx, it.food, x, y, cw, ch);
     ctx.restore();
   });
   applyGrade(ctx, st.grade);
@@ -1320,7 +1466,9 @@ function swapItems(junk, used) {
       if (!p) return null; used.add(p.id); return { src: p.src, food: foodOf(p), id: p.id };
     };
     let alt = null;
-    for (const o of shuffle(opts)) { alt = one(o); if (alt) break; }
+    // Alternativen, die zum Vibe der schon gewählten passen, zuerst
+    const fit = o => taken.size ? -Math.min(...[...taken].map(t => vcomp(t, o))) : 0;
+    for (const o of shuffle(opts).sort((a, b) => fit(a) - fit(b))) { alt = one(o); if (alt) break; }
     // alle passenden schon vergeben? dann lieber ein passendes doppelt als etwas Unpassendes
     for (const o of shuffle(SWAPMAP[j.food.id] || [])) { if (alt) break; alt = one(o); }
     alt = alt || chooseFour(isCore, used)[0];
@@ -1334,6 +1482,58 @@ function chooseItems(sp, used) {
   const out = [...rest]; out.splice(Math.floor(rnd() * 4), 0, sc[0]);
   return out;
 }
+/* ---------- Vibe: was auf einer Folie zusammenpasst ----------
+   Vier Fotos auf einer Folie sollen wie aus einer Welt aussehen: tierische Produkte zusammen,
+   Obst zusammen, Gemüse zusammen, Nüsse/Körner zusammen, Getränke zusammen – nie Steak neben grünem Tee. */
+const VIBE = {
+  animal: ['steak', 'beef', 'lamb', 'chicken', 'eggs', 'salmon', 'sardines', 'mackerel', 'tuna', 'shrimp', 'oysters', 'mussels', 'cheese', 'butter', 'milk', 'yogurt', 'oliveoil', 'olives'],
+  veg: ['carrots', 'sweetpotato', 'potatoes', 'greens', 'peppers', 'tomatoes', 'beets', 'cauliflower', 'asparagus', 'mushrooms', 'onions', 'garlic', 'ginger', 'pumpkin', 'cucumber', 'avocado', 'olives', 'oliveoil', 'kimchi', 'lentils', 'rice'],
+  fruit: ['berries', 'blueberries', 'raspberries', 'cherries', 'kiwi', 'mango', 'banana', 'oranges', 'lemons', 'pomegranate', 'watermelon', 'figs', 'grapes', 'pears', 'apples', 'dates', 'pineapple', 'papaya', 'coconut', 'avocado'],
+  pantry: ['almonds', 'walnuts', 'nuts', 'pumpkinseeds', 'oats', 'chocolate', 'honey', 'dates', 'lentils', 'rice'],
+  drink: ['water', 'coffee', 'milk', 'chamomile', 'greentea', 'mint', 'coconutwater'],
+  dairy: ['eggs', 'yogurt', 'milk', 'cheese', 'butter'],
+};
+// Wie gut zwei Gruppen nebeneinander aussehen (3 = gleiche Welt, 0 = Stilbruch wie Steak neben Tee)
+const VC = {
+  animal: { animal: 3, dairy: 3, veg: 2, pantry: 1, fruit: 0, drink: 0, jsweet: 0, jsalty: 0 },
+  dairy: { animal: 3, dairy: 3, veg: 2, pantry: 2, fruit: 2, drink: 1, jsweet: 0, jsalty: 0 },
+  veg: { animal: 2, dairy: 2, veg: 3, fruit: 2, pantry: 1, drink: 0, jsweet: 0, jsalty: 0 },
+  fruit: { animal: 0, dairy: 2, veg: 2, fruit: 3, pantry: 2, drink: 1, jsweet: 0, jsalty: 0 },
+  pantry: { animal: 1, dairy: 2, veg: 1, fruit: 2, pantry: 3, drink: 1, jsweet: 0, jsalty: 0 },
+  drink: { animal: 0, dairy: 1, veg: 0, fruit: 1, pantry: 1, drink: 3, jsweet: 0, jsalty: 0 },
+  jsweet: { animal: 0, dairy: 0, veg: 0, fruit: 0, pantry: 0, drink: 0, jsweet: 3, jsalty: 2 },
+  jsalty: { animal: 0, dairy: 0, veg: 0, fruit: 0, pantry: 0, drink: 0, jsweet: 2, jsalty: 3 },
+};
+const JSWEET = ['candy', 'donut', 'cookies', 'pancakes', 'soda', 'cereal', 'cerealbar', 'granola', 'juice'];
+const vibesOf = id => { const f = FOODS[id]; if (f && (isJunk(f) || isFake(f))) return [JSWEET.includes(id) ? 'jsweet' : 'jsalty']; const g = Object.keys(VIBE).filter(k => VIBE[k].includes(id)); return g.length ? g : ['veg']; };
+const vcomp = (a, b) => Math.max(...vibesOf(a).flatMap(x => vibesOf(b).map(y => VC[x][y])));
+const twinOf = (a, b) => TWINS.some(g => g.includes(a) && g.includes(b));
+// wählt k Lebensmittel aus ids, die vom Vibe am besten zusammenpassen (mehrere Startpunkte, bestes Ergebnis)
+function vibeFoods(ids, used, k) {
+  ids = [...new Set(ids)];
+  if (ids.length <= k) return shuffle(ids);
+  const fresh = id => used.has('food:' + id) ? 0 : 1;   // in diesem Post noch nicht gezeigt
+  let best = null, bestScore = -1e9;
+  for (let t = 0; t < 8; t++) {
+    const seeds = shuffle(ids).sort((a, b) => fresh(b) - fresh(a));
+    const out = [seeds[t % Math.min(seeds.length, 4)]];
+    while (out.length < k) {
+      let cand = null, cs = -1e9;
+      for (const id of shuffle(ids)) {
+        if (out.includes(id)) continue;
+        const comps = out.map(o => vcomp(o, id));
+        const sc = Math.min(...comps) * 10 + comps.reduce((a, b) => a + b, 0) + fresh(id) * 2 - (out.some(o => twinOf(o, id)) ? 30 : 0) + rnd();
+        if (sc > cs) { cs = sc; cand = id; }
+      }
+      out.push(cand);
+    }
+    let pmin = 3, psum = 0;
+    for (let a = 0; a < out.length; a++) for (let b = a + 1; b < out.length; b++) { const c = vcomp(out[a], out[b]); pmin = Math.min(pmin, c); psum += c; }
+    const score = pmin * 100 + psum * 3 + out.reduce((a, id) => a + fresh(id), 0) * 4 + rnd() * 6;
+    if (score > bestScore) { bestScore = score; best = out; }
+  }
+  return best;
+}
 function chooseFour(pred, used, k = 4) {
   // echte Fotos zuerst, je Essen nur einmal; Fotos aus früheren Slides dieses Posts möglichst nicht wiederholen
   const useT = recent.use || {};
@@ -1342,10 +1542,9 @@ function chooseFour(pred, used, k = 4) {
   const real = shuffle([...photos, ...library].filter(p => p.src && pred(foodOf(p)))).sort((a, b) => seen(a) - seen(b) || (useT[a.id] || 0) - (useT[b.id] || 0));
   const out = [], foods = new Set();
   const take = p => { out.push({ src: p.src, food: foodOf(p), id: p.id, pred }); foods.add(p.food); used.add(p.id); used.add('food:' + p.food); };
-  const twin = id => [...foods].some(o => TWINS.some(g => g.includes(o) && g.includes(id)));
-  for (const p of real) if (out.length < k && !used.has(p.id) && !foods.has(p.food) && !twin(p.food)) take(p);
-  for (const p of real) if (out.length < k && !foods.has(p.food) && !twin(p.food)) take(p);
-  for (const p of real) if (out.length < k && !foods.has(p.food)) take(p);
+  // erst passende Lebensmittel wählen (Vibe), dann je Lebensmittel das beste noch nicht benutzte Foto
+  const want = vibeFoods(real.map(p => p.food), used, k);
+  for (const id of want) { const p = real.find(p => p.food === id && !used.has(p.id)) || real.find(p => p.food === id); if (p && out.length < k) take(p); }
   for (const f of shuffle(Object.values(FOODS).filter(f => pred(f) && f.id !== 'other' && !foods.has(f.id) && !hasPhoto(f.id)))) if (out.length < k && !real.length) { out.push({ food: f, demo: true }); foods.add(f.id); }
   for (const p of real) if (out.length < k && !out.some(o => o.id === p.id)) take(p);
   while (out.length < k) out.push({ food: pick(Object.values(FOODS).filter(pred)), demo: true });
@@ -1408,10 +1607,11 @@ function pickKind(needStrong, needSad) {
   const k = weighted(opts.map(([k, w]) => [k, k === recent.kind ? w * .5 : w]));
   recent.kind = k; return k;
 }
-function nextFigure(mood, physique, kind) {
+function nextFigure(mood, physique, kind, only) {
   // eine Figur pro Post; über mehrere Posts reihum, die zuletzt benutzten kommen zuletzt dran
-  let pool = figures.filter(f => (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind));
-  if (physique && kind === 'statue' && pool.some(f => f.physique)) pool = pool.filter(f => f.physique);
+  let pool = figures.filter(f => (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind) && (!only || only(f)));
+  // starke Statuen: immer die muskulösen (Orakel/Chrom wirken neben Essen fehl am Platz)
+  if (mood === 'strong' && kind === 'statue' && pool.some(f => f.physique)) pool = pool.filter(f => f.physique);
   if (!pool.length) return null;
   const key = mood + '-' + (kind || 'all');
   const last = (recent.figs && recent.figs[key]) || [];
@@ -1451,7 +1651,7 @@ function planSlides(series, n, lang) {
   }
   if (series === 'swap') {
     const pairs = Math.max(1, Math.floor(n / 2)), sw = SWAP[lang];
-    for (let k = 0; k < pairs; k++) { specs.push({ pred: f => isJunk(f) && SWAPMAP[f.id], hook: sw[k * 2], mood: 'sad' }); specs.push({ pred: isCore, hook: sw[k * 2 + 1], mood: 'strong', swapOf: specs.length - 1 }); }
+    for (let k = 0; k < pairs; k++) { specs.push({ pred: f => isJunk(f) && SWAPMAP[f.id] && !['soda', 'beer'].includes(f.id), hook: sw[k * 2], mood: 'sad' }); specs.push({ pred: isCore, hook: sw[k * 2 + 1], mood: 'strong', swapOf: specs.length - 1 }); }
   }
   if (series === 'countries') {
     pickFresh(COUNTRIES, c => c.flag).slice(0, n).forEach(c => specs.push({ pred: idsPred(c.foods), hook: c[lang], mood: 'strong', flag: c.flag, key: c.flag }));
@@ -1526,6 +1726,26 @@ function planSlides(series, n, lang) {
     out.slice(0, Math.max(1, n)).forEach((x, i) => specs.push({ layout: 'collage', variant, pool: x.good ? x.k.good : x.k.bad, cnt: variant === 'royal' ? 10 : 11,
       hook: x.k[lang][x.good ? 0 : 1], mood: x.good ? 'strong' : 'sad', key: i === 0 ? 'king' + x.k.id : undefined }));
   }
+  if (series === 'freq') {
+    const list = n >= 4 ? FREQ : n === 3 ? [FREQ[0], FREQ[1], FREQ[3]] : n === 2 ? [FREQ[0], FREQ[3]] : [FREQ[0]];
+    list.forEach((f, i) => specs.push({ layout: 'freq', pool: f.foods, cnt: 4, hook: f[lang], mood: 'none', key: i === 0 ? 'freq' : undefined, vibe: true }));
+  }
+  if (series === 'love') {
+    pickFresh(LOVE, x => 'love' + x.id).slice(0, n).forEach(x => specs.push({ layout: 'love', love: x, hook: x[lang], mood: 'duel', key: 'love' + x.id }));
+  }
+  if (series === 'dad') {
+    const quote = t => lang === 'de' ? `„${t}“` : `“${t}”`;
+    pickFresh(DAD.filter(d => CLAIMS[d.id]), d => 'dad' + d.id).slice(0, n).forEach(d => specs.push({ layout: 'ring', variant: 'dad',
+      pool: why(d.id), fill: STAPLES, cnt: 12, hook: quote(d[lang]), mood: 'none', key: 'dad' + d.id, claim: d.id, niche: (QUESTIONS.find(q => q.id === d.id) || {}).niche }));
+  }
+  if (series === 'diet') {
+    pickFresh(DIETS, d => 'diet' + d.id).slice(0, n).forEach(d => specs.push({ layout: 'ring', variant: 'diet',
+      pool: d.foods, fill: STAPLES, cnt: 12, hook: d[lang], mood: 'none', key: 'diet' + d.id, niche: d.niche }));
+  }
+  if (series === 'mog') {
+    for (let i = 0; i < Math.max(2, n); i++) specs.push({ layout: 'ring', variant: 'mog', pool: i % 2 ? MOG.bad : MOG.good, cnt: 7,
+      hook: lang === 'de' ? (i % 2 ? 'so nicht' : 'so') : (i % 2 ? 'not like this' : 'like this'), mood: i % 2 ? 'sad' : 'strong', key: i === 0 ? 'mog' : undefined });
+  }
   if (series === 'feel') {
     // erste Folie oft die allgemeine Frage, danach konkrete Fragen mit den passenden Lebensmitteln
     const qs = pickFresh(QUESTIONS.filter(q => why(q.id).filter(hasCut).length >= 5), q => 'fg' + q.id);
@@ -1545,7 +1765,7 @@ const SHORT = ['fix'];   // Arten mit nur 2 Slides – bei Zufall nicht nehmen
 function pickSeries(n) {
   if (S.series !== 'random' && SERIES[S.series]) return S.series;   // gelöschte Arten → Zufall
   const cutsOk = Object.keys(CUTS).length > 20;   // Collagen nur, wenn die freigestellten Bilder geladen sind
-  return weighted(Object.entries(SERIES).filter(([id, s]) => (n < 3 || !SHORT.includes(id)) && (!s.min || n >= s.min) && (cutsOk || !['king', 'feel'].includes(id)))
+  return weighted(Object.entries(SERIES).filter(([id, s]) => (n < 3 || !SHORT.includes(id)) && (!s.min || n >= s.min) && (cutsOk || !['king', 'feel', 'dad', 'diet', 'mog', 'freq', 'love'].includes(id)))
     .map(([id, s]) => [id, recent.series.slice(0, 3).includes(id) ? s.w * .15 : s.w]));
 }
 // Plant einen Post (Texte, Fotos, Statuen) – ohne zu zeichnen
@@ -1553,9 +1773,14 @@ function planPost(series, n, lang) {
   const specs = planSlides(series, n, lang);
   const duel = specs.some(s => s.mood === 'duel');
   const needStrong = specs.some(s => s.mood === 'strong' || s.mood === 'duel'), needSad = specs.some(s => s.mood === 'sad' || s.mood === 'duel');
-  const kind = series === 'king' && figures.some(f => kindOf(f) === 'statue' && f.mood === 'sad') ? 'statue' : pickKind(needStrong, needSad);   // König/Untertan: klassische Statuen
-  const fig = { strong: needStrong && kind ? nextFigure('strong', duel || series === 'king' || specs.some(s => s.big), kind) : null,
-    sad: needSad && kind ? nextFigure('sad', false, kind) : null };
+  const kind = series === 'mog' || series === 'love' ? 'drawing'
+    : series === 'king' && figures.some(f => kindOf(f) === 'statue' && f.mood === 'sad') ? 'statue' : pickKind(needStrong, needSad);   // König/Untertan: klassische Statuen
+  // heller Hintergrund: nur sauber freigestellte Figuren; Mog: männliche Zeichnungen
+  const only = series === 'love' ? (f => (f.mood === 'sad' && (f.id !== 'muede' || !f.builtin)) || ['yeschad', 'manga'].includes(f.id) || !f.builtin)
+    : series === 'mog' ? (f => f.mood === 'sad' || ['manga', 'yeschad'].includes(f.id) || !f.builtin) : ['king'].includes(series) ? (f => f.light !== false && !['parkplatz', 'gym'].includes(f.id)) : null;
+  const fig = { strong: needStrong && kind ? nextFigure('strong', duel || series === 'king' || specs.some(s => s.big), kind, only) : null,
+    sad: needSad && kind ? nextFigure('sad', false, kind, only) : null };
+  if (series === 'love' && fig.sad) fig.sad2 = nextFigure('sad', false, kind, f => only(f) && f !== fig.sad && f.id !== 'muede') || fig.sad;
   const base = makeStyle();  // gleiche Statuen-Größe/-Spiegelung im ganzen Video
   const used = new Set();
   const slides = [];
@@ -1568,6 +1793,9 @@ function planPost(series, n, lang) {
         return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
     : sp.layout === 'hero' ? [chooseHero(sp.one, used)]
     : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
+    : sp.layout === 'freq' ? chooseCuts(vibeFoods(sp.pool.filter(hasCut), used, 4), used, 4)
+    : sp.layout === 'love' ? [...chooseCuts(sp.love.junk, used, 5).map(it => ({ ...it, role: 'a' })), ...chooseCuts(sp.love.fake, used, 4).map(it => ({ ...it, role: 'b' })), ...chooseCuts(sp.love.real, used, 5).map(it => ({ ...it, role: 'c' }))]
+    : sp.layout === 'ring' ? (() => { const a = chooseCuts(sp.pool, used, sp.cnt); return a.length >= sp.cnt || !sp.fill ? a : [...a, ...chooseCuts(sp.fill.filter(id => !a.some(x => x.food.id === id)), used, sp.cnt - a.length)]; })()
     : sp.layout === 'fg' ? (() => { const g = chooseCuts(sp.pool, used, sp.pool.filter(hasCut).length >= 8 ? 8 : 5);
         return [...g, ...chooseCuts(sp.bad, used, 4).map(it => ({ ...it, role: 'x' }))]; })()
     : sp.swapOf != null ? swapItems(slides[sp.swapOf].items, used) : chooseItems(sp, used);
@@ -1577,6 +1805,7 @@ function planPost(series, n, lang) {
     items: itemsFor(sp),
     figure: sp.mood === 'duel' ? fig.strong : sp.mood === 'none' ? null : fig[sp.mood] || null,
     figure2: sp.mood === 'duel' ? fig.sad : null,
+    figure3: sp.layout === 'love' ? fig.sad2 || fig.sad : null,
     niche: sp.niche,
   }));
   const niche = (SERIES[series].niche || slides[0].niche) || ['#realfood', '#wholefoods'];
@@ -1593,7 +1822,7 @@ function planPost(series, n, lang) {
 }
 // Lädt Fotos/Statuen und zeichnet die Slides als JPG
 async function renderBlobs(slides, fig) {
-  const used2 = [...new Set([fig.strong, fig.sad, ...slides.flatMap(sl => [sl.figure, sl.figure2])].filter(Boolean))];
+  const used2 = [...new Set([fig.strong, fig.sad, fig.sad2, ...slides.flatMap(sl => [sl.figure, sl.figure2, sl.figure3])].filter(Boolean))];
   releaseFigs(used2);
   used2.forEach(f => figBusy.set(f, (figBusy.get(f) || 0) + 1));
   try { return await drawSlides(slides, used2); }
@@ -1712,7 +1941,7 @@ function saveFeed() {
     fig: { strong: d.fig.strong ? d.fig.strong.id : null, sad: d.fig.sad ? d.fig.sad.id : null },
     slides: d.slides.map(sl => ({ hook: sl.hook, t: sl.t || null, flag: sl.flag || null, big: !!sl.big, style: sl.style, niche: sl.niche || null,
       layout: sl.layout || 'grid', labels: sl.labels || null, flags: sl.flags || null,
-      figure: sl.figure ? sl.figure.id : null, figure2: sl.figure2 ? sl.figure2.id : null,
+      figure: sl.figure ? sl.figure.id : null, figure2: sl.figure2 ? sl.figure2.id : null, figure3: sl.figure3 ? sl.figure3.id : null, love: sl.love || null,
       variant: sl.variant || null,
       items: sl.items.map(it => ({ src: it.src && !it.src.startsWith('blob:') ? it.src : null, food: it.food.id, id: it.id || null, demo: !!it.demo, cut: !!it.cut, role: it.role || null })) })) })) });
 }
@@ -1724,7 +1953,7 @@ function restoreFeed() {
     feed = p.drafts.map(d => ({ ...d, blobs: [], urls: [], files: null,
       fig: { strong: byId(d.fig.strong), sad: byId(d.fig.sad) },
       slides: d.slides.map(sl => ({ kind: 'grid', lang: d.lang, layout: sl.layout || 'grid', t: sl.t || null, labels: sl.labels, flags: sl.flags, hook: sl.hook, flag: sl.flag, big: sl.big, style: sl.style, niche: sl.niche,
-        figure: sl.figure ? byId(sl.figure) : null, figure2: sl.figure2 ? byId(sl.figure2) : null,
+        figure: sl.figure ? byId(sl.figure) : null, figure2: sl.figure2 ? byId(sl.figure2) : null, figure3: sl.figure3 ? byId(sl.figure3) : null, love: sl.love || null,
         variant: sl.variant || null,
         items: sl.items.map(it => ({ src: it.src, food: FOODS[it.food] || FOODS.other, id: it.id, demo: it.demo, cut: it.cut, role: it.role })) })) }));
     renderFeed(); pump(); return true;
@@ -2015,6 +2244,7 @@ async function init() {
   } catch (e) { library = []; }
   try { sizes = await (await fetch('lib/sizes.json')).json(); } catch (e) { sizes = {}; }
   try { CUTS = await (await fetch('cut/cut.json')).json(); } catch (e) { CUTS = {}; }
+  try { FOCUS = await (await fetch('lib/focus.json')).json(); } catch (e) { FOCUS = {}; }
   await loadLocal();
   renderFigGrid(); renderPhotoGrid();
   if (!restoreFeed()) newFeed();
