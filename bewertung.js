@@ -60,7 +60,7 @@ const R_CATS=[
    b:[60,44,50,64],g:["Viel Protein für eine Nuss","Sättigt gut – kleine Menge","","Fett und Protein liefern gleichmäßige Energie"],x:["Hülsenfrucht, nicht primal","~Sehr kalorienreich|Hülsenfrucht, nicht primal","Viel Omega-6|Hülsenfrucht, nicht primal","Hülsenfrucht, nicht primal"]},
   {id:"butter",k:["beurre","=burro","mantequilla","maslo 82","butter"],n:["buttermilch","butterkase","kakaobutter","sheabutter","nussbutter","mandelbutter","cashewbutter","peanut","erdnuss","cacahuete","arachide"],w:1,d:1,
    b:[46,46,62,66],g:["Naturbelassenes Fett","Natürliches Fett, macht satt","Natürliches Fett mit Vitamin A","Natürliche Fettquelle für lange Energie"],x:["Kein Protein","~Sehr kalorienreich – dünn streichen","Milchfett – in Maßen",""]},
-  {id:"processedmeat",k:["snacki","kabanos","minisalami","geflugelwurst","putenwurst","hahnchenwurst","bratwurstchen","saftschinken","wurst","salami","schinken","=speck","speckwurfel","bacon","leberkase","fleischkase","=wiener","wurstchen","frankfurter","mortadella","lyoner","aufschnitt","chorizo","cabanossi","pastrami","corned","sulze","teewurst","mettwurst","landjager","kassler","kasseler","pfefferbeisser","=bierschinken","leberpastete","pastete","=mett","hot dog","peperoni salami","bresaola","prosciutto","serrano","=parma","coppa","nduja","=bratwurst","weisswurst","krakauer","bockwurst","bifi","jerky","beef jerky","dorrfleisch","knacker","=pastrama","rillettes","=ham","saucisse","cipollata","sunca","schinkenbraten","terrine","leberkas"],n:["wurstsalat","nussknacker","nussbeisser"],
+  {id:"processedmeat",k:["snacki","kabanos","minisalami","geflugelwurst","putenwurst","hahnchenwurst","bratwurstchen","saftschinken","wurst","salami","schinken","=speck","speckwurfel","bacon","leberkase","fleischkase","=wiener","wurstchen","frankfurter","mortadella","lyoner","aufschnitt","chorizo","cabanossi","pastrami","corned","sulze","teewurst","mettwurst","landjager","kassler","kasseler","pfefferbeisser","=bierschinken","leberpastete","pastete","=mett","hot dog","peperoni salami","bresaola","prosciutto","serrano","=parma","coppa","nduja","=bratwurst","weisswurst","krakauer","bockwurst","=bifi","jerky","beef jerky","dorrfleisch","knacker","=pastrama","rillettes","=ham","saucisse","cipollata","sunca","schinkenbraten","terrine","leberkas"],n:["wurstsalat","nussknacker","nussbeisser"],
    b:[40,32,22,28],g:["+Liefert Protein","","",""],x:["Verarbeitet: Salz, Nitrit & Zusätze","Viel Fett & Salz|Verarbeitet","Salz, Nitrit & Zusätze – ungünstig für die Haut","Schwer & salzig, macht träge"]},
   {id:"broth",k:["knochenbruhe","bone broth","rinderbruhe","huhnerbruhe","geflugelbruhe","rinderfond","kalbsfond","huhnerfond","fischfond","geflugelfond","wildfond","=fond"],n:["gemuse"],w:1,
    b:[62,88,95,72],g:["Kollagen & Aminosäuren","Wärmt & sättigt fast ohne Kalorien","Kollagen aus Knochen, gut für die Haut","Mineralien & Elektrolyte"],x:["Wenig Protein pro Portion","","",""]},
@@ -97,7 +97,7 @@ const R_CATS=[
   {id:"sweetpotato",k:["susskartoffel","batate","=yams","sweet potato"],w:1,
    b:[74,78,95,90],g:["Gute Carbs fürs Training","Sättigt bei moderaten Kalorien","Viel Beta-Carotin für die Haut","Langsame, gut verträgliche Carbs"],x:["Kaum Protein","","",""]},
   {id:"potato",k:["kartoffel","erdapfel","drillinge","pellkartoffel","salzkartoffel","bratkartoffel","maniok","cassava","pastinake","topinambur","=knolle","kartoffelpuree","kartoffelbrei","maronen","marone","esskastanie"],w:1,
-   b:[72,78,76,88],g:["Gute Carbs fürs Training","Sättigt stark bei wenig Kalorien","Vitamin C & Kalium, glutenfrei","Lang anhaltende Energie aus Carbs"],x:["Kaum Protein","","",""]},
+   b:[72,78,76,88],g:["Gute Carbs fürs Training","Sättigt stark bei wenig Kalorien","Vitamin C & Kalium, glutenfrei","Stärke & Kalium als Energiequelle"],x:["Kaum Protein","","",""]},
   {id:"oats",k:["avoine","avena","=avoines","=oat","oatcake","oatmeal","porridge oats","flocons d'avoine","овесени","^hafer","porridge","haferbrei","haferflocken","=oats","overnight oats","haferkleie","=musli","bircher","fruchtmusli","fruchte musli","basis musli"],w:1,
    b:[80,78,80,92],g:["Gute Carbs + etwas Protein","Ballaststoffe halten lange satt","Zink & langsame Carbs – gut für die Haut","Langsame Carbs – Energie über Stunden"],x:["","~Trocken viele Kalorien – Portion wiegen","",""]},
   {id:"rice",k:["^reis","basmati","jasminreis","naturreis","vollkornreis","wildreis","parboiled","risottoreis","sushireis","=rice"],w:1,
@@ -294,6 +294,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="spice"&&/(senf|moutarde|mustard)/.test(h)&&n.su>10) return R_BYID.sauce;   // süßer Senf, Honig-Senf
   // Obst & Gemüse mit Getränke-Wörtern und wenig Kalorien: Limo, Schorle, aromatisiertes Wasser
   if(["fruit","berries","vitc","banana","veg","skinveg"].includes(id)&&n.kc<70&&R_DRINKW.test(h)) return "RETRY";
+  if(id==="banana"&&n.kc<60) return "RETRY";                         // Bananen-Milchdrink: echte Banane hat ca. 90 kcal
   if(["poultry","redmeat","leanfish","fattyfish"].includes(id)&&n.cb>8) return /(panier|panade|breaded|coated|crispy|knusper|backfisch|nugget|=pane)/.test(h)?R_BYID.fastfood:dish;
   if(id==="fastfood"&&n.kc<90&&/(passata|sugo|tomat|pizzasauce|pizza sauce)/.test(h)) return R_BYID.sauce;
   if(id==="cereal"&&/(chili|pfeffer|gewurz|spice|paprika)/.test(h)) return R_BYID.spice;
@@ -302,7 +303,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="coconut"&&n.kc<70&&n.su>6) return R_BYID.softdrink;    // Getränk mit Kokos (Kokoswasser hat weniger Zucker)
   if(id==="chips"&&n.fa<5&&n.kc>200&&/(apfel|banane|mango|ananas|frucht|beere|obst|birne)/.test(h)) return R_BYID.driedfruit; // Apfelchips
   if(id==="dairy"&&n.pr>=15&&n.fa>=15&&n.cb<5) return R_BYID.cheese;   // "Heumilch-Bergkäse", "Comté au lait cru"
-  if(["dairy","protdairy"].includes(id)&&n.kc>300&&n.pr>=25&&n.fa<15) return /(riegel|\bbar\b|snack|crisp)/.test(h)?R_BYID.proteinbar:R_BYID.whey; // Diät-/Protein-Shakepulver, Proteinriegel
+  if(["dairy","protdairy"].includes(id)&&n.kc>300&&n.pr>=25&&n.fa<15&&n.su<30) return /(riegel|\bbar\b|snack|crisp)/.test(h)?R_BYID.proteinbar:R_BYID.whey; // Diät-/Protein-Shakepulver, Proteinriegel
   if(["dairy","protdairy","kefir"].includes(id)&&n.kc>300&&n.su>25) return R_BYID.sweets; // Vollmilch-Kuvertüre, Milchschoko
   if(id==="dairy"&&n.kc>300&&n.cb>30) return "RETRY";             // Milchbrei-Pulver, Riegel "Erdnuss & Vollmilch"
   if(id==="dairy"&&n.cb>25&&n.kc>200&&n.su<15) return "RETRY";   // "Greek Style"-Fladenbrot, Milchbrötchen
@@ -349,7 +350,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="avocado"&&n.kc>300) return n.fa>60?R_BYID.goodfat:dish;
   if(["goodfat","seedoil"].includes(id)&&n.fa<60) return R_BYID.sauce;
   if(id==="whey"&&n.pr<20) return R_BYID.proteinbar;
-  if(id==="water"&&n.kc>15) return n.su>2?R_BYID.softdrink:cat;
+  if(id==="water"&&n.kc>15) return n.su>2?R_BYID.softdrink:n.kc>30?"RETRY":cat;   // „Kartoffeln in Wasser“ ist kein Wasser
   return cat;
 }
 // Nährwert-Bewertung je Ziel, 0–100, rein aus den Zahlen pro 100 g
@@ -385,7 +386,7 @@ function rTopic(t){
   if(/zucker/.test(t)) return "sugar";
   if(/kcal|kalorien/.test(t)) return "kcal";
   if(/salz/.test(t)) return "salt";
-  if(/verarbeit|zusätz|fertig|industri|ersatz|isolat/.test(t)) return "proc";
+  if(/verarbeit|zusätz|fertig|industri|ersatz|isolat|naturbelassen|natürlich|echten zutaten/.test(t)) return "proc";
   if(/milch|molke/.test(t)) return "dairy";
   if(/gluten/.test(t)) return "gluten";
   if(/omega/.test(t)) return "omega";
@@ -526,6 +527,7 @@ function scoreFood(item,goal){
   const ps=kc>0?pr*4/kc:0, cs=kc>0?cb*4/kc:0, fs=kc>0?fa*9/kc:0, sr=cb>0?su/cb:0, fr=cb>0?fi/cb:0;
   const carbGood=cl(1-sr*1.4)*0.65+cl(fr*7)*0.35, fruity=R_FRUITY.includes(id)||["veg","skinveg"].includes(id)&&!heavy, drink=kc<8||["coffee","tea","water"].includes(id);
   // Lob für Protein/Carbs nur bei echtem Essen (kein "viel Protein" für Donuts)
+  const highGI=["potato","rice","ricecake","refined"].includes(id)&&!/(vollkorn|basmati|parboiled|wildreis|naturreis|vollreis)/.test(h);   // Stärke, die schnell ins Blut geht
   const junk=["sweets","chips","fastfood","sugar","softdrink","cereal","alcohol","sauce","margarine","seedoil"].includes(id), realFood=!cat||cat.w, okFood=!junk&&!(heavy&&!cat);
   if(!drink){
     if(g==="muscle"){
@@ -534,13 +536,14 @@ function scoreFood(item,goal){
         else if(ps>=0.4&&pr>=7) good("Viel Protein, wenig Kalorien",14);
         else if(pr>=12) good("Viel Protein ("+rG(pr)+" g)",11);
       }
-      if(realFood&&cb>=15&&cs>=0.45&&carbGood>=0.6) good("Gute, langsame Carbs",9);
+      if(realFood&&cb>=15&&cs>=0.45&&carbGood>=0.6&&!highGI) good("Gute, langsame Carbs",9);
       if(pr<5&&kc>=20) bad("Wenig Protein ("+rG(pr)+" g)",10);
       else if(["mixedmeal","readymeal"].includes(id)&&ps<0.2&&kc>=60){ score-=6; bad("Wenig Protein für ein Hauptgericht",10); }
       if(fs>0.65&&pr>=5&&pr<15&&ps<0.2&&!R_GOODFAT.includes(id)) bad("Viel Fett, wenig Protein",9);
     } else if(g==="lose"){
-      if(kc<=60&&realFood) good("Nur "+kc+" kcal pro 100 g",13);
-      else if(kc<=120&&realFood) good("Wenig Kalorien ("+kc+" kcal)",10);
+      const liq=["juice","nectar","vegjuice","softdrink","plantmilk"].includes(id);
+      if(kc<=60&&realFood&&!liq) good("Nur "+kc+" kcal pro 100 g",13);
+      else if(kc<=120&&realFood&&!liq) good("Wenig Kalorien ("+kc+" kcal)",10);
       if(okFood&&ps>=0.4&&pr>=7) good("Viel Protein – macht satt",12);
       if(fi>=5) good("Viele Ballaststoffe – sättigt",9);
       if(kc>=400) bad("Sehr kalorienreich ("+kc+" kcal)",13);
@@ -549,7 +552,7 @@ function scoreFood(item,goal){
       if(fi>=5&&cat&&cat.w) good("Ballaststoffe für einen gesunden Darm",6);
       if(cb>=20&&cs>0.55&&carbGood<0.45&&!fruity) bad("Schnelle Carbs lassen Blutzucker springen",10);
     } else {
-      if(realFood&&cb>=15&&cs>=0.45&&carbGood>=0.6) good("Langsame Carbs – Energie über Stunden",12);
+      if(realFood&&cb>=15&&cs>=0.45&&carbGood>=0.6&&!highGI) good("Langsame Carbs – Energie über Stunden",12);
       if(fs>=0.5&&R_GOODFAT.includes(id)) good("Gesunde Fette – lange Energie",10);
       if(okFood&&pr>=10) good("Protein hält die Energie stabil",7);
       if(cb>=20&&carbGood<0.4&&!fruity) bad("Schnelle Carbs, schnelles Tief",9);
@@ -572,7 +575,7 @@ function scoreFood(item,goal){
   if(id==="softdrink"&&su<1){ const zero=kc<10; score+=[8,zero?47:18,8,6][gi]; cons.length=0;
     if(g==="lose"&&zero){ good("Kaum Kalorien – bremst das Abnehmen nicht",13); good("Besser als die Variante mit Zucker",12); bad("Wasser ist noch besser: ohne Süßstoffe & Zusätze",12); }
     else bad("Süßstoffe und Zusätze, keine Nährstoffe",12); }
-  if(g==="lose"&&kc>0&&kc<=100&&su<10&&!["alcohol","softdrink","seedoil","goodfat","margarine","butter"].includes(id)&&!/(\bol\b|rapsol|olivenol|\boil\b|huile|\bolio\b|\baceite)/.test(h)&&score<45){ score=45+(100-kc)/10; if(!pros.length) good("Wenig Kalorien ("+kc+" kcal)",10); }
+  if(g==="lose"&&kc>0&&kc<=100&&su<10&&!["alcohol","softdrink","seedoil","goodfat","margarine","butter","juice","nectar"].includes(id)&&!/(\bol\b|rapsol|olivenol|\boil\b|huile|\bolio\b|\baceite)/.test(h)&&score<45){ score=45+(100-kc)/10; if(!pros.length) good("Wenig Kalorien ("+kc+" kcal)",10); }
   // Leichte Suppen, Soßen und Fertiggerichte: beim Abnehmen zählen vor allem die Kalorien
   if(["sauce","readymeal","mixedmeal"].includes(id)&&g==="lose"&&kc<=100&&kc>0){ good("Wenig Kalorien ("+kc+" kcal)",12); bad(su>=5?"Auf zugesetzten Zucker achten":sa>1.5?"":"Fertigprodukt: oft viel Salz & Zusätze",9); }
   if(["juice","nectar"].includes(id)&&g==="lose"&&kc<=25){ score+=15; good("Mit Wasser verdünnt: wenig Kalorien",12); bad("Wasser pur ist noch besser",9); }
@@ -586,7 +589,7 @@ function scoreFood(item,goal){
     if(/manuka/.test(h)){ score+=[1,1,5,2][gi]; good("Manuka-Honig",12); }
   }
   if(id==="juice"){
-    if(/smoothie/.test(h)){ score+=[2,3,5,4][gi]; good("Mit Fruchtfleisch: mehr Ballaststoffe",9); }
+    if(/smoothie/.test(h)){ score+=[2,3,5,4][gi]; good("Mit Fruchtfleisch: mehr Ballaststoffe",9); for(let i=cons.length-1;i>=0;i--) if(/ballaststoff/i.test(cons[i].t)) cons.splice(i,1); }
     if(/(direktsaft|frisch gepresst|naturtrub|100 ?%|nfc)/.test(h)){ score+=[1,0,3,2][gi]; good("Direktsaft: mehr Vitamine",8); }
     else if(/konzentrat/.test(h)){ score-=[1,0,3,2][gi]; bad("Aus Konzentrat: weniger Vitamine",7); }
   }
@@ -599,7 +602,7 @@ function scoreFood(item,goal){
   // Milch & Joghurt: Vollfett ist naturbelassener und für die Haut besser als fettarm
   if(id==="dairy"||id==="kefir"){
     const low=fa<2||/(fettarm|mager|entrahmt|0,1|0,3|1,5|light|leicht)/.test(h), full=!low&&(fa>=3||/(vollmilch|vollfett|3,5|3,8|4,0)/.test(h));
-    if(full){ score+=[2,0,10,3][gi]; if(g!=="lose") good(g==="skin"?"Vollfett: besser für die Haut als fettarm":"Vollfett: naturbelassener",g==="skin"?13:10); }
+    if(full){ score+=[2,0,10,3][gi]; if(g!=="lose"&&!heavy) good(g==="skin"?"Vollfett: besser für die Haut als fettarm":"Vollfett: naturbelassener",g==="skin"?13:10); }
     else if(low){ score+=[-1,2,-6,-2][gi]; if(g==="skin") bad("Fettarm: für die Haut eher ungünstiger",11); else if(g==="lose") good("Fettarm: weniger Kalorien",9); }
   }
   // Naturbelassenes Lebensmittel, aber stark verarbeitet (z. B. Fruchtjoghurt mit Zusätzen)
@@ -613,85 +616,200 @@ function scoreFood(item,goal){
   if(!["seedoil","margarine"].includes(id)&&/(sonnenblumenol|rapsol|palmol|pflanzenol)/.test(h)){ score-=5; bad("Mit raffiniertem Pflanzenöl",8); }
   rateQuality(item,id,h,(v,t,w)=>{ score+=v; (v>0?good:bad)(t,w); });
   score=rSoft(score);
-  // 6) Persönliches aus dem Fragebogen
-  const ea=state.coach.answers.gesundheit||{};
+  // 6) Persönliches aus dem Fragebogen – alles landet sichtbar unter „Für dich“ (mit Grund, woher es kommt)
+  const ctx={item,g,id,cat,heavy,nova,h,kc,pr,cb,fa,su,fi,sa,drink,okFood,junk,fruity,ps,highGI};
+  const pers=rPersonal(ctx), notes=pers.notes;
+  score+=pers.delta;
+  rTextCheck(pros,cons,{kc,pr,fa,su,cb,sa,saKnown:item.salt!=null&&item.salt!=="",fiber:item.fiber,h,id,heavy});
+  if(pros.some(x=>/pro stück/i.test(x.t))) for(let i=cons.length-1;i>=0;i--) if(/kalorienreich/i.test(cons[i].t)) cons.splice(i,1);
+  // 7) Immer mindestens zwei sachliche Gründe aus den echten Nährwerten
+  const out=rFill(pros,cons,Math.min(98,score),ctx); out.notes=notes; out.perso=pers.list;
+  // Kein Widerspruch zwischen „Für dich“ und allgemeinen Gründen
+  const pk=new Set(pers.list.map(x=>rTopic(x.t)));
+  out.good=out.good.filter(t=>!pk.has(rTopic(t))||!pers.list.some(x=>x.v<0&&rTopic(x.t)===rTopic(t)));
+  out.bad=out.bad.filter(t=>!pk.has(rTopic(t))||!pers.list.some(x=>x.v>0&&rTopic(x.t)===rTopic(t)));
+  return out;
+}
+// Persönliche Anpassung: jede Antwort im Fragebogen, die zum Lebensmittel passt, wirkt mit kleinem, begründetem Wert.
+// Unverträglichkeiten wirken stark (Sicherheit). Alles andere zusammen höchstens −14 bis +10, damit die Zahl ehrlich bleibt.
+// Ernährungsform & „meiden“ ändern die Zahl nicht (nur Hinweis), damit z. B. Fleisch für Vegetarier nicht „ungesund“ wirkt.
+function rPersonal(c){
+  const {item,g,id,heavy,h,kc,pr,su,fi,sa,drink,okFood,fruity}=c;
+  const A=state.coach.answers||{}, ea=A.gesundheit||{}, ha=A.haut||{}, hr=A.haare||{}, sl=A.schlaf||{}, au=A.aussehen||{}, P=state.profile||{};
+  const notes=[], NOTE=t=>{ if(!notes.includes(t)) notes.push(t); };
+  const hard=[], soft=[];
+  const add=(L,v,t,src)=>{ v=Math.round(v); if(!v||L.some(x=>x.t===t)) return; L.push({t,v,src}); };
   const MEATC=["fattyfish","leanfish","poultry","redmeat","organ","broth","processedmeat"], ANIC=MEATC.concat(["egg","protdairy","kefir","dairy","cheese","butter","whey"]);
   const plant=["ersatz","plantmilk","soy"].includes(id);
   const meat=!plant&&(MEATC.includes(id)||foodHas(item,"meat")), animal=meat||!plant&&(ANIC.includes(id)||foodHas(item,"lak")||foodHas(item,"egg"));
-  const P=(v,t)=>{ v=Math.round(v); if(!v) return; score+=v; (v>0?good:bad)(t,50+Math.abs(v)); };
-  // Die Zahl sagt nur: wie gesund + wie gut fürs Ziel. Ernährungsform und Vorlieben ändern sie NICHT,
-  // sie erscheinen nur als neutraler Hinweis unter der Bewertung.
-  const cap=98, notes=[], NOTE=t=>{ if(!notes.includes(t)) notes.push(t); };
+  const micro=R_MICRO_HIT?[R_MICRO_HIT.ts,R_MICRO_HIT.te,R_MICRO_HIT.tm,R_MICRO_HIT.tl].filter(Boolean).join(" "):"";
+  const nat=!heavy&&(!c.cat||c.cat.w);
+  // Ernährungsform & meiden: nur Hinweis
   if(ea.stil==="Vegan"&&animal) NOTE("Tierisch – passt nicht zu deiner veganen Ernährung");
   else if(ea.stil==="Vegetarisch"&&meat) NOTE("Enthält Fleisch oder Fisch – passt nicht zu deiner vegetarischen Ernährung");
-  // Was die Person meiden will
+  if((ea.stil==="Whole Foods"||ea.stil==="Primal")&&heavy) NOTE("Stark verarbeitet – passt nicht zu "+ea.stil);
+  if(ea.stil==="Primal"&&(plant||/(soja|\bsoy\b|tofu)/.test(h))) NOTE("Ersatzprodukt – passt nicht zu Primal");
   const meiden=(ea.meiden||[]).filter(x=>x!=="Nichts");
-  const M=(v,t)=>NOTE(t);
-  if(meiden.includes("Zucker")&&su>=8&&!R_FRUITY.includes(id)) M(0,"Viel Zucker – du willst Zucker meiden");
-  if(meiden.includes("Milchprodukte")&&(["protdairy","kefir","dairy","cheese","butter","whey","coffeemilk"].includes(id)||foodHas(item,"lak"))&&!plant) M(-22,"Du willst Milchprodukte meiden");
-  if(meiden.includes("Gluten")&&glu0(id,item,h)) M(-22,"Du willst Gluten meiden");
-  if(meiden.includes("Soja")&&(["soy","ersatz"].includes(id)||/(soja|\bsoy\b|tofu|tempeh)/.test(h))) M(-22,"Du willst Soja meiden");
-  if(meiden.includes("Schweinefleisch")&&/(schwein|speck|bacon|salami|leberkase|mett|kassler|kasseler|lyoner|leberwurst|chorizo|serrano|prosciutto|parma|bratwurst|wiener|frankfurter)/.test(h)) M(-25,"Enthält (meist) Schweinefleisch");
-  if(meiden.includes("Rotes Fleisch")&&(id==="redmeat"||id==="processedmeat")) M(-18,"Du willst rotes Fleisch meiden");
-  if(meiden.includes("Alkohol")&&id==="alcohol") M(-25,"Du willst Alkohol meiden");
-  if(meiden.includes("Koffein")&&(foodHas(item,"caf")||id==="coffee"||id==="coffeemilk")&&!/(entkoffeiniert|koffeinfrei)/.test(h)) M(-15,"Du willst Koffein meiden");
-  if(meiden.includes("Fertigprodukte")&&heavy) M(-12,"Du willst Fertigprodukte meiden");
-  // Haut-Probleme: beim Ziel Haut voll, sonst halb
-  const hp=((state.coach.answers.haut||{}).stoert||[]), hk=g==="skin"?1:0.5, H=(v,t)=>{ v=Math.round(v*hk); if(!v) return; score+=v; (v>0?good:bad)(t,35+Math.abs(v)); };
-  const microTxt=(R_MICRO_HIT&&R_MICRO_HIT.ts)||"";
-  if(hp.includes("Unreinheiten")){
-    if(["protdairy","kefir","dairy","cheese","whey","coffeemilk"].includes(id)&&!plant) H(-7,"Milch kann deine Unreinheiten verstärken");
-    else if(su>=12&&!R_FRUITY.includes(id)) H(-6,"Zucker kann deine Unreinheiten verstärken");
-    if(/zink|omega/i.test(microTxt)||["fattyfish","organ"].includes(id)) H(5,"Liefert Zink/Omega-3 für die Haut");
-  }
-  if(hp.includes("Rötung")){
-    if(id==="alcohol") H(-8,"Alkohol verstärkt Rötungen");
-    if(/omega/i.test(microTxt)||id==="fattyfish") H(5,"Liefert Omega-3-Fettsäuren");
-  }
-  if(hp.includes("Trockenheit")&&(R_GOODFAT.includes(id)||/omega|vitamin e/i.test(microTxt))&&!heavy) H(5,"Gute Fette für die Haut");
-  if((hp.includes("Wirkt stumpf")||hp.includes("Pigmentflecken"))&&(["berries","skinveg","vitc","vegjuice"].includes(id)||/antioxid|vitamin c|carotin/i.test(microTxt))&&!heavy) H(5,"Antioxidantien für einen frischen Teint");
-  if(hp.includes("Erste Fältchen")&&(["broth","fattyfish","vitc"].includes(id)||/kollagen|vitamin c/i.test(microTxt))&&!heavy) H(5,"Kollagen & Vitamin C für die Haut");
-  if(hp.includes("Glänzt / große Poren")&&["refined","sweets","fastfood","chips","cereal"].includes(id)) H(-5,"Schnelle Carbs können fettige Haut fördern");
-  const fokus=foodFocus(), intol=ea.intol||[];
+  if(meiden.includes("Zucker")&&su>=8&&!R_FRUITY.includes(id)) NOTE("Viel Zucker – du willst Zucker meiden");
+  if(meiden.includes("Milchprodukte")&&(["protdairy","kefir","dairy","cheese","butter","whey","coffeemilk"].includes(id)||foodHas(item,"lak"))&&!plant) NOTE("Du willst Milchprodukte meiden");
+  if(meiden.includes("Gluten")&&glu0(id,item,h)) NOTE("Du willst Gluten meiden");
+  if(meiden.includes("Soja")&&(["soy","ersatz"].includes(id)||/(soja|\bsoy\b|tofu|tempeh)/.test(h))) NOTE("Du willst Soja meiden");
+  if(meiden.includes("Schweinefleisch")&&/(schwein|speck|bacon|salami|leberkase|mett|kassler|kasseler|lyoner|leberwurst|chorizo|serrano|prosciutto|parma|bratwurst|wiener|frankfurter)/.test(h)) NOTE("Enthält (meist) Schweinefleisch");
+  if(meiden.includes("Rotes Fleisch")&&(id==="redmeat"||id==="processedmeat")) NOTE("Du willst rotes Fleisch meiden");
+  if(meiden.includes("Alkohol")&&id==="alcohol") NOTE("Du willst Alkohol meiden");
+  if(meiden.includes("Koffein")&&(foodHas(item,"caf")||id==="coffee"||id==="coffeemilk")&&!/(entkoffeiniert|koffeinfrei)/.test(h)) NOTE("Du willst Koffein meiden");
+  if(meiden.includes("Fertigprodukte")&&heavy) NOTE("Du willst Fertigprodukte meiden");
+  // Unverträglichkeiten (stark)
+  const intol=ea.intol||[];
   const lak=["protdairy","kefir","dairy","cheese","whey","coffeemilk"].includes(id)||foodHas(item,"lak")&&!plant;
   const glu=["wholewheat","refined"].includes(id)||foodHas(item,"glu");
   const nutA=["nuts","peanut"].includes(id)||foodHas(item,"nut");
-  // Lang gereifter Hartkäse und Butter/Ghee haben kaum Laktose
   const lakArm=id==="cheese"&&/(gouda|emmental|parmesan|parmigiano|grana|bergkase|cheddar|gruyere|comte|pecorino|tilsiter|edamer|leerdam|appenzeller|manchego|gereift|alter |alt )/.test(h)||id==="butter"||/(ghee|butterschmalz)/.test(h);
-  if(intol.includes("Laktose")&&lak&&!/(laktosefrei|lactosefrei)/.test(h)){ if(lakArm) NOTE("Gereift bzw. reines Milchfett: meist fast laktosefrei"); else P(-25,"Kann Laktose enthalten"); }
-  if(intol.includes("Gluten")&&glu&&!/glutenfrei/.test(h)) P(-25,"Kann Gluten enthalten");
-  if(intol.includes("Nüsse")&&nutA) P(-30,"Kann Nüsse enthalten");
-  // Zucker-Fokus: Obst & Co. haben ihren Zucker von Natur aus (mit Ballaststoffen), deshalb kein Abzug
+  if(intol.includes("Laktose")&&lak&&!/(laktosefrei|lactosefrei)/.test(h)){ if(lakArm) NOTE("Gereift bzw. reines Milchfett: meist fast laktosefrei"); else add(hard,-25,"Kann Laktose enthalten","Unverträglichkeit: Laktose"); }
+  if(intol.includes("Gluten")&&glu&&!/glutenfrei/.test(h)) add(hard,-25,"Kann Gluten enthalten","Unverträglichkeit: Gluten");
+  if(intol.includes("Nüsse")&&nutA) add(hard,-30,"Kann Nüsse enthalten","Unverträglichkeit: Nüsse");
+  // Haut (beim Ziel Haut voll, sonst halb)
+  const hp=[].concat(ha.stoert||[]), hk=g==="skin"?1:0.5, H=(v,t,src)=>add(soft,v*hk,t,"Haut: "+src);
+  const dairyAni=["protdairy","kefir","dairy","cheese","whey","coffeemilk"].includes(id)&&!plant;
+  if(hp.includes("Unreinheiten")){
+    if(dairyAni&&!["cheese"].includes(id)) H(-7,"Milch kann Unreinheiten verstärken","Unreinheiten");
+    else if(su>=12&&!R_FRUITY.includes(id)) H(-6,"Zucker kann Unreinheiten verstärken","Unreinheiten");
+    if(/zink|omega/i.test(micro)||["fattyfish","organ"].includes(id)) H(5,"Liefert Zink/Omega-3 für die Haut","Unreinheiten");
+  }
+  if(hp.includes("Rötung")){
+    if(id==="alcohol") H(-8,"Alkohol verstärkt Rötungen","Rötung");
+    if(/omega/i.test(micro)||id==="fattyfish") H(5,"Omega-3 wirkt entzündungshemmend","Rötung");
+  }
+  if((hp.includes("Trockenheit")||ha.bild==="Trocken")&&(R_GOODFAT.includes(id)||/omega|vitamin e/i.test(micro))&&!heavy) H(5,"Gute Fette für die Hautbarriere","trocken");
+  if((hp.includes("Wirkt stumpf")||hp.includes("Pigmentflecken"))&&(["berries","skinveg","vitc","vegjuice"].includes(id)||/antioxid|vitamin c|carotin|polyphenol/i.test(micro))&&!heavy) H(5,"Antioxidantien für einen frischen Teint",hp.includes("Wirkt stumpf")?"wirkt stumpf":"Pigmentflecken");
+  if(hp.includes("Erste Fältchen")&&(["broth","fattyfish","vitc"].includes(id)||/kollagen|vitamin c/i.test(micro))&&!heavy) H(5,"Kollagen & Vitamin C für die Haut","Fältchen");
+  if((hp.includes("Glänzt / große Poren")||ha.bild==="Fettig")&&["refined","sweets","fastfood","chips","cereal"].includes(id)) H(-5,"Schnelle Carbs können fettige Haut fördern","fettig");
+  // Haare: Haarwurzeln brauchen Protein, Eisen und Zink (Mangel fördert Ausfall)
+  const hairNeed=hr.stoert==="Fallen viel aus"||hr.stoert==="Trocken / Spliss";
+  if(hairNeed&&nat&&(["redmeat","organ","egg","fattyfish","legume","nuts","poultry","leanfish"].includes(id)||/eisen|zink|biotin/i.test(micro))&&(pr>=6||/eisen|zink|biotin/i.test(micro)))
+    add(soft,4,"Protein, Eisen & Zink für die Haare","Haare: "+(hr.stoert==="Fallen viel aus"?"fallen aus":"trocken"));
+  // Schlaf: Alkohol stört den Tiefschlaf, Koffein wirkt 5–6 Stunden
+  const sleepBad=sl.ein&&sl.ein!=="Geht schnell"||sl.stunden==="Unter 6"||sl.morgen==="Gerädert";
+  if(sleepBad&&id==="alcohol") add(soft,-6,"Alkohol stört den Tiefschlaf","Schlaf: "+(sl.ein&&sl.ein!=="Geht schnell"?sl.ein.toLowerCase():"zu wenig erholt"));
+  // Aussehen
+  const az=au.ziel||[];
+  if((au.bloat==="Oft"||(au.abend||[]).includes("Alkohol"))&&id==="alcohol") add(soft,-5,"Alkohol lässt das Gesicht aufquellen","Aussehen: aufgedunsen");
+  if(az.includes("Weniger Bauchfett")&&(id==="alcohol"||id==="softdrink"&&su>=4)) add(soft,-5,id==="alcohol"?"Alkohol bremst den Fettabbau":"Zuckergetränke fördern Bauchfett","Aussehen: weniger Bauchfett");
+  const fokus=foodFocus();
+  if(az.includes("Mehr Muskeln")&&g!=="muscle"&&!fokus.includes("Mehr Protein")&&okFood&&!drink&&pr>=15) add(soft,4,"Viel Protein für den Muskelaufbau","Aussehen: mehr Muskeln");
+  // Gesundheit
+  if(ea.gemuese==="Selten"&&["veg","skinveg","legume","berries","fermentedveg"].includes(id)&&!heavy) add(soft,5,"Holt nach, was dir an Gemüse fehlt","Gemüse: selten");
+  if(ea.wasser==="Unter 1 Liter"&&["water","tea"].includes(id)&&kc<8&&su<1) add(soft,6,"Zählt voll zu deiner Trinkmenge","Trinken: unter 1 Liter");
+  if(ea.trink==="Täglich"&&id==="softdrink"&&kc<10&&su<1&&g!=="skin") add(soft,3,"Guter Umstieg weg vom Zucker","Zuckergetränke: täglich");
+  if(ea.alk==="Mehrmals pro Woche"&&id==="alcohol") add(soft,-5,"Mehrmals pro Woche summiert sich","Alkohol: mehrmals pro Woche");
+  if(ea.bauch==="Oft"){
+    if(/(sorbit|xylit|maltit|isomalt|zuckeralkohol)/.test(h)) add(soft,-4,"Zuckeralkohole können blähen","Bauch: oft aufgebläht");
+    if(["kefir","fermentedveg"].includes(id)&&!heavy) add(soft,3,"Fermentiertes unterstützt die Darmflora","Bauch: oft aufgebläht");
+    if(id==="legume") NOTE("Hülsenfrüchte können blähen: langsam steigern, gut einweichen");
+  }
+  const ironFood=nat&&(["redmeat","organ","legume"].includes(id)||/eisen/i.test(micro));
+  if(ea.energie==="Ständig müde"&&ironFood) add(soft,3,"Eisen gegen Müdigkeit","Energie: ständig müde");
+  else if(P.sex==="w"&&(P.age||30)<51&&ironFood&&g!=="lose") add(soft,2,"Eisenreich – Frauen brauchen mehr Eisen","Profil: Frau");
+  if(ea.energie==="Tief nach dem Essen"&&g!=="energy"&&c.cb>=20&&!fruity&&!drink&&["refined","cereal","sweets","ricecake"].includes(id)) add(soft,-4,"Schnelle Carbs – danach oft ein Tief","Energie: Tief nach dem Essen");
+  // Profil: Fisch, Alter, Training
+  if(P.fish==="wenig"&&id==="fattyfish"&&!heavy) add(soft,5,"Omega-3, das dir sonst fehlt","Profil: wenig Fisch");
+  if((P.age||0)>=65&&okFood&&!drink&&pr>=12&&g!=="muscle") add(soft,3,"Ab 65 braucht der Körper mehr Protein","Profil: Alter");
+  const often=["3–4× pro Woche","5× oder öfter"].includes(P.trainFreq);
+  if(often&&["Ausdauer","Beides"].includes(P.trainType)&&["oats","rice","potato","sweetpotato","pseudograin","wholewheat","banana"].includes(id)&&!heavy&&g!=="lose")
+    add(soft,4,"Füllt die Speicher fürs Ausdauertraining","Training: "+P.trainType);
+  if(often&&P.trainType==="Krafttraining"&&g!=="muscle"&&!fokus.includes("Mehr Protein")&&!az.includes("Mehr Muskeln")&&okFood&&!drink&&pr>=15) add(soft,3,"Viel Protein für die Regeneration","Training: Kraft");
+  // Fokus (aus mehreren Antworten abgeleitet, siehe foodFocus)
   const addedSu=su>5&&!R_FRUITY.includes(id)&&!(["dairy","kefir","protdairy"].includes(id)&&su<=6);
-  if(fokus.includes("Weniger Zucker")&&addedSu) P(-Math.min(12,su*0.6),"Viel Zucker – dein Fokus");
-  if(fokus.includes("Zucker & Haut")&&addedSu) P(-Math.min(10,su*0.5),"Zucker – dein Haut-Fokus");
-  if(fokus.includes("Mehr Protein")&&pr>=10) P(Math.min(8,pr*0.3),"Viel Protein – dein Fokus");
-  if(fokus.includes("Weniger Fertiges")&&heavy) P(-8,"Fertigprodukt – dein Fokus");
-  if(fokus.includes("Weniger Salz")&&sa>0.8) P(-Math.min(10,(sa-0.5)*6),"Salzig – dein Fokus");
-  if(fokus.includes("Mehr Ballaststoffe")&&fi>=4) P(Math.min(6,fi*0.6),"Ballaststoffe – dein Fokus");
-  if(fokus.includes("Sättigung")&&((pr>=10&&kc<=250)||fi>=6)) P(5,"Macht lange satt");
-  if(fokus.includes("Koffein am Abend")&&foodHas(item,"caf")) P(-4,"Koffein: nach 15 Uhr meiden");
-  rTextCheck(pros,cons,{kc,pr,fa,su,fiber:item.fiber,h,id});
-  if(pros.some(x=>/pro stück/i.test(x.t))) for(let i=cons.length-1;i>=0;i--) if(/kalorienreich/i.test(cons[i].t)) cons.splice(i,1);
-  // Kein Score ohne Begründung: fehlt ein passender Grund, einen sachlichen aus den Daten ergänzen
-  if(score<45&&!cons.length){
-    if(g==="muscle"&&pr<10&&!drink) cons.push({t:"Wenig Protein ("+rG(pr)+" g)",w:5});
-    else if(junk) cons.push({t:"Snack mit wenig Nährstoffen",w:5});
-    else if(heavy||nova>=4) cons.push({t:"Stark verarbeitet mit Zusätzen",w:5});
-    else if(id==="softdrink"&&su>=2) cons.push({t:"Zugesetzter Zucker ("+rG(su)+" g pro 100 ml)",w:5});
-    else if(su>=12&&!fruity) cons.push({t:"Viel Zucker ("+rG(su)+" g)",w:5});
-    else if(sa>1.2) cons.push({t:"Viel Salz ("+rG(sa)+" g)",w:5});
-    else if(kc>=200&&g==="lose") cons.push({t:"Kalorienreich ("+kc+" kcal)",w:5});
-    else if(g==="skin"&&["refined","cereal"].includes(id)) cons.push({t:"Schnelle Carbs lassen Blutzucker steigen",w:5});
-    else if(g==="skin"&&!cat) cons.push({t:"Wenig Vitamine & Mineralstoffe",w:5});
+  const FS={"Weniger Zucker":"Fokus: weniger Zucker","Zucker & Haut":"Fokus: Zucker & Haut","Mehr Protein":"Fokus: mehr Protein","Weniger Fertiges":"Fokus: weniger Fertiges","Weniger Salz":"Fokus: weniger Salz","Mehr Ballaststoffe":"Fokus: Ballaststoffe","Sättigung":"Fokus: Sättigung","Koffein am Abend":"Fokus: Schlaf & Koffein"};
+  if(fokus.includes("Weniger Zucker")&&addedSu) add(soft,-Math.min(12,su*0.6),"Viel Zucker ("+rG(su)+" g)",FS["Weniger Zucker"]);
+  else if(fokus.includes("Zucker & Haut")&&addedSu) add(soft,-Math.min(10,su*0.5),"Zucker kann der Haut schaden",FS["Zucker & Haut"]);
+  if(fokus.includes("Mehr Protein")&&pr>=10&&okFood) add(soft,Math.min(8,pr*0.3),"Viel Protein ("+rG(pr)+" g)",FS["Mehr Protein"]);
+  if(fokus.includes("Weniger Fertiges")&&heavy) add(soft,-8,"Fertigprodukt",FS["Weniger Fertiges"]);
+  if(fokus.includes("Weniger Salz")&&sa>0.8) add(soft,-Math.min(10,(sa-0.5)*6),"Salzig ("+rG(sa)+" g)",FS["Weniger Salz"]);
+  if(fokus.includes("Mehr Ballaststoffe")&&fi>=4) add(soft,Math.min(6,fi*0.6),"Ballaststoffe ("+rG(fi)+" g)",FS["Mehr Ballaststoffe"]);
+  if(fokus.includes("Sättigung")&&((pr>=10&&kc<=250&&okFood)||fi>=6)) add(soft,5,"Macht lange satt",FS["Sättigung"]);
+  if(fokus.includes("Koffein am Abend")&&(foodHas(item,"caf")||id==="coffee")&&!/(entkoffeiniert|koffeinfrei)/.test(h)) add(soft,-4,"Koffein: nach 15 Uhr meiden",FS["Koffein am Abend"]);
+  // Gleiches Thema nur einmal (stärkster Wert gewinnt)
+  const byTopic=new Map(); soft.forEach(x=>{ const k=rTopic(x.t)+(x.v>0?"+":"-"), o=byTopic.get(k); if(!o||Math.abs(x.v)>Math.abs(o.v)) byTopic.set(k,x); });
+  const softL=[...byTopic.values()];
+  let sd=softL.reduce((s,x)=>s+x.v,0); sd=Math.max(-14,Math.min(10,sd));
+  const list=hard.concat(softL).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v)).slice(0,4);
+  return {delta:hard.reduce((s,x)=>s+x.v,0)+sd, list, notes};
+}
+// Ergänzt sachliche Gründe aus den Nährwerten, bis mindestens zwei da sind.
+// Gute Zahl → zuerst Stärken, schlechte Zahl → zuerst Schwächen; im Mittelfeld (45–79) möglichst beides,
+// damit klar ist, warum es nicht höher oder tiefer liegt. Jeder Kandidat wird über rateOut geprüft (keine Doppelungen).
+function rFill(pros,cons,score,c){
+  const {g,id,cat,heavy,nova,kc,pr,cb,fa,su,fi,sa,drink,okFood,junk,fruity}=c, it=c.item, fib=it.fiber!=null&&it.fiber!=="", sat=+it.sat, hasSalt=it.salt!=null&&it.salt!=="";
+  const P=[], C=[], p=t=>P.push({t,w:1}), n=t=>C.push({t,w:1});
+  const hiCarb=["rice","refined","ricecake","cereal","potato","sweetpotato","oats","pseudograin","wholewheat"].includes(id);
+  if(drink){
+    if(kc<8&&su<1&&["water","tea","coffee"].includes(id)) p("Ohne Kalorien & Zucker");
+    if(kc<8&&su<1&&id==="water") p("Deckt den Flüssigkeitsbedarf");
+    if(su>=4) n("Zucker in flüssiger Form ("+rG(su)+" g pro 100 ml)");
+    if(id==="softdrink"&&kc<10&&su<1) n("Süßstoffe und Zusätze");
+    if(id==="coffee"&&g==="energy") n("Koffein wirkt nur kurz, bei viel davon folgt ein Tief");
+    if(kc<8&&!["water","tea"].includes(id)) n("Keine nennenswerten Nährstoffe");
+  } else {
+    if(okFood&&pr>=15) p("Viel Protein ("+rG(pr)+" g)"); else if(okFood&&pr>=8) p("Liefert Protein ("+rG(pr)+" g)");
+    if(fib&&fi>=6) p("Viele Ballaststoffe ("+rG(fi)+" g)"); else if(fib&&fi>=3&&!junk) p("Enthält Ballaststoffe ("+rG(fi)+" g)");
+    if(cb>=5&&su<=2&&!junk) p("Kaum Zucker ("+rG(su)+" g)");
+    if(kc<=80&&kc>0&&(!cat||cat.w)&&g==="lose") p("Nur "+kc+" kcal pro 100 g");
+    if(R_GOODFAT.includes(id)&&!heavy&&fa>=10) p("Natürliche Fette");
+    if(hasSalt&&sa<=0.1&&kc>0&&id!=="spice"&&!R_SALTY.includes(id)) p("Kaum Salz");
+    if(su>=12&&!fruity) n("Viel Zucker ("+rG(su)+" g)");
+    if(sa>1.2&&id!=="spice") n("Viel Salz ("+rG(sa)+" g)");
+    if(kc>=450&&!R_GOODFAT.includes(id)) n("Sehr kalorienreich ("+kc+" kcal)");
+    else if(kc>=300&&g==="lose") n("Kalorienreich ("+kc+" kcal)");
+    if(sat>=12&&!R_GOODFAT.includes(id)&&!["cheese","redmeat","egg"].includes(id)&&(heavy||junk)) n("Viele gesättigte Fette ("+rG(sat)+" g)");
+    if(junk) n("Snack mit wenig Nährstoffen");
+    // Ziel-Bezug: was fürs Ziel fehlt
+    if(g==="muscle"&&pr<3&&kc>=40) n("Kaum Protein ("+rG(pr)+" g)");
+    else if(g==="muscle"&&pr<10) n("Wenig Protein ("+rG(pr)+" g)");
+    if(g==="lose"&&pr<8&&(!fib||fi<3)&&kc>=60) n("Macht nicht lange satt");
+    if(g==="lose"&&kc>=150&&kc<300) n("Portion im Blick behalten ("+kc+" kcal)");
+    if(g==="skin"&&cb>=40&&(!fib||fi<3)) n("Viel Stärke, wenig Ballaststoffe");
+    if(g==="skin"&&["rice","refined","ricecake","cereal"].includes(id)) n("Wenig Vitamine & Mineralstoffe");
+    if(g==="energy"&&pr<5&&(!fib||fi<3)&&cb>=15&&!R_GOODFAT.includes(id)) n("Ohne Protein & Ballaststoffe hält es nicht lange vor");
+    if(g==="energy"&&cb>=15&&!junk&&(hiCarb||fruity||su/cb<0.5)) p("Liefert Kohlenhydrate als Energie");
+    if(g==="lose"&&kc>0&&kc<=150&&!junk) p("Moderate Kalorien ("+kc+" kcal)");
+    if(okFood&&pr>=4&&pr<8&&g!=="muscle") p("Etwas Protein ("+rG(pr)+" g)");
+    if(fa<1&&kc>0&&["lose","muscle"].includes(g)&&!junk) p("Kaum Fett");
+    if(g==="muscle"&&hiCarb&&!heavy&&cb>=15) p("Kohlenhydrate füllen die Speicher fürs Training");
+    if(fib&&fi<1&&cb>=40) n("Kaum Ballaststoffe");
+    else if(fib&&fi<1.5&&cb>=15&&!fruity) n("Wenig Ballaststoffe ("+rG(fi)+" g)");
+    const fs=kc>0?fa*9/kc:0, ps=kc>0?pr*4/kc:0;
+    if(g==="muscle"&&pr>=10&&fs>0.5&&fa*9>pr*4) n("Mehr Kalorien aus Fett als aus Protein");
+    if(["skin","energy"].includes(g)&&c.highGI) n("Hoher glykämischer Index: Blutzucker steigt schnell");
+    if(g==="energy"&&cb<8&&kc<150&&!R_GOODFAT.includes(id)) n("Wenig Kohlenhydrate – liefert kaum schnelle Energie");
+    else if(g==="energy"&&cb<5&&kc>=150) n("Kaum Kohlenhydrate: Energie nur aus Fett & Protein");
+    if(g==="lose"&&id==="dairy"&&kc<90&&/(milch|drink|\bmilk)/.test(c.h)) n("Getrunkene Kalorien sättigen weniger");
+    if(su>=5&&su<12&&!fruity&&!["dairy","kefir","protdairy"].includes(id)) n("Etwas Zucker ("+rG(su)+" g)");
+    if(nova===3&&!heavy&&!["mixedmeal"].includes(id)) n("Verarbeitetes Produkt");
+    if(!cat) n("Art nicht sicher erkannt – nur nach Nährwerten bewertet");
   }
-  if(score>=75&&!pros.length){
-    if(g==="muscle"&&pr>=10) pros.push({t:"Viel Protein ("+rG(pr)+" g)",w:5});
-    else if(g==="lose"&&kc<=120) pros.push({t:kc<8?"Ohne Kalorien":"Wenig Kalorien ("+kc+" kcal)",w:5});
-    else if(cat&&cat.w&&!heavy) pros.push({t:"Naturbelassen",w:5});
-    else if(fi>=5) pros.push({t:"Viele Ballaststoffe",w:5});
-  }
-  const out=rateOut(Math.min(cap,score),pros,cons); out.notes=notes; return out;
+  if(cat&&cat.w&&!heavy){ p("Naturbelassen"); p("Frisch & unverarbeitet"); } else if(nova===1) p("Unverarbeitet");
+  if(drink&&kc<8) p("Kaum Kalorien");
+  if(["mixedmeal","readymeal"].includes(id)) n("Gericht: Nährwerte hängen stark vom Rezept ab");
+  if(/(frittiert|fritiert|falafel|pommes|fried|backfisch|nugget|schnitzel)/.test(c.h)&&!drink) n("Meist frittiert: viel Fett aus Bratöl");
+  if(heavy||nova>=4) n("Stark verarbeitet mit Zusätzen");
+  if(fruity&&!heavy&&!drink) p("Vitamine & Mineralstoffe");
+  let out=rateOut(score,pros,cons);
+  const tryAdd=(L,dst,key)=>{ const before=out[key].length;
+    const other=new Set(out[key==="good"?"bad":"good"].map(rTopic).filter(t=>!t.startsWith("micro")));
+    while(L.length){ const x=L.shift(); if(other.has(rTopic(x.t))) continue; dst.push(x); const o=rateOut(score,pros,cons);
+      if(o[key].length>before&&o.good.length+o.bad.length>out.good.length+out.bad.length){ out=o; return true; }
+      dst.pop(); }
+    return false; };
+  const addP=()=>tryAdd(P,pros,"good"), addC=()=>tryAdd(C,cons,"bad");
+  if(score>=70&&!out.good.length) addP();
+  if(score<50&&!out.bad.length) addC();
+  if(score>=45&&score<75){ if(!out.good.length) addP(); if(!out.bad.length) addC(); }
+  for(let i=0;i<4&&out.good.length+out.bad.length<2;i++){
+    const ok=score>=55?(addP()||addC()):(addC()||addP()); if(!ok) break; }
+  if(out.bad.some(t=>rTopic(t)==="proc")){ out.good=out.good.filter(t=>rTopic(t)!=="proc"); if(score>=70&&!out.good.length) addP(); }
+  if(score<50&&!out.bad.length) addC();
+  return out;
 }
 // Typische Nährwert-Bewertung je Art (Median aus 100.000 Produkten), Reihenfolge: Muskeln, Abnehmen, Haut, Energie
 const R_MED={_0:[34,45,80,14],_1:[52,41,85,39],_2:[1,1,73,0],_3:[35,48,82,15],_4:[26,44,78,12],alcohol:[0,54,85,0],avocado:[10,47,100,28],banana:[10,50,51,11],berries:[8,55,50,5],broth:[35,81,85,8],butter:[1,-27,95,15],cereal:[29,14,64,23],cheese:[56,35,82,14],chips:[28,8,86,28],coconut:[7,39,95,18],coffeemilk:[16,58,49,5],dairy:[20,55,80,6],darkchoc:[9,-14,77,16],driedfruit:[-24,-12,-9,-33],egg:[58,62,95,30],ersatz:[42,52,86,21],fastfood:[46,46,85,28],fattyfish:[75,61,95,30],fermentedveg:[9,69,85,10],fruit:[4,50,45,2],goodfat:[0,-28,95,15],honey:[-59,-38,-50,-60],juice:[2,53,45,1],kefir:[16,65,85,5],leanfish:[85,77,85,15],legume:[58,57,94,36],margarine:[1,-15,73,0],mixedmeal:[34,53,84,17],nectar:[1,50,42,0],nuts:[38,4,100,37],oats:[52,38,87,47],organ:[85,76,95,26],peanut:[43,8,93,25],plantmilk:[8,60,68,6],potato:[32,58,85,27],poultry:[87,77,85,15],processedmeat:[49,42,81,13],protdairy:[78,78,85,15],proteinbar:[78,49,85,23],pseudograin:[55,34,87,48],readymeal:[37,50,83,19],redmeat:[81,65,95,29],refined:[52,36,83,42],rice:[46,26,76,38],ricecake:[45,20,73,36],sauce:[10,34,75,5],seedoil:[0,-28,73,0],skinveg:[10,65,65,8],softdrink:[0,52,45,0],soy:[63,67,86,18],spice:[30,56,85,11],sugar:[-42,-16,-31,-57],sweetpotato:[24,52,75,18],sweets:[-9,-18,29,-21],tea:[95,65,100,53],veg:[10,62,82,8],vegjuice:[5,63,53,5],vitc:[1,55,47,0],water:[33,55,85,18],whey:[90,46,85,16],wholewheat:[56,42,97,54]};
@@ -701,6 +819,8 @@ const R_SUGAR_FIX=[[/^Viel Zucker, kaum Protein$/,"Wenig Nährstoffe, kaum Prote
   [/^Gezuckerte Flocken, wenig Protein$/,"Verarbeitete Flocken, wenig Protein"],[/^Zucker & Weißmehl – ungünstig für die Haut$/,"Weißmehl – ungünstig für die Haut"],
   [/^Zucker kann Unreinheiten fördern$/,"Schnelle Carbs können Unreinheiten fördern"],[/^Zucker macht danach oft müde$/,"Schnelle Carbs machen danach oft müde"],
   [/^Viel Zucker, viele Kalorien$/,"Viele Kalorien, wenig Nährstoffe"]];
+// Arten, die praktisch immer salzig sind: „0 g Salz“ in der Datenbank ist dort ein Datenfehler, kein Lob wert
+const R_SALTY=["processedmeat","cheese","chips","fastfood","sauce","readymeal","fermentedveg","broth"];
 function rTextCheck(pros,cons,n){
   const glut=/(weizen|dinkel|roggen|gerste|grunkern|emmer|einkorn|kamut|brot|pasta|nudel|couscous|bulgur)/.test(n.h);
   const fib=n.fiber!=null&&n.fiber!=="";
@@ -714,14 +834,18 @@ function rTextCheck(pros,cons,n){
     if(/ballaststoff/.test(t)&&fib&&+n.fiber<1.5) return true;
     if(/glutenfrei/.test(t)&&glut) return true;
     return false; };
-  for(let i=pros.length-1;i>=0;i--) if(badPro(pros[i].t)) pros.splice(i,1);
+  for(let i=pros.length-1;i>=0;i--) if(badPro(pros[i].t)||n.heavy&&/naturbelassen/i.test(pros[i].t)) pros.splice(i,1);
   for(let i=cons.length-1;i>=0;i--){ const t=cons[i].t, l=t.toLowerCase();
     if(/^kein protein/.test(l)&&n.pr>=3||/^(kaum|fast kein) protein/.test(l)&&n.pr>=8||/^wenig protein$/.test(l)&&n.pr>=12) { cons.splice(i,1); continue; }
     if(/weißmehl/.test(l)&&/(vollkorn|whole ?grain|wholegrain|integral|weetabix|corn|\bmais|hafer|\boat|reis|rice|buchweizen|hirse|quinoa|dinkel ?voll)/.test(n.h)){ cons[i]={t:t.replace(/Zucker & Weißmehl/,"Zucker & verarbeitetes Getreide").replace(/Weißmehl/,"Verarbeitetes Getreide"),w:cons[i].w}; continue; }
     if(/^wenig kalorien/.test(l)&&n.kc>120){ cons.splice(i,1); continue; }
+    if(/salz|nitrit/.test(l)&&n.saKnown&&n.sa<0.6&&!R_SALTY.includes(n.id)){ cons.splice(i,1); continue; }
+    if(/kaum carbs/.test(l)&&n.cb>=12){ cons.splice(i,1); continue; }
+    if(/schnelle carbs/.test(l)&&pros.some(x=>/langsame carbs/i.test(x.t))){ cons.splice(i,1); continue; }
     if(/viel zucker/.test(l)&&n.su!=null&&n.su!==""&&+n.su<8){ cons.splice(i,1); continue; }
     if(/zucker aus getreide/.test(l)&&(n.su<1||!/(hafer|oat|reis|rice|dinkel|gerste|avena|riso|getreide)/.test(n.h))){ cons.splice(i,1); continue; }
-    if(/versteckte kalorien/.test(l)&&n.kc<80||/(viele kalorien|kalorienreich|kaloriendichte|nur ein teelöffel)/.test(l)&&n.kc<120&&!["honey","sugar"].includes(n.id)||/flüssige kalorien/.test(l)&&n.kc<25&&n.id!=="softdrink"){ cons.splice(i,1); continue; }
+    if(/mehr kalorien als gedacht/.test(l)&&n.kc<80){ cons.splice(i,1); continue; }
+    if(/versteckte kalorien/.test(l)&&n.kc<100||/(viele kalorien|kalorienreich|kaloriendichte|nur ein teelöffel)/.test(l)&&n.kc<120&&!["honey","sugar"].includes(n.id)||/flüssige kalorien/.test(l)&&n.kc<25&&n.id!=="softdrink"){ cons.splice(i,1); continue; }
     if(/zucker/.test(l)&&!/zugesetzt|süßstoff|zuckeralkohol/.test(l)&&n.su<12&&!["sugar","softdrink","nectar","honey","juice","driedfruit"].includes(n.id)){
       const f=R_SUGAR_FIX.find(([re])=>re.test(t)); if(f) cons[i]={t:f[1],w:cons[i].w}; else if(/^viel zucker/.test(l)) cons.splice(i,1);
     }

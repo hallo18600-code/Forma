@@ -188,13 +188,70 @@ PASST = r"""()=>{
  state.profile=P0; state.coach.answers=A0; state.date=D0; return {n,F};
 }"""
 
+# ---------- 5) Für dich: Antworten wirken sichtbar, begründet und begrenzt; jede Bewertung hat Gründe ----------
+FUERDICH = r"""async ()=>{
+ await loadFoodDb(); const F={}; const fail=(k,ex)=>{ (F[k]=F[k]||{n:0,ex:[]}).n++; if(F[k].ex.length<3) F[k].ex.push(ex); };
+ const P0=JSON.parse(JSON.stringify(state.profile)), A0=JSON.parse(JSON.stringify(state.coach.answers||{})); let n=0;
+ const B=nm=>foods().find(x=>x.name===nm), G=["muscle","lose","skin","energy"];
+ const base={sex:"m",age:30,height:180,weight:80,activity:1.4,goal:"muscle",trainFreq:"Gar nicht",fish:"oft"};
+ const run=(ans,prof,nm,g)=>{ state.profile=Object.assign({},P0,base,prof||{}); state.coach.answers=ans; const it=B(nm); if(!it){ fail("Lebensmittel fehlt",nm); return null; } n++; return scoreFood(it,g); };
+ // [Antworten, Profil, Lebensmittel, Ziel, Richtung (+1/-1/0 = nur Hinweis), Text-Muster in „Für dich“]
+ const CASES=[
+  [{haare:{stoert:"Fallen viel aus"}},{},"Ei","skin",1,/Haare/],
+  [{gesundheit:{wasser:"Unter 1 Liter"}},{},"Wasser","energy",1,/Trinkmenge/],
+  [{},{fish:"wenig"},"Lachsfilet","lose",1,/Omega-3/],
+  [{schlaf:{ein:"Dauert"}},{},"Bier","energy",-1,/Tiefschlaf/],
+  [{gesundheit:{intol:["Laktose"]}},{},"Skyr Natur","muscle",-1,/Laktose/],
+  [{gesundheit:{intol:["Gluten"]}},{},"Vollkornbrot","energy",-1,/Gluten/],
+  [{gesundheit:{gemuese:"Selten"}},{},"Brokkoli","muscle",1,/Gemüse/],
+  [{aussehen:{ziel:["Weniger Bauchfett"]}},{},"Cola","energy",-1,/Bauchfett/],
+  [{gesundheit:{stil:"Vegetarisch"}},{},"Hähnchenbrust","muscle",0,null],
+  [{gesundheit:{meiden:["Rotes Fleisch"]}},{},"Rindersteak","muscle",0,null],
+ ];
+ for(const [ans,prof,nm,g,dir,re] of CASES){
+  const a=run({},{},nm,g), b=run(ans,prof,nm,g); if(!a||!b) continue; const d=`${nm} (${g}) ${JSON.stringify(ans)}`;
+  if(dir>0&&!(b.score>a.score)) fail("Antwort hebt die Bewertung nicht",d+` ${a.score}→${b.score}`);
+  if(dir<0&&!(b.score<a.score)) fail("Antwort senkt die Bewertung nicht",d+` ${a.score}→${b.score}`);
+  if(dir===0&&(b.score!==a.score||!b.notes.length)) fail("Ernährungsform/Meiden ändert die Zahl oder zeigt keinen Hinweis",d+` ${a.score}→${b.score}`);
+  if(re&&!b.perso.some(x=>re.test(x.t+" "+x.src))) fail("Grund fehlt unter „Für dich“",d+" "+JSON.stringify(b.perso));
+ }
+ // Zufällige Antworten: Lebensstil-Anpassung bleibt begrenzt, jeder Eintrag hat Text, Quelle und Richtung
+ const rnd=a=>a[Math.floor(Math.random()*a.length)], areas=["haut","haare","schlaf","aussehen","gesundheit"];
+ const items=foods().concat(FOODDB.rows.slice(0,3000).map(dbItem));
+ for(let i=0;i<300;i++){
+  state.profile=Object.assign({},P0,base,{sex:rnd(["m","w"]),age:rnd([20,40,70]),goal:rnd(G),fish:rnd(["oft","wenig"]),trainFreq:rnd(["Gar nicht","3–4× pro Woche"]),trainType:rnd(["Krafttraining","Ausdauer","Beides"])});
+  state.coach.answers={};
+  for(const ar of areas){ const a={}; state.coach.answers[ar]=a; for(const q of (coachQuiz(ar)||[])){ if(q.skip&&q.skip(a)) continue; a[q.k]=q.multi?[...q.opts.filter(x=>x!==q.none)].sort(()=>Math.random()-.5).slice(0,1+Math.floor(Math.random()*2)):rnd(q.opts); } }
+  state.coach.answers.gesundheit.intol=[];
+  const A=state.coach.answers;
+  for(let j=0;j<40;j++){ const it=rnd(items), g=rnd(G); const b=scoreFood(it,g); state.coach.answers={}; const a=scoreFood(it,g); state.coach.answers=A; n++;
+   const d=`${it.name} (${g})`; if(rSupKind(it,rClassify(it).h,rClassify(it).cat)) continue;   // Supplements: eigene Logik mit eigenen Gründen
+   if(b.score-a.score>11||a.score-b.score>15) fail("Persönliche Anpassung zu groß",d+` ${a.score}→${b.score}`);
+   for(const x of b.perso||[]) if(!x.t||!x.src||!x.v||/undefined|NaN/.test(x.t+x.src)) fail("Kaputter Eintrag unter „Für dich“",d+" "+JSON.stringify(x));
+   if(Math.abs(b.score-a.score)>=3&&!(b.perso||[]).length) fail("Zahl ändert sich ohne Grund unter „Für dich“",d+` ${a.score}→${b.score}`);
+  }
+ }
+ // Jede Bewertung hat mindestens einen Grund; gute Zahl → Stärke, schlechte → Schwäche; kein Widerspruch
+ state.profile=Object.assign({},P0,base); state.coach.answers={};
+ for(const it of foods().concat(FOODDB.rows.slice(0,30000).map(dbItem))) for(const g of G){ const r=scoreFood(it,g); n++; const d=`${it.name} (${g}) ${r.score}`;
+  if(!r.good.length&&!r.bad.length) fail("Bewertung ohne Begründung",d);
+  if(r.score>=70&&!r.good.length&&!rSupKind(it,rClassify(it).h,rClassify(it).cat)) fail("Gute Zahl ohne Stärke",d+" -"+r.bad);
+  if(r.score<50&&!r.bad.length&&!rSupKind(it,rClassify(it).h,rClassify(it).cat)) fail("Schlechte Zahl ohne Schwäche",d+" +"+r.good);
+  const all=r.good.join("|")+" ## "+r.bad.join("|");
+  if(/langsame carbs/i.test(all)&&/glykämisch/i.test(all)) fail("Widerspruch: langsame Carbs & hoher GI",d);
+  if(/naturbelassen/i.test(r.good.join("|"))&&/stark verarbeitet/i.test(r.bad.join("|"))) fail("Widerspruch: naturbelassen & stark verarbeitet",d);
+  if(/kaum salz/i.test(r.good.join("|"))&&/salz/i.test(r.bad.join("|"))) fail("Widerspruch: Salz",d);
+ }
+ state.profile=P0; state.coach.answers=A0; return {n,F};
+}"""
+
 def main():
     bad = 0
     with sync_playwright() as p:
         b = p.chromium.launch(); pg = b.new_page(locale="de-DE"); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(URL); pg.wait_for_timeout(1500)
-        for name, js in [("Richtwerte", RICHTWERTE), ("Coach", COACH), ("Passt zur Person", PASST), ("Lebensmittel", ESSEN)]:
+        for name, js in [("Richtwerte", RICHTWERTE), ("Coach", COACH), ("Passt zur Person", PASST), ("Lebensmittel", ESSEN), ("Für dich & Begründungen", FUERDICH)]:
             r = pg.evaluate(js)
             print(f"\n=== {name}: {r['n']:,} Fälle geprüft".replace(",", "."))
             if not r["F"]: print("    ✅ alles in Ordnung")
