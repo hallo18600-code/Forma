@@ -1763,11 +1763,21 @@ function planSlides(series, n, lang) {
 
 /* ---------- Entwürfe planen und zeichnen ---------- */
 const SHORT = ['fix'];   // Arten mit nur 2 Slides – bei Zufall nicht nehmen
+// Zufall wie ein Kartenstapel: alle Arten gemischt, jede kommt einmal dran, erst dann wird neu gemischt.
+// So doppelt sich keine Art, bis alle durch sind – auch über mehrere „Neue Entwürfe“ hinweg.
+let deck = load('hm2-deck', []);
 function pickSeries(n) {
   if (S.series !== 'random' && SERIES[S.series]) return S.series;   // gelöschte Arten → Zufall
   const cutsOk = Object.keys(CUTS).length > 20;   // Collagen nur, wenn die freigestellten Bilder geladen sind
-  return weighted(Object.entries(SERIES).filter(([id, s]) => (n < 3 || !SHORT.includes(id)) && (!s.min || n >= s.min) && (cutsOk || !['king', 'feel', 'dad', 'diet', 'mog', 'freq', 'love'].includes(id)))
-    .map(([id, s]) => [id, recent.series.slice(0, 3).includes(id) ? s.w * .15 : s.w]));
+  const ok = Object.entries(SERIES).filter(([id, s]) => (n < 3 || !SHORT.includes(id)) && (!s.min || n >= s.min) && (cutsOk || !['king', 'feel', 'dad', 'diet', 'mog', 'freq', 'love'].includes(id))).map(([id]) => id);
+  deck = deck.filter(id => ok.includes(id));
+  if (!deck.length) {
+    const inFeed = new Set([...feed.map(d => d.series), ...recent.series]);   // was gerade dran war, kommt ans Ende
+    deck = [...shuffle(ok.filter(id => !inFeed.has(id))), ...shuffle(ok.filter(id => inFeed.has(id)))];
+  }
+  const id = deck.shift();
+  save('hm2-deck', deck);
+  return id;
 }
 // Plant einen Post (Texte, Fotos, Statuen) – ohne zu zeichnen
 function planPost(series, n, lang) {
@@ -1812,7 +1822,8 @@ function planPost(series, n, lang) {
   }));
   const niche = (SERIES[series].niche || slides[0].niche) || ['#realfood', '#wholefoods'];
   const broad = lang === 'de' ? ['#ernährung', '#gesundessen'] : ['#nutrition', '#healthtips'];
-  const tags = ['#healthmaxxing', ...broad, ...niche].filter((t, i, a) => a.indexOf(t) === i).slice(0, 5);
+  // immer #fyp + #viral, danach passend zum Video (TikTok erlaubt max. 5)
+  const tags = ['#fyp', '#viral', ...niche, '#healthmaxxing', ...broad].filter((t, i, a) => a.indexOf(t) === i).slice(0, 5);
   const desc = `Follow for better Health/Looks 🤝\n\n${tags.join(' ')}`;
   // fürs nächste Mal merken, was gerade dran war (mehr Abwechslung)
   recent.series = [series, ...recent.series.filter(x => x !== series)].slice(0, 4);
