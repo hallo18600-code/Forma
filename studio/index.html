@@ -607,14 +607,14 @@ const MEALS = [
   { tag: 'breakfast', foods: ['eggs', 'oats', 'yogurt', 'berries', 'blueberries', 'banana', 'kiwi', 'coffee'], en: 'breakfast', de: 'Frühstück' },
   { tag: 'lunch', foods: ['chicken', 'rice', 'salmon', 'avocado', 'greens', 'sweetpotato', 'tuna', 'tomatoes'], en: 'lunch', de: 'Mittagessen' },
   { tag: 'dinner', foods: ['steak', 'salmon', 'potatoes', 'sweetpotato', 'greens', 'shrimp', 'beef', 'peppers', 'lamb', 'mackerel', 'asparagus', 'cauliflower'], en: 'dinner', de: 'Abendessen' },
-  { tag: 'snack', foods: ['almonds', 'walnuts', 'nuts', 'dates', 'apples', 'cheese', 'olives', 'blueberries', 'cherries', 'mango', 'figs', 'grapes', 'pears', 'raspberries'], en: 'snacks', de: 'Snacks' },
+  { tag: 'snack', foods: ['almonds', 'walnuts', 'nuts', 'dates', 'apples', 'cheese', 'blueberries', 'cherries', 'mango', 'figs', 'grapes', 'pears', 'raspberries'], en: 'snacks', de: 'Snacks' },
 ];
 // passender Tausch: an derselben Stelle im Raster steht die gesunde Alternative
 const SWAPMAP = {
   candy: ['berries', 'mango', 'cherries', 'dates', 'blueberries', 'grapes', 'raspberries', 'figs'], soda: ['water', 'coconutwater', 'greentea'], beer: ['water', 'coconutwater', 'chamomile'],
   fries: ['potatoes', 'sweetpotato'], donut: ['oats', 'yogurt', 'dates'], cookies: ['dates', 'walnuts', 'chocolate', 'almonds'],
   pancakes: ['oats', 'eggs', 'yogurt'], pizza: ['steak', 'salmon', 'chicken'], burger: ['steak', 'beef'],
-  processed: ['nuts', 'almonds', 'walnuts', 'olives', 'cheese'],
+  processed: ['nuts', 'almonds', 'walnuts', 'cheese', 'dates'],
   chips: ['nuts', 'almonds', 'potatoes', 'sweetpotato'], coldcuts: ['steak', 'beef', 'chicken'], nuggets: ['chicken'],
   granola: ['oats', 'yogurt', 'berries'], juice: ['oranges', 'water'], cerealbar: ['nuts', 'dates', 'almonds'], cereal: ['oats', 'eggs', 'yogurt'], ricecakes: ['potatoes', 'rice', 'sweetpotato'],
 };
@@ -770,7 +770,7 @@ const DUELS = [
   { id: 'protein', en: 'protein', de: 'protein', bad: ['coldcuts', 'nuggets', 'burger'], good: ['steak', 'beef', 'chicken', 'salmon', 'eggs', 'tuna'] },
   { id: 'fats', en: 'fats', de: 'fett', bad: ['fries', 'chips', 'donut', 'nuggets'], good: ['avocado', 'olives', 'oliveoil', 'butter', 'nuts', 'salmon', 'walnuts', 'almonds'] },
   { id: 'sugar', en: 'sugar', de: 'zucker', bad: ['candy', 'soda', 'donut', 'cookies'], good: ['berries', 'mango', 'dates', 'honey', 'cherries'] },
-  { id: 'snacks', en: 'snacks', de: 'snacks', bad: ['chips', 'candy', 'cookies'], good: ['nuts', 'almonds', 'walnuts', 'olives', 'cheese', 'dates', 'apples'] },
+  { id: 'snacks', en: 'snacks', de: 'snacks', bad: ['chips', 'candy', 'cookies'], good: ['nuts', 'almonds', 'walnuts', 'cheese', 'dates', 'apples'] },
   { id: 'breakfast', en: 'breakfast', de: 'frühstück', bad: ['pancakes', 'donut', 'cookies'], good: ['eggs', 'yogurt', 'oats', 'berries'] },
 ];
 // Kurze Gründe für die neuen Einzelbild-Formate (max. ~6 Wörter, nur Nährstoff-Fakten, keine Heilversprechen)
@@ -811,19 +811,19 @@ const PROBLEMS = [
 // „Eat like a king / Not like a peasant“: freigestellte Lebensmittel auf hellem Grund
 const KING = [
   { id: 'all', en: ['Eat like a king:', 'Not like a peasant:'], de: ['Iss wie ein König:', 'Nicht wie ein Untertan:'],
-    good: ['steak', 'oysters', 'salmon', 'eggs', 'cheese', 'honey', 'milk', 'mango', 'grapes', 'olives', 'oranges', 'shrimp', 'lamb', 'butter', 'figs', 'pomegranate', 'dates', 'berries', 'avocado', 'mackerel', 'cherries'],
+    good: ['steak', 'oysters', 'salmon', 'eggs', 'cheese', 'honey', 'milk', 'grapes', 'lamb', 'butter', 'figs', 'pomegranate', 'dates', 'berries', 'cherries', 'beef'],
     bad: ['cereal', 'juice', 'granola', 'cerealbar', 'ricecakes', 'chips', 'soda', 'cookies', 'nuggets', 'candy', 'donut', 'fries', 'coldcuts', 'pizza', 'bread_us'] },
   { id: 'breakfast', en: ['A king’s breakfast:', 'A peasant’s breakfast:'], de: ['Frühstück eines Königs:', 'Frühstück eines Untertans:'],
-    good: ['eggs', 'steak', 'honey', 'berries', 'butter', 'milk', 'oranges', 'yogurt', 'blueberries', 'cheese', 'mango', 'kiwi', 'dates', 'banana'],
+    good: ['eggs', 'steak', 'honey', 'berries', 'butter', 'milk', 'oranges', 'yogurt', 'blueberries', 'cheese', 'banana'],
     bad: ['cereal', 'juice', 'granola', 'cerealbar', 'pancakes', 'donut', 'bread_us', 'cookies', 'coldcuts'] },
   { id: 'snacks', en: ['A king’s snacks:', 'A peasant’s snacks:'], de: ['Snacks eines Königs:', 'Snacks eines Untertans:'],
-    good: ['dates', 'cheese', 'olives', 'walnuts', 'almonds', 'berries', 'mango', 'honey', 'grapes', 'figs', 'cherries', 'blueberries', 'kiwi'],
+    good: ['dates', 'cheese', 'walnuts', 'almonds', 'berries', 'mango', 'grapes', 'figs', 'cherries', 'blueberries'],
     bad: ['chips', 'candy', 'cookies', 'cerealbar', 'ricecakes', 'donut', 'soda', 'nuggets'] },
   { id: 'dinner', en: ['A king’s dinner:', 'A peasant’s dinner:'], de: ['Abendessen eines Königs:', 'Abendessen eines Untertans:'],
-    good: ['steak', 'salmon', 'lamb', 'potatoes', 'sweetpotato', 'shrimp', 'oysters', 'butter', 'asparagus', 'mushrooms', 'mussels', 'garlic', 'tomatoes'],
+    good: ['steak', 'salmon', 'lamb', 'beef', 'potatoes', 'sweetpotato', 'shrimp', 'oysters', 'butter', 'asparagus', 'mussels'],
     bad: ['pizza', 'burger', 'fries', 'nuggets', 'coldcuts', 'beer', 'soda', 'chips'] },
   { id: 'dessert', en: ['A king’s dessert:', 'A peasant’s dessert:'], de: ['Nachtisch eines Königs:', 'Nachtisch eines Untertans:'],
-    good: ['honey', 'berries', 'dates', 'figs', 'chocolate', 'mango', 'yogurt', 'cherries', 'raspberries', 'blueberries', 'grapes', 'pomegranate', 'watermelon'],
+    good: ['honey', 'berries', 'dates', 'figs', 'chocolate', 'mango', 'yogurt', 'cherries', 'raspberries', 'blueberries', 'grapes'],
     bad: ['donut', 'candy', 'cookies', 'pancakes', 'cerealbar', 'soda', 'chips', 'cereal', 'juice'] },
 ];
 // „why do I feel so good all the time?“ – Collage auf Weiß, unten rechts durchgestrichenes Junk Food
@@ -846,10 +846,11 @@ const DAD = [
   { id: 'hair', en: 'Dad why is my hair so thick?', de: 'Papa, warum sind meine Haare so dicht?' },
 ];
 // Grundnahrungsmittel, mit denen ein Ring aufgefüllt wird (primal: Fleisch, Eier, Milch, Honig, Obst)
+// bekannte primale Grundnahrungsmittel (für „aber das ist gesund…“ und als letzte Reserve)
 const STAPLES = ['steak', 'eggs', 'milk', 'honey', 'butter', 'salmon', 'berries', 'kiwi', 'oranges', 'cheese', 'oysters', 'banana', 'potatoes', 'beef'];
 // „zero stress diet“: Ring um schlichten schwarzen Text
 const DIETS = [
-  { id: 'calm', en: 'zero stress diet', de: 'Zero-Stress-\nDiät', foods: ['steak', 'oysters', 'honey', 'milk', 'potatoes', 'oranges', 'lemons', 'pomegranate', 'apples', 'chocolate', 'pumpkinseeds', 'chamomile', 'kiwi', 'banana'], niche: ['#lowcortisol', '#stressrelief'] },
+  { id: 'calm', en: 'zero stress diet', de: 'Zero-Stress-\nDiät', foods: [...Object.keys(CLAIMS.calm), 'oranges', 'honey', 'milk', 'kiwi'], niche: ['#lowcortisol', '#stressrelief'] },
   { id: 'sleep', en: 'deep sleep diet', de: 'Tiefschlaf-\nDiät', foods: [...Object.keys(CLAIMS.sleep), 'honey', 'banana', 'oranges', 'eggs'], niche: ['#sleeptips', '#primal'] },
   { id: 'testo', en: 'high testosterone diet', de: 'Testosteron-\nDiät', foods: [...Object.keys(CLAIMS.testo), 'honey', 'potatoes', 'milk', 'oranges', 'butter', 'cheese'], niche: ['#testosterone', '#primal'] },
   { id: 'skin', en: 'clear skin diet', de: 'Reine-Haut-\nDiät', foods: [...Object.keys(CLAIMS.skin), 'eggs', 'berries', 'oranges', 'pomegranate', 'water'], niche: ['#clearskin', '#glowup'] },
@@ -866,8 +867,8 @@ const MOG = {
 // „Everyday / 3-4 times a week / Never“: 2×2 freigestellte Lebensmittel, schlichter Serif-Text in der Mitte
 const FREQ = [
   { en: 'Everyday', de: 'Jeden Tag', foods: ['milk', 'steak', 'eggs', 'kiwi', 'beef', 'honey', 'butter', 'oranges', 'banana', 'potatoes', 'berries', 'water'] },
-  { en: '3-4 times a week', de: '3–4× pro Woche', foods: ['cheese', 'berries', 'honey', 'salmon', 'oysters', 'sardines', 'dates', 'yogurt', 'sweetpotato', 'chocolate', 'mango', 'avocado', 'lamb'] },
-  { en: 'Once a week', de: 'Einmal pro Woche', foods: ['chocolate', 'rice', 'coffee', 'shrimp', 'mussels', 'figs', 'pomegranate', 'pineapple'] },
+  { en: '3-4 times a week', de: '3–4× pro Woche', foods: ['cheese', 'salmon', 'oysters', 'sardines', 'dates', 'yogurt', 'sweetpotato', 'mango', 'avocado', 'lamb'] },
+  { en: 'Once a week', de: 'Einmal pro Woche', foods: ['chocolate', 'rice', 'shrimp', 'mussels', 'figs', 'pomegranate', 'pineapple'] },
   { en: 'Never', de: 'Nie', foods: ['soda', 'cerealbar', 'juice', 'cereal', 'nuggets', 'burger', 'fries', 'donut', 'candy', 'ricecakes', 'granola', 'coldcuts', 'chips', 'pizza'] },
 ];
 // „I love carbs“: drei Streifen – weinend (Junk), weinend (Fake-Health), Chad (echt)
@@ -875,7 +876,7 @@ const LOVE = [
   { id: 'carbs', en: '"I love carbs"', de: '„Ich liebe Carbs“', junk: ['pizza', 'soda', 'donut', 'fries', 'bread_us', 'cookies', 'chips'], fake: ['cereal', 'granola', 'ricecakes', 'cerealbar', 'juice'], real: ['milk', 'honey', 'potatoes', 'berries', 'mango', 'banana', 'dates', 'oranges', 'sweetpotato'] },
   { id: 'sugar', en: '"I love sugar"', de: '„Ich liebe Zucker“', junk: ['candy', 'soda', 'donut', 'cookies', 'pancakes'], fake: ['juice', 'cerealbar', 'granola', 'cereal'], real: ['honey', 'mango', 'dates', 'berries', 'figs', 'cherries', 'pineapple', 'watermelon'] },
   { id: 'protein', en: '"I love protein"', de: '„Ich liebe Protein“', junk: ['nuggets', 'burger', 'coldcuts', 'pizza'], fake: ['cerealbar', 'granola', 'cereal', 'ricecakes'], real: ['steak', 'eggs', 'salmon', 'milk', 'oysters', 'cheese', 'beef', 'sardines'] },
-  { id: 'snacks', en: '"I love snacks"', de: '„Ich liebe Snacks“', junk: ['chips', 'candy', 'cookies', 'donut', 'nuggets'], fake: ['ricecakes', 'cerealbar', 'granola', 'juice'], real: ['cheese', 'dates', 'berries', 'almonds', 'walnuts', 'kiwi', 'honey', 'olives'] },
+  { id: 'snacks', en: '"I love snacks"', de: '„Ich liebe Snacks“', junk: ['chips', 'candy', 'cookies', 'donut', 'nuggets'], fake: ['ricecakes', 'cerealbar', 'granola', 'juice'], real: ['cheese', 'dates', 'berries', 'almonds', 'walnuts', 'kiwi', 'honey'] },
   { id: 'breakfast', en: '"I love breakfast"', de: '„Ich liebe Frühstück“', junk: ['pancakes', 'donut', 'cookies', 'soda', 'coldcuts'], fake: ['cereal', 'granola', 'juice', 'cerealbar'], real: ['eggs', 'milk', 'honey', 'berries', 'steak', 'butter', 'banana', 'oranges', 'yogurt'] },
 ];
 const SERIES = {
@@ -1497,7 +1498,7 @@ function swapItems(junk, used) {
     for (const o of shuffle(opts).sort((a, b) => fit(a) - fit(b))) { alt = one(o); if (alt) break; }
     // alle passenden schon vergeben? dann lieber ein passendes doppelt als etwas Unpassendes
     for (const o of shuffle(SWAPMAP[j.food.id] || [])) { if (alt) break; alt = one(o); }
-    alt = alt || chooseFour(isCore, used)[0];
+    alt = alt || chooseFour(idsPred(STAPLES), used)[0];
     taken.add(alt.food.id); return alt;
   });
 }
@@ -1579,6 +1580,17 @@ function chooseFour(pred, used, k = 4) {
 // freigestellte Lebensmittel (cut/cut.json): je Essen mehrere Ausschnitte, bewertet nach Qualität
 let CUTS = {};
 const hasCut = id => !!(CUTS[id] && CUTS[id].length);
+// weitere, noch unbenutzte Fotos derselben Lebensmittel (statt unpassender Lückenfüller)
+function moreCuts(ids, used, k) {
+  const out = [], order = shuffle(ids.filter(hasCut));
+  for (let round = 0; round < 4 && out.length < k; round++)
+    for (const id of order) {
+      if (out.length >= k) break;
+      const c = shuffle(CUTS[id]).find(x => !used.has(x.f));
+      if (c) { used.add(c.f); out.push({ src: c.f, id: c.f, food: FOODS[id], cut: true }); }
+    }
+  return out;
+}
 function chooseCuts(ids, used, k) {
   const useT = recent.use || {};
   const foods = [];
@@ -1662,7 +1674,7 @@ function planSlides(series, n, lang) {
   if (series === 'vs') {
     const m = Math.max(2, n), v = pick(VS[lang]);
     for (let i = 0; i < m - 1; i++) specs.push({ pred: isJunk, hook: v.bad[Math.min(i, v.bad.length - 1)], mood: 'sad' });
-    specs.push({ pred: isCore, hook: v.good, mood: 'strong' });
+    specs.push({ pred: idsPred(STAPLES), hook: v.good, mood: 'strong' });
   }
   if (series === 'rules') {
     const list = RULES[lang], idx = shuffle(list.map((_, i) => i)).slice(0, n).sort((a, b) => a - b);
@@ -1762,11 +1774,11 @@ function planSlides(series, n, lang) {
   if (series === 'dad') {
     const quote = t => lang === 'de' ? `„${t}“` : `“${t}”`;
     pickFresh(DAD.filter(d => CLAIMS[d.id]), d => 'dad' + d.id).slice(0, n).forEach(d => specs.push({ layout: 'ring', variant: 'dad',
-      pool: why(d.id), fill: STAPLES, cnt: 12, hook: quote(d[lang]), mood: 'none', key: 'dad' + d.id, claim: d.id, niche: (QUESTIONS.find(q => q.id === d.id) || {}).niche }));
+      pool: why(d.id), cnt: 12, hook: quote(d[lang]), mood: 'none', key: 'dad' + d.id, claim: d.id, niche: (QUESTIONS.find(q => q.id === d.id) || {}).niche }));
   }
   if (series === 'diet') {
     pickFresh(DIETS, d => 'diet' + d.id).slice(0, n).forEach(d => specs.push({ layout: 'ring', variant: 'diet',
-      pool: d.foods, fill: STAPLES, cnt: 12, hook: d[lang], mood: 'none', key: 'diet' + d.id, niche: d.niche }));
+      pool: d.foods, cnt: 12, hook: d[lang], mood: 'none', key: 'diet' + d.id, niche: d.niche }));
   }
   if (series === 'mog') {
     for (let i = 0; i < Math.max(2, n); i++) specs.push({ layout: 'ring', variant: 'mog', pool: i % 2 ? MOG.bad : MOG.good, cnt: 7,
@@ -1832,7 +1844,7 @@ function planPost(series, n, lang) {
     : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
     : sp.layout === 'freq' ? chooseCuts(vibeFoods(sp.pool.filter(hasCut), used, 4), used, 4)
     : sp.layout === 'love' ? [...chooseCuts(sp.love.junk, used, 5).map(it => ({ ...it, role: 'a' })), ...chooseCuts(sp.love.fake, used, 4).map(it => ({ ...it, role: 'b' })), ...chooseCuts(sp.love.real, used, 5).map(it => ({ ...it, role: 'c' }))]
-    : sp.layout === 'ring' ? (() => { const a = chooseCuts(sp.pool, used, sp.cnt); return a.length >= sp.cnt || !sp.fill ? a : [...a, ...chooseCuts(sp.fill.filter(id => !a.some(x => x.food.id === id)), used, sp.cnt - a.length)]; })()
+    : sp.layout === 'ring' ? (() => { const a = chooseCuts(sp.pool, used, sp.cnt); return a.length >= sp.cnt ? a : [...a, ...moreCuts(sp.pool, used, sp.cnt - a.length)]; })()   // fehlende Plätze: andere Fotos derselben passenden Lebensmittel
     : sp.layout === 'fg' ? (() => { const g = chooseCuts(sp.pool, used, sp.pool.filter(hasCut).length >= 8 ? 8 : 5);
         return [...g, ...chooseCuts(sp.bad, used, 4).map(it => ({ ...it, role: 'x' }))]; })()
     : sp.swapOf != null ? swapItems(slides[sp.swapOf].items, used) : chooseItems(sp, used);
