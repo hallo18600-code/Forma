@@ -345,7 +345,7 @@ CARE.push(
   {id:"duft",type:"care",name:"Duschgel parfümiert",emoji:"🧴",skin:["normal"],fragrance:true,alcohol:false,actives:[]},
   {id:"azelain",type:"care",name:"Azelainsäure 10 %",emoji:"🧪",skin:["fettig","unrein","sensibel","normal","trocken"],fragrance:false,alcohol:false,actives:["Azelainsäure"]},
   {id:"bha",type:"care",name:"BHA 2 % (Salicylsäure)",emoji:"🫧",skin:["fettig","unrein","normal"],fragrance:false,alcohol:false,actives:["Salicylsäure"]},
-  {id:"zink",type:"care",name:"Zinksalbe (nur punktuell)",emoji:"⚪",skin:["fettig","unrein","normal","sensibel","trocken"],fragrance:false,alcohol:false,actives:["Zinkoxid"]},
+  {id:"zink",type:"care",name:"Zinkcreme (nur punktuell)",emoji:"⚪",skin:["fettig","unrein","normal","sensibel","trocken"],fragrance:false,alcohol:false,actives:["Zinkoxid"]},
   {id:"retinol",type:"care",name:"Retinol 0,2–0,3 %",emoji:"🌙",skin:["normal","trocken","fettig"],fragrance:false,alcohol:false,actives:["Retinol"]},
   {id:"vitc",type:"care",name:"Vitamin-C-Serum",emoji:"🍊",skin:["normal","trocken","fettig"],fragrance:false,alcohol:false,actives:["Vitamin C"]}
 );

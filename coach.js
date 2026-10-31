@@ -242,7 +242,7 @@ function hautProblem(st,a,c){
       P.am.push("Niacinamid"); P.pm.push("Azelainsäure"); P.note="Dunkle Flecken verblassen meist in 3–6 Monaten.";
     } else {
       P.items=[aze("10 %","Kann Unreinheiten sichtbar verringern."),
-        tip("Zink punktuell","Zinksalbe nur auf entzündete Pickel","Flächig verstopft sie Poren.",{product:"zink"}),
+        tip("Zink punktuell","Zinkcreme nur auf entzündete Pickel","Flächig verstopft sie Poren.",{product:"zink"}),
         tip(null,"Nicht ausdrücken","Das kann dunkle Flecken hinterlassen.")];
       P.pm.push("Azelainsäure"); P.spot.push("Zink auf Pickel"); P.note="Nach 8–12 Wochen nicht besser: Hautarzt.";
     }
