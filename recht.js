@@ -3,7 +3,9 @@
 // Anbieter-Angaben hier zentral pflegen.
 // strasse/ort: KEINE Wohnadresse eintragen. Sobald es eine Adresse von einem Impressum-Service gibt,
 // hier eintragen (z. B. strasse:"c/o Firma XY, Musterstr. 1", ort:"12345 Stadt"). Leere Felder werden nicht angezeigt.
-const ANBIETER={ name:"Simon Spieß", strasse:"", ort:"", land:"Deutschland", mail:"health.maxxing10@gmail.com" };
+// Anbieter = Sebastian Spieß (Store-Konten, Impressum, Haftung). Simon Spieß entwickelt die App (nur Nennung, siehe ENTWICKLER).
+const ANBIETER={ name:"Sebastian Spieß", strasse:"", ort:"", land:"Deutschland", mail:"health.maxxing10@gmail.com" };
+const ENTWICKLER="Simon Spieß";
 const anbieterHtml=()=>[ANBIETER.name,ANBIETER.strasse,ANBIETER.ort,ANBIETER.land].filter(Boolean).join("<br>");
 // Läuft das hier als installierte Store-App (Capacitor) oder im Browser?
 const istStoreApp=()=>!!(window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform());
@@ -17,6 +19,7 @@ function impressumSheet(inApp=true){
     ${li("Anbieter",anbieterHtml())}
     ${li("Kontakt","E-Mail: "+ANBIETER.mail)}
     ${li("Verantwortlich für den Inhalt",ANBIETER.name+(ANBIETER.strasse?", Anschrift wie oben":""))}
+    ${li("Entwicklung",ENTWICKLER)}
     ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org). Angaben ohne Gewähr, sie können Fehler enthalten. Maßgeblich ist die Packung.")}
     ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte für gesunde Erwachsene und keine medizinische Beratung. Sie ersetzen keinen Arzt. Nicht geeignet bei Essstörungen, in Schwangerschaft oder Stillzeit.")}
     ${li("Bewertungen","Die Scores sind eine Einschätzung der App nach eigenen Regeln. Sie sind kein Test und kein Urteil über einzelne Marken.")}
