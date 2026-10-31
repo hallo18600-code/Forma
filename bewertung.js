@@ -30,9 +30,9 @@ const R_CATS=[
    b:[78,70,52,56],g:["Viel Protein, schnell nach dem Training","Viel Protein, wenig Kalorien","","Hält lange satt"],x:["Isoliertes Pulver – echtes Essen ist besser","Getrunken sättigt weniger als gegessen","Molke kann bei manchen Unreinheiten fördern","Kaum Carbs für Energie"],d:1},
   {id:"darkchoc",f:(h,raw)=>/(schokolade|schoko|chocolate|chocolat|kakao|cacao|cocoa|fondente|noir)/.test(h)&&(/(^|\D)(6[5-9]|[7-9]\d|100) ?%/.test(raw)||/(zartbitter|edelbitter|bitterschokolade|rohkakao|kakaonibs|kakao nibs|backkakao|kakaopulver|cacao nibs|raw cacao)/.test(h))&&!/(milch|keks|riegel|pudding|\beis\b|muffin|kuchen|creme|drink|trink|instant|musli|cookie|mousse|nuss|praline)/.test(h),
    b:[50,40,62,64],g:["Viel Kakao, weniger Zucker als Milchschoko","Weniger Zucker, kleine Menge reicht","Kakao liefert Antioxidantien","Kakao und Fett liefern gleichmäßige Energie|Etwas natürliches Koffein"],x:["Wenig Protein für die Kalorien","~Sehr kalorienreich","Etwas Zucker – in Maßen","Nur in kleinen Mengen"]},
-  {id:"ricecake",k:["rice cake","galettes de riz","galette de riz","tortitas de arroz","reiswaffel","maiswaffel","linsenwaffel","kichererbsenwaffel","erbsenwaffel","reiscracker","puffreis","dinkelwaffel","reis waffel","mais waffel"],
-   b:[34,36,38,40],g:["Leichte Carbs vor dem Training","Wenig Kalorien pro Stück","Glutenfrei","Schnell verfügbare Carbs"],x:["Kaum Protein & Nährstoffe","Puffreis lässt Blutzucker springen","Stark verarbeiteter Puffreis","Schnelle Carbs ohne Ballaststoffe"]},
-  {id:"sugar",k:["confiture","confitura","=doce","=jam","conserve","fruit spread","sucre","cassonade","azucar","zucchero","=syrup","=sirop","grenadine","=zucker","rohrzucker","puderzucker","rubenzucker","haushaltszucker","kokosblutenzucker","vanillezucker","gelierzucker","kandis","sirup","agavendicksaft","birnendicksaft","marmelade","konfiture","fruchtaufstrich","gelee","=dulce","zuckerrubensirup","glukose","fruktose","dextrose","traubenzucker"],n:["ahornsirup","erable","maple","sirop de agave","weniger zucker","wenig zucker","ohne zucker","zuckerreduziert","zuckerfrei","ohne zuckerzusatz","maiz","mais dulce"],
+  {id:"ricecake",k:["rice cake","galettes de riz","galette de riz","tortitas de arroz","reiswaffel","maiswaffel","linsenwaffel","linsen waffel","mais waffel","reis waffel","kichererbsenwaffel","erbsenwaffel","reiscracker","puffreis","dinkelwaffel","reis waffel","mais waffel"],
+   b:[34,36,38,40],g:["Leichte Carbs vor dem Training","Wenig Kalorien pro Stück","Glutenfrei","Schnell verfügbare Carbs"],x:["Kaum Protein & Nährstoffe","Gepufft: lässt den Blutzucker schnell steigen","Stark verarbeitet (gepufft)","Schnelle Carbs ohne Ballaststoffe"]},
+  {id:"sugar",k:["confiture","confitura","=doce","=jam","conserve","fruit spread","sucre","cassonade","azucar","zucchero","=syrup","=sirop","grenadine","=zucker","rohrzucker","puderzucker","rubenzucker","haushaltszucker","kokosblutenzucker","vanillezucker","gelierzucker","kandis","sirup","agavendicksaft","birnendicksaft","marmelade","konfiture","fruchtaufstrich","gelee","=dulce","zuckerrubensirup","glukose","fruktose","dextrose","traubenzucker"],n:["ahornsirup","erable","maple","sirop de agave","weniger zucker","wenig zucker","ohne zucker","zuckerreduziert","zuckerfrei","ohne zuckerzusatz","sans sucre","sin azucar","senza zucchero","sugar free","no sugar","zero sugar","no added sugar","maiz","mais dulce"],
    b:[10,8,6,12],g:["","","",""],x:["Purer Zucker ohne Nährstoffe","Purer Zucker, macht nicht satt","Zucker kann Unreinheiten fördern","Lässt den Blutzucker stark schwanken"]},
   {id:"sweets",k:["vollmilch schokolade","milch schokolade","weisse schokolade","biscuit","biscoff","speculoos","madeleine","=sable","sables","tartelette","=cake","bueno","ferrero","rocher","toffifee","mon cheri","=mars","maltesers","toblerone","celebrations","tic tac","mentos","knoppers","jaffa","prinzenrolle","magnum","=glace","glaces","gelato","helado","crema di nocciol","hazelnut spread","pate a tartiner","bionella","noisetta","custard","creme brulee","creme dessert","galette","=boudoirs","gocciole","baiocchi","abbracci","pan di stelle","=lion","schaumwaffel","kipferl","cinnamon roll","rollitos de canela","croissant","brioche","schokolade","schoko","chocolate","nutella","nougat","gummi","haribo","bonbon","lakritz","marshmallow","toffee","karamell","caramel","praline","marzipan","keks","cookie","biskuit","zwieback","platzchen","lebkuchen","stollen","kuchen","torte","muffin","donut","doughnut","brownie","croissant","plunder","strudel","krapfen","=berliner","waffel","pfannkuchen","crepe","pancake","=eis","eiscreme","speiseeis","eiskonfekt","fruchteis","wassereis","milcheis","stieleis","softeis","sahneeis","eis am stiel","kuvertur","pralinen","sorbet","pudding","dessert","tiramisu","mousse","milchreis","griesbrei","grießbrei","quarkballchen","quarkkeulchen","riegel","snickers","twix","bounty","kitkat","kit kat","duplo","hanuta","milka","ritter sport","kinder","m&m","smarties","oreo","leibniz","prinzen rolle","kekse","fruchtschnitte","mochi","baklava","schaumkuss","dickmann","vanilleeis","schokoeis","erdbeereis","fruchtgummi","weingummi","gummibar","goldbar","lolly","=drops","pastillen","schaumzucker","nussknacker"],n:["sussholz","sukartoffel","susskartoffel","sußkartoffel","eisberg","eiswurfel","kuchenkrauter"],
    b:[12,8,8,12],g:["","","",""],x:["Viel Zucker, kaum Protein","Viele Kalorien, macht nicht satt","Zucker kann Unreinheiten fördern","Zucker macht danach oft müde"]},
@@ -106,7 +106,7 @@ const R_CATS=[
    b:[78,74,82,90],g:["Mehr Protein als Reis","Ballaststoffe & Protein sättigen","Glutenfrei & mineralstoffreich","Langsame Carbs & Magnesium"],x:["","~Trocken viele Kalorien – Portion wiegen","",""]},
   {id:"wholewheat",f:(h,raw,c)=>rHit(h,rWords(h),c.k)&&/(brot|brotchen|toast|nudel|pasta|spaghetti|knacke|cracker|mehl|semmel|weckle|flocken|wrap|tortilla|bagel|baguette|vollkorn)/.test(h)&&!/(keks|kuchen|riegel|waffel|cookie|muffin|croissant|hafer|reis|musli|granola|flakes|knusper)/.test(h),k:["vollkorn","roggen","pumpernickel","sauerteig","knackebrot","dinkelvollkorn","schwarzbrot","kornerbrot","eiweissbrot","proteinbrot","=urkorn","emmer","einkorn"],w:1,
    b:[62,56,52,68],g:["Ballaststoffreiche Carbs","Sättigende Ballaststoffe","Ballaststoffe & Zink","Vollkorn hält länger satt als Weißmehl"],x:["Gluten-Getreide, nicht primal","Gluten-Getreide, nicht primal","Gluten-Getreide, nicht primal","Gluten-Getreide, nicht primal"]},
-  {id:"refined",k:["=pain","pain de mie","=pan","bauletto","biscotte","krisprolls","tartines craquantes","fette croccanti","farine","harina","semoule","=pates","coquillette","spaghettoni","maccheroni","tortiglioni","capellini","pipe rigate","risoni","nouilles","=noodles","glass noodles","=soba","pasta","=bread","=toast","brot","brotchen","semmel","schrippe","weckle","wecken","toast","baguette","ciabatta","brezel","breze","laugen","=wrap","wraps","tortilla","fladenbrot","=pita","bagel","=bun","buns","nudel","pasta","spaghetti","penne","fusilli","makkaroni","tagliatelle","farfalle","rigatoni","linguine","lasagneplatten","feuillete","blatterteig","gnocchi","couscous","bulgur","=mehl","weizenmehl","dinkelmehl","spatzle","knodel","kloss","grieß","griess","paniermehl","=focaccia","naan","=toastbrot"],w:1,lq:1,
+  {id:"refined",n:["konjac","konjak","shirataki"],k:["=pain","pain de mie","=pan","bauletto","biscotte","krisprolls","tartines craquantes","fette croccanti","farine","harina","semoule","=pates","coquillette","spaghettoni","maccheroni","tortiglioni","capellini","pipe rigate","risoni","nouilles","=noodles","glass noodles","=soba","pasta","=bread","=toast","brot","brotchen","semmel","schrippe","weckle","wecken","toast","baguette","ciabatta","brezel","breze","laugen","=wrap","wraps","tortilla","fladenbrot","=pita","bagel","=bun","buns","nudel","pasta","spaghetti","penne","fusilli","makkaroni","tagliatelle","farfalle","rigatoni","linguine","lasagneplatten","feuillete","blatterteig","gnocchi","couscous","bulgur","=mehl","weizenmehl","dinkelmehl","spatzle","knodel","kloss","grieß","griess","paniermehl","=focaccia","naan","=toastbrot"],w:1,lq:1,
    b:[42,28,28,38],g:["Schnelle Carbs nach dem Training","","","Schnelle Carbs"],x:["Weißmehl: wenig Nährstoffe","Weißmehl macht schnell wieder hungrig","Weißmehl lässt Blutzucker springen","Schnelle Energie, schnelles Tief"]},
   {id:"driedfruit",k:["getrocknet","trockenobst","trockenfrucht","dattel","rosine","sultanine","bananenchips","apfelchips","=cranberries","=dates","medjool","softfeige","trockenpflaume","aprikose getrocknet","mango getrocknet","gojibeere","goji"],w:1,
    b:[46,28,56,62],g:["Schnelle Carbs fürs Training","","Kalium, Eisen & Polyphenole","Schnelle, natürliche Energie"],x:["Kaum Protein","Sehr viel Zucker auf kleinem Raum","Konzentrierter Zucker","Nur kleine Mengen – viel Zucker"]},
@@ -120,7 +120,7 @@ const R_CATS=[
    b:[56,72,84,76],g:["Schnelle Carbs rund ums Training","Süß, aber mit Ballaststoffen","Vitamine & Antioxidantien","Natürlicher Zucker + Ballaststoffe"],x:["Kaum Protein","Fruchtzucker – in Maßen","",""]},
   {id:"skinveg",k:["epinard","spinach","potiron","courge","pumpkin","carrot","=carotte","carottes","pomodor","=tomato","tomatoes","=sugo","=polpa","arrabbiata","marinara","napoletana","pimiento","poivron","patate douce","karotte","mohre","=rube","rote bete","rote beete","rote rube","spinat","grunkohl","mangold","paprika","tomate","tomatenmark","passata","tomatensauce","tomatensosse","kurbis","hokkaido","butternut","brokkoli","broccoli","rotkohl","rucola","feldsalat","=kresse","wildkrauter","brunnenkresse","pak choi","=kale"],n:["kurbiskern"],w:1,
    b:[56,95,97,74],g:["Mikronährstoffe für die Regeneration","Viel Volumen, kaum Kalorien","Vitamine & Antioxidantien für die Haut","Vitamine & Ballaststoffe"],x:["Kaum Protein","","","Wenig Kalorien – allein keine Energie"]},
-  {id:"veg",k:["asparagus","asperge","cornichon","pepinillo","olives","azeitona","aceituna","petits pois","=pois","haricots verts","gingembre","ginger shot","=ginger","brocoli","courgette","champignon","=funghi","legumes","verdure","gurke","zucchini","aubergine","blumenkohl","rosenkohl","kohlrabi","weisskohl","wirsing","spitzkohl","chinakohl","=kohl","=chou","=choux","sellerie","spargel","pilz","champignon","shiitake","austernpilz","zwiebel","schalotte","knoblauch","lauch","porree","fenchel","=salat","salatherz","eisberg","kopfsalat","romana","chicoree","radicchio","endivie","artischocke","okra","=gemuse","gemuse","grune bohnen","brechbohnen","prinzessbohnen","zuckerschoten","=erbsen","erbse","=mais","zuckermais","radieschen","rettich","rucola","ingwer","oliven","kapern","gewurzgurke","sprossen","keimlinge","bambus","pak choi","staudensellerie","fruhlingszwiebel"],n:["ingwertee","ingwer tee"],w:1,
+  {id:"veg",k:["konjac","konjak","shirataki","asparagus","asperge","cornichon","pepinillo","olives","azeitona","aceituna","petits pois","=pois","haricots verts","gingembre","ginger shot","=ginger","brocoli","courgette","champignon","=funghi","legumes","verdure","gurke","zucchini","aubergine","blumenkohl","rosenkohl","kohlrabi","weisskohl","wirsing","spitzkohl","chinakohl","=kohl","=chou","=choux","sellerie","spargel","pilz","champignon","shiitake","austernpilz","zwiebel","schalotte","knoblauch","lauch","porree","fenchel","=salat","salatherz","eisberg","kopfsalat","romana","chicoree","radicchio","endivie","artischocke","okra","=gemuse","gemuse","grune bohnen","brechbohnen","prinzessbohnen","zuckerschoten","=erbsen","erbse","=mais","zuckermais","radieschen","rettich","rucola","ingwer","oliven","kapern","gewurzgurke","sprossen","keimlinge","bambus","pak choi","staudensellerie","fruhlingszwiebel"],n:["ingwertee","ingwer tee"],w:1,
    b:[52,94,90,70],g:["Mikronährstoffe für die Regeneration","Viel Volumen, kaum Kalorien","Vitamine & Antioxidantien","Vitamine & Ballaststoffe"],x:["Kaum Protein","","","Wenig Kalorien – allein keine Energie"]},
   {id:"honey",k:["=miel","=miele","erable","=maple","honig","honey","ahornsirup","maple"],w:1,
    b:[46,30,58,66],g:["Schnelle Carbs nach dem Training","Natürlich süßen – kleine Menge reicht","Natürlich süß, mit Antioxidantien","Natürlicher Zucker, besser als Haushaltszucker"],x:["Kaum Protein","Viele Kalorien – nur ein Teelöffel","In Maßen: ein Teelöffel statt drei","In Maßen, sonst Zucker-Tief"]},
@@ -295,6 +295,8 @@ function rPlausible(cat,n,heavy,h){
   // Obst & Gemüse mit Getränke-Wörtern und wenig Kalorien: Limo, Schorle, aromatisiertes Wasser
   if(["fruit","berries","vitc","banana","veg","skinveg"].includes(id)&&n.kc<70&&R_DRINKW.test(h)) return "RETRY";
   if(["poultry","redmeat","leanfish","fattyfish"].includes(id)&&n.cb>8) return /(panier|panade|breaded|coated|crispy|knusper|backfisch|nugget|=pane)/.test(h)?R_BYID.fastfood:dish;
+  if(id==="fastfood"&&n.kc<90&&/(passata|sugo|tomat|pizzasauce|pizza sauce)/.test(h)) return R_BYID.sauce;
+  if(id==="cereal"&&/(chili|pfeffer|gewurz|spice|paprika)/.test(h)) return R_BYID.spice;
   if(id==="fermentedveg"&&n.kc>150&&n.cb>30) return R_BYID.readymeal;      // Instant-Nudeln "Kimchi"
   if(id==="coconut"&&(n.su>25||n.su>15&&n.cb>30)) return n.su<=25&&/(mix|nuss|cashew|mandel|\bnut)/.test(h)?"RETRY":R_BYID.sweets;  // Kokos-Gebäck; Nuss-Mix: als Nuss prüfen
   if(id==="coconut"&&n.kc<70&&n.su>6) return R_BYID.softdrink;    // Getränk mit Kokos (Kokoswasser hat weniger Zucker)
@@ -439,6 +441,11 @@ function rClassify(item){
     else if(kc>=380&&cb>=55&&su>=12) cat=R_BYID.sweets;
   }
   if(kc<20&&cat&&!["tea","water","coffee","softdrink","alcohol","broth"].includes(cat.id)&&R_BYID.tea.k.some(k=>kwHit(h,words,k)===2)) cat=R_BYID.tea;
+  // Getränke ohne Kalorien und Zucker (Zero-Sirup, Sportgetränk zero, Kalt-Aufguss): nicht wie Süßigkeit oder Saft werten
+  if(nut.kc<10&&nut.su<1.5&&(!cat||["sweets","sugar","fastfood"].includes(cat.id)||["juice","nectar"].includes(cat.id)&&/(infus|aufguss|\btee\b|\btea\b)/.test(h))){
+    if(/(infus|aufguss|tee|tea|krauter)/.test(h)) cat=R_BYID.tea;
+    else if(R_DRINKW.test(h)||/(sirup|syrup|sirop|drops|energy|zero|sparkling|isoton|powerade|limo)/.test(h)) cat=R_BYID.softdrink;
+  }
   // Pures Fleisch, Fisch, Ei: Die Datenbank stuft abgepacktes Frischfleisch oft als „stark verarbeitet“ ein
   // (Schutzatmosphäre, Etikett). Ohne viel Salz, Zucker oder Würz-Hinweis im Namen ist es naturbelassen.
   if(heavy&&cat&&["poultry","redmeat","leanfish","fattyfish","egg","organ"].includes(cat.id)&&sa<1.2&&su<3
@@ -517,7 +524,7 @@ function scoreFood(item,goal){
   }
   // 3) Texte aus den echten Nährwerten
   const ps=kc>0?pr*4/kc:0, cs=kc>0?cb*4/kc:0, fs=kc>0?fa*9/kc:0, sr=cb>0?su/cb:0, fr=cb>0?fi/cb:0;
-  const carbGood=cl(1-sr*1.4)*0.65+cl(fr*7)*0.35, fruity=R_FRUITY.includes(id), drink=kc<8||["coffee","tea","water"].includes(id);
+  const carbGood=cl(1-sr*1.4)*0.65+cl(fr*7)*0.35, fruity=R_FRUITY.includes(id)||["veg","skinveg"].includes(id)&&!heavy, drink=kc<8||["coffee","tea","water"].includes(id);
   // Lob für Protein/Carbs nur bei echtem Essen (kein "viel Protein" für Donuts)
   const junk=["sweets","chips","fastfood","sugar","softdrink","cereal","alcohol","sauce","margarine","seedoil"].includes(id), realFood=!cat||cat.w, okFood=!junk&&!(heavy&&!cat);
   if(!drink){
@@ -565,6 +572,11 @@ function scoreFood(item,goal){
   if(id==="softdrink"&&su<1){ const zero=kc<10; score+=[8,zero?47:18,8,6][gi]; cons.length=0;
     if(g==="lose"&&zero){ good("Kaum Kalorien – bremst das Abnehmen nicht",13); good("Besser als die Variante mit Zucker",12); bad("Wasser ist noch besser: ohne Süßstoffe & Zusätze",12); }
     else bad("Süßstoffe und Zusätze, keine Nährstoffe",12); }
+  if(g==="lose"&&kc>0&&kc<=100&&su<10&&!["alcohol","softdrink","seedoil","goodfat","margarine","butter"].includes(id)&&!/(\bol\b|rapsol|olivenol|\boil\b|huile|\bolio\b|\baceite)/.test(h)&&score<45){ score=45+(100-kc)/10; if(!pros.length) good("Wenig Kalorien ("+kc+" kcal)",10); }
+  // Leichte Suppen, Soßen und Fertiggerichte: beim Abnehmen zählen vor allem die Kalorien
+  if(["sauce","readymeal","mixedmeal"].includes(id)&&g==="lose"&&kc<=100&&kc>0){ good("Wenig Kalorien ("+kc+" kcal)",12); bad(su>=5?"Auf zugesetzten Zucker achten":sa>1.5?"":"Fertigprodukt: oft viel Salz & Zusätze",9); }
+  if(["juice","nectar"].includes(id)&&g==="lose"&&kc<=25){ score+=15; good("Mit Wasser verdünnt: wenig Kalorien",12); bad("Wasser pur ist noch besser",9); }
+  if(id==="plantmilk"&&kc<=40&&su<=1&&g==="lose"){ score+=15; good("Kaum Kalorien, kein Zucker",12); }
   if(id==="softdrink"&&/(energy|red bull|monster)/.test(h)&&g==="energy") bad("Viel Koffein, danach oft ein Tief",13);
   // Saft: Mikronährstoffe gegen Zucker abwägen. Smoothie (mit Fruchtfleisch) und Direktsaft besser, Konzentrat etwas schlechter
   // Honig: Imkerhonig/roh/kaltgeschleudert ist naturbelassener als Industrie-Mischhonig
@@ -595,7 +607,9 @@ function scoreFood(item,goal){
   if(sa>1.5&&id!=="spice") { score-=Math.min(10,(sa-1.5)*4); bad((g==="skin"?"Viel Salz – kann aufschwemmen":"Viel Salz")+" ("+rG(sa)+" g)",9); }
   // Primal-Blick: Soja, Süßstoffe, Pflanzenöle im Namen
   if(!["soy","ersatz","sauce","plantmilk"].includes(id)&&/(soja|\bsoy\b)/.test(h)){ score-=8; bad("Enthält Soja – nicht naturbelassen",10); }
-  if(heavy&&/(zero|light|zuckerfrei|sugar free|ohne zucker|sussstoff|sussungsmittel|sucralose|aspartam)/.test(h)&&id!=="softdrink"){ score-=6; bad("Mit Süßstoffen",9); }
+  // Süßstoff nur bei klaren Hinweisen ("ohne Zucker" oder "light" allein heißt nicht Süßstoff)
+  if(heavy&&/(zero|sussstoff|sussungsmittel|sucralose|aspartam|acesulfam|steviol)/.test(h)&&!["softdrink","plantmilk"].includes(id)){ score-=4;
+    if(su<5) good("Weniger Zucker als die normale Variante",8); bad("Ohne Süßstoffe wäre es noch besser",9); }
   if(!["seedoil","margarine"].includes(id)&&/(sonnenblumenol|rapsol|palmol|pflanzenol)/.test(h)){ score-=5; bad("Mit raffiniertem Pflanzenöl",8); }
   rateQuality(item,id,h,(v,t,w)=>{ score+=v; (v>0?good:bad)(t,w); });
   score=rSoft(score);
@@ -658,6 +672,25 @@ function scoreFood(item,goal){
   if(fokus.includes("Sättigung")&&((pr>=10&&kc<=250)||fi>=6)) P(5,"Macht lange satt");
   if(fokus.includes("Koffein am Abend")&&foodHas(item,"caf")) P(-4,"Koffein: nach 15 Uhr meiden");
   rTextCheck(pros,cons,{kc,pr,fa,su,fiber:item.fiber,h,id});
+  if(pros.some(x=>/pro stück/i.test(x.t))) for(let i=cons.length-1;i>=0;i--) if(/kalorienreich/i.test(cons[i].t)) cons.splice(i,1);
+  // Kein Score ohne Begründung: fehlt ein passender Grund, einen sachlichen aus den Daten ergänzen
+  if(score<45&&!cons.length){
+    if(g==="muscle"&&pr<10&&!drink) cons.push({t:"Wenig Protein ("+rG(pr)+" g)",w:5});
+    else if(junk) cons.push({t:"Snack mit wenig Nährstoffen",w:5});
+    else if(heavy||nova>=4) cons.push({t:"Stark verarbeitet mit Zusätzen",w:5});
+    else if(id==="softdrink"&&su>=2) cons.push({t:"Zugesetzter Zucker ("+rG(su)+" g pro 100 ml)",w:5});
+    else if(su>=12&&!fruity) cons.push({t:"Viel Zucker ("+rG(su)+" g)",w:5});
+    else if(sa>1.2) cons.push({t:"Viel Salz ("+rG(sa)+" g)",w:5});
+    else if(kc>=200&&g==="lose") cons.push({t:"Kalorienreich ("+kc+" kcal)",w:5});
+    else if(g==="skin"&&["refined","cereal"].includes(id)) cons.push({t:"Schnelle Carbs lassen Blutzucker steigen",w:5});
+    else if(g==="skin"&&!cat) cons.push({t:"Wenig Vitamine & Mineralstoffe",w:5});
+  }
+  if(score>=75&&!pros.length){
+    if(g==="muscle"&&pr>=10) pros.push({t:"Viel Protein ("+rG(pr)+" g)",w:5});
+    else if(g==="lose"&&kc<=120) pros.push({t:kc<8?"Ohne Kalorien":"Wenig Kalorien ("+kc+" kcal)",w:5});
+    else if(cat&&cat.w&&!heavy) pros.push({t:"Naturbelassen",w:5});
+    else if(fi>=5) pros.push({t:"Viele Ballaststoffe",w:5});
+  }
   const out=rateOut(Math.min(cap,score),pros,cons); out.notes=notes; return out;
 }
 // Typische Nährwert-Bewertung je Art (Median aus 100.000 Produkten), Reihenfolge: Muskeln, Abnehmen, Haut, Energie
@@ -684,6 +717,11 @@ function rTextCheck(pros,cons,n){
   for(let i=pros.length-1;i>=0;i--) if(badPro(pros[i].t)) pros.splice(i,1);
   for(let i=cons.length-1;i>=0;i--){ const t=cons[i].t, l=t.toLowerCase();
     if(/^kein protein/.test(l)&&n.pr>=3||/^(kaum|fast kein) protein/.test(l)&&n.pr>=8||/^wenig protein$/.test(l)&&n.pr>=12) { cons.splice(i,1); continue; }
+    if(/weißmehl/.test(l)&&/(vollkorn|whole ?grain|wholegrain|integral|weetabix|corn|\bmais|hafer|\boat|reis|rice|buchweizen|hirse|quinoa|dinkel ?voll)/.test(n.h)){ cons[i]={t:t.replace(/Zucker & Weißmehl/,"Zucker & verarbeitetes Getreide").replace(/Weißmehl/,"Verarbeitetes Getreide"),w:cons[i].w}; continue; }
+    if(/^wenig kalorien/.test(l)&&n.kc>120){ cons.splice(i,1); continue; }
+    if(/viel zucker/.test(l)&&n.su!=null&&n.su!==""&&+n.su<8){ cons.splice(i,1); continue; }
+    if(/zucker aus getreide/.test(l)&&(n.su<1||!/(hafer|oat|reis|rice|dinkel|gerste|avena|riso|getreide)/.test(n.h))){ cons.splice(i,1); continue; }
+    if(/versteckte kalorien/.test(l)&&n.kc<80||/(viele kalorien|kalorienreich|kaloriendichte|nur ein teelöffel)/.test(l)&&n.kc<120&&!["honey","sugar"].includes(n.id)||/flüssige kalorien/.test(l)&&n.kc<25&&n.id!=="softdrink"){ cons.splice(i,1); continue; }
     if(/zucker/.test(l)&&!/zugesetzt|süßstoff|zuckeralkohol/.test(l)&&n.su<12&&!["sugar","softdrink","nectar","honey","juice","driedfruit"].includes(n.id)){
       const f=R_SUGAR_FIX.find(([re])=>re.test(t)); if(f) cons[i]={t:f[1],w:cons[i].w}; else if(/^viel zucker/.test(l)) cons.splice(i,1);
     }

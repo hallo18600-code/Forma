@@ -101,6 +101,7 @@ ESSEN = r"""async ()=>{
    if(/kaum Fett/.test(good)&&fa>5) fail("Text 'kaum Fett' bei fettem Produkt",it.name);
    if(/(Viel Protein|Proteinreich)/.test(good)&&pr<8) fail("Text 'Viel Protein' bei wenig Protein",it.name);
    if(/Wenig Zucker/.test(good)&&su>10) fail("Text 'Wenig Zucker' bei viel Zucker",it.name);
+   if(r.score<35&&!r.bad.length) fail("Schlechter Score ohne Begründung",`${it.name} (${g}) → ${r.score}`);
    if(/Viel Zucker/.test(bad)&&su<12) fail("Text 'Viel Zucker' bei wenig Zucker",it.name);
    if(/^(Kein|Kaum) Protein/.test(r.bad[0]||"")&&pr>=8) fail("Text 'Kein Protein' bei viel Protein",it.name);
    if(/(wenig|kaum) Kalorien(?! pro Stück)|Nur \d+ kcal/.test(good)&&kc>120) fail("Text 'wenig Kalorien' bei vielen Kalorien",it.name+" "+kc);
@@ -124,6 +125,8 @@ ESSEN = r"""async ()=>{
   ["alkoholfrei","^(Krombacher|Erdinger|Bitburger|Clausthaler|Jever)", (s,c)=>c!=="alcohol", "Alkoholfreies Bier ist kein Alkohol"],
   ["Bl[äa]tterteig|p[âa]te feuillet","", (s,c)=>c!=="tea", "Blätterteig ist kein Tee"],
   ["Schlemmer.?filet","", (s,c)=>!["leanfish","fattyfish","veg","skinveg"].includes(c), "Schlemmerfilet nicht wie reiner Fisch"],
+  ["^Coca[- ]?Cola Zero","", (s,c,it)=>(+it.kcal||0)>=10||s[1]>=45&&s[1]<=65, "Cola Zero beim Abnehmen 45–65 (besser als Cola, schlechter als Wasser)"],
+  ["Konjac|Shirataki","", (s,c)=>!["refined","wholewheat"].includes(c), "Konjak-Nudeln sind kein Weißmehl"],
   ["Limonade","", (s,c,it)=>Math.max(...s)<=((+it.sugar||0)<1&&(+it.kcal||0)<10?60:30), "Limonade höchstens 30 (Zero höchstens 60)"],
   ["^(Bio[ -])?Agaven ?dicksaft$","", (s,c,it)=>(+it.sugar||0)<40||Math.max(...s)<=20, "Agavendicksaft höchstens 20"],
   ["Kr[äa]uterquark","", (s,c)=>c!=="spice", "Kräuterquark ist kein Gewürz"],
