@@ -124,7 +124,7 @@ ESSEN = r"""async ()=>{
   ["alkoholfrei","^(Krombacher|Erdinger|Bitburger|Clausthaler|Jever)", (s,c)=>c!=="alcohol", "Alkoholfreies Bier ist kein Alkohol"],
   ["Bl[äa]tterteig|p[âa]te feuillet","", (s,c)=>c!=="tea", "Blätterteig ist kein Tee"],
   ["Schlemmer.?filet","", (s,c)=>!["leanfish","fattyfish","veg","skinveg"].includes(c), "Schlemmerfilet nicht wie reiner Fisch"],
-  ["Limonade","", (s,c)=>Math.max(...s)<=30, "Limonade höchstens 30"],
+  ["Limonade","", (s,c,it)=>Math.max(...s)<=((+it.sugar||0)<1&&(+it.kcal||0)<10?60:30), "Limonade höchstens 30 (Zero höchstens 60)"],
   ["^(Bio[ -])?Agaven ?dicksaft$","", (s,c,it)=>(+it.sugar||0)<40||Math.max(...s)<=20, "Agavendicksaft höchstens 20"],
   ["Kr[äa]uterquark","", (s,c)=>c!=="spice", "Kräuterquark ist kein Gewürz"],
   ["^Pringles|^Chipsfrisch","", (s,c)=>Math.max(...s)<=25, "Chips höchstens 25"],

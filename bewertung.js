@@ -562,8 +562,8 @@ function scoreFood(item,goal){
   }
   // 5) Sonderfälle innerhalb einer Art
   // Zero/Light: Beim Abnehmen zählen vor allem die Kalorien, deshalb im Mittelfeld (besser als mit Zucker, Wasser bleibt besser)
-  if(id==="softdrink"&&su<1){ score+=[8,47,8,6][gi]; cons.length=0;
-    if(g==="lose"){ good("Kaum Kalorien – bremst das Abnehmen nicht",13); good("Besser als die Variante mit Zucker",12); bad("Wasser ist noch besser: ohne Süßstoffe & Zusätze",12); }
+  if(id==="softdrink"&&su<1){ const zero=kc<10; score+=[8,zero?47:18,8,6][gi]; cons.length=0;
+    if(g==="lose"&&zero){ good("Kaum Kalorien – bremst das Abnehmen nicht",13); good("Besser als die Variante mit Zucker",12); bad("Wasser ist noch besser: ohne Süßstoffe & Zusätze",12); }
     else bad("Süßstoffe und Zusätze, keine Nährstoffe",12); }
   if(id==="softdrink"&&/(energy|red bull|monster)/.test(h)&&g==="energy") bad("Viel Koffein, danach oft ein Tief",13);
   // Saft: Mikronährstoffe gegen Zucker abwägen. Smoothie (mit Fruchtfleisch) und Direktsaft besser, Konzentrat etwas schlechter
