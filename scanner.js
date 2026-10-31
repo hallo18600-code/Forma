@@ -34,7 +34,12 @@ async function offLookup(code){
   const n=j.product.nutriments||{}, g=k=>+n[k]||0;
   const kcal=g("energy-kcal_100g")||Math.round(g("energy_100g")/4.184), name=(j.product.product_name||"").trim();
   if(!name||!kcal) return null;
-  return {id:"off-"+code,type:"custom",src:"off",name,brand:(j.product.brands||"").split(",")[0].trim()||"Open Food Facts",emoji:"📦",kcal:Math.round(kcal),protein:g("proteins_100g"),carbs:g("carbohydrates_100g"),fat:g("fat_100g"),sugar:g("sugars_100g"),fiber:g("fiber_100g"),salt:g("salt_100g"),sat:g("saturated-fat_100g"),processed:(+j.product.nova_group||0)>=4,nova:+j.product.nova_group||undefined,bc:code};
+  // Gleiche Plausibilitäts-Prüfung wie bei der eingebauten Liste (build_foods.py): offensichtlich falsche Einträge nicht übernehmen
+  const p=g("proteins_100g"), c=g("carbohydrates_100g"), f=g("fat_100g"), calc=p*4+c*4+f*9, brand=(j.product.brands||"").split(",")[0].trim();
+  const sonder=/(alkohol|bier|beer|wein|wine|sekt|likör|schnaps|vodka|wodka|whisk|kaugummi|zuckerfrei|sugar ?free|xylit|erythrit|allulos|süßstoff)/i.test(name+" "+brand);
+  if(kcal>950||p+c+f>100.5||g("salt_100g")>100) return null;
+  if(!sonder&&Math.max(kcal,calc)>60&&Math.abs(calc-kcal)>80&&Math.abs(calc-kcal)/Math.max(kcal,calc)>0.4) return null;
+  return {id:"off-"+code,type:"custom",src:"off",name,brand:brand||"Open Food Facts",emoji:"📦",kcal:Math.round(kcal),protein:p,carbs:c,fat:f,sugar:Math.min(g("sugars_100g"),c),fiber:g("fiber_100g"),salt:g("salt_100g"),sat:Math.min(g("saturated-fat_100g"),f),processed:(+j.product.nova_group||0)>=4,nova:+j.product.nova_group||undefined,bc:code};
 }
 async function bcLookup(code){
   code=String(code||"").replace(/\D/g,"");

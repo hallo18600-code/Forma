@@ -235,7 +235,9 @@ function buildRoutine(){
   if(p.trainFreq==="Gar nicht") c.push({id:"ob-bewegen", topic:"eigen", title:"10 Minuten bewegen", detail:"", product:null, area:"Energie"});
   // Gleiche Zahl wie oben im Plan (eigener Wert oder der berechnete)
   if(!Object.keys(e).length) c.push({id:"ob-wasser", topic:"eigen", title:`${p.waterManual?p.waterTarget:waterGoal()} Gläser Wasser trinken`, detail:"", product:null, area:"Gewohnheiten"});
-  const areas=(p.areas||[]).map(a=>({"Körperpflege":"Aussehen","Ernährung":"Gesundheit"}[a]||a));
+  // Gewählte Bereiche und das Hauptziel zuerst (Energie = Schlaf + Ernährung, Haut-Ziel = Haut)
+  const areas=(p.areas||[]).flatMap(a=>({"Körperpflege":["Aussehen"],"Ernährung":["Gesundheit"],Energie:["Schlaf","Gesundheit"]}[a]||[a]))
+    .concat({skin:["Haut"],energy:["Schlaf","Gesundheit"],lose:["Aussehen"],muscle:["Aussehen"]}[p.goal]||[]);
   c.sort((a,b)=>(areas.includes(b.area)?1:0)-(areas.includes(a.area)?1:0));
   const max={"5 Minuten":2,"15 Minuten":4,"30 Minuten oder mehr":6}[p.routineTime]||3;
   return noDupes(c).slice(0,max).map(({area,...r})=>r);

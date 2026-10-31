@@ -57,7 +57,7 @@ function coachPlans(){
       why:"Ein Teller mit Protein und etwas Unverarbeitetem schlägt ein Verbot. Der Score bestraft Fertiges, nicht einzelne Lebensmittel.",
       avoid:["Alles-oder-nichts nach einer Pizza","Kalorien ausblenden und dann raten","Nur Shakes statt Essen"],
       steps:[
-        ["Protein auf mindestens zwei Mahlzeiten", "Skyr, Ei, Fisch, Hähnchen, Hülsenfrüchte."],
+        ["Protein auf mindestens zwei Mahlzeiten", cap(proteinFoods(4))+"."],
         ["Eine Mahlzeit ohne Fertigprodukt", "Nicht perfekt, nur eine."],
         ["Wasser vor dem Nachmittagskaffee", "Oft ist es Durst, nicht Hunger."],
         ["Abend nicht als Ausgleich hungern", "Der nächste Tag wird sonst lauter."]
@@ -450,7 +450,7 @@ function schlafAdvice(a){
     tip("20-Min-Regel","Nach 20 Min wach: kurz aufstehen","So verbindet dein Kopf das Bett mit Schlaf statt mit Grübeln.")]);
   if(a.ein==="Wach in der Nacht") g.push([tip("16–19 °C","Schlafzimmer auf 16–19 °C","In einem kühlen Raum schläft man besser durch."),
     alk?tip("Kein Alkohol abends","3 h vorm Bett kein Alkohol","Alkohol macht den Schlaf in der zweiten Nachthälfte unruhig."):tip(null,"Nachts nicht auf die Uhr schauen","Wer die Stunden zählt, wird wacher.")]);
-  if(a.kaffee==="Oft") g.push([tip(`Kaffee bis ${hm(caf)}`,`Letzter Kaffee bis ${hm(caf)}`,"Nach 5 Stunden ist noch etwa die Hälfte des Koffeins im Körper.")]);
+  if(a.kaffee==="Oft"&&!avoidsCaffeine()) g.push([tip(`Kaffee bis ${hm(caf)}`,`Letzter Kaffee bis ${hm(caf)}`,"Nach 5 Stunden ist noch etwa die Hälfte des Koffeins im Körper.")]);
   if(a.vorher==="Handy / Serie im Bett") g.push([tip("Handy weglegen","Handy 30 Min vorher weg","Videos und Nachrichten halten den Kopf wach.")]);
   if(a.vorher==="Arbeit / Lernen") g.push([tip("To-do notieren","5 Min To-dos für morgen notieren","Der Kopf kommt schneller zur Ruhe.")]);
   if(a.vorher==="Sport") g.push([tip("Sport früher","Harten Sport 1–2 h vorm Bett beenden","Sonst sind Puls und Körpertemperatur noch zu hoch.")]);
@@ -458,7 +458,7 @@ function schlafAdvice(a){
   let items=pickTips(g,3);
   if(!items.length) items=[tip(null,"Dein Schlaf passt","Behalte deine Zeiten bei.")];
   const routine=sumRoutine("Schlaf",items,"",null);
-  routine.times=[["⏰","Aufstehen",hm(wake)],["☕","Letzter Kaffee",hm(caf)],["💡","Licht runter",hm(dim)],["🛏️","Ins Bett",hm(bed)]];
+  routine.times=[["⏰","Aufstehen",hm(wake)],avoidsCaffeine()?null:["☕","Letzter Kaffee",hm(caf)],["💡","Licht runter",hm(dim)],["🛏️","Ins Bett",hm(bed)]].filter(Boolean);
   if(!routine.short.includes("Bett")){ routine.short=[`Bett ${hm(bed)}`].concat(routine.short?routine.short.split(" · "):[]).slice(0,4).join(" · "); routine.title="Schlaf: "+routine.short; }
   return {lead:`Aufstehen ${hm(wake)} → Bett ${hm(bed)}`, routine, items};
 }
@@ -504,13 +504,15 @@ const PLAN_INFO={
 function muskelTips(a,lvl,g,fatGoal,prot,lifts){
   const pid=muskelPlanId(a,lifts), P=PLAN_INFO[pid], have=(state.routines||[]).some(r=>r.id===pid);
   const gym=a.gym||"", beginner=gym==="Gym, Anfänger"||gym==="Noch gar nicht";
+  const ea=(state.coach.answers||{}).gesundheit||{}, vegan=ea.stil==="Vegan";
+  const noWhey=vegan||(ea.meiden||[]).includes("Milchprodukte")||(ea.intol||[]).includes("Laktose");
   const surplus=lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal&&((+state.profile.weight||70)/Math.pow(state.profile.height/100,2)<30||leanStated()), G={grp:"Training"};
   return [
     tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why,Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
     tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wiederholungen oder eine schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche eine Wiederholung mehr.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
     tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:"1,6–2,2 g pro kg Körpergewicht gelten als ideal für den Muskelaufbau.",Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
-    tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher","Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
-    tip("Kreatin","3–5 g Kreatin täglich","Erhöht die Leistung bei kurzem, intensivem Krafttraining. Fehlt Protein im Essen, hilft Whey.",Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
+    tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher",vegan?"Reiswaffeln mit Marmelade oder eine Banane.":"Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
+    tip("Kreatin","3–5 g Kreatin täglich","Erhöht die Leistung bei kurzem, intensivem Krafttraining. Fehlt Protein im Essen, hilft "+(noWhey?"pflanzliches Proteinpulver.":"Whey."),Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
   ];
 }
 function aussehenAdvice(a){
@@ -520,7 +522,7 @@ function aussehenAdvice(a){
   const fatGoal=ziel.includes("Weniger Bauchfett")||ziel.includes("Gesicht definierter");
   const hm2=Math.pow(p.height/100,2), prot=Math.max(t.protein, Math.round(Math.min(p.weight,25*hm2)*1.6));
   let cal=null;
-  if(!under&&(lvl>=3||(lvl===2&&fatGoal)))
+  if(!under&&(lvl>=3||(lvl===2&&fatGoal&&g!=="muscle")))
     cal = g==="lose" ? tip("Defizit halten",`Bei ${de(t.kcal)} kcal bleiben`,"So verlierst du Fett und behältst deine Muskeln.")
       : tip("Leichtes Defizit",`Kalorien auf ${de(kcalFor("lose"))} senken`,"Bauch und Gesicht werden erst schlanker, wenn der Körperfettanteil sinkt.",{act:"coach-goal",v:"lose",label:"Kalorienziel senken",once:1});
   // Hoher BMI zählt nicht als „zu viel Fett“, wenn der KFA selbst als niedrig angegeben ist (muskulös)
@@ -575,8 +577,11 @@ function gesundheitAdvice(a){
   if(a.trink==="Täglich") g.push([tip("Sprudel statt Softdrink","Softdrink gegen Sprudel tauschen","0,5 l Cola enthalten rund 53 g Zucker.")]);
   if(a.alk==="Mehrmals pro Woche") g.push([tip("Mo–Do alkoholfrei","Montag bis Donnerstag alkoholfrei","Gut für Schlaf, Leber und Regeneration.")]);
   if(intol.includes("Gluten")) g.push([tip(null,"Vor glutenfrei: Zöliakie-Test","Ohne Gluten ist der Test sonst nicht aussagekräftig.",{must:1})]);
-  if(a.stil==="Vegetarisch") g.push([tip("Eisen + Vitamin C","Linsen & Hafer mit Paprika/Zitrone","Vitamin C verbessert die Aufnahme von Eisen."),
-    tip("B12 im Blick","Täglich Milch, Ei oder Käse","Sonst B12 als Supplement ergänzen.",{sup:"b12"})]);
+  if(a.stil==="Vegetarisch"){
+    const noMilk=intol.includes("Laktose")||(a.meiden||[]).includes("Milchprodukte");
+    g.push([tip("Eisen + Vitamin C",intol.includes("Gluten")?"Linsen & Quinoa mit Paprika/Zitrone":"Linsen & Hafer mit Paprika/Zitrone","Vitamin C verbessert die Aufnahme von Eisen."),
+      tip("B12 im Blick",noMilk?"Täglich Eier":"Täglich Milch, Ei oder Käse","Sonst B12 als Supplement ergänzen.",{sup:"b12"})]);
+  }
   let items=pickTips(g,4);
   if(!items.length) items=[tip("Unverarbeitet essen","Weiter so","Unverarbeitete Lebensmittel sind die beste Grundlage.")];
   return {lead:`${a.stil||"–"} · Energie: ${a.energie||"–"}`, routine:sumRoutine("Gesundheit",items,"",`${glasses} Gläser Wasser`), items, note};
@@ -596,7 +601,7 @@ function coachToday(){
   const t=targets(), tot=totals(), d=day(), hints=[], isToday=state.date===todayIso();
   const wo=state.workouts.filter(w=>w.date===state.date);
   const ea=state.coach.answers.gesundheit||{}, veg=ea.stil==="Vegan"||ea.stil==="Vegetarisch";
-  const food=veg?"Tofu, Linsen oder Quark":"Skyr, Ei oder Hähnchen";
+  const food=cap(proteinFoods());
   const gap=Math.round(t.protein-tot.protein);
   // Kurz: Titel = was los ist, d = was tun (ein paar Worte), bar = Fortschritt 0–1 (optional)
   const pBar=Math.min(1,tot.protein/t.protein);
@@ -614,7 +619,9 @@ function coachToday(){
   return hints.slice(0,3);
 }
 // Themen, die im Fragebogen als wichtig gewählt wurden, zuerst
-function coachPrio(id){ const map={Haut:"haut",Haare:"haare",Schlaf:"schlaf",Energie:"schlaf","Körperpflege":"aussehen",Aussehen:"aussehen","Ernährung":"gesundheit",Gesundheit:"gesundheit"}; return (state.profile.areas||[]).some(a=>map[a]===id)?1:0; }
+function coachPrio(id){ const map={Haut:["haut"],Haare:["haare"],Schlaf:["schlaf"],Energie:["schlaf","gesundheit"],"Körperpflege":["aussehen"],Aussehen:["aussehen"],"Ernährung":["gesundheit"],Gesundheit:["gesundheit"]};
+  const g={skin:"haut",energy:"schlaf"}[state.profile.goal];
+  return id===g||(state.profile.areas||[]).some(a=>(map[a]||[]).includes(id))?1:0; }
 function renderCoach(){
   const routine = state.coach.routine||[];
   const tip = coachToday()[0];

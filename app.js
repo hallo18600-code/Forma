@@ -184,6 +184,32 @@ function scoreCare(item){
   if(ha.sonne&&ha.sonne!=="Täglich"&&act.includes("UV-Filter")) parts.push(["Du brauchst mehr Sonnenschutz",6]);
   return finish(parts);
 }
+// Proteinquellen, die zur Person passen (Ernährungsform, Unverträglichkeiten, was sie meiden will)
+function proteinFoods(n){
+  const e=(state.coach.answers||{}).gesundheit||{}, st=e.stil, intol=e.intol||[], mei=e.meiden||[];
+  const vegan=st==="Vegan", veg=vegan||st==="Vegetarisch";
+  const noDairy=vegan||mei.includes("Milchprodukte"), noSoy=mei.includes("Soja"), noNuts=intol.includes("Nüsse");
+  const L=[];
+  if(!noDairy) L.push(intol.includes("Laktose")?"laktosefreier Skyr":"Skyr");
+  if(!vegan) L.push("Eier");
+  if(!veg) L.push("Hähnchen", "Fisch");
+  if(!noSoy) L.push("Tofu");
+  L.push("Linsen", "Kichererbsen");
+  if(!noNuts) L.push("Erdnüsse");
+  // Schon hier übersetzen: die Liste wird in andere Sätze eingesetzt
+  const x=L.slice(0,n||3).map(w=>LANG==="de"?w:tr(w).toLowerCase()), oder=({en:"or",fr:"ou",es:"o",it:"o",nl:"of"})[LANG]||"oder";
+  return x.length>1?x.slice(0,-1).join(", ")+" "+oder+" "+x[x.length-1]:x[0];
+}
+// Realistische Dauer bis zum Wunschgewicht (in Wochen) aus dem eigenen Richtwert. null = nicht berechenbar.
+function goalWeeks(){
+  const p=state.profile, w=+lastWeight()||70, diff=(+p.target||w)-w;
+  if(Math.abs(diff)<0.5) return null;
+  let rate=0;   // kg pro Woche
+  if(p.goal==="lose"&&diff<0) rate=Math.max(0,kcalFor("energy")-targets().kcal)*7/7700;
+  else if(p.goal==="muscle"&&diff>0) rate=p.sex==="w"?0.15:0.25;   // realistischer Muskelaufbau, kein reines Fett
+  if(rate<0.05) return null;
+  return Math.max(4,Math.min(104,Math.ceil(Math.abs(diff)/rate)));
+}
 function safetyNote(){
   const p=state.profile, m=p.height/100, tb=p.target/(m*m), nb=(+p.weight||70)/(m*m); let msg="";
   if(p.goal==="lose"&&nb<18.5) msg="Dein BMI liegt im Untergewicht ("+de(nb,1)+"). Abnehmen wird nicht empfohlen. Die App rechnet deshalb ohne Defizit. Besprich dein Ziel bitte mit Ärzt:in.";
@@ -196,7 +222,7 @@ function insight(){
   for(let i=1;i<=7;i++){ const s=addDays(state.date,-i); if(state.days[s]&&state.days[s].meals.length){ days++; sum+=totals(s).protein; } }
   if(days<3) return "";
   const avg=Math.round(sum/days);
-  const txt=t.protein-avg>10?`Protein im Schnitt ${avg} g, Richtwert ${t.protein} g. Skyr, Ei oder Hähnchen schließen die Lücke.`:`Protein im Schnitt ${avg} g, nah am Richtwert ${t.protein} g.`;
+  const txt=t.protein-avg>10?`Protein im Schnitt ${avg} g, Richtwert ${t.protein} g. Mehr Protein: ${proteinFoods()}.`:`Protein im Schnitt ${avg} g, nah am Richtwert ${t.protein} g.`;
   return `<div class="insight"><b>Wochen-Check</b><span>${txt}</span></div>`;
 }
 // ---------- Supplements: Bewertung je Ziel (Muskeln, Abnehmen, Haut & Look, Energie) ----------
@@ -225,15 +251,19 @@ function supScore(id,goal){
   if(id==="crea"&&lifts){ sc+=3; why="Passt zu deinem Krafttraining. Sehr gut untersucht."; }
   const notes=[];
   if(id==="whey"&&vegan) notes.push("Enthält Milch – passt nicht zu deiner veganen Ernährung");
+  else if(id==="whey"&&(ea.meiden||[]).includes("Milchprodukte")) notes.push("Milcheiweiß – du willst Milchprodukte meiden. Pflanzliches Proteinpulver passt besser");
+  else if(id==="whey"&&(ea.intol||[]).includes("Laktose")) notes.push("Enthält Laktose – wenn, dann laktosefreies Isolat oder pflanzliches Pulver");
   if(id==="col"&&(vegan||ea.stil==="Vegetarisch")) notes.push("Kollagen ist tierisch – passt nicht zu deiner Ernährung");
   if(id==="whey"){
-    if(g==="skin"){ sc=Math.min(sc,75); bad.unshift("Milcheiweiß kann bei manchen Unreinheiten fördern"); }   // für die Haut nur 70–75
+    const pimples=[].concat(((state.coach.answers||{}).haut||{}).stoert||[]).includes("Unreinheiten");
+    if(g==="skin"||pimples){ sc=Math.min(sc,75); bad.unshift("Milcheiweiß kann bei manchen Unreinheiten fördern"); }   // für die Haut nur 70–75
     else if(lowProt){ sc+=3; why="Protein heute liegt noch unter dem Richtwert."; } else { sc-=6; bad.unshift("Dein Protein passt heute schon"); }
   }
   if(id==="d3"&&winter){ sc+=3; why="Gerade jetzt (Oktober bis März) gibt es wenig Sonne."; }
   if(id==="o3"){ if(hasFish){ sc-=8; bad.unshift("Du isst schon oft Fisch"); } else { sc+=2; why="Du isst wenig Fisch."; } }
+  if(id==="o3"&&(vegan||ea.stil==="Vegetarisch")){ why="Als Algenöl: rein pflanzlich, mit EPA und DHA."; }
   if(id==="mg"&&((day().sleep!=null&&day().sleep<6.5)||(sa.ein&&sa.ein!=="Geht schnell"))){ sc+=3; why="Viele nehmen es abends."; }
-  if(id==="b12"){ if(vegan){ sc=97; why="Vegan: B12 steckt fast nur in tierischen Lebensmitteln."; } else bad.push("Mit Fleisch, Ei und Milch meist genug"); }
+  if(id==="b12"){ if(vegan){ sc=97; why="Vegan: B12 steckt fast nur in tierischen Lebensmitteln."; } else bad.push(ea.stil==="Vegetarisch"?"Mit Ei und Milch oft genug – Blutwert prüfen lassen":"Mit Fleisch, Ei und Milch meist genug"); }
   if(id==="col"&&g==="skin") why="Viele nutzen es für die Haut. Ein Nutzen ist nicht sicher belegt.";
   return {score:Math.max(40,Math.min(99,Math.round(sc))), good, bad, notes, why:why||R.good[0]+"."};
 }
@@ -492,7 +522,7 @@ function renderModal(){
   if(type==="ex"||type==="plan-ex") inner=exPicker(type==="plan-ex"?"plan":"live");
   if(type==="ex-hist") inner=exHist(payload);
   if(type==="wo-detail") inner=woDetail(payload);
-  if(type==="goaldate") inner=`<h2>Zieldatum</h2><p class="sub">Nur eine Markierung. Kein Countdown-Druck.</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In 8 Wochen</button><div class="gap"></div><button class="pill ghost w-full" data-act="close">Später</button>`;
+  if(type==="goaldate"){ const gw=goalWeeks(); inner=`<h2>Zieldatum</h2><p class="sub">${gw?`Bei deinem Richtwert realistisch in ca. ${gw} Wochen. Nur eine Markierung.`:"Nur eine Markierung. Kein Countdown-Druck."}</p><div class="gap"></div><button class="pill primary" data-act="goal-weeks">In ${gw||8} Wochen</button><div class="gap"></div><button class="pill ghost w-full" data-act="close">Später</button>`; }
   if(type==="steps") inner=stepsSheet();
   if(type==="entries") inner=`<h2>Einträge</h2><p class="sub">Tippe auf einen Eintrag, um ihn zu ändern oder zu löschen.</p>${state.weights.slice().reverse().map(w=>`<button class="row space li-btn" data-act="w-edit" data-v="${w.date}"><span>${labelDate(w.date)}</span><span><b>${de(w.kg,1)} kg</b> <span class="sub">›</span></span></button>`).join("")||"<p class=sub>Noch keine Waage.</p>"}<div class="gap"></div><button class="pill primary" data-act="open" data-type="weigh">Gewicht erfassen</button>`;
   if(type==="w-edit") inner=weightEditSheet(payload);
@@ -871,7 +901,7 @@ document.getElementById("app").addEventListener("click", e=>{
     save();
   }
   else if(act==="haut-reset"){ state.hautPlan=false; save(); }
-  else if(act==="goal-weeks"){ state.profile.goalDate=addDays(todayIso(), 7*8); save(); toast("Ziel in 8 Wochen"); }
+  else if(act==="goal-weeks"){ const gw=goalWeeks()||8; state.profile.goalDate=addDays(todayIso(), 7*gw); save(); toast(`Ziel in ${gw} Wochen`); }
   else if(act==="affiliate") toast("Anzeige · Score bleibt gleich");
   else if(act==="w-edit"){ const w=state.weights.find(x=>x.date===el.dataset.v); if(!w) return; ui.draftKg=w.kg; openModal("w-edit", w.date); ui.confirmDel=false; render(); return; }
   else if(act==="w-edit-step"){ const i=document.getElementById("w-edit-kg"); const v=+((i&&i.value)||ui.draftKg).toString().replace(",","."); ui.draftKg=Math.max(35,Math.min(220,+((v||ui.draftKg)+ +el.dataset.d).toFixed(1))); if(i){ i.value=ui.draftKg.toFixed(1); return; } }

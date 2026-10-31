@@ -143,13 +143,55 @@ ESSEN = r"""async ()=>{
  return {n,F};
 }"""
 
+# ---------- 4) Passt alles zur Person? (Ernährung, Unverträglichkeiten, Ziel, Geschlecht) ----------
+PASST = r"""()=>{
+ const F={}; const fail=(k,ex)=>{ (F[k]=F[k]||{n:0,ex:[]}).n++; if(F[k].ex.length<3) F[k].ex.push(ex); };
+ const rnd=a=>a[Math.floor(Math.random()*a.length)], areas=["haut","haare","schlaf","aussehen","gesundheit"];
+ const P0=JSON.parse(JSON.stringify(state.profile)), A0=JSON.parse(JSON.stringify(state.coach.answers||{})), D0=state.date; let n=0;
+ for(let i=0;i<8000;i++){
+  const sex=rnd(["m","w"]), h=150+Math.floor(Math.random()*50), w=Math.round((17+Math.random()*20)*(h/100)**2), goal=rnd(["muscle","lose","skin","energy"]);
+  state.profile=Object.assign({},P0,{sex,age:18+Math.floor(Math.random()*60),height:h,weight:w,target:w+rnd([-10,-4,0,3]),activity:rnd([1.3,1.4,1.55,1.7]),goal,
+   trainFreq:rnd(["Gar nicht","1–2× pro Woche","3–4× pro Woche","5× oder öfter"]),trainType:rnd(["Krafttraining","Ausdauer","Beides"]),fish:rnd(["oft","wenig"])});
+  state.coach.answers={};
+  for(const ar of areas){ const a={}; state.coach.answers[ar]=a;
+   for(const q of (coachQuiz(ar)||[])){ if(q.skip&&q.skip(a)) continue;
+    a[q.k]=q.multi?[...q.opts.filter(x=>x!==q.none)].sort(()=>Math.random()-.5).slice(0,1+Math.floor(Math.random()*(q.pick||3))):rnd(q.opts); } }
+  const e=state.coach.answers.gesundheit, st=e.stil, intol=e.intol||[], mei=e.meiden||[];
+  const vegan=st==="Vegan", veg=vegan||st==="Vegetarisch";
+  // Alle Texte, die die Person zu Essen/Supplements sieht
+  const T=[]; for(const ar of areas){ const r=coachAdvice(ar); T.push(JSON.stringify(r.items||[]), JSON.stringify(r.routine||{})); }
+  T.push(JSON.stringify(coachToday()), proteinFoods(4), JSON.stringify(coachPlans().essen.steps));
+  const txt=T.join(" "), rec=recommendStack().map(x=>x.id); n++;
+  const d=`${sex} ${goal} ${st} intol=${intol} meiden=${mei}`;
+  if(vegan&&/(Skyr|Quark|Milch|Käse|Eier|Ei,|Hähnchen|Fisch|Honig|Whey)/.test(txt.replace(/Milchsäure|Milchprodukte|laktosefrei/g,""))) fail("Vegan: tierische Empfehlung",d+" | "+(txt.match(/(Skyr|Quark|Milch|Käse|Eier|Ei,|Hähnchen|Fisch|Honig|Whey)/)||[])[0]);
+  if(st==="Vegetarisch"&&/(Hähnchen|Fisch,|Fisch oder|Lachs|Thunfisch)/.test(txt)) fail("Vegetarisch: Fleisch/Fisch empfohlen",d);
+  if((intol.includes("Laktose")||mei.includes("Milchprodukte"))&&/(\bSkyr\b(?<!laktosefreier Skyr)|Quark|Milch, Ei|Whey\.)/.test(txt.replace(/laktosefreier Skyr/g,""))&&!(intol.includes("Laktose")&&!mei.includes("Milchprodukte")&&!/Whey\./.test(txt)&&!/Quark|Milch, Ei/.test(txt))) fail("Milch empfohlen trotz Laktose/Meiden",d);
+  if(mei.includes("Soja")&&/Tofu|Tempeh|Soja/.test(txt)) fail("Soja empfohlen trotz Meiden",d);
+  if(intol.includes("Nüsse")&&/(Nüsse|Erdnüsse|Mandel)/.test(txt.replace(/Nüsse meiden/g,""))) fail("Nüsse empfohlen trotz Unverträglichkeit",d);
+  if(intol.includes("Gluten")&&/(Hafer|Vollkornbrot|Nudeln)/.test(txt)) fail("Gluten-Lebensmittel empfohlen trotz Unverträglichkeit",d);
+  if(mei.includes("Koffein")&&/Letzter Kaffee|Kaffee bis/.test(txt)) fail("Kaffee-Zeit trotz Koffein meiden",d);
+  if((vegan&&rec.includes("whey"))||(veg&&rec.includes("col"))) fail("Tierisches Supplement vorgeschlagen",d+" "+rec);
+  if((intol.includes("Laktose")||mei.includes("Milchprodukte"))&&rec.includes("whey")) fail("Whey vorgeschlagen trotz Laktose/Meiden",d);
+  if(sex==="m"&&/(Pony|Schwangerschaft|Stillzeit|Pixie)/.test(txt)) fail("Frauen-Tipp bei Mann",d);
+  if(sex==="w"&&/(Fade|Seiten kürzer|Seiten länger)/.test(txt)) fail("Männer-Tipp bei Frau",d);
+  if(goal==="muscle"&&/Kalorien auf .* senken/.test(txt)&&kfaLevel(state.coach.answers.aussehen)<3) fail("Muskelziel: Defizit trotz mittlerem KFA",d);
+  const bmi=w/(h/100)**2; if(bmi<18.5&&/senken|Defizit halten/.test(txt)) fail("Untergewicht: Defizit empfohlen",d);
+  const t=targets(), keep=kcalFor("energy");
+  if(goal==="lose"&&bmi>=18.5&&t.kcal>=keep&&keep>(sex==="m"?1500:1200)+20) fail("Abnehmen ohne Defizit",d);
+  if(goal==="muscle"&&(bmi<30)&&t.kcal<=keep&&keep>(sex==="m"?1500:1200)) fail("Muskeln ohne Plus",d);
+  const gw=goalWeeks();
+  if(gw!=null&&goal==="lose"&&(w-state.profile.target)/gw>0.01*w+0.05) fail("Zieldatum zu schnell (über 1 %/Woche)",d+" "+gw);
+ }
+ state.profile=P0; state.coach.answers=A0; state.date=D0; return {n,F};
+}"""
+
 def main():
     bad = 0
     with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page(); errs = []
+        b = p.chromium.launch(); pg = b.new_page(locale="de-DE"); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(URL); pg.wait_for_timeout(1500)
-        for name, js in [("Richtwerte", RICHTWERTE), ("Coach", COACH), ("Lebensmittel", ESSEN)]:
+        for name, js in [("Richtwerte", RICHTWERTE), ("Coach", COACH), ("Passt zur Person", PASST), ("Lebensmittel", ESSEN)]:
             r = pg.evaluate(js)
             print(f"\n=== {name}: {r['n']:,} Fälle geprüft".replace(",", "."))
             if not r["F"]: print("    ✅ alles in Ordnung")
