@@ -20,6 +20,8 @@ function impressumSheet(inApp=true){
     ${li("Produktdaten","Teils aus Open Food Facts (© Open Food Facts-Mitwirkende, Lizenz ODbL 1.0, openfoodfacts.org). Angaben ohne Gewähr, sie können Fehler enthalten. Maßgeblich ist die Packung.")}
     ${li("Hinweis","Alle Angaben in der App sind allgemeine Richtwerte für gesunde Erwachsene und keine medizinische Beratung. Sie ersetzen keinen Arzt. Nicht geeignet bei Essstörungen, in Schwangerschaft oder Stillzeit.")}
     ${li("Bewertungen","Die Scores sind eine Einschätzung der App nach eigenen Regeln. Sie sind kein Test und kein Urteil über einzelne Marken.")}
+    ${li("So rechnet die App","Grundumsatz nach der Mifflin-St-Jeor-Formel, mal Aktivitätsfaktor, plus Training nach MET-Werten. BMI-Einteilung nach WHO. Abnehmen mit ca. 0,5 % des Körpergewichts pro Woche, höchstens 20 % unter dem Bedarf und nie unter 1.500 kcal (Männer) bzw. 1.200 kcal (Frauen). Bei Untergewicht kein Defizit. Alles sind Schätzwerte, keine Messung.")}
+    ${li("Open-Source-Software","Barcode-Scanner: ZXing (© ZXing-Autoren), Apache License 2.0, apache.org/licenses/LICENSE-2.0. Quellcode: github.com/zxing-js/library")}
     ${okBtn(inApp)}`;
 }
 
