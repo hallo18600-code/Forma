@@ -140,7 +140,10 @@ function obNumHint(k){
   const p=state.profile, m=p.height/100;
   if(k==="weight"){ const b=p.weight/(m*m); return `BMI <b>${de(b,1)}</b>`; }
   if(k==="target"){
-    const b=p.target/(m*m), d=p.target-p.weight;
+    const b=p.target/(m*m), d=p.target-p.weight, min=obMinTarget();
+    // Zu niedriges Ziel: klare Warnung statt still korrigieren
+    if(+p.target<min) return `<div class="warn">⚠️ ${de(+p.target,+p.target%1?1:0)} kg ist zu wenig für deine Größe (BMI ${de(b,1)}). Das wäre Untergewicht und ungesund. Mindestens <b>${de(min,min%1?1:0)} kg</b>, die App stellt das beim Weiter ein.</div>`;
+    if(p.goal==="lose"&&+p.target===min) return `BMI <b>${de(b,1)}</b> · Das ist das niedrigste gesunde Ziel für deine Größe.`;
     // Gesundes Tempo: abnehmen ca. 0,5 % pro Woche, zunehmen ca. 0,25 kg pro Woche (Muskeln brauchen Zeit)
     const wk=Math.abs(d)>=0.5?Math.ceil(Math.abs(d)/(d<0?p.weight*0.005:0.25)):0;
     return `BMI <b>${de(b,1)}</b>${wk?` · ${d<0?"−":"+"}${de(Math.abs(d),1)} kg · ca. ${wk>=8?Math.round(wk/4.3)+" Monate":wk+" Wochen"}`:""}`;
