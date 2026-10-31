@@ -137,6 +137,11 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
 .cover .tap { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); white-space: nowrap; font-size: 13px; font-weight: 700; background: rgba(0,0,0,.72); color: #fff; padding: 6px 12px; border-radius: 999px; }
 .cover .num { position: absolute; left: 10px; top: 10px; font-size: 12px; font-weight: 700; background: rgba(0,0,0,.65); color: #fff; padding: 2px 8px; border-radius: 6px; }
 .coverbusy { margin: 0 auto; width: min(100%, 360px); aspect-ratio: 3 / 4; display: grid; place-items: center; border-radius: 14px; border: 1px dashed var(--line); color: var(--muted); font-size: 14px; }
+.legal p, .legal li { font-size: 13px; color: var(--muted); margin: 0; }
+.legal b { color: var(--fg); }
+.legal ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.ov p.legal-short { font-size: 12.5px; color: var(--warn); }
+.legal-short a { color: inherit; font-weight: 700; }
 .ov-actions { position: sticky; top: 52px; z-index: 1; display: grid; gap: 8px; background: #050706; padding-bottom: 8px; }
 </style>
 </head><body>
@@ -165,6 +170,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
         <div class="pair"><button id="btnCopy" type="button">Text kopieren</button><button id="btnNext" type="button">Nächster ›</button></div>
         <p class="status" id="saveStatus"></p>
       </div>
+      <p class="legal-short">⚠️ Posten nur mit Werbung für Health Maxxing. Hinweis auf die App nicht rausschneiden. <a href="#dTerms" id="lnkTerms">Bedingungen</a></p>
       <p class="desc" id="desc"></p>
       <div id="ovList" style="display:grid;gap:14px"></div>
       <p>Falls nichts passiert: jedes Bild <b>lange gedrückt halten</b> → <b>„Zu Fotos hinzufügen“</b>.</p>
@@ -214,6 +220,21 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
       <div class="opt"><span>Schrift auf den Slides</span><div class="seg" id="sFont"><button type="button" data-v="tiktok">TikTok Sans</button><button type="button" data-v="figtree">Figtree (alt)</button></div></div>
       <label class="check"><input type="checkbox" id="sGray"> Figuren schwarz-weiß</label>
       <p class="note">TikTok rechnet Bilder beim Hochladen kleiner. HD reicht meistens, 4K ist etwas schärfer, dauert aber länger.</p>
+    </div>
+  </details>
+
+  <details id="dTerms">
+    <summary>Nutzungsbedingungen für Creator</summary>
+    <div class="body legal">
+      <p><b>Die Slides aus diesem Studio dürfen nur zur Werbung für die App Health Maxxing gepostet werden.</b></p>
+      <p>Wer Slides von hier postet, erklärt sich mit diesen Bedingungen einverstanden:</p>
+      <ul>
+        <li>Jeder Post muss erkennbar für Health Maxxing werben (z.&nbsp;B. App-Name, #healthmaxxing oder App-Slide).</li>
+        <li>Der Hinweis auf die App darf nicht herausgeschnitten, überdeckt, verändert oder gelöscht werden – auch nicht nachträglich.</li>
+        <li>Der Post muss als Werbung gekennzeichnet sein (z.&nbsp;B. „Werbung“ oder TikToks Werbe-Kennzeichnung).</li>
+        <li>Eine Nutzung ohne Werbung für Health Maxxing, für andere Apps/Produkte oder ein Weitergeben der Slides an Dritte ist nicht erlaubt.</li>
+      </ul>
+      <p>Die Slides sind urheberrechtlich geschützt. Bei Verstößen erlischt das Nutzungsrecht sofort. Der Anbieter von Health Maxxing behält sich rechtliche Schritte vor, insbesondere Löschung, Unterlassung und Schadensersatz.</p>
     </div>
   </details>
 </div>
@@ -2237,6 +2258,7 @@ function bindSettings() {
   $('#btnSaveAll').addEventListener('click', saveAllPhotos);
   $('#btnNext').addEventListener('click', () => { const i = feed.indexOf(openDraft); if (i >= 0 && feed[i + 1]) openViewer(feed[i + 1]); });
   $('#ovClose').addEventListener('click', closeViewer);
+  $('#lnkTerms').addEventListener('click', e => { e.preventDefault(); closeViewer(); const d = $('#dTerms'); d.open = true; d.scrollIntoView({ behavior: 'smooth' }); });
   $('#btnCopy').addEventListener('click', async () => {
     const b = $('#btnCopy');
     try { await navigator.clipboard.writeText(openDraft.desc); b.textContent = 'Kopiert'; }
