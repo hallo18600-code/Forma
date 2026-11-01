@@ -1700,6 +1700,7 @@ function nextFigure(mood, physique, kind, only) {
   let pool = figures.filter(f => figAllowed(f) && (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind) && (!only || only(f)));
   // starke Statuen: immer die muskulösen (Orakel/Chrom wirken neben Essen fehl am Platz)
   if (mood === 'strong' && kind === 'statue' && pool.some(f => f.physique)) pool = pool.filter(f => f.physique || (f.only && f.only === curSeries));   // fest zugeordnete eigene Figuren bleiben drin
+  if (pool.some(f => f.only && f.only === curSeries)) pool = pool.filter(f => f.only === curSeries);   // Format hat eigene Figuren → nur die
   if (!pool.length) return null;
   const key = mood + '-' + (kind || 'all');
   const last = (recent.figs && recent.figs[key]) || [];
@@ -1891,7 +1892,8 @@ function planPost(series, n, lang) {
   const fig = { strong: needStrong && (kind || series === 'king') ? nextFigure('strong', duel || series === 'king' || specs.some(s => s.big), kind, only) : null,
     sad: needSad && (kind || series === 'king') ? nextFigure('sad', false, kind, only) : null };
   if (series === 'flags' && specs[0]) {   // feste Figuren je she/he, dazu eigene Figuren mit genau diesem Format
-    const who = specs[0].who, pool = figures.filter(f => (f.builtin && FLAGS[who].fig.includes(f.id)) || (!f.builtin && f.only === 'flags-' + who));
+    const who = specs[0].who, own = figures.filter(f => !f.builtin && f.only === 'flags-' + who);
+    const pool = own.length ? own : figures.filter(f => f.builtin && FLAGS[who].fig.includes(f.id));   // eigene zugeordnete Figuren ersetzen die eingebauten
     fig.strong = pool.length ? pick(pool) : fig.strong;
   }
   if (series === 'love' && fig.sad) fig.sad2 = nextFigure('sad', false, kind, f => only(f) && f !== fig.sad && f.id !== 'muede') || fig.sad;
@@ -2354,7 +2356,7 @@ function bindSettings() {
 }
 
 // Version: bei jeder Änderung hochzählen. Ist online eine neuere Version, lädt das Studio sie automatisch (Browser-Speicher umgehen).
-const BUILD = '2026-11-01 c';
+const BUILD = '2026-11-01 d';
 async function checkUpdate() {
   try {
     const t = await (await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' })).text();
