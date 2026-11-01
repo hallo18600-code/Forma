@@ -219,6 +219,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
       <div class="opt"><span>Auflösung</span><div class="seg" id="sRes"><button type="button" data-v="hd">HD 1080 × 1440</button><button type="button" data-v="4k">4K 2160 × 2880</button></div></div>
       <div class="opt"><span>Schrift auf den Slides</span><div class="seg" id="sFont"><button type="button" data-v="tiktok">TikTok Sans</button><button type="button" data-v="figtree">Figtree (alt)</button></div></div>
       <label class="check"><input type="checkbox" id="sGray"> Figuren schwarz-weiß</label>
+      <label class="check"><input type="checkbox" id="sOwnFigs"> Eigene Figuren zufällig verwenden</label>
       <p class="note">TikTok rechnet Bilder beim Hochladen kleiner. HD reicht meistens, 4K ist etwas schärfer, dauert aber länger.</p>
     </div>
   </details>
@@ -875,6 +876,21 @@ const DIETS = [
   { id: 'strong', en: 'muscle building diet', de: 'Muskelaufbau-\nDiät', foods: [...Object.keys(CLAIMS.strong), 'potatoes', 'rice', 'honey', 'banana', 'cheese', 'oats'], niche: ['#gymtok', '#protein'] },
 ];
 // „Mog“: gutes Essen um eine selbstbewusste Zeichnung, Junk & Fake-Health-Produkte um eine weinende
+// Green Flag / Red Flag: nur Sätze mit passendem Foto (food = Foto-Lebensmittel)
+const FLAGS = {
+  she: { fig: ['david'], green: [
+    ['she cooks with real butter', 'butter'], ['she doesn’t eat slop', 'salmon'], ['she buys raw milk', 'milk'],
+    ['she knows her butcher', 'beef'], ['she eats steak on the first date', 'steak'], ['she drinks water, not soda', 'water'],
+    ['she eats fruit, not candy', 'berries'], ['she cooks every meal herself', 'chicken'], ['she orders steak, not salad', 'steak'],
+    ['she buys eggs in packs of 30', 'eggs'], ['she shops at the farmers market', 'tomatoes'], ['she thinks seed oils are the enemy', 'oliveoil'],
+    ['she brings homemade food to work', 'sweetpotato'], ['she eats like her grandma', 'bread_eu']],
+    red: [['she cooks with sunflower oil', 'fries'], ['she lives on protein bars', 'cerealbar'], ['she never cooks', 'nuggets']] },
+  he: { fig: ['sie', 'orakel'], green: [
+    ['he cooks with real butter', 'butter'], ['he doesn’t eat slop', 'salmon'], ['he knows his butcher', 'beef'],
+    ['he grills his own steak', 'steak'], ['he drinks water at the party', 'water'], ['he eats 6 eggs for breakfast', 'eggs'],
+    ['he cooks for you', 'lamb'], ['he buys raw milk', 'milk']],
+    red: [['he eats fast food every day', 'burger']] },
+};
 const MOG = {
   good: ['steak', 'eggs', 'honey', 'milk', 'chocolate', 'oranges', 'butter', 'salmon', 'oysters', 'berries', 'cheese', 'kiwi', 'dates', 'beef', 'pomegranate'],
   bad: ['cerealbar', 'juice', 'ricecakes', 'granola', 'cereal', 'soda', 'candy', 'chips', 'donut', 'cookies', 'nuggets', 'pizza'],
@@ -921,6 +937,7 @@ const SERIES = {
   duel: { label: 'Carbs vs. Carbs', ex: 'CARBS VS CARBS · PROTEIN VS PROTEIN', w: 2.5, niche: ['#junkfood', '#gymtok'] },
   underrated: { label: 'Unterschätzt', ex: 'underrated protein, underrated fats', w: 2, niche: ['#realfood', '#nutrition'] },
   origin: { label: 'Herkunft', ex: 'average European, average Asian', w: 2, niche: ['#realfood', '#culture'] },
+  flags: { label: 'Green / Red Flag', ex: 'green flag: she cooks with real butter', w: 2.5, niche: ['#greenflag', '#realfood'] },
   faith: { label: 'Religion', ex: 'average Christian, average Muslim', w: 1.5, niche: ['#realfood', '#tradition'] },
 };
 
@@ -1277,6 +1294,22 @@ function renderDuel(ctx, sl) {
   ctx.restore();
 }
 // Vollbild: ein großes Foto, Text in der Mitte (Nummer / Frage, Titel, kurzer Grund)
+// Green/Red Flag: Foto randlos, Figur unten mittig, Text oben (weiß mit schwarzem Rand)
+function renderFlag(ctx, sl) {
+  const t = sl.t;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  drawPhotoCell(ctx, sl.items[0], 0, 0, W, H, { z: 1.04, fx: .5, fy: .5 });
+  applyGrade(ctx, sl.style.grade);
+  const g = ctx.createLinearGradient(0, 0, 0, H * .5); g.addColorStop(0, 'rgba(0,0,0,.5)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H * .5);
+  if (sl.figure) drawFigureBox(ctx, sl.figure, W * .12, H * .4, W * .76, H * .6);
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.font = capFont(W * .088);
+  const rows = [{ t: t.flag, s: W * .075 }, ...wrap(ctx, t.text, W * .86).map(l => ({ t: l, s: W * .088 }))];
+  let y = H * .07;
+  rows.forEach((r, i) => { ctx.font = capFont(r.s); if (i === 1) y += W * .015; y += r.s * .6; strokeText(ctx, r.t, W / 2, y, r.s); y += r.s * .6; });
+  ctx.restore();
+}
 function renderHero(ctx, sl) {
   const st = sl.style, t = sl.t || { title: sl.hook };
   ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
@@ -1477,6 +1510,7 @@ function renderGrid(ctx, sl) {
   if (sl.layout === 'collage') return renderCollage(ctx, sl);
   if (sl.layout === 'fg') return renderFeel(ctx, sl);
   if (sl.layout === 'hero') return renderHero(ctx, sl);
+  if (sl.layout === 'flag') return renderFlag(ctx, sl);
   if (sl.layout === 'cmp') return renderCmp(ctx, sl);
   if (sl.layout === 'duel') return renderDuel(ctx, sl);
   const st = sl.style;
@@ -1662,7 +1696,7 @@ function pickKind(needStrong, needSad) {
 }
 function nextFigure(mood, physique, kind, only) {
   // eine Figur pro Post; über mehrere Posts reihum, die zuletzt benutzten kommen zuletzt dran
-  let pool = figures.filter(f => (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind) && (!only || only(f)));
+  let pool = figures.filter(f => (S.ownFigs !== false || f.builtin) && (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind) && (!only || only(f)));
   // starke Statuen: immer die muskulösen (Orakel/Chrom wirken neben Essen fehl am Platz)
   if (mood === 'strong' && kind === 'statue' && pool.some(f => f.physique)) pool = pool.filter(f => f.physique);
   if (!pool.length) return null;
@@ -1810,6 +1844,22 @@ function planSlides(series, n, lang) {
         hook: quote(q ? pick(q[lang]) : FEELGOOD[lang]), mood: 'none', key: q ? 'fg' + q.id : 'fgall', niche: q && q.niche, claim: q && q.id });
     });
   }
+  if (series === 'flags') {
+    // she/he, dann nur grün, gemischt oder nur rot (ohne genug rote Sätze: kein „nur rot“)
+    const who = rnd() < .5 ? 'she' : 'he', F = FLAGS[who];
+    const ok = list => shuffle(list.filter(([, f]) => hasPhoto(f)));
+    const g = ok(F.green), r = ok(F.red);
+    const modes = [['green', 1], ['mixed', r.length ? 1 : 0], ['red', r.length >= Math.min(3, n) ? 1 : 0]].filter(m => m[1]);
+    const mode = weighted(modes);
+    let list = mode === 'green' ? g.map(x => [x, 1]) : mode === 'red' ? r.map(x => [x, 0])
+      : Array.from({ length: n }, (_, i) => i % 2 && r.length ? [r.shift(), 0] : [g.shift(), 1]).filter(x => x[0]);
+    const seen = new Set();
+    const grp = f => (TWINS.find(t => t.includes(f)) || [f])[0];
+    list = list.filter(([[, f]]) => !seen.has(grp(f)) && seen.add(grp(f)));   // kein Foto-Essen doppelt (auch nicht Steak + Rind)
+    const figId = pick(F.fig);
+    list.slice(0, n).forEach(([[text, food], good], i) => specs.push({ layout: 'flag', one: food, hook: (good ? 'green flag: ' : 'red flag: ') + text,
+      t: { flag: good ? 'green flag:' : 'red flag:', text }, mood: 'strong', figId, key: i === 0 ? 'flag' + who + mode : undefined }));
+  }
   return specs;
 }
 
@@ -1846,6 +1896,7 @@ function planPost(series, n, lang) {
     : ['dad', 'diet'].includes(series) ? (f => !f.edge) : null;   // Figur schwebt mittig: keine mit seitlicher Schnittkante
   const fig = { strong: needStrong && (kind || series === 'king') ? nextFigure('strong', duel || series === 'king' || specs.some(s => s.big), kind, only) : null,
     sad: needSad && (kind || series === 'king') ? nextFigure('sad', false, kind, only) : null };
+  if (series === 'flags') { fig.strong = figures.find(f => f.id === specs[0]?.figId && (S.ownFigs !== false || f.builtin)) || fig.strong; }
   if (series === 'love' && fig.sad) fig.sad2 = nextFigure('sad', false, kind, f => only(f) && f !== fig.sad && f.id !== 'muede') || fig.sad;
   const base = makeStyle();  // gleiche Statuen-Größe/-Spiegelung im ganzen Video
   const used = new Set();
@@ -1857,7 +1908,7 @@ function planPost(series, n, lang) {
         const b = chooseOne(idsPred(fresh(sp.bad)), used), g = chooseOne(idsPred(fresh(sp.good)), used);
         duelFoods.add(b.food.id); duelFoods.add(g.food.id);
         return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
-    : sp.layout === 'hero' ? [chooseHero(sp.one, used)]
+    : sp.layout === 'hero' || sp.layout === 'flag' ? [chooseHero(sp.one, used)]
     : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
     : sp.layout === 'freq' ? chooseCuts(vibeFoods(sp.pool.filter(hasCut), used, 4), used, 4)
     : sp.layout === 'love' ? [...chooseCuts(sp.love.junk, used, 5).map(it => ({ ...it, role: 'a' })), ...chooseCuts(sp.love.fake, used, 4).map(it => ({ ...it, role: 'b' })), ...chooseCuts(sp.love.real, used, 5).map(it => ({ ...it, role: 'c' }))]
@@ -2282,6 +2333,8 @@ function bindSettings() {
   seg('#sCount', 'count'); seg('#sLang', 'lang'); seg('#sRes', 'res'); seg('#sFont', 'font');
   const chk = (id, key) => { const el = $(id); el.checked = !!S[key]; el.addEventListener('change', () => { S[key] = el.checked; persist(); newFeed(); }); };
   chk('#sGray', 'gray');
+  if (S.ownFigs === undefined) S.ownFigs = true;
+  chk('#sOwnFigs', 'ownFigs');
   $('#btnGen').addEventListener('click', newFeed);
   $('#btnMore').addEventListener('click', () => addDrafts(FEED_N));
   $('#btnSaveAll').addEventListener('click', saveAllPhotos);
