@@ -1300,7 +1300,7 @@ function renderFlag(ctx, sl) {
   applyGrade(ctx, sl.style.grade);
   const g = ctx.createLinearGradient(0, 0, 0, H * .5); g.addColorStop(0, 'rgba(0,0,0,.5)'); g.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H * .5);
-  if (sl.figure) drawFigureBox(ctx, sl.figure, -W * .14, H * .3, W * 1.28, H * 1.04);   // groß, unten leicht angeschnitten
+  if (sl.figure) drawFigureBox(ctx, sl.figure, W * .12, H * .4, W * .76, H * .6);
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = capFont(W * .088);
   const rows = [...(t.flag ? [{ t: t.flag, s: W * .075 }] : []), ...wrap(ctx, t.text, W * .86).map(l => ({ t: l, s: W * .088 }))];
@@ -2356,7 +2356,7 @@ function bindSettings() {
 }
 
 // Version: bei jeder Änderung hochzählen. Ist online eine neuere Version, lädt das Studio sie automatisch (Browser-Speicher umgehen).
-const BUILD = '2026-11-01 e';
+const BUILD = '2026-11-01 f';
 async function checkUpdate() {
   try {
     const t = await (await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' })).text();
@@ -2366,6 +2366,9 @@ async function checkUpdate() {
 }
 async function init() {
   $('#ver').textContent = 'Version ' + BUILD; checkUpdate();
+  // Home-Bildschirm-App wird oft nur aus dem Hintergrund geholt, nicht neu gestartet: dann auch prüfen
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
+  setInterval(checkUpdate, 5 * 60 * 1000);
   bindSettings();
   await Promise.all([
     ...BUILTIN_FIGS.map(f => addFigure({ ...f, builtin: true })),
