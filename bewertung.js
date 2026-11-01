@@ -397,7 +397,10 @@ function rTopic(t){
 }
 // Art erkennen + Nährwerte aufbereiten (auch für die Median-Tabelle genutzt)
 function rClassify(item){
-  const pr=+item.protein||0, cb=+item.carbs||0, fa=+item.fat||0, su=+item.sugar||0, fi=+item.fiber||0, sa=+item.salt||0;
+  const pr=+item.protein||0, cb=+item.carbs||0, fa=+item.fat||0, fi=+item.fiber||0, sa=+item.salt||0;
+  let su=+item.sugar||0;
+  // Zucker fehlt in der Datenbank (z. B. manche Goldbären): bei Süßigkeiten schätzen, sonst wirken sie zuckerfrei
+  if((item.sugar==null||item.sugar==="")&&cb>=50&&!/(kaugum|chewing ?gum|\bgum\b)/i.test(item.name||"")&&fa<10&&/(gumm|b(ä|ae)r|bear|lakritz|bonbon|drops|marshmallow|schaumzucker|haribo|candy|jelly|fruchtgummi|weingumm)/i.test((item.name||"")+" "+(item.brand||""))) su=Math.round(cb*0.6);
   // Kalorien gegen Makros prüfen (Tippfehler in der Datenbank, z. B. Hackfleisch mit 47 kcal)
   let kc=+item.kcal||0; const calc=pr*4+cb*4+fa*9;
   if(calc>30&&(kc<calc*0.6||kc>calc*1.6)) kc=Math.round(calc);
@@ -633,9 +636,9 @@ function scoreFood(item,goal){
 // Persönliche Anpassung: jede Antwort im Fragebogen, die zum Lebensmittel passt, wirkt mit kleinem, begründetem Wert.
 // Unverträglichkeiten wirken stark (Sicherheit). Alles andere zusammen höchstens −14 bis +10, damit die Zahl ehrlich bleibt.
 // Ernährungsform & „meiden“ ändern die Zahl nicht (nur Hinweis), damit z. B. Fleisch für Vegetarier nicht „ungesund“ wirkt.
-function rPersonal(c){
+function rPersonal(c,AA){
   const {item,g,id,heavy,h,kc,pr,su,fi,sa,drink,okFood,fruity}=c;
-  const A=state.coach.answers||{}, ea=A.gesundheit||{}, ha=A.haut||{}, hr=A.haare||{}, sl=A.schlaf||{}, au=A.aussehen||{}, P=state.profile||{};
+  const A=(AA!==undefined?AA:state.coach.answers)||{}, ea=A.gesundheit||{}, ha=A.haut||{}, hr=A.haare||{}, sl=A.schlaf||{}, au=A.aussehen||{}, P=state.profile||{};
   const notes=[], NOTE=t=>{ if(!notes.includes(t)) notes.push(t); };
   const hard=[], soft=[];
   const add=(L,v,t,src)=>{ v=Math.round(v); if(!v||L.some(x=>x.t===t)) return; L.push({t,v,src}); };
@@ -732,9 +735,12 @@ function rPersonal(c){
   // Gleiches Thema nur einmal (stärkster Wert gewinnt)
   const byTopic=new Map(); soft.forEach(x=>{ const k=rTopic(x.t)+(x.v>0?"+":"-"), o=byTopic.get(k); if(!o||Math.abs(x.v)>Math.abs(o.v)) byTopic.set(k,x); });
   const softL=[...byTopic.values()];
-  let sd=softL.reduce((s,x)=>s+x.v,0); sd=Math.max(-14,Math.min(10,sd));
+  let sd=softL.reduce((s,x)=>s+x.v,0);
+  // Begrenzung gilt für das, was die Fragebogen-Antworten ändern (Profil-Werte wie Training zählen getrennt)
+  if(AA===undefined&&Object.keys(A).length){ const keep=state.coach.answers; let s0; try{ state.coach.answers={}; s0=rPersonal(c,{}).sd; } finally{ state.coach.answers=keep; } sd=s0+Math.max(-14,Math.min(10,sd-s0)); }
+  else sd=Math.max(-14,Math.min(10,sd));
   const list=hard.concat(softL).sort((a,b)=>Math.abs(b.v)-Math.abs(a.v)).slice(0,4);
-  return {delta:hard.reduce((s,x)=>s+x.v,0)+sd, list, notes};
+  return {delta:hard.reduce((s,x)=>s+x.v,0)+sd, sd, list, notes};
 }
 // Ergänzt sachliche Gründe aus den Nährwerten, bis mindestens zwei da sind.
 // Gute Zahl → zuerst Stärken, schlechte Zahl → zuerst Schwächen; im Mittelfeld (45–79) möglichst beides,
