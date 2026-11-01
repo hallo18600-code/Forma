@@ -876,20 +876,18 @@ const DIETS = [
   { id: 'strong', en: 'muscle building diet', de: 'Muskelaufbau-\nDiät', foods: [...Object.keys(CLAIMS.strong), 'potatoes', 'rice', 'honey', 'banana', 'cheese', 'oats'], niche: ['#gymtok', '#protein'] },
 ];
 // „Mog“: gutes Essen um eine selbstbewusste Zeichnung, Junk & Fake-Health-Produkte um eine weinende
-// Green Flag / Red Flag: nur Sätze mit passendem Foto (food = Foto-Lebensmittel)
+// Green Flag: nur Sätze mit passendem Foto (food = Foto-Lebensmittel)
 const FLAGS = {
   she: { fig: ['david'], green: [
     ['she cooks with real butter', 'butter'], ['she doesn’t eat slop', 'salmon'], ['she buys raw milk', 'milk'],
     ['she knows her butcher', 'beef'], ['she eats steak on the first date', 'steak'], ['she drinks water, not soda', 'water'],
     ['she eats fruit, not candy', 'berries'], ['she cooks every meal herself', 'chicken'], ['she orders steak, not salad', 'steak'],
     ['she buys eggs in packs of 30', 'eggs'], ['she shops at the farmers market', 'tomatoes'], ['she thinks seed oils are the enemy', 'oliveoil'],
-    ['she brings homemade food to work', 'sweetpotato'], ['she eats like her grandma', 'bread_eu']],
-    red: [['she cooks with sunflower oil', 'fries'], ['she lives on protein bars', 'cerealbar'], ['she never cooks', 'nuggets']] },
+    ['she brings homemade food to work', 'sweetpotato'], ['she eats like her grandma', 'bread_eu']], },
   he: { fig: ['sie', 'orakel'], green: [
     ['he cooks with real butter', 'butter'], ['he doesn’t eat slop', 'salmon'], ['he knows his butcher', 'beef'],
     ['he grills his own steak', 'steak'], ['he drinks water at the party', 'water'], ['he eats 6 eggs for breakfast', 'eggs'],
-    ['he cooks for you', 'lamb'], ['he buys raw milk', 'milk']],
-    red: [['he eats fast food every day', 'burger']] },
+    ['he cooks for you', 'lamb'], ['he buys raw milk', 'milk']], },
 };
 const MOG = {
   good: ['steak', 'eggs', 'honey', 'milk', 'chocolate', 'oranges', 'butter', 'salmon', 'oysters', 'berries', 'cheese', 'kiwi', 'dates', 'beef', 'pomegranate'],
@@ -937,7 +935,7 @@ const SERIES = {
   duel: { label: 'Carbs vs. Carbs', ex: 'CARBS VS CARBS · PROTEIN VS PROTEIN', w: 2.5, niche: ['#junkfood', '#gymtok'] },
   underrated: { label: 'Unterschätzt', ex: 'underrated protein, underrated fats', w: 2, niche: ['#realfood', '#nutrition'] },
   origin: { label: 'Herkunft', ex: 'average European, average Asian', w: 2, niche: ['#realfood', '#culture'] },
-  flags: { label: 'Green / Red Flag', ex: 'green flag: she cooks with real butter', w: 2.5, niche: ['#greenflag', '#realfood'] },
+  flags: { label: 'Green Flag', ex: '(green flag:) she cooks with real butter', w: 2.5, niche: ['#greenflag', '#realfood'] },
   faith: { label: 'Religion', ex: 'average Christian, average Muslim', w: 1.5, niche: ['#realfood', '#tradition'] },
 };
 
@@ -1305,9 +1303,9 @@ function renderFlag(ctx, sl) {
   if (sl.figure) drawFigureBox(ctx, sl.figure, W * .12, H * .4, W * .76, H * .6);
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = capFont(W * .088);
-  const rows = [{ t: t.flag, s: W * .075 }, ...wrap(ctx, t.text, W * .86).map(l => ({ t: l, s: W * .088 }))];
+  const rows = [...(t.flag ? [{ t: t.flag, s: W * .075 }] : []), ...wrap(ctx, t.text, W * .86).map(l => ({ t: l, s: W * .088 }))];
   let y = H * .07;
-  rows.forEach((r, i) => { ctx.font = capFont(r.s); if (i === 1) y += W * .015; y += r.s * .6; strokeText(ctx, r.t, W / 2, y, r.s); y += r.s * .6; });
+  rows.forEach((r, i) => { ctx.font = capFont(r.s); if (i === 1 && t.flag) y += W * .015; y += r.s * .6; strokeText(ctx, r.t, W / 2, y, r.s); y += r.s * .6; });
   ctx.restore();
 }
 function renderHero(ctx, sl) {
@@ -1848,19 +1846,12 @@ function planSlides(series, n, lang) {
     });
   }
   if (series === 'flags') {
-    // she/he, dann nur grün, gemischt oder nur rot (ohne genug rote Sätze: kein „nur rot“)
-    const who = rnd() < .5 ? 'she' : 'he', F = FLAGS[who];
-    const ok = list => shuffle(list.filter(([, f]) => hasPhoto(f)));
-    const g = ok(F.green), r = ok(F.red);
-    const modes = [['green', 1], ['mixed', r.length ? 1 : 0], ['red', r.length >= Math.min(3, n) ? 1 : 0]].filter(m => m[1]);
-    const mode = weighted(modes);
-    let list = mode === 'green' ? g.map(x => [x, 1]) : mode === 'red' ? r.map(x => [x, 0])
-      : Array.from({ length: n }, (_, i) => i % 2 && r.length ? [r.shift(), 0] : [g.shift(), 1]).filter(x => x[0]);
-    const seen = new Set();
-    const grp = f => (TWINS.find(t => t.includes(f)) || [f])[0];
-    list = list.filter(([[, f]]) => !seen.has(grp(f)) && seen.add(grp(f)));   // kein Foto-Essen doppelt (auch nicht Steak + Rind)
-    list.slice(0, n).forEach(([[text, food], good], i) => specs.push({ layout: 'flag', one: food, hook: (good ? 'green flag: ' : 'red flag: ') + text,
-      t: { flag: good ? 'green flag:' : 'red flag:', text }, mood: 'strong', who, key: i === 0 ? 'flag' + who + mode : undefined }));
+    // she oder he, nur Green Flags; „green flag:“ steht bei der Hälfte der Posts drüber (dann auf allen Slides)
+    const who = rnd() < .5 ? 'she' : 'he', label = rnd() < .5;
+    const grp = f => (TWINS.find(t => t.includes(f)) || [f])[0], seen = new Set();
+    shuffle(FLAGS[who].green.filter(([, f]) => hasPhoto(f))).filter(([, f]) => !seen.has(grp(f)) && seen.add(grp(f)))   // kein Foto-Essen doppelt
+      .slice(0, n).forEach(([text, food], i) => specs.push({ layout: 'flag', one: food, hook: (label ? 'green flag: ' : '') + text,
+        t: { flag: label ? 'green flag:' : '', text }, mood: 'strong', who, key: i === 0 ? 'flag' + who : undefined }));
   }
   return specs;
 }
