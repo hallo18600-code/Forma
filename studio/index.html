@@ -219,7 +219,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
       <div class="opt"><span>Auflösung</span><div class="seg" id="sRes"><button type="button" data-v="hd">HD 1080 × 1440</button><button type="button" data-v="4k">4K 2160 × 2880</button></div></div>
       <div class="opt"><span>Schrift auf den Slides</span><div class="seg" id="sFont"><button type="button" data-v="tiktok">TikTok Sans</button><button type="button" data-v="figtree">Figtree (alt)</button></div></div>
       <label class="check"><input type="checkbox" id="sGray"> Figuren schwarz-weiß</label>
-      <label class="check"><input type="checkbox" id="sOwnFigs"> Eigene Figuren zufällig verwenden</label>
+      <label class="check"><input type="checkbox" id="sOwnFigs"> Eigene Figuren ohne festes Format überall verwenden</label>
       <p class="note">TikTok rechnet Bilder beim Hochladen kleiner. HD reicht meistens, 4K ist etwas schärfer, dauert aber länger.</p>
     </div>
   </details>
@@ -1694,11 +1694,14 @@ function pickKind(needStrong, needSad) {
   const k = weighted(opts.map(([k, w]) => [k, k === recent.kind ? w * .5 : w]));
   recent.kind = k; return k;
 }
+// Eigene Figuren können auf ein Format beschränkt sein (f.only). Ohne Format: überall, solange der Schalter an ist.
+let curSeries = null;
+const figAllowed = f => f.builtin || (f.only ? f.only === curSeries : S.ownFigs !== false);
 function nextFigure(mood, physique, kind, only) {
   // eine Figur pro Post; über mehrere Posts reihum, die zuletzt benutzten kommen zuletzt dran
-  let pool = figures.filter(f => (S.ownFigs !== false || f.builtin) && (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind) && (!only || only(f)));
+  let pool = figures.filter(f => figAllowed(f) && (f.mood || 'strong') === mood && (!kind || kindOf(f) === kind) && (!only || only(f)));
   // starke Statuen: immer die muskulösen (Orakel/Chrom wirken neben Essen fehl am Platz)
-  if (mood === 'strong' && kind === 'statue' && pool.some(f => f.physique)) pool = pool.filter(f => f.physique);
+  if (mood === 'strong' && kind === 'statue' && pool.some(f => f.physique)) pool = pool.filter(f => f.physique || (f.only && f.only === curSeries));   // fest zugeordnete eigene Figuren bleiben drin
   if (!pool.length) return null;
   const key = mood + '-' + (kind || 'all');
   const last = (recent.figs && recent.figs[key]) || [];
@@ -1856,9 +1859,8 @@ function planSlides(series, n, lang) {
     const seen = new Set();
     const grp = f => (TWINS.find(t => t.includes(f)) || [f])[0];
     list = list.filter(([[, f]]) => !seen.has(grp(f)) && seen.add(grp(f)));   // kein Foto-Essen doppelt (auch nicht Steak + Rind)
-    const figId = pick(F.fig);
     list.slice(0, n).forEach(([[text, food], good], i) => specs.push({ layout: 'flag', one: food, hook: (good ? 'green flag: ' : 'red flag: ') + text,
-      t: { flag: good ? 'green flag:' : 'red flag:', text }, mood: 'strong', figId, key: i === 0 ? 'flag' + who + mode : undefined }));
+      t: { flag: good ? 'green flag:' : 'red flag:', text }, mood: 'strong', who, key: i === 0 ? 'flag' + who + mode : undefined }));
   }
   return specs;
 }
@@ -1883,6 +1885,7 @@ function pickSeries(n) {
 }
 // Plant einen Post (Texte, Fotos, Statuen) – ohne zu zeichnen
 function planPost(series, n, lang) {
+  curSeries = series;
   const specs = planSlides(series, n, lang);
   const duel = specs.some(s => s.mood === 'duel');
   const needStrong = specs.some(s => s.mood === 'strong' || s.mood === 'duel'), needSad = specs.some(s => s.mood === 'sad' || s.mood === 'duel');
@@ -1896,7 +1899,10 @@ function planPost(series, n, lang) {
     : ['dad', 'diet'].includes(series) ? (f => !f.edge) : null;   // Figur schwebt mittig: keine mit seitlicher Schnittkante
   const fig = { strong: needStrong && (kind || series === 'king') ? nextFigure('strong', duel || series === 'king' || specs.some(s => s.big), kind, only) : null,
     sad: needSad && (kind || series === 'king') ? nextFigure('sad', false, kind, only) : null };
-  if (series === 'flags') { fig.strong = figures.find(f => f.id === specs[0]?.figId && (S.ownFigs !== false || f.builtin)) || fig.strong; }
+  if (series === 'flags' && specs[0]) {   // feste Figuren je she/he, dazu eigene Figuren mit genau diesem Format
+    const who = specs[0].who, pool = figures.filter(f => (f.builtin && FLAGS[who].fig.includes(f.id)) || (!f.builtin && f.only === 'flags-' + who));
+    fig.strong = pool.length ? pick(pool) : fig.strong;
+  }
   if (series === 'love' && fig.sad) fig.sad2 = nextFigure('sad', false, kind, f => only(f) && f !== fig.sad && f.id !== 'muede') || fig.sad;
   const base = makeStyle();  // gleiche Statuen-Größe/-Spiegelung im ganzen Video
   const used = new Set();
@@ -2200,7 +2206,7 @@ function renderFigGrid() {
   for (const f of figures) {
     const d = document.createElement('div'); d.className = 'ph fig';
     const img = document.createElement('img'); img.alt = f.name; img.src = f.thumb || f.src; img.loading = 'lazy';
-    const nm = document.createElement('div'); nm.className = 'name'; nm.textContent = (f.mood === 'sad' ? '😢 ' : '') + f.name;
+    const nm = document.createElement('div'); nm.className = 'name'; nm.textContent = (f.mood === 'sad' ? '😢 ' : '') + f.name + (f.only ? ' · nur ' + (figFormats().find(x => x[0] === f.only) || ['', '?'])[1] : '');
     d.append(img, nm);
     if (!f.builtin) {
       const sel = document.createElement('select'); sel.id = 'mood-' + f.id; sel.setAttribute('aria-label', 'Wofür passt die Statue?');
@@ -2209,6 +2215,9 @@ function renderFigGrid() {
       const ks = document.createElement('select'); ks.id = 'kind-' + f.id; ks.setAttribute('aria-label', 'Was für eine Figur ist das?');
       ks.innerHTML = Object.entries(KINDS).map(([k, v]) => `<option value="${k}">${v}</option>`).join('');
       ks.value = kindOf(f); ks.onchange = () => { f.kind = ks.value; STORE.patch('figures', f.id, { kind: ks.value }); renderFigGrid(); }; d.append(ks);
+      const os = document.createElement('select'); os.id = 'only-' + f.id; os.setAttribute('aria-label', 'In welchem Format soll die Figur vorkommen?');
+      os.innerHTML = figFormats().map(([k, v]) => `<option value="${k}">${esc(v)}</option>`).join('');
+      os.value = f.only || ''; os.onchange = () => { f.only = os.value; STORE.patch('figures', f.id, { only: os.value }); renderFigGrid(); }; d.append(os);
       const del = document.createElement('button'); del.type = 'button'; del.className = 'del'; del.textContent = '×'; del.setAttribute('aria-label', 'Statue löschen');
       del.onclick = () => armDelete(del, () => removeFigure(f)); d.append(del);
     }
@@ -2217,6 +2226,8 @@ function renderFigGrid() {
   const n = k => figures.filter(f => kindOf(f) === k).length;
   $('#figCount').textContent = `${n('statue')} Statuen · ${n('photo')} Models · ${n('drawing')} Zeichnungen`;
 }
+const figFormats = () => [['', 'Alle Formate'], ...Object.entries(SERIES).flatMap(([id, s]) => id === 'flags'
+  ? [['flags-she', s.label + ' (she)'], ['flags-he', s.label + ' (he)']] : [[id, s.label]])];
 async function setMood(f, mood) {
   f.mood = mood; renderFigGrid();
   if (!f.builtin) STORE.patch('figures', f.id, { mood });
@@ -2236,7 +2247,7 @@ const STORE = (() => {
 async function loadLocal() {
   const ph = await STORE.all('photos'), fg = await STORE.all('figures');
   photos = ph.map(([id, v]) => ({ id, food: v.food || 'other', src: URL.createObjectURL(v.blob), createdAt: v.createdAt || 0 })).sort((a, b) => b.createdAt - a.createdAt);
-  fg.forEach(([id, v]) => addFigure({ id, name: v.name || 'Statue', mood: v.mood || 'strong', kind: v.kind || 'statue', src: URL.createObjectURL(v.blob) }));
+  fg.forEach(([id, v]) => addFigure({ id, name: v.name || 'Statue', mood: v.mood || 'strong', kind: v.kind || 'statue', only: v.only || '', src: URL.createObjectURL(v.blob) }));
 }
 async function resizeBlob(file, max, type) {
   const url = URL.createObjectURL(file);
