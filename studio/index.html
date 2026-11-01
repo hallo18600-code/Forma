@@ -884,7 +884,7 @@ const FLAGS = {
     ['she eats fruit, not candy', 'berries'], ['she cooks every meal herself', 'chicken'], ['she orders steak, not salad', 'steak'],
     ['she buys eggs in packs of 30', 'eggs'], ['she shops at the farmers market', 'tomatoes'], ['she thinks seed oils are the enemy', 'oliveoil'],
     ['she brings homemade food to work', 'sweetpotato'], ['she eats like her grandma', 'bread_eu']], },
-  he: { fig: ['sie', 'orakel'], green: [
+  he: { fig: ['sie'], green: [
     ['he cooks with real butter', 'butter'], ['he doesn’t eat slop', 'salmon'], ['he knows his butcher', 'beef'],
     ['he grills his own steak', 'steak'], ['he drinks water at the party', 'water'], ['he eats 6 eggs for breakfast', 'eggs'],
     ['he cooks for you', 'lamb'], ['he buys raw milk', 'milk']], },
@@ -1300,7 +1300,7 @@ function renderFlag(ctx, sl) {
   applyGrade(ctx, sl.style.grade);
   const g = ctx.createLinearGradient(0, 0, 0, H * .5); g.addColorStop(0, 'rgba(0,0,0,.5)'); g.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = g; ctx.fillRect(0, 0, W, H * .5);
-  if (sl.figure) drawFigureBox(ctx, sl.figure, W * .12, H * .4, W * .76, H * .6);
+  if (sl.figure) drawFigureBox(ctx, sl.figure, -W * .14, H * .3, W * 1.28, H * 1.04);   // groß, unten leicht angeschnitten
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.font = capFont(W * .088);
   const rows = [...(t.flag ? [{ t: t.flag, s: W * .075 }] : []), ...wrap(ctx, t.text, W * .86).map(l => ({ t: l, s: W * .088 }))];
@@ -2356,7 +2356,7 @@ function bindSettings() {
 }
 
 // Version: bei jeder Änderung hochzählen. Ist online eine neuere Version, lädt das Studio sie automatisch (Browser-Speicher umgehen).
-const BUILD = '2026-11-01 d';
+const BUILD = '2026-11-01 e';
 async function checkUpdate() {
   try {
     const t = await (await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' })).text();
