@@ -148,7 +148,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
 <div class="wrap">
   <header>
     <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#3cff8f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l7-7 7 7"/><path d="M5 20l7-7 7 7"/></svg></div>
-    <div><h1>Slide-Studio</h1><div class="sub" id="sub">Health Maxxing · TikTok-Slideshows</div></div>
+    <div><h1>Slide-Studio</h1><div class="sub" id="sub">Health Maxxing · TikTok-Slideshows · <span id="ver"></span></div></div>
   </header>
 
   <p class="label">Content-Art</p>
@@ -2353,7 +2353,17 @@ function bindSettings() {
   $('#upFig').addEventListener('change', e => { if (e.target.files[0]) uploadFigure(e.target.files[0]); e.target.value = ''; });
 }
 
+// Version: bei jeder Änderung hochzählen. Ist online eine neuere Version, lädt das Studio sie automatisch (Browser-Speicher umgehen).
+const BUILD = '2026-11-01 c';
+async function checkUpdate() {
+  try {
+    const t = await (await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' })).text();
+    const m = t.match(/const BUILD = '([^']+)'/);
+    if (m && m[1] !== BUILD && sessionStorage.getItem('hm2-upd') !== m[1]) { sessionStorage.setItem('hm2-upd', m[1]); location.replace(location.pathname + '?v=' + Date.now()); }
+  } catch (e) {}
+}
 async function init() {
+  $('#ver').textContent = 'Version ' + BUILD; checkUpdate();
   bindSettings();
   await Promise.all([
     ...BUILTIN_FIGS.map(f => addFigure({ ...f, builtin: true })),
