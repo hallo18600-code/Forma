@@ -331,7 +331,6 @@ const FOODS = Object.fromEntries([
   F('beer','🍺','#d9a23a','beer','Bier',['junk','F']),
   // „sieht gesund aus“ – Format vorerst abgelehnt, Fotos bleiben für später (nicht in Rotation)
   F('granola','🥣','#c49a5a','granola','Knuspermüsli',['fake']),
-  F('juice','🧃','#f2a33a','fruit juice','Fruchtsaft',['fake']),
   F('cerealbar','🍫','#a8763e','cereal bars','Müsliriegel',['fake']),
   F('cereal','🥣','#e0b04a','breakfast cereal','Frühstücksflocken',['fake']),
   F('ricecakes','🍘','#e8dcc0','rice cakes','Reiswaffeln',['fake']),
@@ -617,7 +616,7 @@ const SWAPMAP = {
   pancakes: ['oats', 'eggs', 'yogurt'], pizza: ['steak', 'salmon', 'chicken'], burger: ['steak', 'beef'],
   processed: ['nuts', 'almonds', 'walnuts', 'cheese', 'dates'],
   chips: ['nuts', 'almonds', 'potatoes', 'sweetpotato'], coldcuts: ['steak', 'beef', 'chicken'], nuggets: ['chicken'],
-  granola: ['oats', 'yogurt', 'berries'], juice: ['oranges', 'water'], cerealbar: ['nuts', 'dates', 'almonds'], cereal: ['oats', 'eggs', 'yogurt'], ricecakes: ['potatoes', 'rice', 'sweetpotato'],
+  granola: ['oats', 'yogurt', 'berries'], cerealbar: ['nuts', 'dates', 'almonds'], cereal: ['oats', 'eggs', 'yogurt'], ricecakes: ['potatoes', 'rice', 'sweetpotato'],
 };
 const SWAP = { en: ['swap this…', 'for this…', 'and this…', 'for this…'], de: ['tausch das…', 'gegen das…', 'und das…', 'gegen das…'] };
 const REALS = [
@@ -828,10 +827,10 @@ const PROBLEMS = [
 const KING = [
   { id: 'all', en: ['Eat like a king:', 'Not like a peasant:'], de: ['Iss wie ein König:', 'Nicht wie ein Untertan:'],
     good: ['steak', 'oysters', 'salmon', 'eggs', 'cheese', 'honey', 'milk', 'grapes', 'lamb', 'butter', 'figs', 'pomegranate', 'dates', 'berries', 'cherries', 'beef'],
-    bad: ['cereal', 'juice', 'granola', 'cerealbar', 'ricecakes', 'chips', 'soda', 'cookies', 'nuggets', 'candy', 'donut', 'fries', 'coldcuts', 'pizza', 'bread_us'] },
+    bad: ['cereal', 'granola', 'cerealbar', 'ricecakes', 'chips', 'soda', 'cookies', 'nuggets', 'candy', 'donut', 'fries', 'coldcuts', 'pizza', 'bread_us'] },
   { id: 'breakfast', en: ['A king’s breakfast:', 'A peasant’s breakfast:'], de: ['Frühstück eines Königs:', 'Frühstück eines Untertans:'],
     good: ['eggs', 'steak', 'honey', 'berries', 'butter', 'milk', 'oranges', 'yogurt', 'blueberries', 'cheese', 'banana'],
-    bad: ['cereal', 'juice', 'granola', 'cerealbar', 'pancakes', 'donut', 'bread_us', 'cookies', 'coldcuts'] },
+    bad: ['cereal', 'granola', 'cerealbar', 'pancakes', 'donut', 'bread_us', 'cookies', 'coldcuts'] },
   { id: 'snacks', en: ['A king’s snacks:', 'A peasant’s snacks:'], de: ['Snacks eines Königs:', 'Snacks eines Untertans:'],
     good: ['dates', 'cheese', 'walnuts', 'almonds', 'berries', 'mango', 'grapes', 'figs', 'cherries', 'blueberries'],
     bad: ['chips', 'candy', 'cookies', 'cerealbar', 'ricecakes', 'donut', 'soda', 'nuggets'] },
@@ -840,7 +839,7 @@ const KING = [
     bad: ['pizza', 'burger', 'fries', 'nuggets', 'coldcuts', 'beer', 'soda', 'chips'] },
   { id: 'dessert', en: ['A king’s dessert:', 'A peasant’s dessert:'], de: ['Nachtisch eines Königs:', 'Nachtisch eines Untertans:'],
     good: ['honey', 'berries', 'dates', 'figs', 'chocolate', 'mango', 'yogurt', 'cherries', 'raspberries', 'blueberries', 'grapes'],
-    bad: ['donut', 'candy', 'cookies', 'pancakes', 'cerealbar', 'soda', 'chips', 'cereal', 'juice'] },
+    bad: ['donut', 'candy', 'cookies', 'pancakes', 'cerealbar', 'soda', 'chips', 'cereal'] },
 ];
 // „why do I feel so good all the time?“ – Collage auf Weiß, unten rechts durchgestrichenes Junk Food
 const FEELGOOD = {
@@ -891,22 +890,22 @@ const FLAGS = {
 };
 const MOG = {
   good: ['steak', 'eggs', 'honey', 'milk', 'chocolate', 'oranges', 'butter', 'salmon', 'oysters', 'berries', 'cheese', 'kiwi', 'dates', 'beef', 'pomegranate'],
-  bad: ['cerealbar', 'juice', 'ricecakes', 'granola', 'cereal', 'soda', 'candy', 'chips', 'donut', 'cookies', 'nuggets', 'pizza'],
+  bad: ['cerealbar', 'ricecakes', 'granola', 'cereal', 'soda', 'candy', 'chips', 'donut', 'cookies', 'nuggets', 'pizza'],
 };
 // „Everyday / 3-4 times a week / Never“: 2×2 freigestellte Lebensmittel, schlichter Serif-Text in der Mitte
 const FREQ = [
   { en: 'Everyday', de: 'Jeden Tag', foods: ['milk', 'steak', 'eggs', 'kiwi', 'beef', 'honey', 'butter', 'oranges', 'banana', 'potatoes', 'berries', 'water'] },
   { en: '3-4 times a week', de: '3–4× pro Woche', foods: ['cheese', 'salmon', 'oysters', 'sardines', 'dates', 'yogurt', 'sweetpotato', 'mango', 'avocado', 'lamb'] },
   { en: 'Once a week', de: 'Einmal pro Woche', foods: ['chocolate', 'rice', 'shrimp', 'mussels', 'figs', 'pomegranate', 'pineapple'] },
-  { en: 'Never', de: 'Nie', foods: ['soda', 'cerealbar', 'juice', 'cereal', 'nuggets', 'burger', 'fries', 'donut', 'candy', 'ricecakes', 'granola', 'coldcuts', 'chips', 'pizza'] },
+  { en: 'Never', de: 'Nie', foods: ['soda', 'cerealbar', 'cereal', 'nuggets', 'burger', 'fries', 'donut', 'candy', 'ricecakes', 'granola', 'coldcuts', 'chips', 'pizza'] },
 ];
 // „I love carbs“: drei Streifen – weinend (Junk), weinend (Fake-Health), Chad (echt)
 const LOVE = [
-  { id: 'carbs', en: '"I love carbs"', de: '„Ich liebe Carbs“', junk: ['pizza', 'soda', 'donut', 'fries', 'bread_us', 'cookies', 'chips'], fake: ['cereal', 'granola', 'ricecakes', 'cerealbar', 'juice'], real: ['milk', 'honey', 'potatoes', 'berries', 'mango', 'banana', 'dates', 'oranges', 'sweetpotato'] },
-  { id: 'sugar', en: '"I love sugar"', de: '„Ich liebe Zucker“', junk: ['candy', 'soda', 'donut', 'cookies', 'pancakes'], fake: ['juice', 'cerealbar', 'granola', 'cereal'], real: ['honey', 'mango', 'dates', 'berries', 'figs', 'cherries', 'pineapple', 'watermelon'] },
+  { id: 'carbs', en: '"I love carbs"', de: '„Ich liebe Carbs“', junk: ['pizza', 'soda', 'donut', 'fries', 'bread_us', 'cookies', 'chips'], fake: ['cereal', 'granola', 'ricecakes', 'cerealbar'], real: ['milk', 'honey', 'potatoes', 'berries', 'mango', 'banana', 'dates', 'oranges', 'sweetpotato'] },
+  { id: 'sugar', en: '"I love sugar"', de: '„Ich liebe Zucker“', junk: ['candy', 'soda', 'donut', 'cookies', 'pancakes'], fake: ['cerealbar', 'granola', 'cereal'], real: ['honey', 'mango', 'dates', 'berries', 'figs', 'cherries', 'pineapple', 'watermelon'] },
   { id: 'protein', en: '"I love protein"', de: '„Ich liebe Protein“', junk: ['nuggets', 'burger', 'coldcuts', 'pizza'], fake: ['cerealbar', 'granola', 'cereal', 'ricecakes'], real: ['steak', 'eggs', 'salmon', 'milk', 'oysters', 'cheese', 'beef', 'sardines'] },
-  { id: 'snacks', en: '"I love snacks"', de: '„Ich liebe Snacks“', junk: ['chips', 'candy', 'cookies', 'donut', 'nuggets'], fake: ['ricecakes', 'cerealbar', 'granola', 'juice'], real: ['cheese', 'dates', 'berries', 'almonds', 'walnuts', 'kiwi', 'honey'] },
-  { id: 'breakfast', en: '"I love breakfast"', de: '„Ich liebe Frühstück“', junk: ['pancakes', 'donut', 'cookies', 'soda', 'coldcuts'], fake: ['cereal', 'granola', 'juice', 'cerealbar'], real: ['eggs', 'milk', 'honey', 'berries', 'steak', 'butter', 'banana', 'oranges', 'yogurt'] },
+  { id: 'snacks', en: '"I love snacks"', de: '„Ich liebe Snacks“', junk: ['chips', 'candy', 'cookies', 'donut', 'nuggets'], fake: ['ricecakes', 'cerealbar', 'granola'], real: ['cheese', 'dates', 'berries', 'almonds', 'walnuts', 'kiwi', 'honey'] },
+  { id: 'breakfast', en: '"I love breakfast"', de: '„Ich liebe Frühstück“', junk: ['pancakes', 'donut', 'cookies', 'soda', 'coldcuts'], fake: ['cereal', 'granola', 'cerealbar'], real: ['eggs', 'milk', 'honey', 'berries', 'steak', 'butter', 'banana', 'oranges', 'yogurt'] },
 ];
 const SERIES = {
   freq: { label: 'Everyday / Never', ex: 'Everyday · 3-4 times a week · Never', w: 4, niche: ['#primal', '#rawmilk'], min: 2 },
@@ -1578,7 +1577,7 @@ const VC = {
   jsweet: { animal: 0, dairy: 0, veg: 0, fruit: 0, pantry: 0, drink: 0, jsweet: 3, jsalty: 2 },
   jsalty: { animal: 0, dairy: 0, veg: 0, fruit: 0, pantry: 0, drink: 0, jsweet: 2, jsalty: 3 },
 };
-const JSWEET = ['candy', 'donut', 'cookies', 'pancakes', 'soda', 'cereal', 'cerealbar', 'granola', 'juice'];
+const JSWEET = ['candy', 'donut', 'cookies', 'pancakes', 'soda', 'cereal', 'cerealbar', 'granola'];
 const vibesOf = id => { const f = FOODS[id]; if (f && (isJunk(f) || isFake(f))) return [JSWEET.includes(id) ? 'jsweet' : 'jsalty']; const g = Object.keys(VIBE).filter(k => VIBE[k].includes(id)); return g.length ? g : ['veg']; };
 const vcomp = (a, b) => Math.max(...vibesOf(a).flatMap(x => vibesOf(b).map(y => VC[x][y])));
 const twinOf = (a, b) => TWINS.some(g => g.includes(a) && g.includes(b));
