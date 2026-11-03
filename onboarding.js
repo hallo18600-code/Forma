@@ -74,6 +74,13 @@ function obSteps(){
   if(p.trainFreq!=="Gar nicht") S.push({id:"trainType",sec:"Alltag & Training",kind:"single",q:"Welches Training?",
     opts:list([["Krafttraining","Kraft","🏋️","Gym, Geräte, Hanteln"],["Ausdauer","Ausdauer","🏃","Laufen, Rad, Schwimmen"],["Beides","Beides","⚡"],["Weiß ich noch nicht","Weiß ich noch nicht","🤔"]]),
     get:()=>p.trainType, set:v=>{ p.trainType=v; }});
+  // Verlauf aus einer anderen Gym-App übernehmen (nur wer trainiert)
+  if(p.trainFreq!=="Gar nicht"){
+    S.push({id:"prevApp",sec:"Alltag & Training",kind:"single",q:"Hast du vorher eine Gym-App benutzt?",sub:"Dann übernehmen wir deinen Verlauf.",
+      opts:list([["hevy","Hevy","🏋️"],["strong","Strong","💪"],["none","Nein / andere App","🆕"]]),
+      get:()=>p.prevApp, set:v=>{ p.prevApp=v; ui.gymErr=false; }});
+    if(GYM_APPS[p.prevApp]) S.push({id:"gym",sec:"Alltag & Training",kind:"gym",q:"Verlauf übernehmen"});
+  }
   // Schrittziel wird aus dem Alltag abgeleitet (änderbar im Verlauf)
   const quizStep=(t,title,q,extra)=>S.push(Object.assign({id:t+"-"+q.k, sec:title, topic:t, opt:1, kind:q.multi?"multi":"single", q:q.q, sub:q.sub, none:q.none, pick:q.pick,
       opts:q.opts.map(o=>({v:o,l:o,e:(q.emo||{})[o],d:(q.desc||{})[o]})), get:()=>obAns(t)[q.k], set:v=>{ obAns(t)[q.k]=v; }},extra||{}));
@@ -183,11 +190,16 @@ function renderOnboard(){
     const cur=st.get(), multi=st.kind==="multi";
     body=`${multi?`<div class="ob-multi">${st.pick?`Bis zu ${st.pick} auswählen`:"Mehrere möglich"}</div>`:""}<div class="ob-opts ${st.opts.length>5?"two":""}">${st.opts.map(o=>obOpt(o, multi?(cur||[]).includes(o.v):cur===o.v, multi)).join("")}</div>`;
     if(st.req) can=hasVal(cur);
+  } else if(st.kind==="gym"){
+    body=gymBody(p.prevApp);
   } else if(st.kind==="plan"){
     body=renderObPlan();
   }
   const foot = st.kind==="plan"
     ? `<button class="pill primary" data-act="ob-finish">Los geht's</button>`
+    : st.kind==="gym"&&!ui.gymRes
+    ? `<button class="pill primary" data-act="gym-pick">📂 Datei auswählen</button>
+       <button class="pill skip" data-act="ob-next">Später machen</button>`
     : `<button class="pill primary" data-act="ob-next" ${can?"":"disabled"}>Weiter</button>
        ${st.opt?`<button class="pill skip" data-act="ob-skip">Abschnitt überspringen</button>`:""}`;
   return `<div class="screen ob">

@@ -529,6 +529,7 @@ function renderModal(){
   if(type==="wo-edit") inner=woEditSheet();
   if(type==="wo-del") inner=woDelSheet(payload);
   if(type==="import") inner=importSheet();
+  if(type==="gym") inner=gymSheet(payload);
   if(type==="reset") inner=resetSheet();
   return `<div class="sheet" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
 }
@@ -593,6 +594,8 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="ob-next"){ obNext(); }
   else if(act==="ob-back"){ obBack(); }
   else if(act==="ob-skip"){ obSkip(); }
+  else if(act==="gym-pick"){ gymPick(); return; }
+  else if(act==="gym-app"){ ui.gymRes=null; ui.gymErr=false; openModal("gym", el.dataset.v); return; }
   else if(act==="ob-nudge"){ obNudge(+el.dataset.d); }
   else if(act==="ob-finish"){ obFinish(); }
   else if(act==="ob-close"){ state.obRedo=false; state.onboarded=true; state.step=null; save(); }
@@ -610,6 +613,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="open"){
     if(el.dataset.slot) ui.addSlot=el.dataset.slot;
     if(el.dataset.type==="weigh") ui.draftKg=lastWeight();
+    if(el.dataset.type==="gym"){ ui.gymRes=null; ui.gymErr=false; }
     if(el.dataset.type==="scan"){ ui.query=""; ui.scanView="list"; }
     if(el.dataset.type==="product") ensureDb(el.dataset.id); openModal(el.dataset.type, el.dataset.id); return;
   }
