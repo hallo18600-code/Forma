@@ -4,7 +4,9 @@
 
 const GYM_APPS = {
   hevy:   { name:"Hevy",   emo:"🏋️", path:["Hevy öffnen","Profil → ⚙️ Einstellungen","„Daten exportieren“ → Workouts"] },
-  strong: { name:"Strong", emo:"💪", path:["Strong öffnen","Profil → ⚙️ Einstellungen","„Strong-Daten exportieren“"] }
+  strong: { name:"Strong", emo:"💪", path:["Strong öffnen","Profil → ⚙️ Einstellungen","„Strong-Daten exportieren“"] },
+  fitbod: { name:"Fitbod", emo:"🤖", path:["Fitbod öffnen","Profil → ⚙️ Einstellungen","„Workout-Daten exportieren“"] },
+  fitnotes:{ name:"FitNotes", emo:"📒", path:["FitNotes öffnen","⚙️ Einstellungen → Tabellen-Export","„Workouts exportieren“"] }
 };
 
 // Englische Namen (Hevy/Strong) → passende Übungen hier. Bei mehreren entscheidet das Gerät in Klammern.
@@ -45,7 +47,9 @@ const gymNorm = s => String(s||"").toLowerCase().replace(/[‐-―-]/g," ").repl
 // Übungsname → id hier, oder null (dann wird es eine eigene Übung)
 function gymMatch(title){
   const m = String(title).match(/^(.*?)\s*\(([^)]*)\)\s*$/);
-  const base = gymNorm(m ? m[1] : title), eq = GYM_EQ[gymNorm(m ? m[2] : "")];
+  const base = gymNorm(m ? m[1] : title);
+  let eq = GYM_EQ[gymNorm(m ? m[2] : "")];
+  if(!eq){ const w=Object.keys(GYM_EQ).sort((a,b)=>b.length-a.length).find(k=>new RegExp("(^| )"+k+"( |$)").test(base)); if(w) eq=GYM_EQ[w]; }
   // Schon deutscher Name aus dieser App?
   const de = Object.values(EX).find(x => gymNorm(x.name)===gymNorm(title) || (gymNorm(x.base)===base && (!eq || x.eq===eq)));
   if(de) return de.id;
@@ -108,6 +112,16 @@ function gymParse(text){
     get=r=>{ const dur=String(r.duration||""), hh=+(dur.match(/(\d+)\s*h/)||[0,0])[1], mm=+(dur.match(/(\d+)\s*m/)||[0,0])[1];
       return { key:r.date+"|"+r["workout name"], name:r["workout name"], start:r.date, min:hh*60+mm, ex:r["exercise name"],
         kg:gymNum(r.weight), reps:gymNum(r.reps), sec:gymNum(r.seconds), warm:/^w/i.test(r["set order"]||""), skip:/rest/i.test(r["set order"]||"") }; };
+  } else if(k.includes("exercise")&&k.includes("iswarmup")){
+    app="fitbod";   // eine Zeile pro Satz, ohne Trainingsname: ein Training pro Tag
+    const wk=k.find(h=>/^weight/.test(h))||"weight(kg)", lbs=/lb/.test(wk);
+    get=r=>({ key:String(r.date).slice(0,10), name:"Training", start:r.date, ex:r.exercise,
+      kg:gymNum(r[wk])*(lbs?0.4536:1), reps:gymNum(r.reps), sec:gymNum(r["duration(s)"]), warm:/true|1/i.test(r.iswarmup) });
+  } else if(k.includes("exercise")&&k.includes("category")&&k.includes("date")){
+    app="fitnotes";
+    const wk=k.find(h=>/^weight/.test(h))||"weight (kgs)", lbs=/lb/.test(wk);
+    get=r=>{ const t=String(r.time||"").split(":").map(Number), sec=t.length===3?t[0]*3600+t[1]*60+t[2]:t.length===2?t[0]*60+t[1]:0;
+      return { key:r.date, name:"Training", start:r.date, ex:r.exercise, kg:gymNum(r[wk])*(lbs?0.4536:1), reps:gymNum(r.reps), sec, warm:false }; };
   } else return null;
 
   const wos=new Map(), names=new Map();

@@ -77,7 +77,7 @@ function obSteps(){
   // Verlauf aus einer anderen Gym-App übernehmen (nur wer trainiert)
   if(p.trainFreq!=="Gar nicht"){
     S.push({id:"prevApp",sec:"Alltag & Training",kind:"single",q:"Hast du vorher eine Gym-App benutzt?",sub:"Dann übernehmen wir deinen Verlauf.",
-      opts:list([["hevy","Hevy","🏋️"],["strong","Strong","💪"],["none","Nein / andere App","🆕"]]),
+      opts:Object.keys(GYM_APPS).map(k=>({v:k,l:GYM_APPS[k].name,e:GYM_APPS[k].emo})).concat({v:"none",l:"Nein / andere App",e:"🆕"}),
       get:()=>p.prevApp, set:v=>{ p.prevApp=v; ui.gymErr=false; }});
     if(GYM_APPS[p.prevApp]) S.push({id:"gym",sec:"Alltag & Training",kind:"gym",q:"Verlauf übernehmen"});
   }

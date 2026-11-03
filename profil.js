@@ -39,7 +39,7 @@ function renderProfil(){
       <button class="g-row" data-act="open" data-type="legal"><div class="grow"><b>Hinweise</b></div><span class="chev">›</span></button>
       <button class="g-row" data-act="open" data-type="impressum"><div class="grow"><b>Impressum</b></div><span class="chev">›</span></button>
       <button class="g-row" data-act="backup"><span class="bubble">⬇️</span><div class="grow"><b>Daten exportieren</b><div class="sub">${state.workouts.length} Trainings · ${state.weights.length} Wiegepunkte · als Datei</div></div></button>
-      <button class="g-row" data-act="open" data-type="gym"><span class="bubble">🏋️</span><div class="grow"><b>Aus Hevy oder Strong übernehmen</b><div class="sub">Trainingsverlauf mit allen Sätzen</div></div><span class="chev">›</span></button>
+      <button class="g-row" data-act="open" data-type="gym"><span class="bubble">🏋️</span><div class="grow"><b>Aus anderer Gym-App übernehmen</b><div class="sub">Hevy, Strong, Fitbod, FitNotes</div></div><span class="chev">›</span></button>
       <button class="g-row" data-act="import-pick"><span class="bubble">⬆️</span><div class="grow"><b>Daten importieren</b><div class="sub">Aus einer gesicherten Datei wiederherstellen</div></div></button>
       <button class="g-row" data-act="reset"><div class="grow"><b class="t-bad">Alles löschen</b><div class="sub">Mit Sicherheitsabfrage</div></div></button>
     </div>

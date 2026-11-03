@@ -272,16 +272,17 @@ function renderCalendar(){
       return `<div><div class="sub mb-1">${first.toLocaleDateString(LOC,{month:"short"})}</div><div class="mini">${cells}</div></div>`;
     }).join("")}</div>`;
   } else {
-    const years=[now.getFullYear(), now.getFullYear()-1];
-    body=years.map(y=>{
-      const start=new Date(y,0,1);
-      const off=(start.getDay()+6)%7;
-      const days=[];
-      for(let i=0;i<off;i++) days.push("");
-      for(let d=new Date(y,0,1); d.getFullYear()===y; d.setDate(d.getDate()+1)) days.push(iso(new Date(d)));
-      return `<h2>${y}</h2><div class="sub months">Jan Feb Mär Apr Mai Jun Jul Aug Sep Okt Nov Dez</div>
+    const years=[now.getFullYear(), now.getFullYear()-1].filter((y,i)=>!i||state.workouts.some(w=>w.date.startsWith(y+"-")));   // Vorjahr nur mit Trainings
+    // Jedes Jahr in zwei Hälften (Jan–Jun, Jul–Dez): größere Kästchen, passt ohne Scrollen auf den Bildschirm
+    const M=["Jan","Feb","Mär","Apr","Mai","Jun","Jul","Aug","Sep","Okt","Nov","Dez"];
+    const half=(y,h)=>{
+      const start=new Date(y,h*6,1), days=[];
+      for(let i=0;i<(start.getDay()+6)%7;i++) days.push("");
+      for(let d=new Date(start); d.getFullYear()===y&&d.getMonth()<h*6+6; d.setDate(d.getDate()+1)) days.push(iso(new Date(d)));
+      return `<div class="sub months">${M.slice(h*6,h*6+6).map(m=>`<span>${m}</span>`).join("")}</div>
         <div class="heat">${days.map(s=>`<i class="${s&&workoutOn(s).length?"on":""}"></i>`).join("")}</div>`;
-    }).join("");
+    };
+    body=years.map(y=>`<h2>${y}</h2>${half(y,0)}${half(y,1)}`).join("");
   }
   return `<div class="calhead">
       <button class="navd" data-act="dash-close" aria-label="Zurück">‹</button>
@@ -289,7 +290,7 @@ function renderCalendar(){
     </div>
     <div class="card split">
       <div><b>${weekStreak()}-Wochen-Serie</b><div class="sub">Mindestens ein Training</div></div>
-      <div><b>${restDays()} Ruhetage</b><div class="sub">Diese Woche bisher</div></div>
+      <div><b>${restDays()} ${restDays()===1?"Ruhetag":"Ruhetage"}</b><div class="sub">Diese Woche bisher</div></div>
     </div>
     ${body}`;
 }
