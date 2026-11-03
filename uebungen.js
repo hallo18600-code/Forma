@@ -309,7 +309,7 @@ function renderExInfo(){
         ${x.primary.length||x.secondary.length?`<div class="exi-mus">
           ${x.primary.length?`<div><i class="mdot p"></i><span>Primär</span><b>${musLabel(x.primary)}</b></div>`:""}
           ${x.secondary.length?`<div><i class="mdot s"></i><span>Sekundär</span><b>${musLabel(x.secondary)}</b></div>`:""}
-        </div>`:`<p class="sub">Eigene Übung – ohne Männchen und Muskel-Angaben.</p>`}
+        </div>`:exMapBox(id,x)}
         <h2 class="exi-h">Fortschritt</h2>
         ${exChart(id)}
         ${exRecords(id)}
@@ -319,6 +319,31 @@ function renderExInfo(){
     </div>
     ${mode?`<div class="exi-foot"><button class="pill primary" data-act="${mode==="plan"?"plan-add-ex":"add-ex"}" data-id="${id}">Zum ${mode==="plan"?"Trainingstag":"Training"} hinzufügen</button></div>`:""}
   </div>`;
+}
+
+// Eigene Übung einer bekannten zuordnen: Vorschläge + Suche. Der Verlauf bleibt erhalten.
+function exMapBox(id,x){
+  if(!/^x-/.test(id)) return `<p class="sub">Eigene Übung – ohne Männchen und Muskel-Angaben.</p>`;
+  const sug=gymSuggest(x.name,3).filter(r=>r.score>=0.25);
+  return `<div class="exmap">
+    <b>Welche Übung ist das?</b>
+    <p class="sub">Dann gibt es Männchen, Muskeln und Tipps. Dein Verlauf bleibt.</p>
+    ${sug.map(r=>`<button class="exmap-row" data-act="exi-merge" data-from="${id}" data-to="${r.id}">${exThumb(r.id)}<span class="grow">${esc(EX[r.id].name)}</span><span class="exmap-go">Wählen</span></button>`).join("")}
+    <button class="pill ghost w-full" data-act="open" data-type="ex-map" data-id="${id}">🔍 Andere Übung suchen</button>
+  </div>`;
+}
+function exMapSheet(from){
+  const c=(state.customEx||[]).find(x=>x.id===from); if(!c) return "";
+  return `<h2>Übung zuordnen</h2><p class="sub">„${esc(c.name)}“ ist …</p>
+    <div class="exsearch mt-3"><input type="search" data-act="exmap-q" placeholder="Übung suchen" value="${esc(ui.exMapQ||"")}" autocomplete="off" aria-label="Übung suchen"></div>
+    <div class="group mt-3" id="exmap-list">${exMapList(from)}</div>`;
+}
+function exMapList(from){
+  const c=(state.customEx||[]).find(x=>x.id===from), q=gymNorm(ui.exMapQ||"");
+  const rank=Object.fromEntries(gymSuggest(c?c.name:"",400).map((r,i)=>[r.id,i]));
+  const list=Object.values(EX).filter(x=>!q||gymNorm(x.name).includes(q)||gymNorm(x.group).includes(q))
+    .sort((a,b)=>q?a.name.localeCompare(b.name,"de"):(rank[a.id]??999)-(rank[b.id]??999)).slice(0,60);
+  return list.map(x=>`<button class="g-row" data-act="exi-merge" data-from="${from}" data-to="${x.id}">${exThumb(x.id)}<div class="grow"><b>${esc(x.name)}</b><div class="sub">${esc(x.group)}</div></div><span class="chev">›</span></button>`).join("")||`<p class="sub">Nichts gefunden.</p>`;
 }
 
 // Nach dem Zeichnen: gewählten Filter-Chip sichtbar halten
@@ -339,12 +364,19 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="exi-range"){ ui.exiRange=el.dataset.v; ui.exiPt=null; }
   else if(act==="exi-metric"){ ui.exiMetric=el.dataset.v; }
   else if(act==="exi-pt"){ ui.exiPt=+el.dataset.i; }
+  else if(act==="exi-merge"){
+    const from=el.dataset.from, to=el.dataset.to; gymMerge(from,to);
+    if(ui.exInfo&&ui.exInfo.id===from) ui.exInfo.id=to;
+    ui.modal=null; ui.exMapQ=""; save(); toast("Zugeordnet: "+EX[to].name);
+  }
   else if(act==="exl-group"){ ui.exGroup=el.dataset.v; }
   else if((act==="add-ex"||act==="plan-add-ex") && ui.exInfo){ ui.exInfo=null; }
   else if(act==="dash" && el.dataset.id==="exercises"){ ui.exQuery=""; ui.exGroup="Alle"; }
   else if(act==="open-day-ex" || (act==="open" && el.dataset.type==="ex")){ ui.exQuery=""; ui.exGroup="Alle"; }
 });
 document.getElementById("app").addEventListener("input", e=>{
+  const mq=e.target.closest('[data-act="exmap-q"]');
+  if(mq){ ui.exMapQ=mq.value; const box=document.getElementById("exmap-list"); if(box&&ui.modal) box.innerHTML=exMapList(ui.modal.payload); return; }
   const el=e.target.closest('[data-act="exl-query"]'); if(!el) return;
   ui.exQuery=el.value;
   const box=document.getElementById("exl-list"); if(box) box.innerHTML=exLibList(ui.exlMode);

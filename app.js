@@ -27,6 +27,7 @@ function fresh(){
 let state = load();
 slimRoutine();
 let ui = { modal:null, toast:null, scanMode:"text", query:"", addSlot:"breakfast", draftKg:76, portion:100, workout:null, rest:0, tick:null, wrange:"30", plan:null, planDay:0, exQuery:"", dash:null, cal:"month" };
+try{ if(gymRemap()) save(); }catch(e){}   // früher importierte Übungen nachträglich erkennen
 
 function load(){
   try {
@@ -530,8 +531,9 @@ function renderModal(){
   if(type==="wo-del") inner=woDelSheet(payload);
   if(type==="import") inner=importSheet();
   if(type==="gym") inner=gymSheet(payload);
+  if(type==="ex-map") inner=exMapSheet(payload);
   if(type==="reset") inner=resetSheet();
-  return `<div class="sheet" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
+  return `<div class="sheet ${type==="ex-map"?"top":""}" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
 }
 function render(){ try{ ensureRoutine(); }catch(e){}
   const root=document.getElementById("app");
@@ -541,12 +543,17 @@ function render(){ try{ ensureRoutine(); }catch(e){}
   if(state.onboarded) html += renderExInfo();
   if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
   // Scroll-Positionen merken, damit ein Neuaufbau (Tipp, Toast, Timer) nicht nach oben springt
-  const keep=[...root.querySelectorAll(".scroll,.sheet-card")].map(n=>n.scrollTop);
+  // Jede Art von Scroll-Bereich einzeln merken (auch Übungs-Detailseite und Leisten zum Wischen)
+  const SCR=[".scroll",".sheet-card",".exi-scroll",".units"];
+  const keep=SCR.map(q=>[...root.querySelectorAll(q)].map(n=>[n.scrollTop,n.scrollLeft]));
   const view=!state.onboarded?"ob:"+state.step:ui.workout?"w":ui.plan?"p":ui.dash?"d:"+ui.dash:"t:"+state.tab;
-  const same=ui._view===view;
-  ui._view=view;
+  const same=ui._view===view, exSame=ui._exi===(ui.exInfo&&ui.exInfo.id), mSame=ui._modal===(ui.modal&&ui.modal.type);
+  ui._view=view; ui._exi=ui.exInfo&&ui.exInfo.id; ui._modal=ui.modal&&ui.modal.type;
   root.innerHTML = html;
-  if(same){ [...root.querySelectorAll(".scroll,.sheet-card")].forEach((n,i)=>{ if(keep[i]) n.scrollTop=keep[i]; }); }
+  SCR.forEach((q,k)=>{
+    if(q===".exi-scroll"?!exSame:q===".sheet-card"?!(same&&mSame):!same) return;
+    [...root.querySelectorAll(q)].forEach((n,i)=>{ const v=keep[k][i]; if(v){ n.scrollTop=v[0]; n.scrollLeft=v[1]; } });
+  });
   if(ui.exInfo) figKick();
   exAfterRender();
 }
@@ -594,7 +601,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="ob-next"){ obNext(); }
   else if(act==="ob-back"){ obBack(); }
   else if(act==="ob-skip"){ obSkip(); }
-  else if(act==="gym-pick"){ gymPick(); return; }
+  else if(act==="gym-pick"){ gymPickFile(); return; }
   else if(act==="gym-app"){ ui.gymRes=null; ui.gymErr=false; openModal("gym", el.dataset.v); return; }
   else if(act==="ob-nudge"){ obNudge(+el.dataset.d); }
   else if(act==="ob-finish"){ obFinish(); }

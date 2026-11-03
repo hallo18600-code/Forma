@@ -40,29 +40,104 @@ const GYM_ALIAS = {
   "crunch":["crunch","cable_crunch"], "cable crunch":["cable_crunch"], "sit up":["situp"], "plank":["plank"], "leg raise":["leg_raise"], "lying leg raise":["leg_raise"],
   "hanging leg raise":["hang_raise"], "ab wheel":["ab_wheel"], "mountain climber":["mountain"], "jumping jack":["jacks"]
 };
+// Deutsche Namen (z. B. Hevy auf Deutsch) – gleiche Logik
+Object.assign(GYM_ALIAS, {
+  "bankdrücken":["bp","bp_db","bp_smith"], "schrägbankdrücken":["bp_inc","bp_inc_db","bp_inc_smith"], "schrägbank":["bp_inc","bp_inc_db","bp_inc_smith"],
+  "negativbankdrücken":["bp_dec","bp_dec_db"], "enges bankdrücken":["bp_close"], "bankdrücken eng":["bp_close"], "brustpresse":["chest_press"],
+  "fliegende":["fly_db","fly_cable"], "kabel fliegende":["fly_cable"], "kabelzug fliegende":["fly_cable"], "butterfly":["pecdeck"], "reverse butterfly":["rear_fly_machine","rear_fly"],
+  "liegestütz":["pushup"], "dips":["dip","dip_assist"], "trizeps dips":["dip","dip_machine"], "bankdips":["bench_dip"], "bank dips":["bench_dip"], "überzug":["pullover"], "überzüge":["pullover"],
+  "rudern vorgebeugt":["row","row_db"], "vorgebeugtes rudern":["row","row_db"], "einarmiges rudern":["row_db"], "kurzhantelrudern":["row_db"], "t bar rudern":["row_tbar"],
+  "rudern sitzend":["row_cable","row_machine"], "sitzendes rudern":["row_cable","row_machine"], "kabelrudern":["row_cable"], "rudern":["row_machine","row_cable","row","row_db"],
+  "latzug":["lat","lat_machine"], "latziehen":["lat","lat_machine"], "latzug eng":["lat_close"], "enger latzug":["lat_close"], "lat überzug":["straight_pd"],
+  "klimmzug":["pull","pull_assist"], "klimmzüge":["pull","pull_assist"], "klimmzug untergriff":["chin"], "kreuzheben":["dl","dl_db"], "rumänisches kreuzheben":["rdl","rdl_db"],
+  "sumo kreuzheben":["dl_sumo"], "rückenstrecker":["back_ext","back_ext_machine"], "rückenstreckung":["back_ext","back_ext_machine"], "schulterheben":["shrug","shrug_db"],
+  "schulterdrücken":["ohp_db","ohp","ohp_smith","ohp_machine"], "schulterpresse":["ohp_machine"], "überkopfdrücken":["ohp","ohp_db"], "militärpresse":["ohp"],
+  "seitheben":["latraise","latraise_cable","latraise_machine"], "seitliches heben":["latraise","latraise_cable","latraise_machine"], "frontheben":["front_raise","front_raise_cable"],
+  "vorgebeugtes seitheben":["rear_fly","rear_fly_machine"], "aufrechtes rudern":["upright"],
+  "bizeps curl":["curl","curl_db","curl_ez","curl_cable"], "bizepscurl":["curl","curl_db","curl_ez","curl_cable"], "langhantelcurl":["curl"], "kurzhantelcurl":["curl_db"],
+  "hammercurl":["hammer","hammer_cable"], "scott curl":["preacher","preacher_db","preacher_machine"], "scottcurl":["preacher","preacher_db","preacher_machine"],
+  "bizepsmaschine":["preacher_machine"], "konzentrationscurl":["conc"],
+  "trizeps pushdown":["tri","tri_rope"], "trizepsdrücken":["tri","tri_rope"], "trizeps drücken":["tri","tri_rope"], "pushdown":["tri","tri_rope"],
+  "trizeps über kopf":["tri_oh","tri_oh_cable"], "überkopf trizepsdrücken":["tri_oh","tri_oh_cable"], "überkopf trizepsstrecken":["tri_oh","tri_oh_cable"], "überkopf trizeps":["tri_oh","tri_oh_cable"], "trizepsstrecken über kopf":["tri_oh","tri_oh_cable"], "trizepsdrücken über kopf":["tri_oh","tri_oh_cable"],
+  "trizepsstrecken":["tri_oh","tri_oh_cable","skull"], "french press":["skull","skull_db"], "stirndrücken":["skull","skull_db"], "kickback":["kickback"], "dip maschine":["dip_machine"],
+  "kniebeuge":["sq","sq_smith","sq_bw"], "frontkniebeuge":["sq_front"], "goblet":["sq_goblet","sq_goblet_kb"], "hackenschmidt":["sq_hack"], "hack kniebeuge":["sq_hack"],
+  "beinpresse":["legpress"], "ausfallschritt":["lunge","lunge_bb","lunge_bw"], "ausfallschritte gehend":["walk_lunge"], "gehende ausfallschritte":["walk_lunge"],
+  "bulgarische kniebeuge":["bulgarian"], "aufsteiger":["stepup"], "beinstrecker":["leg_ext"], "beinstreckung":["leg_ext"],
+  "beinbeuger liegend":["leg_curl"], "beinbeuger sitzend":["leg_curl_seat"], "beinbeuger":["leg_curl","leg_curl_seat"], "beincurl":["leg_curl","leg_curl_seat"],
+  "wadenheben":["calf","calf_db","calf_bw"], "wadenheben sitzend":["calf_seat"], "adduktoren":["adductor"], "adduktion":["adductor"], "abduktoren":["abductor"], "abduktion":["abductor"],
+  "hüftstoß":["hip","hip_smith","hip_machine"], "beckenheben":["bridge","bridge_bb"], "gesäß kickback":["glute_kick","glute_kick_machine"],
+  "bauchpresse":["crunch","cable_crunch"], "kabel crunch":["cable_crunch"], "kabelcrunch":["cable_crunch"], "unterarmstütz":["plank"],
+  "beinheben liegend":["leg_raise"], "beinheben hängend":["hang_raise"], "hängendes beinheben":["hang_raise"], "beinheben":["leg_raise","hang_raise"],
+  "bauchroller":["ab_wheel"], "ab roller":["ab_wheel"], "bergsteiger":["mountain"], "hampelmann":["jacks"]
+});
 const GYM_EQ = { barbell:"Langhantel", dumbbell:"Kurzhantel", cable:"Kabel", machine:"Maschine", "smith machine":"Smith-Maschine",
-  "ez bar":"SZ-Stange", kettlebell:"Kettlebell", bodyweight:"Körpergewicht", "weighted":"Körpergewicht", assisted:"Maschine", "plate loaded":"Maschine", band:"Kabel" };
+  "ez bar":"SZ-Stange", kettlebell:"Kettlebell", bodyweight:"Körpergewicht", weighted:"Körpergewicht", assisted:"Maschine", "plate loaded":"Maschine", band:"Kabel",
+  langhantel:"Langhantel", kurzhantel:"Kurzhantel", kurzhanteln:"Kurzhantel", kabelzug:"Kabel", kabel:"Kabel", seilzug:"Kabel", maschine:"Maschine", gerät:"Maschine",
+  "smith maschine":"Smith-Maschine", multipresse:"Smith-Maschine", "sz stange":"SZ-Stange", "ez stange":"SZ-Stange", körpergewicht:"Körpergewicht", unterstützt:"Maschine",
+  widerstandsband:"Kabel", "mit gewicht":"Körpergewicht" };
+const GYM_EQK = Object.keys(GYM_EQ).sort((a,b)=>b.length-a.length);
 const GYM_KEYS = Object.keys(GYM_ALIAS).sort((a,b)=>b.length-a.length);   // längste zuerst: "incline bench press" vor "bench press"
 const gymNorm = s => String(s||"").toLowerCase().replace(/[‐-―-]/g," ").replace(/[^a-zäöüß0-9 ]/g," ").replace(/\s+/g," ").trim();
+const gymWord = k => new RegExp("(^| )"+k.replace(/ /g," ?")+"(s|es|e|n|en|er)?( |$)");
+const GYM_STOP = /\b(mit|am|an|der|die|das|und|im|auf|the|with|on|a|an|of|machine|variante|version)\b/g;
+// Name ohne Gerät und Füllwörter, zusammengeschrieben ("Trizeps-Pushdown mit Seil" → "trizepspushdownseil")
+function gymCore(n){ let t=" "+gymNorm(n)+" "; GYM_EQK.forEach(k=>{ t=t.replace(new RegExp(" "+k+"(?= )","g")," "); }); return t.replace(GYM_STOP," ").replace(/[^a-zäöüß0-9]/g,""); }
+function gymTri(s){ const o=new Set(), t="  "+s+" "; for(let i=0;i<t.length-2;i++) o.add(t.slice(i,i+3)); return o; }
+function gymSim(a,b){ if(!a||!b) return 0; if(a===b) return 1; const A=gymTri(a), B=gymTri(b); let n=0; A.forEach(x=>{ if(B.has(x)) n++; }); return 2*n/(A.size+B.size); }
+// Aus mehreren Varianten die mit passendem Gerät, Seil oder Unterstützung
+function gymPick(ids, full, eq){
+  ids=ids.filter(id=>EX[id]); if(!ids.length) return null;
+  const byEq=eq?ids.filter(id=>EX[id].eq===eq):[]; if(byEq.length) ids=byEq;   // Gerät zuerst
+  if(/überkopf|über kopf|overhead/.test(full)){ const o=ids.filter(id=>/über Kopf/.test(EX[id].name)); if(o.length) ids=o; }
+  const rope=/(^| )(seil|rope)( |$)/.test(full);
+  if(rope){ const r=ids.find(id=>/seil/i.test(EX[id].name)); if(r) return r; }
+  else { const nr=ids.filter(id=>!/seil/i.test(EX[id].name)); if(nr.length) ids=nr; }
+  if(/assist|unterstützt/.test(full)){ const a=ids.find(id=>/assist/.test(id)); if(a) return a; }
+  return (eq && ids.find(id=>EX[id].eq===eq)) || ids[0];
+}
+function gymEqOf(full){ const k=GYM_EQK.find(k=>gymWord(k).test(full)); return k?GYM_EQ[k]:null; }
 
 // Übungsname → id hier, oder null (dann wird es eine eigene Übung)
 function gymMatch(title){
-  const m = String(title).match(/^(.*?)\s*\(([^)]*)\)\s*$/);
-  const base = gymNorm(m ? m[1] : title);
-  let eq = GYM_EQ[gymNorm(m ? m[2] : "")];
-  if(!eq){ const w=Object.keys(GYM_EQ).sort((a,b)=>b.length-a.length).find(k=>new RegExp("(^| )"+k+"( |$)").test(base)); if(w) eq=GYM_EQ[w]; }
-  // Schon deutscher Name aus dieser App?
-  const de = Object.values(EX).find(x => gymNorm(x.name)===gymNorm(title) || (gymNorm(x.base)===base && (!eq || x.eq===eq)));
-  if(de) return de.id;
-  const full = gymNorm(title);
-  for(const key of GYM_KEYS){
-    const hit = new RegExp("(^| )"+key+"(s|es)?( |$)");
-    if(!hit.test(base) && !hit.test(full)) continue;
-    const ids = GYM_ALIAS[key].filter(id => EX[id]);
-    if(/assisted/.test(full)){ const a=ids.find(id=>/assist/.test(id)); if(a) return a; }
-    return (eq && ids.find(id => EX[id].eq===eq)) || ids[0] || null;
-  }
-  return null;
+  const full=gymNorm(title), eq=gymEqOf(full);
+  const m=String(title).match(/^(.*?)\s*\(([^)]*)\)\s*$/), base=gymNorm(m?m[1]:title);
+  // 1. Genau ein Name aus dieser App
+  const own=Object.values(EX).find(x=>gymNorm(x.name)===full); if(own) return own.id;
+  const same=Object.values(EX).filter(x=>gymNorm(x.base)===base).map(x=>x.id);
+  if(same.length&&(!eq||same.some(id=>EX[id].eq===eq))) return gymPick(same, full, eq);
+  // 2. Bekannte Namen (Englisch/Deutsch), längster Treffer zuerst
+  for(const key of GYM_KEYS) if(gymWord(key).test(full)) return gymPick(GYM_ALIAS[key], full, eq);
+  // 3. Ähnlichster Name (Tippfehler, andere Schreibweise)
+  const best=gymSuggest(title,1)[0];
+  return best&&best.score>=0.62 ? best.id : null;
+}
+// Ähnlichste Übungen mit Punktzahl 0–1 (für Zuordnen von Hand)
+function gymSuggest(title, n){
+  const full=gymNorm(title), eq=gymEqOf(full), core=gymCore(title), out={};
+  const add=(ids,sc)=>{ const id=gymPick(ids, full, eq); if(id&&(!out[id]||out[id]<sc)) out[id]=sc; };
+  Object.values(EX).forEach(x=>add([x.id], gymSim(core, gymCore(x.base))+(eq&&x.eq===eq?0.05:0)));
+  GYM_KEYS.forEach(k=>add(GYM_ALIAS[k], gymSim(core, gymCore(k))));
+  return Object.keys(out).map(id=>({id, score:out[id]})).sort((a,b)=>b.score-a.score).slice(0,n||3);
+}
+// Eigene Übung durch eine bekannte ersetzen (in allen Trainings und Plänen)
+function gymMerge(from, to){
+  if(!EX[to]) return;
+  const fix=list=>(list||[]).forEach(e=>{ if(e&&e.id===from) e.id=to; });
+  state.workouts.forEach(w=>fix(w.exercises));
+  (state.routines||[]).forEach(r=>(r.days||[]).forEach(d=>fix(d.exercises)));
+  if(typeof ui!=="undefined"&&ui.workout) fix(ui.workout.exercises);
+  state.customEx=(state.customEx||[]).filter(c=>c.id!==from);
+}
+// Beim Start: eigene Übungen aus einem früheren Import nachträglich erkennen
+function gymRemap(){
+  let n=0;
+  (state.customEx||[]).slice().forEach(c=>{
+    const used=state.workouts.filter(w=>(w.exercises||[]).some(e=>e.id===c.id));
+    const fromImport=c.imp || (used.length && used.every(w=>w.imp));
+    if(!fromImport) return;
+    const id=gymMatch(c.name); if(id){ gymMerge(c.id,id); n++; }
+  });
+  return n;
 }
 
 // CSV lesen (Komma oder Semikolon, Anführungszeichen)
@@ -161,7 +236,7 @@ function gymApply(res){
     let id=gymMatch(n);
     if(!id){
       const own=state.customEx.find(c=>gymNorm(c.name)===gymNorm(n));
-      if(own) id=own.id; else { id="x-"+uid(); state.customEx.push({id, name:n}); newEx++; }
+      if(own) id=own.id; else { id="x-"+uid(); state.customEx.push({id, name:n, imp:1}); newEx++; }
     }
     idOf[n]=id;
   });
@@ -181,7 +256,7 @@ function gymApply(res){
 }
 
 // Datei auswählen und direkt übernehmen
-function gymPick(){
+function gymPickFile(){
   const inp=document.createElement("input");
   inp.type="file"; inp.accept=".csv,text/csv,text/plain"; inp.style.display="none";
   inp.addEventListener("change",()=>{
