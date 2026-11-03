@@ -1827,7 +1827,15 @@ function planSlides(series, n, lang) {
     specs.push({ pred: idsPred(STAPLES), hook: v.good, mood: 'strong' });
   }
   if (series === 'rules') {
-    const list = RULES[lang], idx = shuffle(list.map((_, i) => i)).slice(0, n).sort((a, b) => a - b);
+    // Stapel: alle Regeln kommen einmal dran, bevor sich eine wiederholt (früher sortiert → immer die ersten Regeln vorne)
+    const list = RULES[lang];
+    let deck = (recent.ruleDeck || []).filter(i => i < list.length);
+    const idx = [];
+    while (idx.length < n) {
+      if (!deck.length) deck = shuffle(list.map((_, i) => i).filter(i => !idx.includes(i)));
+      const i = deck.shift(); if (!idx.includes(i)) idx.push(i);
+    }
+    recent.ruleDeck = deck; save('hm2-recent', recent);
     idx.forEach((ri, k) => specs.push({ pred: idsPred(RULES.foods[ri]), hook: `${lang === 'de' ? 'Regel' : 'Rule'} ${k + 1}:\n${list[ri]}`, mood: 'strong', key: 'rule' + ri }));
   }
   if (series === 'tier') {
