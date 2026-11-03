@@ -628,9 +628,11 @@ const REALS = [
 ];
 const RULES = {
   en: ['shop the edges of the supermarket.', 'if it has a cartoon on it, skip it.', 'if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.',
-    'eat like your great-grandparents.', 'can’t pronounce it? don’t eat it.', 'more than 5 ingredients? put it back.', 'butter over margarine.', 'cook it yourself.', 'eat meals, not snacks.', 'don’t drink your sugar.', 'eat seasonal.', 'eat fish twice a week.', 'fried in seed oil? skip it.', 'buy at your regional supermarket.', 'fats are not your enemy.', 'sugar is not your enemy.'],
+    'eat like your great-grandparents.', 'can’t pronounce it? don’t eat it.', 'more than 5 ingredients? put it back.', 'butter over margarine.', 'cook it yourself.', 'eat meals, not snacks.', 'don’t drink your sugar.', 'eat seasonal.', 'eat fish twice a week.', 'fried in seed oil? skip it.', 'buy at your regional supermarket.', 'fats are not your enemy.', 'sugar is not your enemy.',
+    'never buy "low-fat".', 'never buy "high protein".', 'red meat is not the enemy.', 'white bread is bad for you.', 'if it was alive, eat it. if it was made, skip it.', 'eat what you can hunt, fish or pick.', 'eat like a caveman.', 'dessert comes from a tree.', 'carbs before the gym.', 'colors from nature, not from a lab.'],
   de: ['Kauf am Rand des Supermarkts ein.', 'Ist ein Comic drauf, lass es liegen.', 'Wenn es nicht verdirbt, iss es nicht.', 'Nur eine Zutat.', 'Kennt Oma es nicht, lass es weg.', 'Iss Lebensmittel, keine Produkte.', 'Hat es Fernsehwerbung, kauf es nicht.', 'Obst ist die Süßigkeit der Natur.', 'Protein zu jeder Mahlzeit.', 'Trink Wasser, keine Kalorien.',
-    'Iss wie deine Urgroßeltern.', 'Kannst du es nicht aussprechen, iss es nicht.', 'Mehr als 5 Zutaten? Leg es zurück.', 'Butter statt Margarine.', 'Koch selbst.', 'Iss Mahlzeiten, keine Snacks.', 'Trink keinen Zucker.', 'Iss saisonal.', 'Iss zweimal pro Woche Fisch.', 'In Pflanzenöl frittiert? Lass es.', 'Kauf regional ein.', 'Fett ist nicht dein Feind.', 'Zucker ist nicht dein Feind.'],
+    'Iss wie deine Urgroßeltern.', 'Kannst du es nicht aussprechen, iss es nicht.', 'Mehr als 5 Zutaten? Leg es zurück.', 'Butter statt Margarine.', 'Koch selbst.', 'Iss Mahlzeiten, keine Snacks.', 'Trink keinen Zucker.', 'Iss saisonal.', 'Iss zweimal pro Woche Fisch.', 'In Pflanzenöl frittiert? Lass es.', 'Kauf regional ein.', 'Fett ist nicht dein Feind.', 'Zucker ist nicht dein Feind.',
+    'Kauf nie „fettarm“.', 'Kauf nie „High Protein“.', 'Rotes Fleisch ist nicht der Feind.', 'Weißbrot ist schlecht für dich.', 'Hat es gelebt, iss es. Wurde es gemacht, lass es.', 'Iss, was du jagen, fischen oder pflücken kannst.', 'Iss wie ein Höhlenmensch.', 'Nachtisch wächst am Baum.', 'Carbs vor dem Gym.', 'Farben aus der Natur, nicht aus dem Labor.'],
   foods: [
     ['steak', 'eggs', 'milk', 'apples', 'carrots', 'salmon', 'cheese', 'tomatoes'],
     ['eggs', 'apples', 'oranges', 'potatoes', 'banana', 'carrots', 'steak'],
@@ -655,7 +657,26 @@ const RULES = {
     ['apples', 'potatoes', 'milk', 'eggs', 'cheese', 'carrots', 'beef', 'pears', 'beets', 'onions'],
     ['butter', 'avocado', 'oliveoil', 'eggs', 'cheese', 'salmon', 'walnuts', 'almonds', 'steak'],
     ['honey', 'watermelon', 'mango', 'dates', 'berries', 'banana', 'cherries', 'figs', 'pineapple'],
+    ['butter', 'cheese', 'eggs', 'milk'],
+    ['eggs', 'steak', 'chicken', 'salmon', 'beef', 'milk'],
+    ['steak', 'beef', 'lamb'],
+    ['potatoes', 'sweetpotato', 'rice', 'honey', 'banana'],
+    ['steak', 'salmon', 'eggs', 'berries', 'apples'],
+    ['steak', 'salmon', 'berries', 'apples', 'beef'],
+    ['steak', 'eggs', 'salmon', 'berries', 'honey'],
+    ['figs', 'dates', 'cherries', 'mango', 'apples', 'oranges', 'pears'],
+    ['banana', 'dates', 'honey', 'rice', 'potatoes'],
+    ['berries', 'oranges', 'mango', 'kiwi', 'pomegranate', 'carrots', 'peppers'],
   ],
+};
+// Lifestyle-Regeln: nur Text + Statue auf Schwarz
+const LIFE = {
+  en: ['10k steps daily.', 'p*rn is bad for you.', 'watch the sunrise.', 'watch the sunset.', 'don’t run after her.', 'sleep 8 hours.', 'phone out of the bedroom.',
+    'no phone for the first hour.', 'sunlight before screens.', 'train even when you don’t feel like it.', 'lift heavy things.', 'walk after every meal.', 'read 10 pages a day.',
+    'go outside every day.', 'discipline over motivation.', 'keep your word.', 'call your parents.', 'in bed before midnight.', 'breathe through your nose.', 'stop scrolling, start building.'],
+  de: ['10.000 Schritte am Tag.', 'P*rnos sind schlecht für dich.', 'Schau dir den Sonnenaufgang an.', 'Schau dir den Sonnenuntergang an.', 'Lauf ihr nicht hinterher.', 'Schlaf 8 Stunden.', 'Handy raus aus dem Schlafzimmer.',
+    'Die erste Stunde kein Handy.', 'Erst Sonne, dann Bildschirm.', 'Trainier auch, wenn du keine Lust hast.', 'Heb schwere Sachen.', 'Geh nach jedem Essen spazieren.', 'Lies 10 Seiten am Tag.',
+    'Geh jeden Tag raus.', 'Disziplin statt Motivation.', 'Halte dein Wort.', 'Ruf deine Eltern an.', 'Vor Mitternacht ins Bett.', 'Atme durch die Nase.', 'Hör auf zu scrollen, fang an zu bauen.'],
 };
 // typische Lebensmittel des Landes
 const COUNTRIES = [
@@ -920,6 +941,7 @@ const SERIES = {
   real: { label: 'Real', ex: 'real protein, real sugar', w: 2, niche: ['#realfood', '#wholefoods'] },
   vs: { label: 'Ungesund vs. gesund', ex: 'this is not healthy… but this is…', w: 2, niche: ['#junkfood', '#realfood'] },
   rules: { label: 'Regeln', ex: 'Rule 1: eat food, not products.', w: 1.5, niche: ['#realfood', '#wholefoods'] },
+  life: { label: 'Lifestyle-Regeln', ex: 'Rule 1: 10k steps daily.', w: 2, niche: ['#selfimprovement', '#discipline'] },
   countries: { label: 'Länder', ex: 'why are the Dutch so tall?', w: 2.5, niche: ['#longevity', '#realfood'] },
   tier: { label: 'Tier-Liste', ex: 'S tier foods … F tier foods', w: 2, niche: ['#tierlist', '#realfood'] },
   day: { label: 'Ein Tag essen', ex: 'what I eat in a day: breakfast', w: 2, niche: ['#whatieatinaday', '#realfood'] },
@@ -1583,10 +1605,19 @@ function renderLove(ctx, sl) {
     ctx.restore();
   });
 }
+function renderLife(ctx, sl) {
+  const g = ctx.createRadialGradient(W / 2, H * .62, W * .05, W / 2, H * .6, H * .75);
+  g.addColorStop(0, '#2b2b2b'); g.addColorStop(1, '#000'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const cap = layoutCaption(ctx, sl.hook), cy = H * .3;
+  const capBottom = cy + (cap.lines.length - 1) * cap.lh / 2 + cap.size * .55;
+  if (sl.figure) drawFigure(ctx, sl.figure, sl.style, capBottom + H * .02);
+  drawCaption(ctx, sl.hook, cy);
+}
 function renderGrid(ctx, sl) {
   if (sl.layout === 'freq') return renderFreq(ctx, sl);
   if (sl.layout === 'love') return renderLove(ctx, sl);
   if (sl.layout === 'ring') return renderRing(ctx, sl);
+  if (sl.layout === 'life') return renderLife(ctx, sl);
   if (sl.layout === 'collage') return KINGDRAW[sl.variant] ? KINGDRAW[sl.variant](ctx, sl) : renderCollage(ctx, sl);
   if (sl.layout === 'fg') return renderFeel(ctx, sl);
   if (sl.layout === 'hero') return renderHero(ctx, sl);
@@ -1813,6 +1844,10 @@ function planSlides(series, n, lang) {
     const list = RULES[lang], idx = shuffle(list.map((_, i) => i)).slice(0, n).sort((a, b) => a - b);
     idx.forEach((ri, k) => specs.push({ pred: idsPred(RULES.foods[ri]), hook: `${lang === 'de' ? 'Regel' : 'Rule'} ${k + 1}:\n${list[ri]}`, mood: 'strong', key: 'rule' + ri }));
   }
+  if (series === 'life') {
+    const list = LIFE[lang], idx = pickFresh(list.map((_, i) => i), i => 'life' + i).slice(0, n).sort((a, b) => a - b);
+    idx.forEach((ri, k) => specs.push({ layout: 'life', hook: `${lang === 'de' ? 'Regel' : 'Rule'} ${k + 1}:\n${list[ri]}`, mood: 'strong', key: 'life' + ri }));
+  }
   if (series === 'tier') {
     const order = { 1: ['S'], 2: ['S', 'F'], 3: ['S', 'A', 'F'], 4: ['S', 'A', 'B', 'F'] }[n];
     order.forEach(t => { const ti = TIERS.find(x => x.tag === t); specs.push({ pred: f => tagPred([t])(f) && !f.tags.includes('minor'), hook: ti[lang], mood: t === 'F' ? 'sad' : 'strong', key: 'tier' + t }); });
@@ -1969,6 +2004,7 @@ function planPost(series, n, lang) {
   const needStrong = specs.some(s => s.mood === 'strong' || s.mood === 'duel'), needSad = specs.some(s => s.mood === 'sad' || s.mood === 'duel');
   const kingPlain = series === 'king' && specs.some(s => ['plain', 'marble', 'split'].includes(s.variant));   // schlichte Variante: Figur steht mittig, also keine mit Schnittkante an der Seite
   const kind = series === 'mog' || series === 'love' ? 'drawing'
+    : series === 'life' ? 'statue'
     : series === 'king' ? null   // König vs. Untertan: eigene gemischte Auswahl (siehe only)
     : pickKind(needStrong, needSad);
   // heller Hintergrund: nur sauber freigestellte Figuren; Mog: männliche Zeichnungen
@@ -1994,6 +2030,7 @@ function planPost(series, n, lang) {
         duelFoods.add(b.food.id); duelFoods.add(g.food.id);
         return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
     : sp.layout === 'hero' || sp.layout === 'flag' ? [chooseHero(sp.one, used)]
+    : sp.layout === 'life' ? []
     : sp.layout === 'collage' && sp.variant === 'split' ? [...chooseCuts(sp.pool, used, 6), ...chooseCuts(sp.bad, used, 6).map(it => ({ ...it, role: 'x' }))]
     : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
     : sp.layout === 'freq' ? chooseCuts(vibeFoods(sp.pool.filter(hasCut), used, 4), used, 4)
