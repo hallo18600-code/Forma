@@ -1365,6 +1365,89 @@ const SLOTS = {
   plain: [[.03, .03, .45, .17], [.52, .03, .45, .17], [.02, .21, .31, .15], [.345, .21, .31, .15], [.67, .21, .31, .15],
     [.01, .50, .28, .16], [.71, .50, .28, .16], [.01, .67, .28, .16], [.71, .67, .28, .16], [.02, .84, .28, .15], [.70, .84, .28, .15]],
 };
+// ---- König vs. Untertan: weitere Designs (Samt, Speisekarte, Marmor, Split) ----
+// fester Zufall je Folie, damit Muster beim erneuten Zeichnen gleich bleiben
+const seedRnd = str => { let h = 2166136261; for (const c of String(str)) h = Math.imul(h ^ c.charCodeAt(0), 16777619);
+  return () => { h += 0x6D2B79F5; let t = h; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; }; };
+const kGold = (ctx, y0, y1) => { const g = ctx.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, '#f8e3a0'); g.addColorStop(.5, '#d6a640'); g.addColorStop(1, '#9e6d1e'); return g; };
+function kText(ctx, t, x, y, font, size, maxW, fill, align = 'center') {
+  let s = size; ctx.font = font(s); while (ctx.measureText(t).width > maxW && s > W * .03) { s *= .96; ctx.font = font(s); }
+  ctx.save(); ctx.fillStyle = fill; ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillText(t, x, y); ctx.restore(); return s;
+}
+const cinzel = s => `700 ${s}px Cinzel, Georgia, serif`;
+const kFoods = (sl, role) => sl.items.filter(it => it.img && (role ? it.role === role : it.role !== 'x'));
+function kGrid(ctx, foods, x0, y0, w, h, cols, st, pad = .05) {
+  const rows = Math.max(1, Math.ceil(foods.length / cols)), cw = w / cols, ch = h / rows;
+  foods.forEach((it, i) => { const z = st.zoom[i % 4];
+    drawCut(ctx, it.img, x0 + (i % cols) * cw, y0 + Math.floor(i / cols) * ch, cw, ch, { pad, scale: .95 + (z.z - 1) * .3 }); });
+}
+// kurze Namen für die Speisekarte (en, de)
+const MENUNAME = { bread_us: ['White Toast', 'Weißbrot'], coldcuts: ['Cold Cuts', 'Wurst'], chocolate: ['Dark Chocolate', 'Zartbitter'], cereal: ['Cereal', 'Cornflakes'],
+  pancakes: ['Pancakes', 'Pancakes'], burger: ['Fast Food', 'Fast Food'], nuggets: ['Nuggets', 'Nuggets'], beef: ['Beef', 'Rind'], sweetpotato: ['Sweet Potato', 'Süßkartoffel'],
+  chips: ['Chips', 'Chips'], steak: ['Steak', 'Steak'], soda: ['Soda', 'Softdrinks'], oysters: ['Oysters', 'Austern'] };
+const KINGDRAW = {
+  // Roter Samt, weißes Titelband mit Goldrahmen (König und Untertan gleich gestaltet)
+  samt(ctx, sl) {
+    const g = ctx.createRadialGradient(W / 2, H * .45, W * .08, W / 2, H * .5, H * .85);
+    g.addColorStop(0, '#7a1a2c'); g.addColorStop(1, '#2a050d'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    for (let x = 0; x < W; x += W / 60) { ctx.fillStyle = `rgba(0,0,0,${.05 + .05 * Math.sin(x / (W * .037))})`; ctx.fillRect(x, 0, W / 120, H); }
+    const bx = W * .065, by = H * .055, bw = W * .87, bh = H * .105;
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = W * .02; ctx.fillStyle = '#fff8eb'; ctx.fillRect(bx, by, bw, bh); ctx.restore();
+    ctx.strokeStyle = kGold(ctx, by, by + bh); ctx.lineWidth = W * .0075; ctx.strokeRect(bx - W * .009, by - W * .009, bw + W * .018, bh + W * .018);
+    kText(ctx, sl.hook, W / 2, by + bh * .54, serifFont, W * .085, bw * .9, '#5b1322');
+    const f = kFoods(sl), st = sl.style;
+    kGrid(ctx, f.slice(0, 6), W * .035, H * .2, W * .93, H * .38, 3, st);
+    kGrid(ctx, f.slice(6, 10), W * .46, H * .6, W * .52, H * .38, 2, st);
+    if (sl.figure) drawFigureBox(ctx, sl.figure, 0, H * .57, W * .47, H * .43, sl.figure.id === 'bauer' ? 'center' : 'left');
+  },
+  // Königliche Speisekarte: Papier, Rahmen, Lebensmittel mit Namen
+  menu(ctx, sl) {
+    const good = sl.mood !== 'sad', R = seedRnd(sl.hook);
+    ctx.fillStyle = '#f2e7d0'; ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 14000; i++) { ctx.fillStyle = `rgba(120,80,30,${R() * .09})`; ctx.fillRect(R() * W, R() * H, W * .002, W * .002); }
+    const v = ctx.createRadialGradient(W / 2, H / 2, W * .35, W / 2, H / 2, H * .8); v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(90,55,20,.14)');
+    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = '#8a5a1c'; ctx.lineWidth = W * .003; ctx.strokeRect(W * .04, W * .04, W * .92, H - W * .08);
+    ctx.lineWidth = W * .001; ctx.strokeRect(W * .054, W * .054, W * .892, H - W * .108);
+    const de = sl.lang === 'de';
+    kText(ctx, good ? (de ? '— KÖNIGLICHE SPEISEKARTE —' : '— ROYAL MENU —') : (de ? '— SPEISEKARTE DES UNTERTANS —' : '— PEASANT MENU —'), W / 2, H * .078, cinzel, W * .034, W * .8, '#8a5a1c');
+    kText(ctx, sl.hook, W / 2, H * .135, serifFont, W * .088, W * .84, '#3b0d16');
+    const f = kFoods(sl).slice(0, 8), cw = W * .43, ch = H * .135, x0 = W * .075;
+    const cap = t => de ? t : t.replace(/\b\w/g, c => c.toUpperCase());
+    f.forEach((it, i) => { const x = x0 + (i % 2) * cw, y = H * .2 + Math.floor(i / 2) * ch;
+      drawCut(ctx, it.img, x, y, cw * .46, ch, { pad: .06 });
+      const id = it.food && it.food.id, fd = FOODS[id], nm = (MENUNAME[id] && MENUNAME[id][de ? 1 : 0]) || (fd ? cap(de ? fd.de : fd.en) : '');
+      kText(ctx, nm, x + cw * .49, y + ch / 2, s => `italic 400 ${s}px "DM Serif Display", Georgia, serif`, W * .042, cw * .5, '#3b0d16', 'left'); });
+    if (sl.figure) drawFigureBox(ctx, sl.figure, W * .56, H * .745, W * .4, H * .235, 'center');
+    kText(ctx, de ? 'täglich serviert' : 'served daily', W * .09, H * .9, cinzel, W * .026, W * .4, '#8a5a1c', 'left');
+  },
+  // Marmor: Statue in der Mitte, Lebensmittel als Ring drumherum
+  marble(ctx, sl) {
+    const R = seedRnd(sl.hook + 'm');
+    ctx.fillStyle = '#f4f2ee'; ctx.fillRect(0, 0, W, H);
+    for (let i = 0; i < 14; i++) { ctx.strokeStyle = `rgba(120,120,120,${.08 + R() * .12})`; ctx.lineWidth = W * (.001 + R() * .003);
+      ctx.beginPath(); let x = R() * W, y = 0; ctx.moveTo(x, y); while (y < H) { x += (R() - .5) * W * .11; y += H * .042; ctx.lineTo(x, y); } ctx.stroke(); }
+    kText(ctx, sl.hook, W / 2, H * .075, cinzel, W * .074, W * .9, '#1d1d1d');
+    ctx.fillStyle = kGold(ctx, H * .112, H * .118); ctx.fillRect(W * .3, H * .113, W * .4, H * .0035);
+    if (sl.figure) drawFigureBox(ctx, sl.figure, W * .3, H * .3, W * .4, H * .52, 'center');
+    const pos = [[.17, .24], [.5, .21], [.83, .24], [.13, .44], [.87, .44], [.13, .64], [.87, .64], [.17, .86], [.5, .89], [.83, .86]];
+    const mf = kFoods(sl).slice(0, 10), mp = mf.length >= 10 ? pos : Array.from({ length: mf.length }, (_, i) => pos[Math.round(i * 9 / Math.max(1, mf.length - 1))]);
+    mf.forEach((it, i) => { const [px, py] = mp[i];
+      drawCut(ctx, it.img, px * W - W * .15, py * H - H * .095, W * .3, H * .19, { pad: .04 }); });
+  },
+  // Split: König oben, Untertan unten, goldene Linie in der Mitte (nur eine Folie)
+  split(ctx, sl) {
+    ctx.fillStyle = '#f3efe9'; ctx.fillRect(0, 0, W, H / 2); ctx.fillStyle = '#d2d0cc'; ctx.fillRect(0, H / 2, W, H / 2);
+    ctx.fillStyle = kGold(ctx, H / 2 - W * .006, H / 2 + W * .006); ctx.fillRect(0, H / 2 - W * .005, W, W * .01);
+    const st = sl.style;
+    kText(ctx, sl.hook, W * .06, H * .06, serifFont, W * .074, W * .6, '#5b1322', 'left');
+    kGrid(ctx, kFoods(sl).slice(0, 6), W * .02, H * .1, W * .6, H * .385, 3, st);
+    if (sl.figure) drawFigureBox(ctx, sl.figure, W * .6, H * .05, W * .4, H * .445, 'center');
+    kText(ctx, sl.hook2 || '', W * .06, H * .56, serifFont, W * .074, W * .88, '#333', 'left');
+    kGrid(ctx, kFoods(sl, 'x').slice(0, 6), W * .37, H * .6, W * .61, H * .385, 3, st);
+    if (sl.figure2) drawFigureBox(ctx, sl.figure2, 0, H * .58, W * .37, H * .42, 'center');
+  },
+};
 function renderCollage(ctx, sl) {
   const royal = sl.variant !== 'plain', st = sl.style, foods = sl.items.filter(it => it.img);
   // Hintergrund: royal = warmes Papier-Beige, plain = Weiß
@@ -1504,7 +1587,7 @@ function renderGrid(ctx, sl) {
   if (sl.layout === 'freq') return renderFreq(ctx, sl);
   if (sl.layout === 'love') return renderLove(ctx, sl);
   if (sl.layout === 'ring') return renderRing(ctx, sl);
-  if (sl.layout === 'collage') return renderCollage(ctx, sl);
+  if (sl.layout === 'collage') return KINGDRAW[sl.variant] ? KINGDRAW[sl.variant](ctx, sl) : renderCollage(ctx, sl);
   if (sl.layout === 'fg') return renderFeel(ctx, sl);
   if (sl.layout === 'hero') return renderHero(ctx, sl);
   if (sl.layout === 'flag') return renderFlag(ctx, sl);
@@ -1806,12 +1889,16 @@ function planSlides(series, n, lang) {
   }
   if (series === 'king') {
     // Paare König → Untertan; erstes Paar meist das allgemeine „Eat like a king“
-    const variant = window.FORCE_VARIANT || (rnd() < .8 ? 'royal' : 'plain');
+    // Designs: Beige (alt), Samt, Speisekarte, Marmor, Split (Split = immer nur eine Folie)
+    const vr = rnd(), variant = window.FORCE_VARIANT || (vr < .2 ? 'royal' : vr < .4 ? 'samt' : vr < .6 ? 'menu' : vr < .8 ? 'marble' : vr < .95 ? 'split' : 'plain');
+    if (variant === 'split') { const k = rnd() < .6 ? KING[0] : pickFresh(KING.slice(1), x => 'king' + x.id)[0] || KING[0];
+      specs.push({ layout: 'collage', variant, pool: k.good, bad: k.bad, cnt: 6, hook: k[lang][0], hook2: k[lang][1], mood: 'duel', key: 'king' + k.id });
+      return specs; }
     const rest = pickFresh(KING.slice(1), x => 'king' + x.id);
     const pairs = [rnd() < .7 ? KING[0] : rest.shift(), ...rest.filter(x => x !== KING[0])].filter(Boolean);
     const out = [];
     for (const k of pairs) { out.push({ k, good: true }, { k, good: false }); if (out.length >= n) break; }
-    out.slice(0, Math.max(1, n)).forEach((x, i) => specs.push({ layout: 'collage', variant, pool: x.good ? x.k.good : x.k.bad, cnt: variant === 'royal' ? 10 : 11,
+    out.slice(0, Math.max(1, n)).forEach((x, i) => specs.push({ layout: 'collage', variant, pool: x.good ? x.k.good : x.k.bad, cnt: { royal: 10, plain: 11, menu: 8 }[variant] || 10,
       hook: x.k[lang][x.good ? 0 : 1], mood: x.good ? 'strong' : 'sad', key: i === 0 ? 'king' + x.k.id : undefined }));
   }
   if (series === 'freq') {
@@ -1880,7 +1967,7 @@ function planPost(series, n, lang) {
   const specs = planSlides(series, n, lang);
   const duel = specs.some(s => s.mood === 'duel');
   const needStrong = specs.some(s => s.mood === 'strong' || s.mood === 'duel'), needSad = specs.some(s => s.mood === 'sad' || s.mood === 'duel');
-  const kingPlain = series === 'king' && specs.some(s => s.variant === 'plain');   // schlichte Variante: Figur steht mittig, also keine mit Schnittkante an der Seite
+  const kingPlain = series === 'king' && specs.some(s => ['plain', 'marble', 'split'].includes(s.variant));   // schlichte Variante: Figur steht mittig, also keine mit Schnittkante an der Seite
   const kind = series === 'mog' || series === 'love' ? 'drawing'
     : series === 'king' ? null   // König vs. Untertan: eigene gemischte Auswahl (siehe only)
     : pickKind(needStrong, needSad);
@@ -1907,6 +1994,7 @@ function planPost(series, n, lang) {
         duelFoods.add(b.food.id); duelFoods.add(g.food.id);
         return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
     : sp.layout === 'hero' || sp.layout === 'flag' ? [chooseHero(sp.one, used)]
+    : sp.layout === 'collage' && sp.variant === 'split' ? [...chooseCuts(sp.pool, used, 6), ...chooseCuts(sp.bad, used, 6).map(it => ({ ...it, role: 'x' }))]
     : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
     : sp.layout === 'freq' ? chooseCuts(vibeFoods(sp.pool.filter(hasCut), used, 4), used, 4)
     : sp.layout === 'love' ? [...chooseCuts(sp.love.junk, used, 5).map(it => ({ ...it, role: 'a' })), ...chooseCuts(sp.love.fake, used, 4).map(it => ({ ...it, role: 'b' })), ...chooseCuts(sp.love.real, used, 5).map(it => ({ ...it, role: 'c' }))]
@@ -1915,7 +2003,7 @@ function planPost(series, n, lang) {
         return [...g, ...chooseCuts(sp.bad, used, 4).map(it => ({ ...it, role: 'x' }))]; })()
     : sp.swapOf != null ? swapItems(slides[sp.swapOf].items, used) : chooseItems(sp, used);
   specs.forEach(sp => slides.push({
-    kind: 'grid', lang, variant: sp.variant, layout: sp.layout || 'grid', hook: sp.hook, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags, t: sp.t,
+    kind: 'grid', lang, variant: sp.variant, layout: sp.layout || 'grid', hook: sp.hook, hook2: sp.hook2, mood: sp.mood, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags, t: sp.t,
     style: { ...makeStyle(), figScale: base.figScale, flip: base.flip, figDrop: base.figDrop },
     items: itemsFor(sp),
     figure: sp.mood === 'duel' ? fig.strong : sp.mood === 'none' ? null : fig[sp.mood] || null,
