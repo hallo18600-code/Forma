@@ -677,6 +677,8 @@ const LIFE = {
   de: ['10.000 Schritte am Tag.', 'P*rnos sind schlecht für dich.', 'Schau dir den Sonnenaufgang an.', 'Schau dir den Sonnenuntergang an.', 'Lauf ihr nicht hinterher.', 'Schlaf 8 Stunden.', 'Handy raus aus dem Schlafzimmer.',
     'Die erste Stunde kein Handy.', 'Erst Sonne, dann Bildschirm.', 'Trainier auch, wenn du keine Lust hast.', 'Heb schwere Sachen.', 'Geh nach jedem Essen spazieren.', 'Lies 10 Seiten am Tag.',
     'Geh jeden Tag raus.', 'Disziplin statt Motivation.', 'Halte dein Wort.', 'Ruf deine Eltern an.', 'Vor Mitternacht ins Bett.', 'Atme durch die Nase.', 'Hör auf zu scrollen, fang an zu bauen.'],
+  // passende Fotos je Regel (lib/life/<Pexels-ID>.jpg, freie Lizenz)
+  photos: [["10399053", "4228206", "6748310"], ["6943430", "6943448"], ["100077", "19248218"], ["10692472", "29092630"], ["7261634", "4063002", "19566160"], ["34243695", "8860194"], ["6940346", "1572728"], ["31146885", "11073296", "29299804"], ["3557507", "30669567", "17888969"], ["5496591", "4162544", "3838883"], ["1552103", "116078", "841130"], ["19131528", "28192915", "34676896"], ["15524080", "3118214"], ["18085006", "2629233", "9829570"], ["19203052", "38413154", "114603"], ["8070768", "7875996"], ["4894558", "7188681"], ["5624978", "18542702"], ["17892792", "5405011", "3782826"], ["20373372", "20373333", "4069289"]],
 };
 // typische Lebensmittel des Landes
 const COUNTRIES = [
@@ -1605,13 +1607,14 @@ function renderLove(ctx, sl) {
     ctx.restore();
   });
 }
+// Lifestyle-Regel: passendes Foto über die ganze Folie, leicht abgedunkelt, Text in der Mitte
 function renderLife(ctx, sl) {
-  const g = ctx.createRadialGradient(W / 2, H * .62, W * .05, W / 2, H * .6, H * .75);
-  g.addColorStop(0, '#2b2b2b'); g.addColorStop(1, '#000'); ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  const cap = layoutCaption(ctx, sl.hook), cy = H * .3;
-  const capBottom = cy + (cap.lines.length - 1) * cap.lh / 2 + cap.size * .55;
-  if (sl.figure) drawFigure(ctx, sl.figure, sl.style, capBottom + H * .02);
-  drawCaption(ctx, sl.hook, cy);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  const im = sl.items[0] && sl.items[0].img;
+  if (im) { const s = Math.max(W / im.width, H / im.height), dw = im.width * s, dh = im.height * s;
+    ctx.save(); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh); ctx.restore(); }
+  ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fillRect(0, 0, W, H);
+  drawCaption(ctx, sl.hook, H * .5);
 }
 function renderGrid(ctx, sl) {
   if (sl.layout === 'freq') return renderFreq(ctx, sl);
@@ -1846,7 +1849,7 @@ function planSlides(series, n, lang) {
   }
   if (series === 'life') {
     const list = LIFE[lang], idx = pickFresh(list.map((_, i) => i), i => 'life' + i).slice(0, n).sort((a, b) => a - b);
-    idx.forEach((ri, k) => specs.push({ layout: 'life', hook: `${lang === 'de' ? 'Regel' : 'Rule'} ${k + 1}:\n${list[ri]}`, mood: 'strong', key: 'life' + ri }));
+    idx.forEach((ri, k) => specs.push({ layout: 'life', photo: pick(LIFE.photos[ri]), hook: `${lang === 'de' ? 'Regel' : 'Rule'} ${k + 1}:\n${list[ri]}`, mood: 'none', key: 'life' + ri }));
   }
   if (series === 'tier') {
     const order = { 1: ['S'], 2: ['S', 'F'], 3: ['S', 'A', 'F'], 4: ['S', 'A', 'B', 'F'] }[n];
@@ -2004,7 +2007,6 @@ function planPost(series, n, lang) {
   const needStrong = specs.some(s => s.mood === 'strong' || s.mood === 'duel'), needSad = specs.some(s => s.mood === 'sad' || s.mood === 'duel');
   const kingPlain = series === 'king' && specs.some(s => ['plain', 'marble', 'split'].includes(s.variant));   // schlichte Variante: Figur steht mittig, also keine mit Schnittkante an der Seite
   const kind = series === 'mog' || series === 'love' ? 'drawing'
-    : series === 'life' ? 'statue'
     : series === 'king' ? null   // König vs. Untertan: eigene gemischte Auswahl (siehe only)
     : pickKind(needStrong, needSad);
   // heller Hintergrund: nur sauber freigestellte Figuren; Mog: männliche Zeichnungen
@@ -2030,7 +2032,7 @@ function planPost(series, n, lang) {
         duelFoods.add(b.food.id); duelFoods.add(g.food.id);
         return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
     : sp.layout === 'hero' || sp.layout === 'flag' ? [chooseHero(sp.one, used)]
-    : sp.layout === 'life' ? []
+    : sp.layout === 'life' ? [{ src: 'lib/life/' + sp.photo + '.jpg', id: 'life' + sp.photo, cut: true, food: { id: 'life' } }]
     : sp.layout === 'collage' && sp.variant === 'split' ? [...chooseCuts(sp.pool, used, 6), ...chooseCuts(sp.bad, used, 6).map(it => ({ ...it, role: 'x' }))]
     : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
     : sp.layout === 'freq' ? chooseCuts(vibeFoods(sp.pool.filter(hasCut), used, 4), used, 4)
