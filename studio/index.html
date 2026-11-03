@@ -309,6 +309,11 @@ const FOODS = Object.fromEntries([
   F('mushrooms','🍄','#a07a52','mushrooms','Pilze',['A','ancestral']),
   F('onions','🧅','#c7a26a','onions','Zwiebeln',['A','ancestral','minor']),
   F('lamb','🍖','#a8423a','lamb','Lamm',['S','godfood','ancestral']),
+  F('lobster','🦞','#d9582b','lobster','Hummer',['S','godfood']),
+  F('hotdog','🌭','#c9763a','hot dog','Hot Dog',['junk','F']),
+  F('noodles','🍜','#e8c46a','instant noodles','Instant-Nudeln',['junk','F']),
+  F('muffin','🧁','#b8763a','muffin','Muffins',['junk','F']),
+  F('icecream','🍦','#f2e2c8','ice cream','Eis',['junk','F']),
   F('mussels','🦪','#3a3a4a','mussels','Miesmuscheln',['S','ancestral']),
   F('mackerel','🐟','#6a8aa0','mackerel','Makrele',['S','ancestral']),
   F('pineapple','🍍','#e8b83a','pineapple','Ananas',['A','godfood']),
@@ -838,20 +843,20 @@ const PROBLEMS = [
 // „Eat like a king / Not like a peasant“: freigestellte Lebensmittel auf hellem Grund
 const KING = [
   { id: 'all', en: ['Eat like a king:', 'Not like a peasant:'], de: ['Iss wie ein König:', 'Nicht wie ein Untertan:'],
-    good: ['steak', 'oysters', 'salmon', 'eggs', 'cheese', 'honey', 'milk', 'grapes', 'lamb', 'butter', 'figs', 'pomegranate', 'dates', 'berries', 'cherries', 'beef'],
-    bad: ['cereal', 'granola', 'cerealbar', 'ricecakes', 'chips', 'soda', 'cookies', 'nuggets', 'candy', 'donut', 'fries', 'coldcuts', 'pizza', 'bread_us'] },
+    good: ['steak', 'oysters', 'salmon', 'eggs', 'cheese', 'honey', 'milk', 'grapes', 'lamb', 'butter', 'figs', 'pomegranate', 'dates', 'berries', 'cherries', 'beef', 'lobster', 'shrimp', 'mussels', 'raspberries', 'pineapple', 'mango'],
+    bad: ['cereal', 'granola', 'cerealbar', 'ricecakes', 'chips', 'soda', 'cookies', 'nuggets', 'candy', 'donut', 'fries', 'coldcuts', 'pizza', 'bread_us', 'hotdog', 'noodles', 'muffin', 'icecream', 'burger'] },
   { id: 'breakfast', en: ['A king’s breakfast:', 'A peasant’s breakfast:'], de: ['Frühstück eines Königs:', 'Frühstück eines Untertans:'],
-    good: ['eggs', 'steak', 'honey', 'berries', 'butter', 'milk', 'oranges', 'yogurt', 'blueberries', 'cheese', 'banana'],
-    bad: ['cereal', 'granola', 'cerealbar', 'pancakes', 'donut', 'bread_us', 'cookies', 'coldcuts'] },
+    good: ['eggs', 'steak', 'honey', 'berries', 'butter', 'milk', 'oranges', 'yogurt', 'blueberries', 'cheese', 'banana', 'kiwi', 'mango', 'raspberries', 'salmon'],
+    bad: ['cereal', 'granola', 'cerealbar', 'pancakes', 'donut', 'bread_us', 'cookies', 'coldcuts', 'muffin', 'soda'] },
   { id: 'snacks', en: ['A king’s snacks:', 'A peasant’s snacks:'], de: ['Snacks eines Königs:', 'Snacks eines Untertans:'],
-    good: ['dates', 'cheese', 'walnuts', 'almonds', 'berries', 'mango', 'grapes', 'figs', 'cherries', 'blueberries'],
-    bad: ['chips', 'candy', 'cookies', 'cerealbar', 'ricecakes', 'donut', 'soda', 'nuggets'] },
+    good: ['dates', 'cheese', 'walnuts', 'almonds', 'berries', 'mango', 'grapes', 'figs', 'cherries', 'blueberries', 'kiwi', 'pineapple', 'raspberries', 'honey', 'oranges'],
+    bad: ['chips', 'candy', 'cookies', 'cerealbar', 'ricecakes', 'donut', 'soda', 'nuggets', 'muffin', 'icecream', 'noodles'] },
   { id: 'dinner', en: ['A king’s dinner:', 'A peasant’s dinner:'], de: ['Abendessen eines Königs:', 'Abendessen eines Untertans:'],
-    good: ['steak', 'salmon', 'lamb', 'beef', 'potatoes', 'sweetpotato', 'shrimp', 'oysters', 'butter', 'asparagus', 'mussels'],
-    bad: ['pizza', 'burger', 'fries', 'nuggets', 'coldcuts', 'beer', 'soda', 'chips'] },
+    good: ['steak', 'salmon', 'lamb', 'beef', 'potatoes', 'sweetpotato', 'shrimp', 'oysters', 'butter', 'asparagus', 'mussels', 'lobster', 'mackerel'],
+    bad: ['pizza', 'burger', 'fries', 'nuggets', 'coldcuts', 'beer', 'soda', 'chips', 'hotdog', 'noodles'] },
   { id: 'dessert', en: ['A king’s dessert:', 'A peasant’s dessert:'], de: ['Nachtisch eines Königs:', 'Nachtisch eines Untertans:'],
-    good: ['honey', 'berries', 'dates', 'figs', 'chocolate', 'mango', 'yogurt', 'cherries', 'raspberries', 'blueberries', 'grapes'],
-    bad: ['donut', 'candy', 'cookies', 'pancakes', 'cerealbar', 'soda', 'chips', 'cereal'] },
+    good: ['honey', 'berries', 'dates', 'figs', 'chocolate', 'mango', 'yogurt', 'cherries', 'raspberries', 'blueberries', 'grapes', 'pineapple', 'kiwi', 'pomegranate'],
+    bad: ['donut', 'candy', 'cookies', 'pancakes', 'cerealbar', 'soda', 'chips', 'cereal', 'icecream', 'muffin'] },
 ];
 // „why do I feel so good all the time?“ – Collage auf Weiß, unten rechts durchgestrichenes Junk Food
 const FEELGOOD = {
@@ -1394,7 +1399,7 @@ function kGrid(ctx, foods, x0, y0, w, h, cols, st, pad = .05) {
     drawCut(ctx, it.img, x0 + (i % cols) * cw, y0 + Math.floor(i / cols) * ch, cw, ch, { pad, scale: .95 + (z.z - 1) * .3 }); });
 }
 // kurze Namen für die Speisekarte (en, de)
-const MENUNAME = { bread_us: ['White Toast', 'Weißbrot'], coldcuts: ['Cold Cuts', 'Wurst'], chocolate: ['Dark Chocolate', 'Zartbitter'], cereal: ['Cereal', 'Cornflakes'],
+const MENUNAME = { noodles: ['Instant Noodles', 'Instant-Nudeln'], icecream: ['Ice Cream', 'Eis'], hotdog: ['Hot Dog', 'Hot Dog'], bread_us: ['White Toast', 'Weißbrot'], coldcuts: ['Cold Cuts', 'Wurst'], chocolate: ['Dark Chocolate', 'Zartbitter'], cereal: ['Cereal', 'Cornflakes'],
   pancakes: ['Pancakes', 'Pancakes'], burger: ['Fast Food', 'Fast Food'], nuggets: ['Nuggets', 'Nuggets'], beef: ['Beef', 'Rind'], sweetpotato: ['Sweet Potato', 'Süßkartoffel'],
   chips: ['Chips', 'Chips'], steak: ['Steak', 'Steak'], soda: ['Soda', 'Softdrinks'], oysters: ['Oysters', 'Austern'] };
 const KINGDRAW = {
