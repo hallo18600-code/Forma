@@ -628,7 +628,7 @@ const REALS = [
   { foods: ['steak', 'beef', 'eggs', 'chicken', 'salmon', 'tuna', 'sardines', 'shrimp', 'lamb', 'mussels', 'mackerel'], en: 'real protein', de: 'echtes Protein' },
   { foods: ['honey', 'dates', 'banana', 'mango', 'berries', 'cherries', 'oranges', 'apples', 'blueberries', 'watermelon', 'figs', 'grapes', 'raspberries', 'pears'], en: 'real sugar', de: 'echter Zucker' },
   { foods: ['avocado', 'olives', 'oliveoil', 'butter', 'walnuts', 'almonds', 'salmon', 'nuts', 'coconut', 'mackerel'], en: 'real fats', de: 'echte Fette' },
-  { foods: ['potatoes', 'sweetpotato', 'rice', 'oats', 'banana', 'lentils'], en: 'real carbs', de: 'echte Kohlenhydrate' },
+  { foods: ['potatoes', 'sweetpotato', 'rice', 'banana', 'honey', 'dates'], en: 'real carbs', de: 'echte Kohlenhydrate' },
   { foods: ['water', 'coffee', 'milk', 'chamomile', 'greentea', 'coconutwater', 'mint'], en: 'real drinks', de: 'echte Getränke' },
 ];
 const RULES = {
@@ -647,7 +647,7 @@ const RULES = {
     ['eggs', 'steak', 'potatoes', 'honey', 'rice', 'avocado', 'oranges', 'almonds'],
     ['butter', 'milk', 'eggs', 'potatoes', 'cheese', 'honey', 'oats', 'apples'],
     ['eggs', 'steak', 'salmon', 'berries', 'potatoes', 'greens'],
-    ['eggs', 'potatoes', 'carrots', 'beef', 'lentils', 'apples'],
+    ['eggs', 'potatoes', 'carrots', 'beef', 'apples', 'steak'],
     ['mango', 'berries', 'cherries', 'dates', 'banana', 'kiwi', 'oranges', 'blueberries', 'pomegranate', 'watermelon'],
     ['eggs', 'chicken', 'steak', 'salmon', 'yogurt', 'beef', 'tuna'],
     ['water'],
@@ -657,17 +657,17 @@ const RULES = {
     ['butter'],
     ['steak', 'eggs', 'salmon', 'potatoes', 'beef', 'chicken', 'sweetpotato', 'garlic', 'onions'],
     ['steak', 'salmon', 'beef', 'lamb', 'chicken'],
-    ['water', 'coffee', 'greentea', 'chamomile', 'mint'],
+    ['water', 'coffee'],
     ['apples', 'pumpkin', 'berries', 'cherries', 'asparagus', 'pears', 'raspberries', 'watermelon', 'carrots'],
     ['salmon', 'sardines', 'mackerel', 'tuna'],
-    ['butter', 'oliveoil'],
+    ['butter'],
     ['apples', 'potatoes', 'milk', 'eggs', 'cheese', 'carrots', 'beef', 'pears', 'beets', 'onions'],
     ['butter', 'avocado', 'oliveoil', 'eggs', 'cheese', 'salmon', 'walnuts', 'almonds', 'steak'],
     ['honey', 'watermelon', 'mango', 'dates', 'berries', 'banana', 'cherries', 'figs', 'pineapple'],
     ['butter', 'cheese', 'eggs', 'milk'],
     ['eggs', 'steak', 'chicken', 'salmon', 'beef', 'milk'],
     ['steak', 'beef', 'lamb'],
-    ['potatoes', 'sweetpotato', 'rice', 'honey', 'banana'],
+    ['potatoes', 'sweetpotato', 'rice', 'banana'],
     ['steak', 'salmon', 'eggs', 'berries', 'apples'],
     ['steak', 'salmon', 'berries', 'apples', 'beef'],
     ['steak', 'eggs', 'salmon', 'berries', 'honey'],
@@ -768,7 +768,7 @@ const NATURES = [
 ];
 // unterschätzt: Lebensmittel, die kaum einer isst, obwohl sie sehr nährstoffreich sind
 const UNDERRATED = [
-  { foods: ['sardines', 'oysters', 'eggs', 'lentils', 'mussels', 'mackerel'], en: 'underrated protein', de: 'unterschätztes Protein' },
+  { foods: ['sardines', 'oysters', 'eggs', 'mussels', 'mackerel', 'lamb'], en: 'underrated protein', de: 'unterschätztes Protein' },
   { foods: ['butter', 'olives', 'walnuts', 'sardines'], en: 'underrated fats', de: 'unterschätzte Fette' },
   { foods: ['potatoes', 'beets', 'sweetpotato', 'oats'], en: 'underrated carbs', de: 'unterschätzte Kohlenhydrate' },
   { foods: ['kimchi', 'oysters', 'pumpkinseeds', 'kiwi', 'beets', 'mussels'], en: 'underrated superfoods', de: 'unterschätzte Superfoods' },
