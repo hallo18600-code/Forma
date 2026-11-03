@@ -6,7 +6,8 @@ const GYM_APPS = {
   hevy:   { name:"Hevy",   emo:"🏋️", path:["Hevy öffnen","Profil → ⚙️ Einstellungen","„Daten exportieren“ → Workouts"] },
   strong: { name:"Strong", emo:"💪", path:["Strong öffnen","Profil → ⚙️ Einstellungen","„Strong-Daten exportieren“"] },
   fitbod: { name:"Fitbod", emo:"🤖", path:["Fitbod öffnen","Profil → ⚙️ Einstellungen","„Workout-Daten exportieren“"] },
-  fitnotes:{ name:"FitNotes", emo:"📒", path:["FitNotes öffnen","⚙️ Einstellungen → Tabellen-Export","„Workouts exportieren“"] }
+  fitnotes:{ name:"FitNotes", emo:"📒", path:["FitNotes öffnen","⚙️ Einstellungen → Tabellen-Export","„Workouts exportieren“"] },
+  other:  { name:"Andere App", emo:"📱", path:["Deine App öffnen","Einstellungen → „Export“ oder „CSV“","Datei speichern"] }
 };
 
 // Englische Namen (Hevy/Strong) → passende Übungen hier. Bei mehreren entscheidet das Gerät in Klammern.
@@ -111,7 +112,7 @@ function gymParse(text){
     app="strong";
     get=r=>{ const dur=String(r.duration||""), hh=+(dur.match(/(\d+)\s*h/)||[0,0])[1], mm=+(dur.match(/(\d+)\s*m/)||[0,0])[1];
       return { key:r.date+"|"+r["workout name"], name:r["workout name"], start:r.date, min:hh*60+mm, ex:r["exercise name"],
-        kg:gymNum(r.weight), reps:gymNum(r.reps), sec:gymNum(r.seconds), warm:/^w/i.test(r["set order"]||""), skip:/rest/i.test(r["set order"]||"") }; };
+        kg:gymNum(r.weight)*(/lb/i.test(r["weight unit"]||"")?0.4536:1), reps:gymNum(r.reps), sec:gymNum(r.seconds), warm:/^w/i.test(r["set order"]||""), skip:/rest/i.test(r["set order"]||"") }; };
   } else if(k.includes("exercise")&&k.includes("iswarmup")){
     app="fitbod";   // eine Zeile pro Satz, ohne Trainingsname: ein Training pro Tag
     const wk=k.find(h=>/^weight/.test(h))||"weight(kg)", lbs=/lb/.test(wk);
@@ -122,7 +123,19 @@ function gymParse(text){
     const wk=k.find(h=>/^weight/.test(h))||"weight (kgs)", lbs=/lb/.test(wk);
     get=r=>{ const t=String(r.time||"").split(":").map(Number), sec=t.length===3?t[0]*3600+t[1]*60+t[2]:t.length===2?t[0]*60+t[1]:0;
       return { key:r.date, name:"Training", start:r.date, ex:r.exercise, kg:gymNum(r[wk])*(lbs?0.4536:1), reps:gymNum(r.reps), sec, warm:false }; };
-  } else return null;
+  } else {
+    // Andere App: Spalten am Namen erkennen (Englisch oder Deutsch)
+    const col=(re,not)=>k.find(h=>re.test(h)&&!(not&&not.test(h)));
+    const cD=col(/date|datum|^day$|^tag$|start/,/end|update/), cE=col(/exercise|übung|uebung|movement|lift/,/note|categ|id$|type|group|muscle/),
+      cW=col(/weight|gewicht|^kg$|^lbs?$|load/,/unit|body|körper/), cR=col(/^reps?$|reps|wdh|wiederhol/), cS=col(/^sets?$|^sätze$|^saetze$/),
+      cN=col(/workout|routine|training|session|einheit/,/date|datum|time|zeit|dur|note|id$/), cT=col(/second|sekunde|duration|dauer/), cU=col(/unit|einheit/,/workout|training/), cY=col(/warm|set.?type|satzart/);
+    if(!cD||!cE||!(cR||cW)) return null;
+    app="other";
+    const lbsCol=/lb/.test(cW||"");
+    get=r=>{ const lbs=lbsCol||/lb/i.test(r[cU]||"");
+      return { key:String(r[cD]).slice(0,10)+"|"+(cN?r[cN]:""), name:cN?r[cN]:"Training", start:r[cD], ex:r[cE],
+        kg:gymNum(r[cW])*(lbs?0.4536:1), reps:gymNum(r[cR]), sec:cT?gymNum(r[cT]):0, warm:cY?/warm|aufwärm|^w$|true/i.test(r[cY]||""):false, n:cS?Math.min(20,Math.max(1,Math.round(gymNum(r[cS])))):1 }; };
+  }
 
   const wos=new Map(), names=new Map();
   rows.forEach(r=>{
@@ -130,10 +143,10 @@ function gymParse(text){
     if(!(x.reps>0||x.kg>0||x.sec>0)) return;
     const d=gymDate(x.start); if(!d) return;
     let w=wos.get(x.key);
-    if(!w){ const e=x.end&&gymDate(x.end); w={ imp:app+":"+x.key, date:d.date, name:gymClean(x.name)||"Training", min:x.min||(e?Math.max(1,Math.round((e.t-d.t)/60000)):45), ex:new Map() }; wos.set(x.key,w); }
+    if(!w){ const e=x.end&&gymDate(x.end); w={ imp:app+":"+x.key, date:d.date, name:gymClean(x.name)||"Training", min:Math.min(300,x.min||(e?Math.max(1,Math.round((e.t-d.t)/60000)):45)), ex:new Map() }; wos.set(x.key,w); }
     const title=gymClean(x.ex,80);
     if(!w.ex.has(title)) w.ex.set(title,[]);
-    w.ex.get(title).push({ kg:Math.round(x.kg*10)/10, reps:Math.round(x.reps||x.sec)||0, done:true });
+    for(let i=0;i<(x.n||1);i++) w.ex.get(title).push({ kg:Math.round(x.kg*10)/10, reps:Math.round(x.reps||x.sec)||0, done:true });
     names.set(title,1);
   });
   return { app, workouts:[...wos.values()], names:[...names.keys()] };
@@ -202,13 +215,14 @@ function gymBody(app){
     </div>`;
   return `<div class="gi-app"><span class="gi-emo">${A.emo}</span><b>${A.name}</b><span class="gi-arrow">→</span><img class="gi-emo gi-hm" src="icon-192.png" alt=""><b>Health Maxxing</b></div>
     <ol class="gi-steps">${A.path.concat("Datei hier auswählen").map((t,i)=>`<li><span>${i+1}</span>${esc(t)}</li>`).join("")}</ol>
-    ${ui.gymErr?`<div class="warn">Das ist keine ${A.name}-Datei. Bitte die exportierte CSV-Datei wählen.</div>`:""}
+    ${ui.gymErr?`<div class="warn">${app==="other"?"Die Datei konnte nicht gelesen werden. Sie braucht Spalten für Datum, Übung und Wiederholungen oder Gewicht.":`Das ist keine ${A.name}-Datei. Bitte die exportierte CSV-Datei wählen.`}</div>`:""}
+    ${app==="other"&&!ui.gymErr?`<p class="gi-note">Klappt mit fast jeder App, die eine CSV-Datei mit Datum, Übung, Gewicht und Wiederholungen exportiert.</p>`:""}
     <p class="gi-note">🔒 Die Datei bleibt auf deinem Handy.</p>`;
 }
 // Auswahl im Profil: erst App wählen, dann gleiche Anleitung
 function gymSheet(app){
   if(!app) return `<h2>Aus anderer App übernehmen</h2><p class="sub">Dein Trainingsverlauf mit allen Sätzen und Gewichten.</p>
     <div class="ob-opts">${Object.keys(GYM_APPS).map(k=>obOpt({v:k,l:GYM_APPS[k].name,e:GYM_APPS[k].emo},false,false,"gym-app")).join("")}</div>`;
-  return `<h2>Aus ${GYM_APPS[app].name} übernehmen</h2>${gymBody(app)}<div class="gap"></div>
+  return `<h2>${app==="other"?"Aus anderer App":"Aus "+GYM_APPS[app].name} übernehmen</h2>${gymBody(app)}<div class="gap"></div>
     ${ui.gymRes?`<button class="pill primary" data-act="close">Fertig</button>`:`<button class="pill primary" data-act="gym-pick">📂 Datei auswählen</button>`}`;
 }
