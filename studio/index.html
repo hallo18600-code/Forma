@@ -669,17 +669,6 @@ const RULES = {
     ['berries', 'oranges', 'mango', 'kiwi', 'pomegranate', 'carrots', 'peppers'],
   ],
 };
-// Lifestyle-Regeln: nur Text + Statue auf Schwarz
-const LIFE = {
-  en: ['10k steps daily.', 'p*rn is bad for you.', 'watch the sunrise.', 'watch the sunset.', 'don’t run after her.', 'sleep 8 hours.', 'phone out of the bedroom.',
-    'no phone for the first hour.', 'sunlight before screens.', 'train even when you don’t feel like it.', 'lift heavy things.', 'walk after every meal.', 'read 10 pages a day.',
-    'go outside every day.', 'discipline over motivation.', 'keep your word.', 'call your parents.', 'in bed before midnight.', 'breathe through your nose.', 'stop scrolling, start building.'],
-  de: ['10.000 Schritte am Tag.', 'P*rnos sind schlecht für dich.', 'Schau dir den Sonnenaufgang an.', 'Schau dir den Sonnenuntergang an.', 'Lauf ihr nicht hinterher.', 'Schlaf 8 Stunden.', 'Handy raus aus dem Schlafzimmer.',
-    'Die erste Stunde kein Handy.', 'Erst Sonne, dann Bildschirm.', 'Trainier auch, wenn du keine Lust hast.', 'Heb schwere Sachen.', 'Geh nach jedem Essen spazieren.', 'Lies 10 Seiten am Tag.',
-    'Geh jeden Tag raus.', 'Disziplin statt Motivation.', 'Halte dein Wort.', 'Ruf deine Eltern an.', 'Vor Mitternacht ins Bett.', 'Atme durch die Nase.', 'Hör auf zu scrollen, fang an zu bauen.'],
-  // passende Fotos je Regel (lib/life/<Pexels-ID>.jpg, freie Lizenz)
-  photos: [["10399053", "4228206", "6748310"], ["6943430", "6943448"], ["100077", "19248218"], ["10692472", "29092630"], ["7261634", "4063002", "19566160"], ["34243695", "8860194"], ["6940346", "1572728"], ["31146885", "11073296", "29299804"], ["3557507", "30669567", "17888969"], ["5496591", "4162544", "3838883"], ["1552103", "116078", "841130"], ["19131528", "28192915", "34676896"], ["15524080", "3118214"], ["18085006", "2629233", "9829570"], ["19203052", "38413154", "114603"], ["8070768", "7875996"], ["4894558", "7188681"], ["5624978", "18542702"], ["17892792", "5405011", "3782826"], ["20373372", "20373333", "4069289"]],
-};
 // typische Lebensmittel des Landes
 const COUNTRIES = [
   { flag: 'nl', foods: ['cheese', 'milk', 'yogurt', 'eggs', 'butter'], en: 'why are the Dutch so tall?', de: 'warum sind Niederländer so groß?' },
@@ -943,7 +932,6 @@ const SERIES = {
   real: { label: 'Real', ex: 'real protein, real sugar', w: 2, niche: ['#realfood', '#wholefoods'] },
   vs: { label: 'Ungesund vs. gesund', ex: 'this is not healthy… but this is…', w: 2, niche: ['#junkfood', '#realfood'] },
   rules: { label: 'Regeln', ex: 'Rule 1: eat food, not products.', w: 1.5, niche: ['#realfood', '#wholefoods'] },
-  life: { label: 'Lifestyle-Regeln', ex: 'Rule 1: 10k steps daily.', w: 2, niche: ['#selfimprovement', '#discipline'] },
   countries: { label: 'Länder', ex: 'why are the Dutch so tall?', w: 2.5, niche: ['#longevity', '#realfood'] },
   tier: { label: 'Tier-Liste', ex: 'S tier foods … F tier foods', w: 2, niche: ['#tierlist', '#realfood'] },
   day: { label: 'Ein Tag essen', ex: 'what I eat in a day: breakfast', w: 2, niche: ['#whatieatinaday', '#realfood'] },
@@ -1607,20 +1595,10 @@ function renderLove(ctx, sl) {
     ctx.restore();
   });
 }
-// Lifestyle-Regel: passendes Foto über die ganze Folie, leicht abgedunkelt, Text in der Mitte
-function renderLife(ctx, sl) {
-  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
-  const im = sl.items[0] && sl.items[0].img;
-  if (im) { const s = Math.max(W / im.width, H / im.height), dw = im.width * s, dh = im.height * s;
-    ctx.save(); ctx.imageSmoothingQuality = 'high'; ctx.drawImage(im, (W - dw) / 2, (H - dh) / 2, dw, dh); ctx.restore(); }
-  ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.fillRect(0, 0, W, H);
-  drawCaption(ctx, sl.hook, H * .5);
-}
 function renderGrid(ctx, sl) {
   if (sl.layout === 'freq') return renderFreq(ctx, sl);
   if (sl.layout === 'love') return renderLove(ctx, sl);
   if (sl.layout === 'ring') return renderRing(ctx, sl);
-  if (sl.layout === 'life') return renderLife(ctx, sl);
   if (sl.layout === 'collage') return KINGDRAW[sl.variant] ? KINGDRAW[sl.variant](ctx, sl) : renderCollage(ctx, sl);
   if (sl.layout === 'fg') return renderFeel(ctx, sl);
   if (sl.layout === 'hero') return renderHero(ctx, sl);
@@ -1847,10 +1825,6 @@ function planSlides(series, n, lang) {
     const list = RULES[lang], idx = shuffle(list.map((_, i) => i)).slice(0, n).sort((a, b) => a - b);
     idx.forEach((ri, k) => specs.push({ pred: idsPred(RULES.foods[ri]), hook: `${lang === 'de' ? 'Regel' : 'Rule'} ${k + 1}:\n${list[ri]}`, mood: 'strong', key: 'rule' + ri }));
   }
-  if (series === 'life') {
-    const list = LIFE[lang], idx = pickFresh(list.map((_, i) => i), i => 'life' + i).slice(0, n).sort((a, b) => a - b);
-    idx.forEach((ri, k) => specs.push({ layout: 'life', photo: pick(LIFE.photos[ri]), hook: `${lang === 'de' ? 'Regel' : 'Rule'} ${k + 1}:\n${list[ri]}`, mood: 'none', key: 'life' + ri }));
-  }
   if (series === 'tier') {
     const order = { 1: ['S'], 2: ['S', 'F'], 3: ['S', 'A', 'F'], 4: ['S', 'A', 'B', 'F'] }[n];
     order.forEach(t => { const ti = TIERS.find(x => x.tag === t); specs.push({ pred: f => tagPred([t])(f) && !f.tags.includes('minor'), hook: ti[lang], mood: t === 'F' ? 'sad' : 'strong', key: 'tier' + t }); });
@@ -2032,7 +2006,6 @@ function planPost(series, n, lang) {
         duelFoods.add(b.food.id); duelFoods.add(g.food.id);
         return [b, g, chooseOne(f => sp.bad.includes(f.id) && f.id !== b.food.id, used), chooseOne(f => sp.good.includes(f.id) && f.id !== g.food.id, used)]; })()
     : sp.layout === 'hero' || sp.layout === 'flag' ? [chooseHero(sp.one, used)]
-    : sp.layout === 'life' ? [{ src: 'lib/life/' + sp.photo + '.jpg', id: 'life' + sp.photo, cut: true, food: { id: 'life' } }]
     : sp.layout === 'collage' && sp.variant === 'split' ? [...chooseCuts(sp.pool, used, 6), ...chooseCuts(sp.bad, used, 6).map(it => ({ ...it, role: 'x' }))]
     : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
     : sp.layout === 'freq' ? chooseCuts(vibeFoods(sp.pool.filter(hasCut), used, 4), used, 4)
