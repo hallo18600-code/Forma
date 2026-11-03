@@ -132,6 +132,7 @@
 
 /* ---------- 3. Grundlagen ---------- */
 * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+button, [data-act] { touch-action:manipulation; }   /* sofort reagieren, kein Doppeltipp-Zoom */
 html, body { margin:0; height:100%; background:var(--bg); }
 body { font-family:var(--font); font-size:var(--fs-m); line-height:var(--lh); color:var(--ink); -webkit-font-smoothing:antialiased; }
 button, input, textarea { font:inherit; color:inherit; }
@@ -900,6 +901,7 @@ svg.chart { width:100%; height:auto; display:block; }
 .mdot.p { background:var(--mus-p); } .mdot.s { background:var(--mus-s); }
 .exi-h { font-size:var(--fs-l); letter-spacing:-.02em; margin:var(--s-6) 0 var(--s-3); }
 .exc { border:1px solid var(--line); border-radius:var(--r-xl); padding:var(--s-3); }
+.exc-svg { touch-action:pan-y; user-select:none; -webkit-user-select:none; }
 .exc-range { margin-bottom:var(--s-3); }
 .exc-top { padding:0 var(--s-1); }
 .exc-val { font-size:var(--fs-l); font-weight:800; letter-spacing:-.03em; }

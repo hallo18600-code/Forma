@@ -254,7 +254,7 @@ function exChart(id){
       ${data.length>1?`<path d="${area}" fill="url(#excg)"/><polyline points="${pts}" fill="none" stroke="${tc("accent")}" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`:""}
       <line x1="${xs[sel]}" x2="${xs[sel]}" y1="${pt-4}" y2="${H-pb}" stroke="${tc("accent")}" stroke-opacity=".35" stroke-dasharray="3 3"/>
       ${xs.map((x,i)=>`<circle cx="${x}" cy="${ys[i]}" r="${i===sel?5.5:3.2}" fill="${i===sel?tc("surface"):tc("accent")}" stroke="${tc("accent")}" stroke-width="${i===sel?3:0}"/>`).join("")}
-      ${xs.map((x,i)=>`<circle cx="${x}" cy="${ys[i]}" r="13" fill="transparent" data-act="exi-pt" data-i="${i}" class="hit"/>`).join("")}
+      ${xs.map((x,i)=>{ const x0=i?(xs[i-1]+x)/2:0, x1=i<xs.length-1?(x+xs[i+1])/2:W; return `<rect x="${x0.toFixed(1)}" y="0" width="${Math.max(1,x1-x0).toFixed(1)}" height="${H}" fill="transparent" data-act="exi-pt" data-i="${i}" class="hit"/>`; }).join("")}
     </svg>`;
   }
   return `<div class="exc">
@@ -296,7 +296,7 @@ function renderExInfo(){
   const cues=CUES[x.pattern]||[];
   const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
   const playing=!figPaused&&!reduce;
-  return `<div class="exi" role="dialog" aria-label="${esc(x.name)}">
+  return `<div class="exi" data-once="exi:${esc(id)}" role="dialog" aria-label="${esc(x.name)}">
     <div class="exi-scroll">
       <div class="exi-hero">
         <button class="exi-back" data-act="exi-close" aria-label="Zurück">‹</button>
@@ -361,9 +361,14 @@ document.getElementById("app").addEventListener("click", e=>{
   if(act==="exi-open"){ ui.exInfo={ id:el.dataset.id, mode:el.dataset.mode||null }; ui.exiPt=null; ui.exiMetric=null; }
   else if(act==="exi-close"){ ui.exInfo=null; }
   else if(act==="exi-play"){ figPaused=!figPaused; }
-  else if(act==="exi-range"){ ui.exiRange=el.dataset.v; ui.exiPt=null; }
-  else if(act==="exi-metric"){ ui.exiMetric=el.dataset.v; }
-  else if(act==="exi-pt"){ ui.exiPt=+el.dataset.i; }
+  else if(act==="exi-range"||act==="exi-metric"||act==="exi-pt"){
+    if(act==="exi-range"){ ui.exiRange=el.dataset.v; ui.exiPt=null; }
+    if(act==="exi-metric") ui.exiMetric=el.dataset.v;
+    if(act==="exi-pt") ui.exiPt=+el.dataset.i;
+    // Nur das Diagramm austauschen: kein Neuaufbau der Seite, kein Flackern, nichts springt
+    const box=el.closest(".exc");
+    if(box&&ui.exInfo){ box.outerHTML=exChart(ui.exInfo.id); e.stopImmediatePropagation(); return; }
+  }
   else if(act==="exi-merge"){
     const from=el.dataset.from, to=el.dataset.to; gymMerge(from,to);
     if(ui.exInfo&&ui.exInfo.id===from) ui.exInfo.id=to;
@@ -374,6 +379,18 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="dash" && el.dataset.id==="exercises"){ ui.exQuery=""; ui.exGroup="Alle"; }
   else if(act==="open-day-ex" || (act==="open" && el.dataset.type==="ex")){ ui.exQuery=""; ui.exGroup="Alle"; }
 });
+// Mit dem Finger übers Diagramm fahren: Punkt folgt dem Finger (wie bei der Gewichtskurve)
+(function(){
+  const app=document.getElementById("app"); let on=false;
+  const pick=(x,y)=>{
+    const hit=document.elementFromPoint(x,y), r=hit&&hit.closest&&hit.closest('[data-act="exi-pt"]');
+    if(!r||!ui.exInfo||+r.dataset.i===ui.exiPt) return;
+    ui.exiPt=+r.dataset.i; const box=r.closest(".exc"); if(box) box.outerHTML=exChart(ui.exInfo.id);
+  };
+  app.addEventListener("pointerdown",e=>{ if(e.target.closest&&e.target.closest(".exc-svg")){ on=true; pick(e.clientX,e.clientY); } });
+  app.addEventListener("pointermove",e=>{ if(on) pick(e.clientX,e.clientY); });
+  ["pointerup","pointercancel","pointerleave"].forEach(t=>app.addEventListener(t,()=>{ on=false; }));
+})();
 document.getElementById("app").addEventListener("input", e=>{
   const mq=e.target.closest('[data-act="exmap-q"]');
   if(mq){ ui.exMapQ=mq.value; const box=document.getElementById("exmap-list"); if(box&&ui.modal) box.innerHTML=exMapList(ui.modal.payload); return; }

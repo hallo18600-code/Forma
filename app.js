@@ -549,7 +549,10 @@ function render(){ try{ ensureRoutine(); }catch(e){}
   const view=!state.onboarded?"ob:"+state.step:ui.workout?"w":ui.plan?"p":ui.dash?"d:"+ui.dash:"t:"+state.tab;
   const same=ui._view===view, exSame=ui._exi===(ui.exInfo&&ui.exInfo.id), mSame=ui._modal===(ui.modal&&ui.modal.type);
   ui._view=view; ui._exi=ui.exInfo&&ui.exInfo.id; ui._modal=ui.modal&&ui.modal.type;
+  // Einblend-Animationen nur beim ersten Öffnen, nicht bei jedem Neuaufbau
+  const seen=new Set([...root.querySelectorAll("[data-once]")].map(n=>n.dataset.once));
   root.innerHTML = html;
+  root.querySelectorAll("[data-once]").forEach(n=>{ if(seen.has(n.dataset.once)) n.style.animation="none"; });
   SCR.forEach((q,k)=>{
     if(q===".exi-scroll"?!exSame:q===".sheet-card"?!(same&&mSame):!same) return;
     [...root.querySelectorAll(q)].forEach((n,i)=>{ const v=keep[k][i]; if(v){ n.scrollTop=v[0]; n.scrollLeft=v[1]; } });

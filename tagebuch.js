@@ -146,7 +146,7 @@ function foodSheet(it,sc){
       <div class="ftable" id="ftable">${fTable(it,g)}</div>
     </div>
     <p class="sub fnote">${src}</p>
-    <div class="amt ${ui.amtOpen?"open":""}">
+    <div class="amt ${ui.amtOpen?"open":""}" ${ui.amtOpen?`data-once="amt"`:""}>
       <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>
       <div class="amt-compact" id="amt-compact">${amtCompact(it)}</div>
       <div class="amt-body" id="amt-body">${amtBody(it)}</div>
