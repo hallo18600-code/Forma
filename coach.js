@@ -377,7 +377,7 @@ function haareAdvice(a){
         tip("Mildes Shampoo","Bis dahin mild waschen","Bitte nichts auf eigene Faust behandeln.",{product:"shampoo"})];
     } else {
       tips=[tip(null,"Blutbild: Ferritin, Vit. D, Schilddrüse","Das sind die häufigsten Ursachen."),
-        tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,"Haare zeigen Veränderungen erst nach 2–3 Monaten."),
+        tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,`Am besten über ${proteinFoodTxt(dietCtx())}. Haare zeigen Veränderungen erst nach 2–3 Monaten.`),
         tip(null,"Geduld: oft 3–6 Monate","Haare wachsen langsam nach, wenn die Ursache behoben ist.")];
     }
   } else {
@@ -510,7 +510,7 @@ function muskelTips(a,lvl,g,fatGoal,prot,lifts){
   return [
     tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why,Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
     tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wiederholungen oder eine schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche eine Wiederholung mehr.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
-    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:"1,6–2,2 g pro kg Körpergewicht gelten als ideal für den Muskelaufbau.",Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
+    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:`1,6–2,2 g pro kg Körpergewicht gelten als ideal. Am einfachsten über ${proteinFoodTxt(dietCtx())}.`,Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
     tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher",vegan?"Reiswaffeln mit Marmelade oder eine Banane.":"Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
     tip("Kreatin","3–5 g Kreatin täglich","Erhöht die Leistung bei kurzem, intensivem Krafttraining. Fehlt Protein im Essen, hilft "+(noWhey?"pflanzliches Proteinpulver.":"Whey."),Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
   ];
@@ -563,7 +563,10 @@ function gesundheitAdvice(a){
   let note="";
   if(a.stil==="Vegan") g.push([tip("B12","Vitamin B12 täglich","Steckt fast nur in tierischen Lebensmitteln. Wichtig für Blut und Nerven.",{product:"b12",sup:"b12"}),
     tip("Jodsalz","Mit Jodsalz kochen","Bei veganer Ernährung fehlt oft Jod.")]);
+  const dc=dietCtx();
   if(a.energie==="Ständig müde") g.push([tip(null,"Blutbild: Ferritin, B12, Vit. D, Schilddrüse","Häufige Ursachen für dauerhafte Müdigkeit.",{must:1}),
+    dc.veg?tip("Eisen",dc.noGluten?"Linsen, Quinoa, Kürbiskerne mit Paprika oder Zitrone":"Linsen, Hafer, Kürbiskerne mit Paprika oder Zitrone","Eisen aus Pflanzen wird schlechter aufgenommen. Vitamin C in derselben Mahlzeit hilft.",{e:"🫘"})
+      :tip("Eisen & B12",dc.noRed?"Eier, Fisch und Geflügel jeden Tag":"Rotes Fleisch 1–2×, Leber gelegentlich",dc.noRed?"Liefern gut verfügbares Eisen und B12, beides fehlt oft bei Müdigkeit.":"Eisen aus Fleisch nimmt der Körper deutlich besser auf als aus Pflanzen. Leber ist sehr reich an Vitamin A, darum nur gelegentlich.",{e:"🥩"}),
     tip("Tageslicht am Morgen","Morgens 10 Min raus","Tageslicht macht wach.")]);
   if(a.energie==="Tief nach dem Essen") g.push([tip("Erst Gemüse & Protein","Erst Gemüse & Protein, dann Beilage","Der Blutzucker steigt langsamer, das Tief danach ist kleiner."),
     tip("10 Min gehen","10 Min gehen nach dem Essen","Bewegung senkt den Blutzucker nach dem Essen.")]);
@@ -582,13 +585,88 @@ function gesundheitAdvice(a){
     g.push([tip("Eisen + Vitamin C",intol.includes("Gluten")?"Linsen & Quinoa mit Paprika/Zitrone":"Linsen & Hafer mit Paprika/Zitrone","Vitamin C verbessert die Aufnahme von Eisen."),
       tip("B12 im Blick",noMilk?"Täglich Eier":"Täglich Milch, Ei oder Käse","Sonst B12 als Supplement ergänzen.",{sup:"b12"})]);
   }
+  const d=dietCtx();
+  // Fisch selten: Omega-3 (nicht bei vegetarisch, das deckt omegaTip mit Pflanzen/Algen ab)
+  if(d.fishRare) g.push([omegaTip(d,"Omega-3-Fette sind wichtig für Herz, Gehirn und Augen.")]);
+  if(d.primal||(a.meiden||[]).includes("Fertigprodukte")) g.push([
+    tip("Protein zuerst","Jede Mahlzeit um "+proteinFoodTxt(d)+" bauen","Eiweiß sättigt am stärksten. So bleibt weniger Hunger auf Snacks.",{e:"🍳"}),
+    tip("Echte Lebensmittel","Einkaufen: wenige Zutaten, kaum Verpackung","In einer Studie aßen Teilnehmer mit stark verarbeitetem Essen rund 500 kcal mehr pro Tag, ohne es zu merken.",{e:"🥩"})]);
+  if(d.primal&&!d.veg&&!d.noMilk) g.push([tip("Echte Fette","Butter, Olivenöl, Eier statt Light-Produkte","Natürliche Fette machen satt und liefern fettlösliche Vitamine (A, D, E, K).",{e:"🧈"})]);
   let items=pickTips(g,4);
-  if(!items.length) items=[tip("Unverarbeitet essen","Weiter so","Unverarbeitete Lebensmittel sind die beste Grundlage.")];
+  if(!items.length) items=[tip("Echte Lebensmittel","Weiter so: "+(d.veg?"Gemüse, Hülsenfrüchte, Obst":"Fleisch, Fisch, Eier, Obst, Gemüse"),"Naturbelassene Lebensmittel sind die beste Grundlage.",{e:"🥗"})];
   return {lead:`${a.stil||"–"} · Energie: ${a.energie||"–"}`, routine:sumRoutine("Gesundheit",items,"",`${glasses} Gläser Wasser`), items, note};
+}
+// ---------- Von innen: Ernährung passend zum Thema ----------
+// Naturbelassene Lebensmittel zuerst (Fleisch, Fisch, Eier, Obst, Gemüse), immer passend zu Ernährungsform,
+// Unverträglichkeiten und dem, was jemand meiden will. Nur belegte Aussagen, vorsichtig formuliert.
+function dietCtx(){
+  const e=(state.coach.answers||{}).gesundheit||{}, m=e.meiden||[], i=e.intol||[];
+  const vegan=e.stil==="Vegan", veg=vegan||e.stil==="Vegetarisch";
+  return { vegan, veg, primal:["Primal","Whole Foods"].includes(e.stil), noRed:veg||m.includes("Rotes Fleisch"), noPork:m.includes("Schweinefleisch"),
+    noMilk:vegan||m.includes("Milchprodukte")||i.includes("Laktose"), noNuts:i.includes("Nüsse"), noSugar:m.includes("Zucker"),
+    fishRare:state.profile.fish!=="oft", noProc:m.includes("Fertigprodukte"), noSoy:m.includes("Soja"), noGluten:i.includes("Gluten")||m.includes("Gluten") };
+}
+// Liste aus [Text, Bedingung] → "A, B und C" (nur erlaubte, höchstens n)
+function foodList(pairs,n){ const l=pairs.filter(([,ok])=>ok!==false).map(([t])=>t).slice(0,n||3); return l.length>1?l.slice(0,-1).join(", ")+" und "+l[l.length-1]:l[0]||""; }
+function omegaTip(d,why){
+  if(d.veg) return tip("Omega-3",d.vegan?(d.noNuts?"Algenöl oder täglich Leinöl":"Algenöl oder täglich Leinöl & Walnüsse"):(d.noNuts?"Leinöl und Omega-3-Eier":"Leinöl, Walnüsse, Omega-3-Eier"),`${why} Pflanzen liefern nur die Vorstufe, Algenöl enthält EPA und DHA direkt.`,{e:"🐟",sup:"o3"});
+  return tip("Fetter Fisch","2× pro Woche fetter Fisch","Lachs, Makrele, Hering oder Sardinen. "+why,{e:"🐟"});
+}
+function proteinFoodTxt(d){
+  return foodList([["Eier",!d.vegan],["Rindfleisch",!d.noRed],["Fisch",!d.veg],["Hähnchen",!d.veg],["Skyr oder Quark",!d.noMilk],["Linsen",d.veg],["Tofu",d.vegan&&!d.noSoy],["Bohnen",d.vegan]],3);
+}
+function foodTips(id,a){
+  const d=dietCtx(), out=[];
+  if(id==="haut"){
+    const st=hautList(a);
+    if(st.includes("Unreinheiten")&&a.art!=="Tiefe, schmerzhafte Knoten"){
+      // Nur testen, was man nicht schon meidet
+      const what=d.noSugar&&d.noMilk?"Weißmehl und Süßes":d.noSugar?"Milch":d.noMilk?"Zucker und Weißmehl":"Zucker und Milch";
+      out.push(tip("4-Wochen-Test","4 Wochen wenig "+what,`Bei manchen Menschen hängen Unreinheiten mit ${d.noSugar&&!d.noMilk?"Milch":d.noMilk?"stark zuckerhaltigem Essen":"stark zuckerhaltigem Essen und Milch"} zusammen. Der Test zeigt, ob das bei dir so ist.`,{e:"🍬"}));
+    }
+    if(st.includes("Unreinheiten")||st.includes("Glänzt / große Poren"))
+      out.push(tip("Zink aus dem Essen","Zinkreich essen: "+foodList([["Rindfleisch",!d.noRed],["Austern",!d.veg],["Eier",!d.vegan],["Kürbiskerne",true],["Linsen",d.veg]],3),"Zink ist wichtig für die Hautheilung.",{e:"🥩"}));
+    if(st.some(x=>["Trockenheit","Wirkt stumpf","Rötung"].includes(x)))
+      out.push(omegaTip(d,"Omega-3-Fette sind ein Baustein der Hautbarriere."));
+    if(st.some(x=>["Erste Fältchen","Pigmentflecken","Wirkt stumpf"].includes(x)))
+      out.push(tip("Vitamin C & Protein","Beeren, Paprika, Kiwi + Protein zu jeder Mahlzeit","Für die Bildung von Kollagen braucht der Körper Vitamin C und Eiweiß.",{e:"🫐"}));
+    if(!out.length) out.push(tip("Echte Lebensmittel",d.noSugar?"Viel Obst, Gemüse und Protein":"Wenig Zucker, viel Obst, Gemüse und Protein","Die Haut erneuert sich ständig und braucht dafür Eiweiß, Vitamine und Mineralstoffe.",{e:"🥗"}));
+  }
+  if(id==="haare"){
+    const thin=a.stoert==="Fallen viel aus"&&a.ausfall!=="Kahle runde Stellen";
+    out.push(tip("Eiweiß für die Haare",proteinFoodTxt(d)+" täglich","Haare bestehen fast nur aus Keratin, einem Eiweiß. Bei zu wenig Protein werden sie dünner.",{e:"🥚"}));
+    if(thin||a.stoert==="Trocken / Spliss")
+      out.push(d.noRed&&d.veg?tip("Eisen","Linsen & Kürbiskerne mit Paprika oder Zitrone","Eisenmangel ist eine häufige Ursache für Haarausfall. Vitamin C verbessert die Aufnahme.",{e:"🫘"})
+        :tip("Eisen",d.noRed?"Eier, Fisch, Linsen mit Vitamin C":"1–2× pro Woche rotes Fleisch",d.noRed?"Eisenmangel ist eine häufige Ursache für Haarausfall.":"Eisen aus Fleisch nimmt der Körper deutlich besser auf als aus Pflanzen. Eisenmangel ist eine häufige Ursache für Haarausfall.",{e:"🥩"}));
+  }
+  if(id==="schlaf"){
+    if(a.ein!=="Geht schnell"||a.morgen==="Gerädert")
+      out.push(tip("Komplett dunkel","Schlafzimmer komplett dunkel","Schon wenig Licht in der Nacht bremst die Bildung des Schlafhormons Melatonin. Verdunkeln oder Schlafmaske.",{e:"🌑"}));
+    out.push(tip("Spät nicht schwer essen","Letzte große Mahlzeit 2–3 h vorm Bett","Ein voller Magen und Sodbrennen stören den Schlaf.",{e:"🍽️"}));
+    if(a.morgen==="Gerädert"&&a.ein!=="Dauert")
+      out.push(tip("Morgenlicht","Morgens 10 Min Tageslicht, dann Kaffee","Licht am Morgen stellt die innere Uhr ein. Abends wirst du dann früher müde.",{e:"☀️"}));
+  }
+  if(id==="aussehen"){
+    const z=a.ziel||[];
+    if(z.includes("Weniger Bauchfett")||z.includes("Gesicht definierter")){
+      if(!z.includes("Mehr Muskeln")) out.push(tip("Protein zuerst","Zu jeder Mahlzeit: "+proteinFoodTxt(d),"Eiweiß sättigt am stärksten und schützt beim Abnehmen die Muskeln.",{e:"🍳"}));
+      out.push(tip("Echtes Essen",d.noProc?"Selbst kochen, aus wenigen Zutaten":"Hochverarbeitetes durch echte Lebensmittel ersetzen","In einer Studie aßen Teilnehmer mit stark verarbeitetem Essen rund 500 kcal mehr pro Tag, ohne es zu merken.",{e:"🥩"}));
+    }
+    if(z.includes("Frischer wirken")) out.push(tip("Wasser & Obst","Wasser statt Softdrinks, Obst statt Süßes","Zucker und zu wenig Flüssigkeit sieht man schnell an Haut und Augen.",{e:"💧"}));
+  }
+  return out.slice(0,2);
 }
 function coachAdvice(id){
   const a = (state.coach.answers||{})[id]||{};
-  return ({haut:hautAdvice, haare:haareAdvice, schlaf:schlafAdvice, aussehen:aussehenAdvice, gesundheit:gesundheitAdvice}[id]||(()=>({lead:"",routine:null,items:[]})))(a);
+  const res=({haut:hautAdvice, haare:haareAdvice, schlaf:schlafAdvice, aussehen:aussehenAdvice, gesundheit:gesundheitAdvice}[id]||(()=>({lead:"",routine:null,items:[]})))(a);
+  // Ernährungstipps als eigene Gruppe unten (zählen nicht zur Routine-Zeile, die bleibt kurz)
+  if(id!=="gesundheit"&&res.items&&res.items.length){
+    const have=new Set(res.items.map(i=>i.k||i.title));
+    const f=foodTips(id,a).filter(t=>!have.has(t.k)&&!(t.k==="Eiweiß für die Haare"&&have.has("Protein"))&&!(t.k==="Morgenlicht"&&res.items.some(i=>/Morgenlicht|Tageslicht/.test((i.k||"")+i.title))));
+    if(f.length){ if(res.items.some(i=>i.grp)) res.items.forEach(i=>i.grp=i.grp||"Look & Körper"); else res.items.forEach(i=>i.grp={haut:"Pflege",haare:"Pflege",schlaf:"Abläufe",aussehen:"Look & Körper"}[id]||"Tipps");
+      res.items=res.items.concat(f.map(t=>Object.assign(t,{grp:{schlaf:"Umgebung & Essen",aussehen:"Ernährung"}[id]||"Von innen",once:1}))); }
+  }
+  return res;
 }
 function routineOn(id, s){
   const d = s? (state.days[s]||{}) : day();
