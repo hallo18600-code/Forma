@@ -890,18 +890,10 @@ const DAD = [
 // bekannte primale Grundnahrungsmittel (für „aber das ist gesund…“ und als letzte Reserve)
 // Dreamfood: früher Junk, heute echtes Essen – unten links eine Statue, deren Stimmung zum Text passt
 const DREAM = {
-  now: { mood: 'strong', slots: [['steak', 'beef', 'lamb'], ['eggs', 'salmon', 'oysters'], ['berries', 'blueberries', 'raspberries', 'avocado', 'kiwi']], en: 'Dreamfood now', de: 'Lieblingsessen heute' },
-  year: { mood: 'sad', slots: [['burger', 'nuggets', 'fries', 'hotdog'], ['pancakes', 'donut', 'muffin'], ['soda']], en: 'Dreamfood a year ago', de: 'Lieblingsessen vor einem Jahr' },
-  teen: { mood: 'sad', slots: [['pizza', 'hotdog', 'noodles'], ['chips', 'candy'], ['soda', 'nuggets', 'fries']], en: 'Dreamfood as a teen', de: 'Lieblingsessen als Teenager' },
-  kid: { mood: 'sad', slots: [['pizza', 'nuggets'], ['cookies', 'candy', 'muffin'], ['icecream', 'donut', 'cookies']], en: 'Dreamfood as a kid', de: 'Lieblingsessen als Kind' },
+  kid: { mood: 'sad', slots: [['pizza', 'nuggets', 'burger', 'fries'], ['cookies', 'candy', 'donut', 'cereal'], ['pancakes', 'candy', 'donut', 'cookies']], en: 'Dreamfood as a kid', de: 'Lieblingsessen als Kind' },
+  year: { mood: 'sad', slots: [['burger', 'nuggets', 'fries', 'pizza'], ['pancakes', 'donut', 'chips', 'coldcuts'], ['soda', 'chips', 'candy', 'cereal']], en: 'Dreamfood 1 year ago', de: 'Lieblingsessen vor 1 Jahr' },
+  now: { mood: 'strong', slots: [['steak', 'beef', 'lamb', 'salmon'], ['eggs', 'oysters', 'sardines', 'cheese', 'milk', 'butter'], ['berries', 'blueberries', 'raspberries', 'avocado', 'kiwi', 'cherries', 'honey', 'pomegranate', 'mango', 'figs']], en: 'Dreamfood now', de: 'Lieblingsessen heute' },
 };
-// Average … man: echtes Essen = starke Statue, Junk = traurige Statue
-const AVGMEN = [
-  { mood: 'strong', slots: [['steak', 'beef', 'eggs'], ['milk', 'cheese', 'butter'], ['berries', 'blueberries', 'raspberries', 'avocado']], en: 'Average European man', de: 'Der typische Europäer' },
-  { mood: 'sad', slots: [['pizza'], ['chips', 'candy'], ['burger', 'nuggets', 'fries']], en: 'Average American man', de: 'Der typische Amerikaner' },
-  { mood: 'strong', slots: [['salmon', 'tuna', 'mackerel'], ['rice', 'eggs'], ['kimchi', 'mushrooms', 'greentea']], en: 'Average Japanese man', de: 'Der typische Japaner' },
-  { mood: 'sad', slots: [['noodles', 'nuggets'], ['candy', 'chips'], ['soda']], en: 'Average Gen Z man', de: 'Der typische Gen-Z-Mann' },
-];
 const STAPLES = ['steak', 'eggs', 'milk', 'honey', 'butter', 'salmon', 'berries', 'kiwi', 'oranges', 'cheese', 'oysters', 'banana', 'potatoes', 'beef'];
 // „zero stress diet“: Ring um schlichten schwarzen Text
 const DIETS = [
@@ -976,7 +968,6 @@ const SERIES = {
   origin: { label: 'Herkunft', ex: 'average European, average Asian', w: 2, niche: ['#realfood', '#culture'] },
   flags: { label: 'Green Flag', ex: '(green flag:) she cooks with real butter', w: 2.5, niche: ['#greenflag', '#realfood'] },
   dream: { label: 'Dreamfood', ex: 'Dreamfood now · a year ago · as a kid', w: 3, niche: ['#glowup', '#realfood'], min: 2 },
-  avgman: { label: 'Average … man', ex: 'Average European man vs. Average American man', w: 3, niche: ['#realfood', '#junkfood'], min: 2 },
   faith: { label: 'Religion', ex: 'average Christian, average Muslim', w: 1.5, niche: ['#realfood', '#tradition'] },
 };
 
@@ -2007,11 +1998,8 @@ function planSlides(series, n, lang) {
     });
   }
   if (series === 'dream') {
-    const order = n >= 4 ? ['now', 'year', 'teen', 'kid'] : n === 3 ? ['now', 'year', 'kid'] : ['now', 'kid'];
+    const order = ['kid', 'year', 'now'];   // immer genau 3 Slides: als Kind → vor 1 Jahr → heute
     order.forEach((k, i) => { const d = DREAM[k]; specs.push({ layout: 'quad', slots: d.slots, hook: d[lang], mood: d.mood, key: i === 0 ? 'dream' : undefined }); });
-  }
-  if (series === 'avgman') {
-    AVGMEN.slice(0, Math.max(2, n)).forEach((a, i) => specs.push({ layout: 'quad', slots: a.slots, hook: a[lang], mood: a.mood, key: i === 0 ? 'avgman' : undefined }));
   }
   if (series === 'flags') {
     // she oder he, nur Green Flags; „green flag:“ steht bei der Hälfte der Posts drüber (dann auf allen Slides)
@@ -2078,7 +2066,11 @@ function planPost(series, n, lang) {
     : sp.layout === 'collage' && sp.variant === 'split' ? [...chooseCuts(sp.pool, used, 6), ...chooseCuts(sp.bad, used, 6).map(it => ({ ...it, role: 'x' }))]
     : sp.layout === 'collage' ? chooseCuts(sp.pool, used, sp.cnt)
     : sp.layout === 'quad' ? (() => { const out = [];   // je Feld eine feste Rolle (z. B. Fleisch · Eier · Beeren), kein Essen doppelt
-        sp.slots.forEach(ids => { const ok = ids.filter(id => hasPhoto(id) && !out.some(o => o.food.id === id)); const it = ok.length && chooseFour(idsPred(ok), used, 1)[0]; if (it) out.push(it); });
+        const useT = recent.use || {}, last = id => Math.max(0, ...[...photos, ...library].filter(p => p.food === id).map(p => useT[p.id] || 0));
+        sp.slots.forEach(ids => { let ok = ids.filter(id => hasPhoto(id) && !out.some(o => o.food.id === id));
+          const fresh = ok.filter(id => !used.has('food:' + id)); if (fresh.length) ok = fresh;   // nichts doppelt im selben Post
+          ok = shuffle(ok).sort((a, b) => last(a) - last(b)).slice(0, 2);   // zuletzt benutztes Essen nach hinten
+          const it = ok.length && chooseFour(idsPred([pick(ok)]), used, 1)[0]; if (it) out.push(it); });
         return out.length === 3 ? out : [...out, ...chooseFour(idsPred(sp.slots.flat().filter(hasPhoto)), used, 3 - out.length)]; })()
     : sp.layout === 'freq' ? chooseCuts(vibeFoods(sp.pool.filter(hasCut), used, 4), used, 4)
     : sp.layout === 'love' ? [...chooseCuts(sp.love.junk, used, 5).map(it => ({ ...it, role: 'a' })), ...chooseCuts(sp.love.fake, used, 4).map(it => ({ ...it, role: 'b' })), ...chooseCuts(sp.love.real, used, 5).map(it => ({ ...it, role: 'c' }))]
@@ -2095,7 +2087,7 @@ function planPost(series, n, lang) {
     figure3: sp.layout === 'love' ? fig.sad2 || fig.sad : null,
     niche: sp.niche,
   }));
-  if (series === 'dream' || series === 'avgman') {   // jede Folie eine eigene Statue (nur echte Statuen, in Farbe)
+  if (series === 'dream') {   // jede Folie eine eigene Statue (nur echte Statuen, in Farbe)
     const taken = new Set();
     slides.forEach(sl => { const f = nextFigure(sl.mood, false, 'statue', x => !taken.has(x.id)) || nextFigure(sl.mood, false, 'statue');
       if (f) taken.add(f.id); sl.figure = f || null; });
