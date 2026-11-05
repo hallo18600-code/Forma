@@ -336,6 +336,85 @@ def klicktest(b):
             ctx.close()
     return probleme
 
+# ---------- 6) Fortschrittsfotos ----------
+def fototest(b):
+    import tempfile, struct, zlib
+    probleme = []
+    tmp = tempfile.mkdtemp()
+    def png(path, w, h, rgb):
+        # kleines PNG ohne Zusatz-Bibliotheken
+        raw = b"".join(b"\x00" + bytes(rgb) * w for _ in range(h))
+        def chunk(t, d): return struct.pack(">I", len(d)) + t + d + struct.pack(">I", zlib.crc32(t + d) & 0xffffffff)
+        open(path, "wb").write(b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)) + chunk(b"IDAT", zlib.compress(raw)) + chunk(b"IEND", b""))
+        return path
+    big = png(tmp + "/gross.png", 3000, 4000, (180, 160, 140))
+    klein = png(tmp + "/klein.png", 300, 400, (120, 140, 130))
+    quer = png(tmp + "/quer.png", 1600, 900, (90, 90, 120))
+    falsch = tmp + "/text.txt"; open(falsch, "w").write("kein Bild")
+    for theme in ["light", "dark"]:
+        ctx = b.new_context(locale="de-DE", viewport={"width": 390, "height": 844}); pg = ctx.new_page(); errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
+        pg.goto(URL); pg.wait_for_timeout(400)
+        pg.evaluate(f"()=>{{ seedDemo(); state.profile.termsOk=TERMS_V; state.profile.theme='{theme}'; save(); }}"); pg.reload(); pg.wait_for_timeout(600)
+        ev = lambda js: pg.evaluate("async ()=>{" + js + "}")
+        def check(c, m):
+            if not c: probleme.append(f"[{theme}] {m}")
+        def add(path):
+            with pg.expect_file_chooser() as fc: pg.locator('[data-act="ph-add"]').first.click()
+            fc.value.set_files(path); pg.wait_for_timeout(900)
+        ev("state.tab='verlauf'; render();")
+        # Ganz unten: Fotos-Bereich ist das Letzte auf der Seite
+        check(ev("const c=document.querySelector('.scroll').lastElementChild; return !!(c&&c.classList.contains('pf-empty'))"), "Leerer Foto-Bereich nicht ganz unten")
+        add(big)
+        check(ev("return PH.length") == 1, "Großes Foto nicht gespeichert")
+        size = ev("const r=await phTx('readonly',st=>st.getAll()); const b=r[0].blob; const i=await createImageBitmap(b); return [i.width,i.height,b.type,b.size]")
+        check(max(size[0], size[1]) <= 1280 and size[2] == "image/jpeg", f"Foto nicht verkleinert {size}")
+        check(ev("return document.querySelectorAll('.pf-two .pf-ph').length") == 1, "Ein Foto: Anzeige falsch")
+        add(falsch); check(ev("return PH.length") == 1, "Falsche Datei wurde gespeichert")
+        add(klein); add(quer)
+        check(ev("return PH.length") == 3, "Weitere Fotos fehlen")
+        # Daten zurückdatieren, Gewicht passend → Unterschied richtig
+        ev("const r=await phTx('readonly',st=>st.getAll()); r.sort((a,b)=>a.t-b.t); const ds=[addDays(todayIso(),-60),addDays(todayIso(),-30),todayIso()]; for(let i=0;i<r.length;i++){ r[i].date=ds[i]; await phTx('readwrite',st=>st.put(r[i])); } state.weights=[{date:addDays(todayIso(),-61),kg:80.4},{date:addDays(todayIso(),-31),kg:78.0},{date:todayIso(),kg:76.9}]; save(); await phLoad(); render();")
+        check(ev("return document.querySelector('.pf-two .pf-diff')&&document.querySelector('.pf-two .pf-diff').textContent.trim()") == "−3,5 kg", "Gewichtsunterschied falsch")
+        check(ev("return document.querySelector('.scroll').lastElementChild.querySelector('.pf-two')!==null"), "Foto-Bereich nicht ganz unten")
+        # Seite „Alle ansehen“
+        pg.locator('[data-act="dash"][data-id="photos"]').click(); pg.wait_for_timeout(200)
+        check(ev("return ui.dash") == "photos", "Foto-Seite öffnet nicht")
+        check(ev("return document.querySelectorAll('.pf-th').length") == 3, "Nicht alle Fotos in der Leiste")
+        check(ev("return document.querySelectorAll('.pf-th.on').length") == 2, "Nicht genau 2 ausgewählt")
+        mid = ev("return PH[1].id")
+        pg.locator(f'[data-act="ph-sel"][data-id="{mid}"]').click(); pg.wait_for_timeout(150)
+        pair = ev("return phPair().map(p=>p.id)")
+        check(pair == [ev("return PH[0].id"), mid], f"Auswahl falsch {pair}")
+        check(ev("return document.querySelector('.pf-big .pf-diff').textContent.trim()") == "−2,4 kg", "Unterschied bei Auswahl falsch")
+        for _ in range(6):
+            pg.locator('[data-act="ph-sel"]').nth(int(ev("return Math.floor(Math.random()*3)"))).click(); pg.wait_for_timeout(60)
+            pr = ev("return phPair().map(p=>p.id)")
+            check(len(pr) == 2 and pr[0] != pr[1], f"Vergleich zeigt zweimal das gleiche Foto {pr}")
+            check(ev("return document.querySelectorAll('.pf-th.on').length") == 2, "Auswahl nicht genau 2")
+        # Einzelnes Foto: löschen braucht zwei Tipps
+        pg.locator('.pf-big [data-act="ph-open"]').first.click(); pg.wait_for_timeout(150)
+        check(ev("return ui.modal&&ui.modal.type") == "photo", "Foto-Blatt öffnet nicht")
+        pg.locator('[data-act="ph-del"]').click(); pg.wait_for_timeout(150)
+        check(ev("return PH.length") == 3, "Löscht schon beim ersten Tipp")
+        pg.locator('[data-act="ph-del"]').click(); pg.wait_for_timeout(600)
+        check(ev("return PH.length") == 2, "Löschen klappt nicht")
+        check(ev("return ui.modal") is None, "Blatt bleibt nach Löschen offen")
+        # Zurück, Neuladen: alles noch da
+        pg.locator('[data-act="dash-close"]').click(); pg.wait_for_timeout(150)
+        check(ev("return ui.dash") is None and ev("return state.tab") == "verlauf", "Zurück führt nicht zum Verlauf")
+        pg.reload(); pg.wait_for_timeout(900)
+        check(ev("return PH&&PH.length") == 2, "Fotos nach Neuladen weg")
+        # Datensicherung enthält keine Fotos (Datei bleibt klein)
+        check(ev("return JSON.stringify(state).length<200000"), "Sicherung wird durch Fotos groß")
+        # Alles löschen löscht auch Fotos
+        ev("ui.resetTxt='LÖSCHEN'; openModal('reset');"); pg.locator('#reset-go').click(); pg.wait_for_timeout(800)
+        check(ev("const r=await phTx('readonly',st=>st.getAll()); return r.length") == 0, "Alles löschen lässt Fotos übrig")
+        for e in errs: probleme.append(f"[{theme}] JS-Fehler: {e}")
+        ctx.close()
+    return probleme
+
 def main():
     bad = 0
     with sync_playwright() as p:
@@ -356,6 +435,10 @@ def main():
         pr = klicktest(b)
         if not pr: print("    ✅ alles in Ordnung")
         for x in pr: bad += 1; print("    ❌", x)
+        print("\n=== Fortschrittsfotos (echte Bilddateien, hell/dunkel)")
+        pf = fototest(b)
+        if not pf: print("    ✅ alles in Ordnung")
+        for x in pf: bad += 1; print("    ❌", x)
         b.close()
     print("\nERGEBNIS:", "❌ Probleme gefunden" if bad else "✅ Alle Prüfungen bestanden")
     sys.exit(1 if bad else 0)

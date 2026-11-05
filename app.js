@@ -403,7 +403,7 @@ function renderApp(){
     </nav></div>`;
 }
 function renderDash(){
-  const body=ui.dash==="meal"?renderMealPage():ui.dash==="routine"?renderRoutineDash():ui.dash==="calendar"?renderCalendar():ui.dash==="stats"?renderStats():ui.dash==="exercises"?renderExercises():renderMeasures();
+  const body=ui.dash==="meal"?renderMealPage():ui.dash==="routine"?renderRoutineDash():ui.dash==="calendar"?renderCalendar():ui.dash==="stats"?renderStats():ui.dash==="exercises"?renderExercises():ui.dash==="photos"?renderPhotos():renderMeasures();
   return `<div class="screen"><div class="scroll pad">${body}</div></div>`;
 }
 
@@ -511,6 +511,7 @@ function renderModal(){
   if(type==="details") inner=detailsSheet();
   if(type==="rem") inner=remSheet();
   if(type==="dayscore") inner=dayScoreSheet();
+  if(type==="photo") inner=photoSheet(payload);
   if(type==="pref") inner=prefSheet(payload);
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
@@ -550,7 +551,7 @@ function render(){ try{ ensureRoutine(); }catch(e){} try{ adaptCheck(); }catch(e
   if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
   // Scroll-Positionen merken, damit ein Neuaufbau (Tipp, Toast, Timer) nicht nach oben springt
   // Jede Art von Scroll-Bereich einzeln merken (auch Übungs-Detailseite und Leisten zum Wischen)
-  const SCR=[".scroll",".sheet-card",".exi-scroll",".units"];
+  const SCR=[".scroll",".sheet-card",".exi-scroll",".units",".pf-strip"];
   const keep=SCR.map(q=>[...root.querySelectorAll(q)].map(n=>[n.scrollTop,n.scrollLeft]));
   const view=!state.onboarded?"ob:"+state.step:ui.workout?"w":ui.plan?"p":ui.dash?"d:"+ui.dash:"t:"+state.tab;
   const same=ui._view===view, exSame=ui._exi===(ui.exInfo&&ui.exInfo.id), mSame=ui._modal===(ui.modal&&ui.modal.type);
@@ -827,6 +828,10 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="toggle"){ p[el.dataset.k]=!p[el.dataset.k]; save(); }
   else if(act==="adapt-toggle"){ p.adaptive=p.adaptive===false; if(state.adapt) state.adapt.seen=true; save(); }
+  else if(act==="ph-add"){ phPick(); return; }
+  else if(act==="ph-sel"){ phSelect(el.dataset.id); }
+  else if(act==="ph-open"){ ui.phDel=null; openModal("photo", el.dataset.id); return; }
+  else if(act==="ph-del"){ if(ui.phDel===el.dataset.id){ ui.phDel=null; phDelete(el.dataset.id); return; } ui.phDel=el.dataset.id; }
   else if(act==="rem-tog"){ remToggle(el.dataset.k); return; }
   else if(act==="rem-time"){ remTime(el.dataset.k,+el.dataset.d); }
   else if(act==="adapt-seen"){ if(state.adapt){ state.adapt.seen=true; save(); } }
@@ -993,7 +998,8 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="backup"){ downloadBackup(); return; }
   else if(act==="reset-go"){
     if((ui.resetTxt||"").trim().toUpperCase()!=="LÖSCHEN") return;
-    try{ localStorage.removeItem(KEY); }catch(e){} state=fresh(); ui.resetTxt=""; ui.modal=null; applyTheme(); toast("Alle Daten gelöscht");
+    try{ localStorage.removeItem(KEY); localStorage.removeItem(REM_FIRED); }catch(e){} state=fresh(); ui.resetTxt=""; ui.modal=null; applyTheme(); toast("Alle Daten gelöscht");
+    phClearAll().then(()=>render());   // Fortschrittsfotos (IndexedDB) auch löschen
   }
   render();
 });

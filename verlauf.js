@@ -31,7 +31,7 @@ function weightView(){
   const dots = pts.map((p,i)=>i===sel ? "" : `<circle cx="${p[0]}" cy="${p[1]}" r="2.2" fill="${tc("accent")}"/>`).join("");
   // Ausgewählter Eintrag: senkrechte Linie + hohler Punkt (wie ein "Fadenkreuz")
   const selMark = (selW && pts[sel]) ? `<line x1="${pts[sel][0]}" y1="0" x2="${pts[sel][0]}" y2="${H}" stroke="${tc("accent")}" stroke-width="1.5"/><circle cx="${pts[sel][0]}" cy="${pts[sel][1]}" r="6" fill="${tc("surface")}" stroke="${tc("accent")}" stroke-width="3"/>` : "";
-  const dirTxt = (d,label)=>{ if(d===null) return `<div class="wdelta"><b>–</b><span class="sub">${label}</span></div>`; const s=d>0?"+":""; const w=d>0.05?"zugenommen":d<-0.05?"abgenommen":"unverändert"; return `<div class="wdelta"><b>${s}${de(d,1)} kg</b><span class="sub">${label.replace("X",w)}</span></div>`; };
+  const dirTxt = (d,label)=>{ if(d===null) return `<div class="wdelta"><b>–</b><span class="sub">${label.replace(" X","")}</span></div>`; const s=d>0?"+":""; const w=d>0.05?"zugenommen":d<-0.05?"abgenommen":"unverändert"; return `<div class="wdelta"><b>${s}${de(d,1)} kg</b><span class="sub">${label.replace("X",w)}</span></div>`; };
   const weightAt = dd => { const c=all.filter(w=>w.date<=dd); return c.length? c[c.length-1].kg : null; };
   const b30 = weightAt(addDays(todayIso(),-30)), b90 = weightAt(addDays(todayIso(),-90));
   const d30 = (all.length && b30!==null) ? +(last-b30).toFixed(1) : null;
@@ -163,6 +163,7 @@ function renderVerlauf(){
     ${weightView()}
     ${sleepCard()}
     ${stepsCard()}
+    ${photoSection()}
   </div>`;
 }
 function renderMeasures(){
