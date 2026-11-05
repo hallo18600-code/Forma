@@ -234,11 +234,18 @@ ERINNERUNGEN = r"""async ()=>{ F={}; let n=0; const T0=todayIso();
 # ---------- 5) Klick-Test wie ein Mensch ----------
 def klicktest(b):
     probleme = []
-    for lang in ["de", "en", "fr"]:
-        for theme in ["light", "dark"]:
-            ctx = b.new_context(locale="de-DE", viewport={"width": 390, "height": 844})
+    # Jeder Durchlauf in einer anderen Zeitzone und zu einer anderen Uhrzeit (auch kurz vor/nach Mitternacht und Zeitumstellung),
+    # damit nichts davon abhängt, wann und wo die Prüfung läuft
+    LAEUFE = [("de","light","Europe/Berlin","2026-11-05T00:05:00+01:00"),("de","dark","UTC","2026-11-05T19:18:00Z"),
+              ("en","light","America/Los_Angeles","2026-11-05T07:59:00-08:00"),("en","dark","Asia/Tokyo","2026-11-08T23:58:00+09:00"),
+              ("fr","light","Pacific/Kiritimati","2026-11-09T12:30:00+14:00"),("fr","dark","Europe/Berlin","2026-03-29T03:10:00+02:00"),
+              ("de","light","Pacific/Pago_Pago","2026-12-31T23:59:00-11:00"),("de","dark","Europe/Berlin",None)]
+    for lang, theme, tz, zeit in LAEUFE:
+        if True:
+            ctx = b.new_context(locale="de-DE", viewport={"width": 390, "height": 844}, timezone_id=tz)
             ctx.grant_permissions(["notifications"], origin=URL.split("/index")[0])
             pg = ctx.new_page(); errs = []
+            if zeit: pg.clock.set_fixed_time(zeit)
             pg.on("pageerror", lambda e: errs.append(str(e)))
             pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
             pg.goto(URL); pg.wait_for_timeout(400)
@@ -247,10 +254,10 @@ def klicktest(b):
             def ev(js): return pg.evaluate("()=>{" + js + "}")
             def click(sel):
                 el = pg.locator(sel).first
-                if el.count() == 0: probleme.append(f"[{lang}/{theme}] nicht gefunden: {sel}"); return False
+                if el.count() == 0: probleme.append(f"[{lang}/{theme}/{tz}/{zeit}] nicht gefunden: {sel}"); return False
                 el.click(); pg.wait_for_timeout(120); return True
             def check(cond, msg):
-                if not cond: probleme.append(f"[{lang}/{theme}] {msg}")
+                if not cond: probleme.append(f"[{lang}/{theme}/{tz}/{zeit}] {msg}")
             # Tagebuch: ohne Einträge heute kein Tages-Score
             check(pg.locator(".dsrow").count() == 0, "Tages-Score sichtbar ohne Einträge")
             # Frühstück: Plus → Vorschläge → + mit letzter Menge
@@ -301,7 +308,8 @@ def klicktest(b):
             click('[data-act="rem-tog"][data-k="wasser"]'); pg.wait_for_timeout(150)
             check(ev("return remCfg().wasser") is False, "Erinnerung geht nicht aus")
             # Mitteilung im Hintergrund wirklich zeigen (Browser-Weg)
-            n_shown = ev("let c=0; const o=remShow; remShow=r=>{c++;}; localStorage.removeItem(REM_FIRED); const d=new Date(), c0=remCfg(); c0.t.breakfast=remHHMM(d.getHours()*60+d.getMinutes()); c0.essen=true; remSave(c0); day().meals=day().meals.filter(m=>m.slot!=='breakfast'); Object.defineProperty(document,'visibilityState',{value:'hidden',configurable:true}); Object.defineProperty(Notification,'permission',{value:'granted',configurable:true}); remTick(); remTick(); delete document.visibilityState; delete Notification.permission; remShow=o; return c;")
+            # Nur Frühstück offen (Mittag/Abend eingetragen, Rest aus), damit das Ergebnis nicht von der Uhrzeit abhängt
+            n_shown = ev("let c=0; const o=remShow; remShow=r=>{c++;}; localStorage.removeItem(REM_FIRED); const d=new Date(), c0=remCfg(); c0.t.breakfast=remHHMM(d.getHours()*60+d.getMinutes()); Object.assign(c0,{essen:true,wasser:false,wiegen:false,sups:false}); remSave(c0); day().meals=day().meals.filter(m=>m.slot!=='breakfast'); ['lunch','dinner'].forEach(sl=>day().meals.push({uid:uid(),id:'skyr',slot:sl,portion:100})); Object.defineProperty(document,'visibilityState',{value:'hidden',configurable:true}); Object.defineProperty(Notification,'permission',{value:'granted',configurable:true}); remTick(); remTick(); delete document.visibilityState; delete Notification.permission; remShow=o; return c;")
             check(n_shown == 1, f"Mitteilung im Hintergrund {n_shown}× statt 1×")
             click('.sheet-card [data-act="close"]')
             # Bedarf-Hinweis im Tagebuch: erscheint bei Änderung, × schließt ihn
@@ -324,14 +332,14 @@ def klicktest(b):
             # Neu laden: alles gespeichert, keine Fehler
             pg.reload(); pg.wait_for_timeout(500)
             check(ev("return remCfg().essen&&remCfg().t.breakfast") is not None, "Erinnerungen nicht gespeichert")
-            for e in errs: probleme.append(f"[{lang}/{theme}] JS-Fehler: {e}")
+            for e in errs: probleme.append(f"[{lang}/{theme}/{tz}/{zeit}] JS-Fehler: {e}")
             ctx.close()
     return probleme
 
 def main():
     bad = 0
     with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page(locale="de-DE"); errs = []
+        b = p.chromium.launch(); pg = b.new_page(locale="de-DE", timezone_id=os.environ.get("TEST_TZ") or None); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(URL); pg.wait_for_timeout(1500)
         pg.evaluate("()=>{" + HELP + "}")
@@ -344,7 +352,7 @@ def main():
                 bad += 1; print(f"    ❌ {k}: {v['n']}×")
                 for e in v["ex"]: print("       z. B.", e)
         if errs: bad += 1; print("\n❌ JavaScript-Fehler:", errs[:5])
-        print("\n=== Klick-Test (3 Sprachen × hell/dunkel)")
+        print("\n=== Klick-Test (3 Sprachen, hell/dunkel, 8 Zeitzonen/Uhrzeiten)")
         pr = klicktest(b)
         if not pr: print("    ✅ alles in Ordnung")
         for x in pr: bad += 1; print("    ❌", x)
