@@ -339,6 +339,10 @@ const FOODS = Object.fromEntries([
   F('cerealbar','🍫','#a8763e','cereal bars','Müsliriegel',['fake']),
   F('cereal','🥣','#e0b04a','breakfast cereal','Frühstücksflocken',['fake']),
   F('ricecakes','🍘','#e8dcc0','rice cakes','Reiswaffeln',['fake']),
+  F('proteinbar','🍫','#8a5a3a','protein bars','Proteinriegel',['fake']),
+  F('whey','🥤','#c9a27a','protein shakes','Proteinshakes',['fake']),
+  F('zerodrink','🥫','#c0303a','zero drinks','Zero-Drinks',['fake']),
+  F('sweetener','🧂','#e8d24a','sweetener','Süßstoff',['fake']),
   // Vergleichsbilder (nur für „USA vs. Europa“)
   F('apple_us','🍎','#c8243c','apples (USA / supermarket)','Äpfel (USA / Supermarkt)',['cmp']),
   F('apple_eu','🍎','#a8462c','apples (Europe / farm)','Äpfel (Europa / Bauernhof)',['cmp']),
@@ -891,7 +895,7 @@ const DAD = [
 // Dreamfood: früher Junk, heute echtes Essen – unten links eine Statue, deren Stimmung zum Text passt
 const DREAM = {
   kid: { mood: 'sad', slots: [['pizza', 'nuggets', 'burger', 'fries'], ['cookies', 'candy', 'donut', 'cereal'], ['pancakes', 'candy', 'donut', 'cookies']], en: 'Dreamfood as a kid', de: 'Lieblingsessen als Kind' },
-  year: { mood: 'sad', slots: [['burger', 'nuggets', 'fries', 'pizza'], ['pancakes', 'donut', 'chips', 'coldcuts'], ['soda', 'chips', 'candy', 'cereal']], en: 'Dreamfood 1 year ago', de: 'Lieblingsessen vor 1 Jahr' },
+  year: { mood: 'sad', slots: [['proteinbar', 'cerealbar'], ['whey', 'ricecakes', 'sweetener'], ['zerodrink']], en: 'Dreamfood 1 year ago', de: 'Lieblingsessen vor 1 Jahr' },
   now: { mood: 'strong', slots: [['steak', 'beef', 'lamb', 'salmon'], ['eggs', 'oysters', 'sardines', 'cheese', 'milk', 'butter'], ['berries', 'blueberries', 'raspberries', 'avocado', 'kiwi', 'cherries', 'honey', 'pomegranate', 'mango', 'figs']], en: 'Dreamfood now', de: 'Lieblingsessen heute' },
 };
 const STAPLES = ['steak', 'eggs', 'milk', 'honey', 'butter', 'salmon', 'berries', 'kiwi', 'oranges', 'cheese', 'oysters', 'banana', 'potatoes', 'beef'];
