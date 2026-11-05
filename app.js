@@ -652,10 +652,6 @@ document.getElementById("app").addEventListener("click", e=>{
     const a=lastAmount(it.id, ui.addSlot||"snack")||{portion:100}, m=Object.assign({uid:uid(),id:it.id,slot:ui.addSlot||"snack"},a);
     day().meals.push(m); syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+amtTxt(it,m));
   }
-  else if(act==="sug-repeat"){
-    const n=addRepeat(ui.addSlot||"snack"); if(!n) return;
-    syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+n+" "+T("Lebensmittel"));
-  }
   else if(act==="ai-mic"){ aiMic(); return; }
   else if(act==="ai-ex"){ ui.aiText=el.dataset.v; ui.aiOv={}; aiParse(); }
   else if(act==="ai-alt"){ const k=+el.dataset.i; ui.aiOpen=ui.aiOpen===k?null:k; }

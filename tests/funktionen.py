@@ -44,8 +44,7 @@ VORSCHLAEGE = r"""()=>{ F={}; let n=0;
    const ids=list.map(s=>s.food.id); if(new Set(ids).size!==ids.length) fail("Vorschlag doppelt",d0);
    list.forEach(s=>{ if(!foods().some(f=>f.id===s.food.id)||s.food.hidden) fail("Vorschlag ohne gültiges Lebensmittel",d0+" "+s.food.id);
     if(!(s.amt.portion>0)||!Number.isFinite(s.amt.portion)) fail("Ungültige Menge",d0+" "+JSON.stringify(s.amt));
-    if(s.amt.u&&!unitsFor(s.food).some(u=>u.k===s.amt.u)) fail("Einheit gibt es nicht",d0+" "+s.amt.u);
-    if(!/^(oft|gestern|vor \d+ Tagen|letzte Woche|vor \d+ Wochen)$/.test(sugWhen(s))) fail("Komischer Zeit-Text",sugWhen(s)); });
+    if(s.amt.u&&!unitsFor(s.food).some(u=>u.k===s.amt.u)) fail("Einheit gibt es nicht",d0+" "+s.amt.u); });
    // Feste Gewohnheit (jeden Tag zur gleichen Mahlzeit, mind. 10 Tage) steht unter den Vorschlägen dieser Mahlzeit
    habit.filter(h=>h.slot===slot&&h.every===1&&days>=20).forEach(h=>{ if(!ids.includes(h.p.id)&&list.length<SUG_MAX) fail("Tägliche Gewohnheit fehlt",d0+" "+h.p.name); });
    // HTML baut ohne Fehler, keine Doppelten zwischen Vorschlägen und Liste darunter
@@ -53,13 +52,8 @@ VORSCHLAEGE = r"""()=>{ F={}; let n=0;
    const plus=[...html.matchAll(/data-act="(?:sug-add|quick-add)" data-id="([^"]+)"/g)].map(m=>m[1]);
    if(new Set(plus).size!==plus.length) fail("Lebensmittel doppelt im Plus-Blatt",d0);
    if(/undefined|NaN/.test(html)) fail("undefined/NaN im Plus-Blatt",d0);
-   // Wie gestern: nur wenn heute leer, kopiert genau die Einträge
-   const rep=mealRepeat(slot), today=(state.days[T0]||{meals:[]}).meals.filter(m=>m&&m.slot===slot);
-   if(rep&&today.length) fail("Wie gestern trotz Einträgen",d0);
-   if(rep){ const before=day().meals.length, k=rep.kcal, c=addRepeat(slot); const added=day().meals.slice(before);
-    if(c!==rep.items.length||added.length!==c) fail("Wie gestern kopiert falsch",d0);
-    const k2=added.reduce((a,m)=>a+line(foods().find(f=>f.id===m.id),m.portion).kcal,0); if(k2!==k) fail("Wie gestern: kcal stimmen nicht",d0+` ${k} vs ${k2}`);
-    if(mealRepeat(slot)) fail("Wie gestern bleibt nach dem Kopieren",d0); }
+   // „Wie gestern“ und Zeit-Texte sind ausgebaut
+   if(/yrep|sug-repeat|Wie gestern|· oft|· gestern|vor \d+ (Tagen|Wochen)|letzte Woche/.test(html)) fail("Ausgebautes taucht wieder auf",d0);
   }
  }
  // Gezielt: Reihenfolge und letzte Menge
@@ -265,13 +259,12 @@ def klicktest(b):
             # Frühstück: Plus → Vorschläge → + mit letzter Menge
             click('[data-type="scan"][data-slot="breakfast"]')
             check(pg.locator('[data-act="sug-add"]').count() > 0, "keine Vorschläge im Plus-Blatt")
-            check(pg.locator('.yrep').count() == 1, "„Wie gestern“ fehlt")
+            check(pg.locator('.yrep').count() == 0, "„Wie gestern“ ist noch da")
             first = pg.locator('[data-act="sug-add"]').first.get_attribute("data-id")
             want = ev(f"return lastAmount('{first}','breakfast').portion")
             click('[data-act="sug-add"]')
             got = ev("const m=day().meals[day().meals.length-1]; return [m.id,m.portion,m.slot]")
             check(got == [first, want, "breakfast"], f"Vorschlag falsch eingetragen {got} statt {first},{want}")
-            check(pg.locator('.yrep').count() == 0, "„Wie gestern“ bleibt trotz Eintrag")
             # Lebensmittel-Blatt übernimmt letzte Menge
             click('.yrow [data-act="open"][data-type="product"]')
             pid = ev("return ui.modal&&ui.modal.payload")

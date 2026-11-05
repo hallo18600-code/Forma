@@ -64,48 +64,15 @@ function lastAmount(id, slot){
   return any;
 }
 
-// „Wie gestern“: die letzte Mahlzeit gleicher Art aus den letzten 7 Tagen – nur wenn heute dort noch nichts steht
-function mealRepeat(slot){
-  const base=state.date||todayIso(), today=state.days[base];
-  if(today&&(today.meals||[]).some(m=>m&&m.slot===slot)) return null;
-  for(let i=1;i<=7;i++){
-    const s=addDays(base,-i), d=state.days[s]; if(!d||!Array.isArray(d.meals)) continue;
-    const items=d.meals.filter(m=>m&&m.slot===slot&&m.portion>0).map(m=>({m,p:sugFood(m.id)})).filter(x=>x.p);
-    if(items.length) return { date:s, items, kcal:items.reduce((n,x)=>n+line(x.p,x.m.portion).kcal,0) };
-  }
-  return null;
-}
-function repeatLabel(s){
-  const base=state.date||todayIso();
-  if(s===addDays(base,-1)) return "Wie gestern";
-  return "Wie am "+parseIso(s).toLocaleDateString(LOC,{weekday:"long"});
-}
-function addRepeat(slot){
-  const r=mealRepeat(slot); if(!r) return 0;
-  r.items.forEach(({m})=>{ const e={uid:uid(),id:m.id,portion:m.portion,slot}; if(m.u&&m.q){ e.u=m.u; e.q=m.q; } day().meals.push(e); });
-  return r.items.length;
-}
-
-// Wie lange her, kurz: „gestern“, „vor 3 Tagen“ – bei festen Gewohnheiten „oft“
-function sugWhen(s){
-  if(s.slotDays>=4||s.days>=6) return "oft";
-  if(s.age===1) return "gestern";
-  if(s.age<7) return "vor "+s.age+" Tagen";
-  if(s.age<14) return "letzte Woche";
-  return "vor "+Math.round(s.age/7)+" Wochen";
-}
-
 // Liste oben im „+“-Blatt (nur ohne Suchtext)
 function sugBlock(){
-  const slot=ui.addSlot||"snack", list=foodSuggest(slot), rep=mealRepeat(slot);
-  if(!list.length&&!rep) return "";
-  const names=rep?rep.items.map(x=>x.p.name):[];
-  const repRow=rep?`<button class="yrep" data-act="sug-repeat"><span class="yrep-ic" aria-hidden="true">↺</span><span class="grow ynm"><b>${repeatLabel(rep.date)}</b><span class="sub">${names.slice(0,3).map(n=>`<span>${esc(n)}</span>`).join(", ")}${names.length>3?` <span class="notr">+${names.length-3}</span>`:""}</span></span>${showKcal()?`<span class="ykc">${rep.kcal} kcal</span>`:""}<span class="yplus" aria-hidden="true">+</span></button>`:"";
+  const slot=ui.addSlot||"snack", list=foodSuggest(slot);
+  if(!list.length) return "";
   const row=s=>{
     const p=s.food, sc=scored(p).score, kc=line(p,s.amt.portion).kcal;
-    return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub"><span class="notr">${esc(amtTxt(p,s.amt))}</span> · ${sugWhen(s)}</div></button>${showKcal()?`<span class="ykc">${kc} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div><button class="yplus" data-act="sug-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button></div>`;
+    return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub notr">${esc(amtTxt(p,s.amt))}</div></button>${showKcal()?`<span class="ykc">${kc} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div><button class="yplus" data-act="sug-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button></div>`;
   };
-  return `${repRow}${list.length?`<div class="ylabel">Für dich</div>${list.map(row).join("")}<div class="ylabel">Alle Lebensmittel</div>`:""}`;
+  return `<div class="ylabel">Für dich</div>${list.map(row).join("")}<div class="ylabel">Alle Lebensmittel</div>`;
 }
 // IDs, die schon oben vorgeschlagen werden (damit sie in der Liste darunter nicht doppelt stehen)
 function sugIds(){ return new Set(foodSuggest(ui.addSlot||"snack").map(s=>s.food.id)); }

@@ -495,11 +495,8 @@ p { margin:var(--s-2) 0; }
 .adneed div { background:var(--fill-2); border-radius:var(--r-l); padding:var(--s-3); text-align:center; }
 .adneed b { display:block; font-size:var(--fs-l); }
 .adneed span { font-size:var(--fs-s); color:var(--ink-2); }
-/* Schlaue Vorschläge: kleine Zwischenüberschrift und „Wie gestern“-Zeile */
+/* Schlaue Vorschläge: kleine Zwischenüberschrift */
 .ylabel { font-size:var(--fs-s); font-weight:700; color:var(--ink-2); text-transform:uppercase; letter-spacing:.04em; margin:var(--s-4) 0 var(--s-1); }
-.yrep { display:flex; align-items:center; gap:var(--s-3); width:100%; text-align:left; background:var(--fill-2); border-radius:var(--r-l); padding:var(--s-2) var(--s-3); min-height:64px; margin-bottom:var(--s-1); }
-.yrep-ic { width:36px; height:36px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent-text); display:grid; place-items:center; font-size:var(--fs-m); font-weight:700; }
-.yrep .sub { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 /* Großer Abschluss-Knopf unten im Blatt (gleich wie .pill.primary) */
 .yfertig {
   position:sticky; bottom:0; width:100%; min-height:52px; margin-top:var(--s-4); padding:0 var(--s-5);
