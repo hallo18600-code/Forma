@@ -153,6 +153,7 @@ function scanResults(){
   const q=ui.query.trim().toLowerCase(), mode="text";
   const pool=mode==="care"?CARE:mode==="sup"?SUPS:foods().filter(p=>!p.hidden);
   // Ohne Suchtext: oben die schlauen Vorschläge (vorschlaege.js), darunter die Grundlebensmittel ohne Doppelte
+  if(!q){ const tb=scanTabBody(); if(tb!=null) return tb; }   // Reiter „Zuletzt“ / „Favoriten“
   const top=q?"":sugBlock(), seen=q||!top?null:sugIds();
   const ts=qTokens(q), found0=(q?rankSort(pool.filter(p=>{ const x=hay(p); return ts.every(w=>x.includes(w)); }),q):pool.filter(p=>!seen||!seen.has(p.id))).slice(0,12);
   let found=found0, more=""; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const lim=ui.scanMax||30, ids=new Set(found0.map(p=>p.id)), d=dbSearch(q,lim); found=found0.concat(d.filter(p=>!ids.has(p.id))); if(d.length>=lim) more=`<button class="pill ghost w-full mt-3" data-act="scan-more">Mehr anzeigen</button>`; }
@@ -171,6 +172,7 @@ function scanSheet(){
   return `${yHead(title)}
     <div class="ytiles"><button class="ytile" data-act="scan-view" data-v="barcode"><i>${BC_ICON}</i>Barcode</button><button class="ytile" data-act="scan-view" data-v="ai"><i>💬</i>Sprache/Text</button><button class="ytile" data-act="scan-view" data-v="more"><i>⋯</i>Mehr</button></div>
     <div class="field ysearch"><input value="${esc(ui.query)}" data-act="query" placeholder="${slot?"Was hattest du zum "+slot.name+"?":"Suchen"}"></div>
+    <div id="scan-tabs">${q?"":scanTabs()}</div>
     <div id="scan-results">${scanResults()}</div>
     <p class="sub mt-3">Produktdaten: Open Food Facts (ODbL)</p>
     <button class="yfertig" data-act="close">Fertig</button>`;

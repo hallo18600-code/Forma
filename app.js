@@ -42,6 +42,7 @@ function normalize(s){
     s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
     s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.coach.skipped=s.coach.skipped||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
     s.date = s.date || todayIso(); s.ob = s.ob||{}; migrateCoach(s);
+    s.favs=Array.isArray(s.favs)?[...new Set(s.favs.filter(x=>typeof x==="string"&&x))]:[];
     if(s.adapt!=null&&(typeof s.adapt!=="object"||s.adapt.ratio==null||s.adapt.ratio===""||!Number.isFinite(+s.adapt.ratio))) delete s.adapt;
     // Kaputte Tagebuch-Einträge (z. B. aus einer fremden Datei) entfernen, sonst stürzen Rechnungen ab
     Object.keys(s.days).forEach(k=>{ const d=s.days[k]; if(!d||typeof d!=="object"){ delete s.days[k]; return; } d.meals=Array.isArray(d.meals)?d.meals.filter(m=>m&&typeof m==="object"&&m.id!=null):[]; });
@@ -66,7 +67,7 @@ function amtEntry(){
   const g=Math.max(1,Math.round(+ui.portion||100));
   return ui.unit&&ui.unit!=="g"?{portion:g,u:ui.unit,q:ui.qty||1}:{portion:g};
 }
-function closeModal(){ stopCam(); ui.modal=null; render(); }
+function closeModal(){ stopCam(); if(ui.modal&&ui.modal.type==="ph-date") phPendingCancel(); ui.modal=null; render(); }
 
 // Richtwerte aus dem Fragebogen. Grundumsatz nach Mifflin-St Jeor, Alltag (ohne Sport) + Training getrennt.
 // Gespeichert ist die Alltags-Stufe (1.3/1.4/1.55/1.7), gerechnet wird mit dem Faktor ohne Sport.
@@ -480,7 +481,7 @@ function cleanIds(d){
   each(d.workouts,w=>{ w.id=c(w.id); each(w.exercises,e=>e.id=c(e.id)); });
   each(d.routines,r=>{ r.id=c(r.id); each(r.days,x=>{ x.id=c(x.id); each(x.exercises,e=>e.id=c(e.id)); }); });
   each(d.coach&&d.coach.routine,r=>{ r.id=c(r.id); r.topic=c(r.topic); });
-  each(d.customs,x=>x.id=c(x.id)); each(d.customEx,x=>x.id=c(x.id)); d.stack=(d.stack||[]).map(c);
+  each(d.customs,x=>x.id=c(x.id)); each(d.customEx,x=>x.id=c(x.id)); d.stack=(d.stack||[]).map(c); d.favs=(d.favs||[]).map(c).filter(Boolean);
   Object.values(d.days||{}).forEach(day=>each(day&&day.meals,m=>{ m.uid=c(m.uid); m.id=c(m.id); }));
   return d;
 }
@@ -512,6 +513,8 @@ function renderModal(){
   if(type==="rem") inner=remSheet();
   if(type==="dayscore") inner=dayScoreSheet();
   if(type==="photo") inner=photoSheet(payload);
+  if(type==="ph-add") inner=phAddSheet();
+  if(type==="ph-date") inner=phDateSheet();
   if(type==="pref") inner=prefSheet(payload);
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
@@ -551,7 +554,7 @@ function render(){ try{ ensureRoutine(); }catch(e){} try{ adaptCheck(); }catch(e
   if(ui.toast) html += `<div class="toast">${esc(ui.toast)}</div>`;
   // Scroll-Positionen merken, damit ein Neuaufbau (Tipp, Toast, Timer) nicht nach oben springt
   // Jede Art von Scroll-Bereich einzeln merken (auch Übungs-Detailseite und Leisten zum Wischen)
-  const SCR=[".scroll",".sheet-card",".exi-scroll",".units",".pf-strip"];
+  const SCR=[".scroll",".sheet-card",".exi-scroll",".units"];
   const keep=SCR.map(q=>[...root.querySelectorAll(q)].map(n=>[n.scrollTop,n.scrollLeft]));
   const view=!state.onboarded?"ob:"+state.step:ui.workout?"w":ui.plan?"p":ui.dash?"d:"+ui.dash:"t:"+state.tab;
   const same=ui._view===view, exSame=ui._exi===(ui.exInfo&&ui.exInfo.id), mSame=ui._modal===(ui.modal&&ui.modal.type);
@@ -631,7 +634,7 @@ document.getElementById("app").addEventListener("click", e=>{
     if(el.dataset.slot) ui.addSlot=el.dataset.slot;
     if(el.dataset.type==="weigh") ui.draftKg=lastWeight();
     if(el.dataset.type==="gym"){ ui.gymRes=null; ui.gymErr=false; }
-    if(el.dataset.type==="scan"){ ui.query=""; ui.scanView="list"; }
+    if(el.dataset.type==="scan"){ ui.query=""; ui.scanView="list"; ui.scanTab="fuer"; }
     if(el.dataset.type==="product") ensureDb(el.dataset.id); openModal(el.dataset.type, el.dataset.id); return;
   }
   else if(act==="close"){ closeModal(); return; }
@@ -649,9 +652,11 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="sug-add"){
     // Vorschlag: mit der zuletzt gegessenen Menge eintragen
     const it=foods().find(x=>x.id===el.dataset.id); if(!it) return;
-    const a=lastAmount(it.id, ui.addSlot||"snack")||{portion:100}, m=Object.assign({uid:uid(),id:it.id,slot:ui.addSlot||"snack"},a);
+    const a=lastAmount(it.id, ui.addSlot||"snack")||sugDefault(it), m=Object.assign({uid:uid(),id:it.id,slot:ui.addSlot||"snack"},a);
     day().meals.push(m); syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+amtTxt(it,m));
   }
+  else if(act==="scan-tab"){ ui.scanTab=el.dataset.v; }
+  else if(act==="fav"){ const on=favToggle(el.dataset.id); toast(on?"Zu den Favoriten":"Aus den Favoriten"); return; }
   else if(act==="ai-mic"){ aiMic(); return; }
   else if(act==="ai-ex"){ ui.aiText=el.dataset.v; ui.aiOv={}; aiParse(); }
   else if(act==="ai-alt"){ const k=+el.dataset.i; ui.aiOpen=ui.aiOpen===k?null:k; }
@@ -824,9 +829,13 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="toggle"){ p[el.dataset.k]=!p[el.dataset.k]; save(); }
   else if(act==="adapt-toggle"){ p.adaptive=p.adaptive===false; if(state.adapt) state.adapt.seen=true; save(); }
-  else if(act==="ph-add"){ phPick(); return; }
-  else if(act==="ph-sel"){ phSelect(el.dataset.id); }
-  else if(act==="ph-open"){ ui.phDel=null; openModal("photo", el.dataset.id); return; }
+  else if(act==="ph-add"){ openModal("ph-add"); return; }
+  else if(act==="ph-pick"){ phPick(el.dataset.v); ui.modal=null; }
+  else if(act==="ph-page"){ ui.dash="photos"; ui.modal=null; }
+  else if(act==="ph-open"){ ui.phDel=null; ui.phRedate=null; openModal("photo", el.dataset.id); return; }
+  else if(act==="ph-redate"){ ui.phRedate=el.dataset.id; ui.phDel=null; }
+  else if(act==="ph-redate-save"){ phSetDate(el.dataset.id); return; }
+  else if(act==="ph-date-save"){ phPendingSave(); return; }
   else if(act==="ph-del"){ if(ui.phDel===el.dataset.id){ ui.phDel=null; phDelete(el.dataset.id); return; } ui.phDel=el.dataset.id; }
   else if(act==="rem-tog"){ remToggle(el.dataset.k); return; }
   else if(act==="rem-time"){ remTime(el.dataset.k,+el.dataset.d); }
@@ -1010,7 +1019,8 @@ document.getElementById("app").addEventListener("input", e=>{
   if(el.dataset.act==="reset-type"){ ui.resetTxt=el.value; const b=document.getElementById("reset-go"); if(b) b.disabled=el.value.trim().toUpperCase()!=="LÖSCHEN"; }
   if(el.dataset.act==="query"){
     ui.query=el.value; ui.scanMax=30;
-    const box=document.getElementById("scan-results");
+    const box=document.getElementById("scan-results"), tabs=document.getElementById("scan-tabs");
+    if(tabs) tabs.innerHTML=ui.query.trim()?"":scanTabs();
     if(box) box.innerHTML=scanResults(); else render();
   }
   if(el.dataset.act==="ai-type") aiTyped(el.value);

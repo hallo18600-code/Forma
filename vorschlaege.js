@@ -64,15 +64,59 @@ function lastAmount(id, slot){
   return any;
 }
 
-// Liste oben im „+“-Blatt (nur ohne Suchtext)
+// Menge für „+“ ohne Verlauf: übliche Portion (1 Ei, 1 Scheibe …), sonst 100 g
+function sugDefault(p){ const d=unitsFor(p).find(x=>x.d); return d?{portion:d.g,u:d.k,q:1}:{portion:100}; }
+function sugRow(p,amt){
+  const sc=scored(p).score, kc=line(p,amt.portion).kcal, fav=favOn(p.id);
+  return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${fav?`<i class="yfav-dot" aria-hidden="true">★</i>`:""}${esc(p.name)}</b><div class="sub notr">${esc(amtTxt(p,amt))}</div></button>${showKcal()?`<span class="ykc">${kc} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div><button class="yplus" data-act="sug-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button></div>`;
+}
+
+// ---------- Favoriten ----------
+function favs(){ return Array.isArray(state.favs)?state.favs:[]; }
+function favOn(id){ return favs().includes(id); }
+function favToggle(id){
+  ensureDb(id); const p=foods().find(x=>x.id===id); if(!p) return false;
+  state.favs=favOn(id)?favs().filter(x=>x!==id):[id].concat(favs()).slice(0,200);
+  save(); return favOn(id);
+}
+function favList(){ return favs().map(sugFood).filter(Boolean); }
+
+// ---------- Zuletzt gegessen: jedes Lebensmittel einmal, das zuletzt gegessene oben (letzte 60 Tage) ----------
+function recentList(limit){
+  const base=state.date||todayIso(), seen=new Set(), out=[];
+  for(let i=0;i<=SUG_DAYS&&out.length<(limit||25);i++){
+    const d=state.days[addDays(base,-i)]; if(!d||!Array.isArray(d.meals)) continue;
+    for(let k=d.meals.length-1;k>=0&&out.length<(limit||25);k--){
+      const m=d.meals[k]; if(!m||!m.id||seen.has(m.id)||!(m.portion>0)) continue;
+      const p=sugFood(m.id); seen.add(m.id); if(p) out.push({food:p,amt:sugAmt(p,m)});
+    }
+  }
+  return out;
+}
+
+// Reiter oben im „+“-Blatt (nur ohne Suchtext): Für dich · Zuletzt · Favoriten
+const SCAN_TABS=[["fuer","Für dich"],["zuletzt","Zuletzt"],["fav","Favoriten"]];
+function scanTabs(){
+  const t=ui.scanTab||"fuer";
+  return `<div class="seg ytabs" role="tablist">${SCAN_TABS.map(([k,l])=>`<button class="${t===k?"on":""}" role="tab" aria-selected="${t===k}" data-act="scan-tab" data-v="${k}">${l}</button>`).join("")}</div>`;
+}
+function scanTabBody(){
+  const t=ui.scanTab||"fuer", slot=ui.addSlot||"snack";
+  if(t==="zuletzt"){
+    const L=recentList();
+    return L.length?L.map(x=>sugRow(x.food,x.amt)).join(""):`<p class="sub yempty">Hier erscheint, was du zuletzt gegessen hast.</p>`;
+  }
+  if(t==="fav"){
+    const L=favList();
+    return L.length?L.map(p=>sugRow(p,lastAmount(p.id,slot)||sugDefault(p))).join(""):`<p class="sub yempty">Noch keine Favoriten. Öffne ein Lebensmittel und tippe auf ☆.</p>`;
+  }
+  return null;   // „Für dich“: Vorschläge + alle Lebensmittel (scanResults)
+}
+// „Für dich“: Vorschläge oben (nur ohne Suchtext)
 function sugBlock(){
   const slot=ui.addSlot||"snack", list=foodSuggest(slot);
   if(!list.length) return "";
-  const row=s=>{
-    const p=s.food, sc=scored(p).score, kc=line(p,s.amt.portion).kcal;
-    return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub notr">${esc(amtTxt(p,s.amt))}</div></button>${showKcal()?`<span class="ykc">${kc} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div><button class="yplus" data-act="sug-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button></div>`;
-  };
-  return `<div class="ylabel">Für dich</div>${list.map(row).join("")}<div class="ylabel">Alle Lebensmittel</div>`;
+  return `<div class="ylabel">Oft gegessen</div>${list.map(s=>sugRow(s.food,s.amt)).join("")}<div class="ylabel">Alle Lebensmittel</div>`;
 }
 // IDs, die schon oben vorgeschlagen werden (damit sie in der Liste darunter nicht doppelt stehen)
 function sugIds(){ return new Set(foodSuggest(ui.addSlot||"snack").map(s=>s.food.id)); }

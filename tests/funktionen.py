@@ -75,6 +75,31 @@ VORSCHLAEGE = r"""()=>{ F={}; let n=0;
  ["ei","hähnchen","skyr","brot","cola","xyzq"].forEach(q=>{ ui.query=q; const a=scanResults(); const keep=state.days; state.days={}; const b=scanResults(); state.days=keep; if(a!==b) fail("Suche verändert durch Verlauf",q); });
  // Leerer Zustand: kein Vorschlag, keine Überschrift
  newState(); ui.query=""; ui.addSlot="breakfast"; if(sugBlock()!=="") fail("Vorschlagsblock ohne Verlauf","");
+ // Zuletzt gegessen: jedes Lebensmittel einmal, neueste zuerst, nur gültige
+ for(let it=0;it<2000;it++){ n++;
+  newState(); const T=todayIso(), log=[];
+  for(let i=ri(0,70);i>=0;i--){ if(Math.random()<.4) continue; const d=state.days[addDays(T,-i)]=blankDay();
+   for(let k=ri(0,5);k>0;k--){ const id=Math.random()<.05?"weg-"+uid():rnd(pool).id; d.meals.push({uid:uid(),id,slot:rnd(slots),portion:ri(1,400)}); log.push({i,id}); } }
+  const R=recentList(), ids=R.map(x=>x.food.id);
+  if(new Set(ids).size!==ids.length) fail("Zuletzt: doppelt","");
+  if(R.length>25) fail("Zuletzt: zu viele","");
+  if(R.some(x=>!foods().some(f=>f.id===x.food.id)||x.food.hidden||!(x.amt.portion>0))) fail("Zuletzt: ungültiger Eintrag","");
+  // Erwartete Reihenfolge unabhängig nachrechnen
+  const want=[]; for(let i=0;i<=60;i++){ const d=state.days[addDays(T,-i)]; if(!d) continue; for(let k=d.meals.length-1;k>=0;k--){ const m=d.meals[k]; if(!want.includes(m.id)&&foods().some(f=>f.id===m.id&&!f.hidden)) want.push(m.id); } }
+  if(ids.join()!==want.slice(0,25).join()) fail("Zuletzt: falsche Reihenfolge",ids.slice(0,3).join()+" vs "+want.slice(0,3).join());
+ }
+ // Favoriten: an/aus, keine Doppelten, übersteht Speichern/Import, kaputte Werte werden bereinigt
+ newState(); n++;
+ if(!favToggle("ei")||!favToggle("lachs")||favs().join()!=="lachs,ei") fail("Favorit hinzufügen falsch",favs().join());
+ if(favToggle("ei")||favOn("ei")) fail("Favorit entfernen falsch","");
+ if(favToggle("gibtsnicht")!==false||favOn("gibtsnicht")) fail("Unbekanntes Lebensmittel als Favorit","");
+ favToggle("ei"); const st=normalize(JSON.parse(JSON.stringify(state))); if(st.favs.join()!=="ei,lachs") fail("Favoriten nach Laden weg",st.favs.join());
+ const im=checkImport('{"app":"Health Maxxing","data":{"profile":{},"favs":["ei","ei",5,null,"<b>x","lachs"]}}');
+ if(!im||im.favs.join()!=="ei,bx,lachs") fail("Favoriten aus Datei nicht bereinigt",im&&JSON.stringify(im.favs));
+ ["fuer","zuletzt","fav"].forEach(t=>{ ui.scanTab=t; ui.query=""; const h=scanResults(); if(/undefined|NaN/.test(h)) fail("undefined/NaN im Reiter",t); if(t==="fav"&&!h.includes('data-id="ei"')) fail("Favorit fehlt im Reiter",""); });
+ state.favs=["gibtsnicht","ei"]; ui.scanTab="fav"; if(scanResults().includes("gibtsnicht")) fail("Gelöschter Favorit angezeigt","");
+ ui.scanTab="fav"; ui.query="ei"; if(scanResults().includes('data-act="sug-add"')&&!scanResults().includes("quick-add")) fail("Suche ignoriert Reiter nicht","");
+ ui.scanTab="fuer"; ui.query="";
  return {n,F};
 }"""
 
@@ -270,6 +295,9 @@ def klicktest(b):
             pid = ev("return ui.modal&&ui.modal.payload")
             la = ev(f"const a=lastAmount('{pid}','breakfast'); return a&&a.portion")
             if la: check(ev("return ui.portion") == la, "Blatt zeigt nicht die letzte Menge")
+            # Favorit setzen (Stern), dann Reiter prüfen
+            click('[data-act="fav"]'); check(ev(f"return favOn('{pid}')"), "Stern macht keinen Favoriten")
+            check(pg.locator('.yfav.on').count() == 1, "Stern zeigt Favorit nicht an")
             click('[data-act="log-food"]')
             check(ev("return ui.modal") is None, "Blatt schließt nach Hinzufügen nicht")
             # Jetzt Tages-Score sichtbar und Zahl richtig
@@ -279,8 +307,22 @@ def klicktest(b):
                 check(shown == str(ev("return dayScore().score")), "Tages-Score Zahl falsch")
                 click(".dsrow"); check(ev("return ui.modal&&ui.modal.type") == "dayscore", "Tages-Score-Blatt öffnet nicht")
                 click('.sheet-card [data-act="close"]')
-            # Snacks: Wie gestern geht nicht (gestern keine Snacks) → kein Fehler
-            click('[data-type="scan"][data-slot="snack"]'); click('.sheet-card [data-act="close"]')
+            # Reiter im Plus-Blatt: Zuletzt + Favoriten
+            click('[data-type="scan"][data-slot="snack"]')
+            check(pg.locator('[data-act="scan-tab"]').count() == 3, "Reiter fehlen")
+            click('[data-act="scan-tab"][data-v="zuletzt"]')
+            check(pg.locator('#scan-results [data-act="sug-add"]').first.get_attribute("data-id") == pid, "Zuletzt: zuletzt gegessenes nicht oben")
+            click('[data-act="scan-tab"][data-v="fav"]')
+            check(pg.locator('#scan-results [data-act="sug-add"]').count() == 1 and pg.locator('#scan-results .yfav-dot').count() == 1, "Favoriten-Reiter falsch")
+            n0 = ev("return day().meals.length"); click('#scan-results [data-act="sug-add"]')
+            check(ev("return day().meals.length") == n0 + 1 and ev("return day().meals[day().meals.length-1].slot") == "snack", "+ im Favoriten-Reiter trägt nicht ein")
+            pg.locator('input[data-act="query"]').fill("ba"); pg.wait_for_timeout(200)
+            check(pg.locator('[data-act="scan-tab"]').count() == 0, "Reiter bleiben beim Suchen")
+            pg.locator('input[data-act="query"]').fill(""); pg.wait_for_timeout(200)
+            check(pg.locator('[data-act="scan-tab"]').count() == 3, "Reiter kommen nach dem Suchen nicht zurück")
+            click('.ynm'); click('[data-act="fav"]'); click('[data-act="back-scan"]')
+            click('.sheet-card [data-act="close"]')
+            ev("state.favs=[]; save(); day().meals=day().meals.filter(m=>m.slot!=='snack'); save(); render();")
             # Alles löschen per Eintrag → Score verschwindet
             ev("day().meals=[]; save(); render();"); check(pg.locator(".dsrow").count() == 0, "Score bleibt nach Löschen")
             # Profil: Richtwert-Blatt, Schalter aus/an
@@ -357,60 +399,88 @@ def fototest(b):
         ev = lambda js: pg.evaluate("async ()=>{" + js + "}")
         def check(c, m):
             if not c: probleme.append(f"[{theme}] {m}")
-        def add(path, soll):
-            # Wartet, bis das Foto wirklich gespeichert ist (große Bilder brauchen auf langsamen Rechnern länger)
-            with pg.expect_file_chooser() as fc: pg.locator('[data-act="ph-add"]').first.click()
-            fc.value.set_files(path)
-            try: pg.wait_for_function(f"()=>PH&&PH.length==={soll}", timeout=15000)
+        def wait(cond):
+            try: pg.wait_for_function(cond, timeout=15000)
             except Exception: pass
+        def open_add():
+            el = pg.locator('[data-type="ph-add"], [data-act="ph-add"]').first; el.click(); pg.wait_for_timeout(200)
+            check(ev("return ui.modal&&ui.modal.type") == "ph-add", "Foto-Auswahl öffnet nicht")
+        def add(path, soll, mode="cam", date=None):
+            # Wartet auf echte Ergebnisse (große Bilder brauchen auf langsamen Rechnern länger)
+            open_add()
+            with pg.expect_file_chooser() as fc: pg.locator(f'[data-act="ph-pick"][data-v="{mode}"]').click()
+            cap = fc.value.element.get_attribute("capture")
+            check((cap == "environment") if mode == "cam" else (cap is None), f"Kamera-Einstellung falsch ({mode}: {cap})")
+            fc.value.set_files(path)
+            if mode == "lib" and date is not None:
+                wait("()=>ui.modal&&ui.modal.type==='ph-date'")
+                check(ev("return ui.modal&&ui.modal.type") == "ph-date", "Datum wird bei „Aus Fotos“ nicht gefragt")
+                pg.locator("#ph-date-in").fill(date); pg.locator('[data-act="ph-date-save"]').click()
+            wait(f"()=>PH&&PH.length==={soll}")
             pg.wait_for_timeout(300)
+        D = lambda n: ev(f"return addDays(todayIso(),{n})")
         ev("state.tab='verlauf'; render();")
-        # Ganz unten: Fotos-Bereich ist das Letzte auf der Seite
+        # Ganz unten: leerer Foto-Bereich ist das Letzte auf der Seite
         check(ev("const c=document.querySelector('.scroll').lastElementChild; return !!(c&&c.classList.contains('pf-empty'))"), "Leerer Foto-Bereich nicht ganz unten")
-        add(big, 1)
-        check(ev("return PH.length") == 1, "Großes Foto nicht gespeichert")
-        size = ev("const r=await phTx('readonly',st=>st.getAll()); const b=r[0].blob; const i=await createImageBitmap(b); return [i.width,i.height,b.type,b.size]")
+        # Kamera: kein Datum fragen, Datum = heute
+        add(big, 1, "cam")
+        check(ev("return PH.length") == 1, "Kamera-Foto nicht gespeichert")
+        check(ev("return ui.modal") is None, "Nach Kamera-Foto wird trotzdem etwas gefragt")
+        check(ev("return PH[0].date") == D(0), "Kamera-Foto hat nicht das heutige Datum")
+        size = ev("const r=await phTx('readonly',st=>st.getAll()); const b=r[0].blob; const i=await createImageBitmap(b); return [i.width,i.height,b.type]")
         check(max(size[0], size[1]) <= 1280 and size[2] == "image/jpeg", f"Foto nicht verkleinert {size}")
-        check(ev("return document.querySelectorAll('.pf-two .pf-ph').length") == 1, "Ein Foto: Anzeige falsch")
-        pg.wait_for_timeout(100); add(falsch, 2); check(ev("return PH.length") == 1, "Falsche Datei wurde gespeichert")
-        add(klein, 2); add(quer, 3)
-        check(ev("return PH.length") == 3, "Weitere Fotos fehlen")
-        # Daten zurückdatieren, Gewicht passend → Unterschied richtig
-        ev("const r=await phTx('readonly',st=>st.getAll()); r.sort((a,b)=>a.t-b.t); const ds=[addDays(todayIso(),-60),addDays(todayIso(),-30),todayIso()]; for(let i=0;i<r.length;i++){ r[i].date=ds[i]; await phTx('readwrite',st=>st.put(r[i])); } state.weights=[{date:addDays(todayIso(),-61),kg:80.4},{date:addDays(todayIso(),-31),kg:78.0},{date:todayIso(),kg:76.9}]; save(); await phLoad(); render();")
-        pg.wait_for_timeout(300)
-        check(ev("return document.querySelector('.pf-two .pf-diff')&&document.querySelector('.pf-two .pf-diff').textContent.trim()") == "−3,5 kg", "Gewichtsunterschied falsch")
+        check(ev("return document.querySelectorAll('.pf-two .pf-cell').length===2&&!!document.querySelector('.pf-two .pf-next')"), "Ein Foto: rechts fehlt der Platzhalter")
+        # Falsche Datei: nichts speichern, nichts fragen
+        add(falsch, 2, "lib"); check(ev("return PH.length") == 1 and ev("return ui.modal&&ui.modal.type") != "ph-date", "Falsche Datei wurde angenommen")
+        # Aus Fotos: Datum wird gefragt; ungültig/zukünftig wird abgelehnt; Abbrechen speichert nichts
+        open_add()
+        with pg.expect_file_chooser() as fc: pg.locator('[data-act="ph-pick"][data-v="lib"]').click()
+        fc.value.set_files(klein); wait("()=>ui.modal&&ui.modal.type==='ph-date'")
+        check(ev("return document.getElementById('ph-date-in').value") == D(0), "Datum nicht mit heute vorbelegt")
+        for bad in ["", D(1)]:
+            pg.locator("#ph-date-in").fill(bad) if bad else ev("document.getElementById('ph-date-in').value=''")
+            pg.locator('[data-act="ph-date-save"]').click(); pg.wait_for_timeout(400)
+            check(ev("return PH.length") == 1 and ev("return ui.modal&&ui.modal.type") == "ph-date", f"Ungültiges Datum angenommen ({bad or 'leer'})")
+        pg.locator('.sheet-card [data-act="close"]').last.click(); pg.wait_for_timeout(400)
+        check(ev("return PH.length") == 1 and ev("return ui.phPending") is None, "Abbrechen speichert trotzdem")
+        add(klein, 2, "lib", D(-60)); add(quer, 3, "lib", D(-30))
+        check(ev("return PH.map(p=>p.date)") == [D(-60), D(-30), D(0)], "Fotos falsch nach Datum sortiert")
+        # Links immer das erste, rechts immer das neueste; Gewichtsunterschied richtig
+        ev("state.weights=[{date:addDays(todayIso(),-61),kg:80.4},{date:addDays(todayIso(),-31),kg:78.0},{date:todayIso(),kg:76.9}]; save(); render();"); pg.wait_for_timeout(300)
+        cells = ev("return [...document.querySelectorAll('.scroll > .card .pf-two .pf-cell')].map(c=>c.dataset.id)")
+        check(cells == [ev("return PH[0].id"), ev("return PH[2].id")], f"Links/rechts nicht erstes/neuestes {cells}")
+        check(ev("return document.querySelector('.pf-diff b').textContent.trim()") == "−3,5 kg", "Gewichtsunterschied falsch")
         check(ev("return document.querySelector('.scroll').lastElementChild.querySelector('.pf-two')!==null"), "Foto-Bereich nicht ganz unten")
-        # Seite „Alle ansehen“
-        pg.locator('[data-act="dash"][data-id="photos"]').click(); pg.wait_for_timeout(500)
-        check(ev("return ui.dash") == "photos", "Foto-Seite öffnet nicht")
-        check(ev("return document.querySelectorAll('.pf-th').length") == 3, "Nicht alle Fotos in der Leiste")
-        check(ev("return document.querySelectorAll('.pf-th.on').length") == 2, "Nicht genau 2 ausgewählt")
+        check(ev("return document.querySelectorAll('.scroll .pf-g').length") == 0, "Im Verlauf werden schon alle Fotos gezeigt")
+        # Antippen → Seite mit allen Fotos (neueste zuerst)
+        pg.locator('.scroll > .card .pf-cell').first.click(); pg.wait_for_timeout(400)
+        check(ev("return ui.dash") == "photos", "Antippen öffnet nicht alle Fotos")
+        check(ev("return [...document.querySelectorAll('.pf-g')].map(x=>x.dataset.id)") == ev("return PH.slice().reverse().map(p=>p.id)"), "Alle Fotos falsch")
+        # Datum ändern: mittleres Foto auf ganz alt → wird zum Vorher-Foto
         mid = ev("return PH[1].id")
-        pg.locator(f'[data-act="ph-sel"][data-id="{mid}"]').click(); pg.wait_for_timeout(150)
-        pair = ev("return phPair().map(p=>p.id)")
-        check(pair == [ev("return PH[0].id"), mid], f"Auswahl falsch {pair}")
-        check(ev("return document.querySelector('.pf-big .pf-diff').textContent.trim()") == "−2,4 kg", "Unterschied bei Auswahl falsch")
-        for _ in range(6):
-            pg.locator('[data-act="ph-sel"]').nth(int(ev("return Math.floor(Math.random()*3)"))).click(); pg.wait_for_timeout(60)
-            pr = ev("return phPair().map(p=>p.id)")
-            check(len(pr) == 2 and pr[0] != pr[1], f"Vergleich zeigt zweimal das gleiche Foto {pr}")
-            check(ev("return document.querySelectorAll('.pf-th.on').length") == 2, "Auswahl nicht genau 2")
-        # Einzelnes Foto: löschen braucht zwei Tipps
-        pg.locator('.pf-big [data-act="ph-open"]').first.click(); pg.wait_for_timeout(150)
+        pg.locator(f'.pf-g[data-id="{mid}"]').click(); pg.wait_for_timeout(200)
         check(ev("return ui.modal&&ui.modal.type") == "photo", "Foto-Blatt öffnet nicht")
-        pg.locator('[data-act="ph-del"]').click(); pg.wait_for_timeout(150)
+        pg.locator('[data-act="ph-redate"]').click(); pg.wait_for_timeout(150)
+        pg.locator("#ph-redate").fill(D(1)); pg.locator('[data-act="ph-redate-save"]').click(); pg.wait_for_timeout(400)
+        check(ev("return PH.find(p=>p.id==='"+mid+"').date") == D(-30), "Zukunftsdatum angenommen")
+        pg.locator("#ph-redate").fill(D(-90)); pg.locator('[data-act="ph-redate-save"]').click()
+        wait(f"()=>PH[0].id==='{mid}'")
+        check(ev("return PH[0].id") == mid, "Datum ändern sortiert nicht neu")
+        pg.locator('.sheet-card [data-act="close"]').last.click(); pg.wait_for_timeout(300)
+        check(ev("return document.querySelector('.pf-two .pf-cell').dataset.id") == mid, "Vorher-Foto nach Datum ändern falsch")
+        # Löschen braucht zwei Tipps
+        pg.locator('.pf-g').first.click(); pg.wait_for_timeout(200)
+        pg.locator('[data-act="ph-del"]').click(); pg.wait_for_timeout(200)
         check(ev("return PH.length") == 3, "Löscht schon beim ersten Tipp")
-        pg.locator('[data-act="ph-del"]').click()
-        try: pg.wait_for_function("()=>PH.length===2&&!ui.modal", timeout=15000)
-        except Exception: pass
-        check(ev("return PH.length") == 2, "Löschen klappt nicht")
-        check(ev("return ui.modal") is None, "Blatt bleibt nach Löschen offen")
+        pg.locator('[data-act="ph-del"]').click(); wait("()=>PH.length===2&&!ui.modal")
+        check(ev("return PH.length") == 2 and ev("return ui.modal") is None, "Löschen klappt nicht")
+        # Aufnahmedatum aus Bilddaten
+        ex = ev("const t=s=>new File([new Blob(['JFIF...Exif..'+s+'...'])],'a.jpg',{type:'image/jpeg'}); return [await phExifDate(t('2024:05:17 10:11:12')), await phExifDate(t('2099:01:01 00:00:00')), await phExifDate(t('2024:13:40 00:00:00')), await phExifDate(t('nichts'))]")
+        check(ex == ["2024-05-17", None, None, None], f"Aufnahmedatum falsch gelesen {ex}")
         # Zurück, Neuladen: alles noch da
-        pg.locator('[data-act="dash-close"]').click(); pg.wait_for_timeout(150)
+        pg.locator('[data-act="dash-close"]').click(); pg.wait_for_timeout(200)
         check(ev("return ui.dash") is None and ev("return state.tab") == "verlauf", "Zurück führt nicht zum Verlauf")
-        pg.reload()
-        try: pg.wait_for_function("()=>PH&&PH.length===2", timeout=15000)
-        except Exception: pass
+        pg.reload(); wait("()=>PH&&PH.length===2")
         check(ev("return PH&&PH.length") == 2, "Fotos nach Neuladen weg")
         # Datensicherung enthält keine Fotos (Datei bleibt klein)
         check(ev("return JSON.stringify(state).length<200000"), "Sicherung wird durch Fotos groß")

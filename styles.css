@@ -31,6 +31,7 @@
   --ink:#17181a;              /* Haupttext */
   --ink-2:#5f6670;            /* Nebentext, Kontrast mind. 4,5 : 1 */
   --ink-3:#8b929b;            /* nur Deko: Pfeile, Platzhalter */
+  --star:#d99a00;             /* Favoriten-Stern */
 
   /* Akzent (Grün) */
   --accent:#12a05a;           /* Flächen: Ringe, Balken, Schalter */
@@ -109,7 +110,7 @@
   --surface:#1b1c1f; --surface-sheet:#202124;
   --fill:rgba(150,158,170,.17); --fill-2:rgba(150,158,170,.09);
   --track:#2c2f34; --line:#2a2c31; --line-strong:#3c3f45;
-  --ink:#f2f3f5; --ink-2:#a3a9b1; --ink-3:#6c727a;
+  --ink:#f2f3f5; --ink-2:#a3a9b1; --ink-3:#6c727a; --star:#f2b632;
   --accent:#2fc679; --accent-strong:#2fc679; --accent-text:#4bd38a; --on-accent:#06140c;
   --accent-soft:rgba(47,198,121,.16); --on-accent-soft:#6fe0a4;
   --accent-mid:#25814f; --accent-weak:#1d4a33;
@@ -455,25 +456,23 @@ p { margin:var(--s-2) 0; }
 /* Fortschrittsfotos: ganz unten im Verlauf + eigene Seite */
 .pf-empty { display:flex; flex-direction:column; align-items:center; text-align:center; padding:var(--s-6) var(--s-4) var(--s-5); }
 .pf-ic { width:64px; height:64px; border-radius:50%; background:var(--accent-soft); color:var(--accent-text); display:grid; place-items:center; margin-bottom:var(--s-3); }
-.pf-ic svg { width:30px; height:30px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+.pf-ic svg, .pf-next svg { width:30px; height:30px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
 .pf-empty b { font-size:var(--fs-m); margin-bottom:var(--s-1); }
 .pf-empty .pill { margin-top:var(--s-4); min-height:44px; padding:0 var(--s-5); }
-.pf-two, .pf-big { display:grid; grid-template-columns:1fr 1fr; gap:var(--s-2); position:relative; }
-.pf-two.one, .pf-big.one { grid-template-columns:1fr; max-width:60%; margin:0 auto; }
-.pf-big { margin-top:var(--s-3); }
-.pf-ph { position:relative; display:block; width:100%; aspect-ratio:3/4; border-radius:var(--r-m); overflow:hidden; background:var(--fill); padding:0; }
-.pf-big .pf-ph { aspect-ratio:3/4.4; }
-.pf-ph img, .pf-th img { width:100%; height:100%; object-fit:cover; display:block; }
-.pf-tag { position:absolute; left:var(--s-2); bottom:var(--s-2); background:rgba(0,0,0,.5); color:#fff; font-size:var(--fs-s); font-weight:600; border-radius:var(--r-full); padding:var(--s-1) var(--s-2); }
-.pf-diff { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); background:var(--surface); color:var(--accent-text); border-radius:var(--r-full); padding:var(--s-1) var(--s-3); font-size:var(--fs-s); font-weight:800; box-shadow:0 2px 10px rgba(0,0,0,.15); pointer-events:none; }
-.pf-acts { display:flex; gap:var(--s-2); margin-top:var(--s-3); }
-.pf-acts .pill { flex:1; min-height:46px; }
+.pf-two { display:grid; grid-template-columns:1fr 1fr; gap:var(--s-3); }
+.pf-cell { display:flex; flex-direction:column; align-items:flex-start; gap:2px; text-align:left; min-width:0; }
+.pf-cell b { font-size:var(--fs-m); margin-top:var(--s-2); }
+.pf-cell .sub { font-size:var(--fs-s); }
+.pf-ph { position:relative; display:block; width:100%; aspect-ratio:3/4; border-radius:var(--r-m); overflow:hidden; background:var(--fill-2); }
+.pf-ph img { width:100%; height:100%; object-fit:cover; display:block; }
+.pf-next { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:var(--s-2); border:2px dashed var(--line-strong); background:transparent; color:var(--ink-3); font-size:var(--fs-s); }
+.pf-diff { margin-top:var(--s-3); padding:var(--s-2) var(--s-3); border-radius:var(--r-m); background:var(--accent-soft); color:var(--on-accent-soft); text-align:center; font-size:var(--fs-s); }
+.pf-diff b { font-size:var(--fs-m); }
+.pf-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--s-2); }
+.pf-g { display:flex; flex-direction:column; gap:var(--s-1); text-align:center; min-width:0; }
+.pf-g .pf-ph { border-radius:var(--r-s); }
 .pf-hint { text-align:center; margin-top:var(--s-2); }
-.pf-strip { display:flex; gap:var(--s-2); overflow-x:auto; margin-top:var(--s-3); padding-bottom:var(--s-1); }
-.pf-th { flex:none; width:72px; text-align:center; }
-.pf-th img { height:96px; border-radius:var(--r-s); }
-.pf-th.on img { outline:3px solid var(--accent); outline-offset:-3px; }
-.pf-th span { display:block; font-size:var(--fs-s); color:var(--ink-2); margin-top:var(--s-1); }
+.pf-prev img { width:100%; max-height:40vh; object-fit:contain; border-radius:var(--r-m); display:block; background:var(--fill-2); margin:var(--s-3) 0; }
 .pf-full img { width:100%; max-height:60vh; object-fit:contain; border-radius:var(--r-m); display:block; background:var(--fill-2); }
 /* Tages-Score: schmale Zeile unter der Kalorien-Karte */
 .dsrow { display:flex; align-items:center; gap:var(--s-3); width:100%; text-align:left; background:var(--surface); border-radius:var(--r-xl); padding:var(--s-3) var(--s-4); margin-top:var(--s-3); min-height:68px; }
@@ -495,6 +494,13 @@ p { margin:var(--s-2) 0; }
 .adneed div { background:var(--fill-2); border-radius:var(--r-l); padding:var(--s-3); text-align:center; }
 .adneed b { display:block; font-size:var(--fs-l); }
 .adneed span { font-size:var(--fs-s); color:var(--ink-2); }
+/* Plus-Blatt: Reiter Für dich · Zuletzt · Favoriten, Stern im Lebensmittel-Blatt */
+.ytabs { margin:var(--s-1) 0 var(--s-2); }
+#scan-results { min-height:min(420px,50vh); }   /* gleiche Höhe beim Wechsel der Reiter */
+.yempty { text-align:center; padding:var(--s-8) var(--s-4); }
+.yfav { width:var(--tap); height:var(--tap); border-radius:50%; font-size:var(--fs-l); color:var(--ink-3); display:grid; place-items:center; justify-self:end; }
+.yfav.on { color:var(--star); }
+.yfav-dot { font-style:normal; color:var(--star); font-size:.8em; margin-right:var(--s-1); }
 /* Schlaue Vorschläge: kleine Zwischenüberschrift */
 .ylabel { font-size:var(--fs-s); font-weight:700; color:var(--ink-2); text-transform:uppercase; letter-spacing:.04em; margin:var(--s-4) 0 var(--s-1); }
 /* Großer Abschluss-Knopf unten im Blatt (gleich wie .pill.primary) */

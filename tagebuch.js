@@ -132,7 +132,8 @@ function foodSheet(it,sc){
   const all=scoreAllGoals(it), order=[main].concat(GOALS.map(x=>x.id).filter(x=>x!==main));
   const intol=((state.coach.answers.gesundheit||{}).intol||[]).some(x=>x!=="Nein, alles okay");
   const list=(arr,cls)=>arr.map(t=>`<li class="${cls}">${esc(t)}</li>`).join("");
-  return `<div class="yhead"><button class="yback" data-act="${ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><span></span></div>
+  const fav=favOn(it.id);
+  return `<div class="yhead"><button class="yback" data-act="${ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><button class="yfav ${fav?"on":""}" data-act="fav" data-id="${it.id}" aria-pressed="${fav}" aria-label="${fav?"Aus den Favoriten":"Zu den Favoriten"}">${fav?"★":"☆"}</button></div>
     <div class="fhead"><span class="femo">${esc(it.emoji||"🍽️")}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
     ${rateRing(sc.score)}
     <div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
