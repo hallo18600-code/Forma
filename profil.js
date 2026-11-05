@@ -19,7 +19,7 @@ function renderProfil(){
       <button class="g-row" data-act="open" data-type="body"><span class="bubble">📏</span><div class="grow"><b>Körperdaten</b><div class="sub">${p.height} cm · ${p.age} Jahre · ${!p.trainFreq?"Training offen":p.trainFreq==="Gar nicht"?"kein Training":"Training "+p.trainFreq.replace(" pro Woche","")+"/Woche"}</div></div><span class="chev">›</span></button>
       <button class="g-row" data-act="open" data-type="weigh"><span class="bubble">⚖️</span><div class="grow"><b>Gewicht</b><div class="sub">${de(lastWeight(),1)} kg · Ziel ${de(p.target,1)} kg</div></div><span class="chev">›</span></button>
       <button class="g-row" data-act="ob-redo"><span class="bubble">📝</span><div class="grow"><b>Fragebogen</b><div class="sub">Antworten ändern, Plan neu berechnen</div></div><span class="chev">›</span></button>
-      <div class="g-row"><span class="bubble">🍽️</span><div class="grow"><b>Richtwert</b><div class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein</div></div></div>
+      <button class="g-row" data-act="open" data-type="details"><span class="bubble">🍽️</span><div class="grow"><b>Richtwert</b><div class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein · ${p.adaptive===false?"fest":adaptRatio()!==1?"lernt mit ✓":"lernt mit"}</div></div><span class="chev">›</span></button>
     </div>
     <div class="section"><h2>Ernährung & Haut</h2></div>
     <div class="group">
@@ -30,6 +30,7 @@ function renderProfil(){
       <div class="g-row"><div class="grow"><b>Darstellung</b></div>
         <div class="seg seg-theme" role="radiogroup" aria-label="Darstellung">${[["light","Hell"],["dark","Dunkel"],["system","System"]].map(([v,l])=>`<button class="${(p.theme||"system")===v?"on":""}" role="radio" aria-checked="${(p.theme||"system")===v}" data-act="theme" data-v="${v}">${l}</button>`).join("")}</div></div>
       <button class="g-row" data-act="open" data-type="lang"><div class="grow"><b>Sprache</b></div><span class="sub notr">${LANGS[LANG]}</span><span class="chev">›</span></button>
+      <button class="g-row" data-act="open" data-type="rem"><div class="grow"><b>Erinnerungen</b><div class="sub">${esc(remSubTxt())}</div></div><span class="chev">›</span></button>
       <button class="g-row" data-act="toggle" data-k="calories"><div class="grow"><b>Kalorien im Tagebuch</b></div>${tog(p.calories)}</button>
       ${PARTNERS_ENABLED?`<button class="g-row" data-act="toggle" data-k="affiliates"><div class="grow"><b>Partnerlinks</b><div class="sub">Anzeige, Score bleibt unabhängig</div></div>${tog(p.affiliates)}</button>`:""}
     </div>

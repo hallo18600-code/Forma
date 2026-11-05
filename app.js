@@ -42,11 +42,15 @@ function normalize(s){
     s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
     s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.coach.skipped=s.coach.skipped||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
     s.date = s.date || todayIso(); s.ob = s.ob||{}; migrateCoach(s);
+    if(s.adapt!=null&&(typeof s.adapt!=="object"||s.adapt.ratio==null||s.adapt.ratio===""||!Number.isFinite(+s.adapt.ratio))) delete s.adapt;
+    // Kaputte Tagebuch-Einträge (z. B. aus einer fremden Datei) entfernen, sonst stürzen Rechnungen ab
+    Object.keys(s.days).forEach(k=>{ const d=s.days[k]; if(!d||typeof d!=="object"){ delete s.days[k]; return; } d.meals=Array.isArray(d.meals)?d.meals.filter(m=>m&&typeof m==="object"&&m.id!=null):[]; });
     return s;
 }
 function save(){
   const copy = JSON.parse(JSON.stringify(state));
   try { localStorage.setItem(KEY, JSON.stringify(copy)); } catch(e){}
+  try { remSoon(); } catch(e){}   // Store-App: Erinnerungen neu einplanen (erinnerungen.js)
 }
 function day(s){ s=s||state.date; if(!state.days[s]) state.days[s]=blankDay(); return state.days[s]; }
 function foods(){ return [...BASE_FOODS, ...state.customs]; }
@@ -82,8 +86,8 @@ function kfaStated(){
 function leanStated(){ const k=kfaStated(); return k!==null&&k<=1; }
 function targets(){
   const p=state.profile, w=+p.weight||70, h=+p.height||175, m=h/100;
-  const bmr=10*w+6.25*h-5*(+p.age||30)+(p.sex==="m"?5:-161);
-  const tdee=bmr*(PAL_ALLTAG[p.activity]||p.activity||1.375)+trainKcal(p);
+  // Verbrauch = Formel (tdeeFormula in bedarf.js) × gelernter Faktor aus Essen + Gewichtsverlauf (1 = reine Formel)
+  const tdee=tdeeFormula(p)*adaptRatio();
   let kcal=tdee; const bmiNow=w/(m*m), lean=leanStated();
   // Abnehmen: ca. 0,5 % Körpergewicht pro Woche (1 kg Fett ≈ 7.700 kcal), höchstens 20 % unter Bedarf.
   // Bei Untergewicht (BMI < 18,5) KEIN Defizit, nur Halten – dazu zeigt safetyNote() eine Warnung.
@@ -504,7 +508,9 @@ function renderModal(){
   if(type==="area") inner=areaSheet(payload);
   if(type==="rarea") inner=routineSheet(payload);
   if(type==="lang") inner=`<h2>Sprache</h2><div class="group mt-3">${Object.keys(LANGS).map(k=>`<button class="g-row" data-act="set-lang" data-v="${k}"><div class="grow notr"><b>${LANGS[k]}</b></div>${k===LANG?"✓":""}</button>`).join("")}</div>`;
-  if(type==="details"){ const t=targets(); inner=`<h2>Richtwert</h2><p class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein. Berechnet aus Körper, Alltag, Training pro Woche und Ziel. Kein ärztlicher Wert.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`; }
+  if(type==="details") inner=detailsSheet();
+  if(type==="rem") inner=remSheet();
+  if(type==="dayscore") inner=dayScoreSheet();
   if(type==="pref") inner=prefSheet(payload);
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
@@ -535,7 +541,7 @@ function renderModal(){
   if(type==="reset") inner=resetSheet();
   return `<div class="sheet ${type==="ex-map"?"top":""}" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
 }
-function render(){ try{ ensureRoutine(); }catch(e){}
+function render(){ try{ ensureRoutine(); }catch(e){} try{ adaptCheck(); }catch(e){}
   const root=document.getElementById("app");
   const gate=state.onboarded&&(!termsOk()||ui.termsPending);
   let html = !state.onboarded ? (state.step==null ? renderWelcome() : renderOnboard()) : gate ? renderTermsGate() : renderApp();
@@ -638,6 +644,16 @@ document.getElementById("app").addEventListener("click", e=>{
     const d=unitsFor(it).find(x=>x.d), m={uid:uid(),id:it.id,portion:d?d.g:100,slot:ui.addSlot||"snack"};
     if(d){ m.u=d.k; m.q=1; }
     day().meals.push(m); syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+amtTxt(it,m));
+  }
+  else if(act==="sug-add"){
+    // Vorschlag: mit der zuletzt gegessenen Menge eintragen
+    const it=foods().find(x=>x.id===el.dataset.id); if(!it) return;
+    const a=lastAmount(it.id, ui.addSlot||"snack")||{portion:100}, m=Object.assign({uid:uid(),id:it.id,slot:ui.addSlot||"snack"},a);
+    day().meals.push(m); syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+amtTxt(it,m));
+  }
+  else if(act==="sug-repeat"){
+    const n=addRepeat(ui.addSlot||"snack"); if(!n) return;
+    syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+n+" "+T("Lebensmittel"));
   }
   else if(act==="ai-mic"){ aiMic(); return; }
   else if(act==="ai-ex"){ ui.aiText=el.dataset.v; ui.aiOv={}; aiParse(); }
@@ -810,6 +826,10 @@ document.getElementById("app").addEventListener("click", e=>{
     p.weight=lastWeight(); ui.modal=null; save(); toast("Gewicht gespeichert");
   }
   else if(act==="toggle"){ p[el.dataset.k]=!p[el.dataset.k]; save(); }
+  else if(act==="adapt-toggle"){ p.adaptive=p.adaptive===false; if(state.adapt) state.adapt.seen=true; save(); }
+  else if(act==="rem-tog"){ remToggle(el.dataset.k); return; }
+  else if(act==="rem-time"){ remTime(el.dataset.k,+el.dataset.d); }
+  else if(act==="adapt-seen"){ if(state.adapt){ state.adapt.seen=true; save(); } }
   else if(act==="set-lang"){ p.lang=el.dataset.v; save(); location.reload(); return; }
   else if(act==="theme"){ p.theme=el.dataset.v; save(); applyTheme(); }
   else if(act==="start-empty"){
@@ -1021,6 +1041,7 @@ document.getElementById("app").addEventListener("input", e=>{
 });
 applyTheme();
 render();
+try{ remSoon(); }catch(e){}
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")) window.addEventListener("load",()=>{ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} });
 

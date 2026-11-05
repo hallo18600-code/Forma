@@ -18,6 +18,8 @@ function renderHeute(){
         ${[["Eiweiß", tot.protein, t.protein, "protein"],["Kohlenhydrate", tot.carbs, t.carbs, "carbs"],["Fett", tot.fat, t.fat, "fat"]].map(([name,val,goal,col])=>`<div class="mac" style="--mc:var(--c-${col})"><span>${name}</span><div class="dotbar"><i style="width:${Math.min(100,goal?val/goal*100:0)}%"></i><b style="left:${Math.min(96,goal?val/goal*100:0)}%"></b></div><b>${Math.round(val)} / ${goal} g</b></div>`).join("")}
       </div>
     </div>
+    ${dayScoreRow()}
+    ${adaptNote()}
     <div class="section"><h2>Mahlzeiten</h2><button class="link" data-act="open" data-type="custom">Mehr</button></div>
     <div class="card meals">
       ${SLOTS.map(slot=>{

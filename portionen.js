@@ -218,6 +218,9 @@ function amtInit(it){
     const u=m.u&&us.find(x=>x.k===m.u);
     ui.unit=u?u.k:"g"; ui.qty=u?(m.q||1):null; ui.portion=m.portion; return;
   }
+  // Schon mal gegessen? Dann die letzte Menge vorschlagen (vorschlaege.js), sonst die übliche Portion
+  const la=typeof lastAmount==="function"&&lastAmount(it.id, ui.addSlot);
+  if(la){ const lu=la.u&&us.find(x=>x.k===la.u); if(lu){ ui.unit=lu.k; ui.qty=la.q||1; ui.portion=la.portion; } else { ui.unit="g"; ui.qty=null; ui.portion=la.portion; } return; }
   const d=us.find(x=>x.d);
   if(d){ ui.unit=d.k; ui.qty=1; ui.portion=d.g; }
   else { ui.unit="g"; ui.qty=null; ui.portion=100; }

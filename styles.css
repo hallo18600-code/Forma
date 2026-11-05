@@ -452,6 +452,31 @@ p { margin:var(--s-2) 0; }
 .ynm { text-align:left; min-width:0; align-self:stretch; min-height:var(--tap); display:flex; flex-direction:column; justify-content:center; }
 .ynm b { font-weight:600; font-size:var(--fs-m); display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .ykc { font-size:var(--fs-s); color:var(--ink-2); white-space:nowrap; }
+/* Tages-Score: schmale Zeile unter der Kalorien-Karte */
+.dsrow { display:flex; align-items:center; gap:var(--s-3); width:100%; text-align:left; background:var(--surface); border-radius:var(--r-xl); padding:var(--s-3) var(--s-4); margin-top:var(--s-3); min-height:68px; }
+.dsrow .score { width:46px; height:46px; min-width:46px; font-size:var(--fs-m); }
+.dsrow b { display:block; font-size:var(--fs-m); }
+.dsrow .sub { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.dsring { display:flex; flex-direction:column; align-items:center; margin:var(--s-3) 0; }
+/* Erinnerungen: Uhrzeiten unter dem Schalter */
+.remts { padding:0 var(--s-4) var(--s-2) calc(var(--s-4) + 44px); }
+.remt { display:flex; align-items:center; justify-content:space-between; gap:var(--s-3); min-height:var(--tap); }
+.remt > span { color:var(--ink-2); font-size:var(--fs-s); }
+.remt .stepper b { min-width:56px; text-align:center; font-variant-numeric:tabular-nums; }
+/* Bedarf lernt mit: Hinweis im Tagebuch und Zahlen im Richtwert-Blatt */
+.adnote { display:flex; align-items:center; gap:var(--s-2); background:var(--surface); border-radius:var(--r-xl); padding:var(--s-2) var(--s-2) var(--s-2) var(--s-4); margin-top:var(--s-3); }
+.adnote-go { display:flex; align-items:center; gap:var(--s-3); text-align:left; min-height:var(--tap); }
+.adnote-go > span:first-child { font-size:var(--icon-m); }
+.adnote-go b { display:block; font-size:var(--fs-m); }
+.adneed { display:grid; grid-template-columns:1fr 1fr; gap:var(--s-3); margin:var(--s-3) 0; }
+.adneed div { background:var(--fill-2); border-radius:var(--r-l); padding:var(--s-3); text-align:center; }
+.adneed b { display:block; font-size:var(--fs-l); }
+.adneed span { font-size:var(--fs-s); color:var(--ink-2); }
+/* Schlaue Vorschläge: kleine Zwischenüberschrift und „Wie gestern“-Zeile */
+.ylabel { font-size:var(--fs-s); font-weight:700; color:var(--ink-2); text-transform:uppercase; letter-spacing:.04em; margin:var(--s-4) 0 var(--s-1); }
+.yrep { display:flex; align-items:center; gap:var(--s-3); width:100%; text-align:left; background:var(--fill-2); border-radius:var(--r-l); padding:var(--s-2) var(--s-3); min-height:64px; margin-bottom:var(--s-1); }
+.yrep-ic { width:36px; height:36px; flex:none; border-radius:50%; background:var(--accent-soft); color:var(--accent-text); display:grid; place-items:center; font-size:var(--fs-m); font-weight:700; }
+.yrep .sub { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 /* Großer Abschluss-Knopf unten im Blatt (gleich wie .pill.primary) */
 .yfertig {
   position:sticky; bottom:0; width:100%; min-height:52px; margin-top:var(--s-4); padding:0 var(--s-5);

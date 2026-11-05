@@ -16,3 +16,4 @@ jobs:
           python -m http.server 8765 &
           sleep 2
           python tests/pruefung.py
+          python tests/funktionen.py
