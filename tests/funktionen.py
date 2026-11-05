@@ -245,6 +245,8 @@ def klicktest(b):
             ctx = b.new_context(locale="de-DE", viewport={"width": 390, "height": 844}, timezone_id=tz)
             ctx.grant_permissions(["notifications"], origin=URL.split("/index")[0])
             pg = ctx.new_page(); errs = []
+            if os.environ.get("TEST_SLOW"):   # langsamen Rechner nachstellen
+                ctx.new_cdp_session(pg).send("Emulation.setCPUThrottlingRate", {"rate": float(os.environ["TEST_SLOW"])})
             if zeit: pg.clock.set_fixed_time(zeit)
             pg.on("pageerror", lambda e: errs.append(str(e)))
             pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
@@ -355,31 +357,38 @@ def fototest(b):
         ctx = b.new_context(locale="de-DE", viewport={"width": 390, "height": 844}); pg = ctx.new_page(); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
+        if theme == "dark":   # einmal wie ein langsames Handy (Prozessor 6× gebremst)
+            ctx.new_cdp_session(pg).send("Emulation.setCPUThrottlingRate", {"rate": 6})
         pg.goto(URL); pg.wait_for_timeout(400)
-        pg.evaluate(f"()=>{{ seedDemo(); state.profile.termsOk=TERMS_V; state.profile.theme='{theme}'; save(); }}"); pg.reload(); pg.wait_for_timeout(600)
+        pg.evaluate(f"()=>{{ seedDemo(); state.profile.termsOk=TERMS_V; state.profile.theme='{theme}'; save(); }}"); pg.reload(); pg.wait_for_timeout(900)
         ev = lambda js: pg.evaluate("async ()=>{" + js + "}")
         def check(c, m):
             if not c: probleme.append(f"[{theme}] {m}")
-        def add(path):
+        def add(path, soll):
+            # Wartet, bis das Foto wirklich gespeichert ist (große Bilder brauchen auf langsamen Rechnern länger)
             with pg.expect_file_chooser() as fc: pg.locator('[data-act="ph-add"]').first.click()
-            fc.value.set_files(path); pg.wait_for_timeout(900)
+            fc.value.set_files(path)
+            try: pg.wait_for_function(f"()=>PH&&PH.length==={soll}", timeout=15000)
+            except Exception: pass
+            pg.wait_for_timeout(300)
         ev("state.tab='verlauf'; render();")
         # Ganz unten: Fotos-Bereich ist das Letzte auf der Seite
         check(ev("const c=document.querySelector('.scroll').lastElementChild; return !!(c&&c.classList.contains('pf-empty'))"), "Leerer Foto-Bereich nicht ganz unten")
-        add(big)
+        add(big, 1)
         check(ev("return PH.length") == 1, "Großes Foto nicht gespeichert")
         size = ev("const r=await phTx('readonly',st=>st.getAll()); const b=r[0].blob; const i=await createImageBitmap(b); return [i.width,i.height,b.type,b.size]")
         check(max(size[0], size[1]) <= 1280 and size[2] == "image/jpeg", f"Foto nicht verkleinert {size}")
         check(ev("return document.querySelectorAll('.pf-two .pf-ph').length") == 1, "Ein Foto: Anzeige falsch")
-        add(falsch); check(ev("return PH.length") == 1, "Falsche Datei wurde gespeichert")
-        add(klein); add(quer)
+        pg.wait_for_timeout(100); add(falsch, 2); check(ev("return PH.length") == 1, "Falsche Datei wurde gespeichert")
+        add(klein, 2); add(quer, 3)
         check(ev("return PH.length") == 3, "Weitere Fotos fehlen")
         # Daten zurückdatieren, Gewicht passend → Unterschied richtig
         ev("const r=await phTx('readonly',st=>st.getAll()); r.sort((a,b)=>a.t-b.t); const ds=[addDays(todayIso(),-60),addDays(todayIso(),-30),todayIso()]; for(let i=0;i<r.length;i++){ r[i].date=ds[i]; await phTx('readwrite',st=>st.put(r[i])); } state.weights=[{date:addDays(todayIso(),-61),kg:80.4},{date:addDays(todayIso(),-31),kg:78.0},{date:todayIso(),kg:76.9}]; save(); await phLoad(); render();")
+        pg.wait_for_timeout(300)
         check(ev("return document.querySelector('.pf-two .pf-diff')&&document.querySelector('.pf-two .pf-diff').textContent.trim()") == "−3,5 kg", "Gewichtsunterschied falsch")
         check(ev("return document.querySelector('.scroll').lastElementChild.querySelector('.pf-two')!==null"), "Foto-Bereich nicht ganz unten")
         # Seite „Alle ansehen“
-        pg.locator('[data-act="dash"][data-id="photos"]').click(); pg.wait_for_timeout(200)
+        pg.locator('[data-act="dash"][data-id="photos"]').click(); pg.wait_for_timeout(500)
         check(ev("return ui.dash") == "photos", "Foto-Seite öffnet nicht")
         check(ev("return document.querySelectorAll('.pf-th').length") == 3, "Nicht alle Fotos in der Leiste")
         check(ev("return document.querySelectorAll('.pf-th.on').length") == 2, "Nicht genau 2 ausgewählt")
@@ -398,18 +407,25 @@ def fototest(b):
         check(ev("return ui.modal&&ui.modal.type") == "photo", "Foto-Blatt öffnet nicht")
         pg.locator('[data-act="ph-del"]').click(); pg.wait_for_timeout(150)
         check(ev("return PH.length") == 3, "Löscht schon beim ersten Tipp")
-        pg.locator('[data-act="ph-del"]').click(); pg.wait_for_timeout(600)
+        pg.locator('[data-act="ph-del"]').click()
+        try: pg.wait_for_function("()=>PH.length===2&&!ui.modal", timeout=15000)
+        except Exception: pass
         check(ev("return PH.length") == 2, "Löschen klappt nicht")
         check(ev("return ui.modal") is None, "Blatt bleibt nach Löschen offen")
         # Zurück, Neuladen: alles noch da
         pg.locator('[data-act="dash-close"]').click(); pg.wait_for_timeout(150)
         check(ev("return ui.dash") is None and ev("return state.tab") == "verlauf", "Zurück führt nicht zum Verlauf")
-        pg.reload(); pg.wait_for_timeout(900)
+        pg.reload()
+        try: pg.wait_for_function("()=>PH&&PH.length===2", timeout=15000)
+        except Exception: pass
         check(ev("return PH&&PH.length") == 2, "Fotos nach Neuladen weg")
         # Datensicherung enthält keine Fotos (Datei bleibt klein)
         check(ev("return JSON.stringify(state).length<200000"), "Sicherung wird durch Fotos groß")
         # Alles löschen löscht auch Fotos
-        ev("ui.resetTxt='LÖSCHEN'; openModal('reset');"); pg.locator('#reset-go').click(); pg.wait_for_timeout(800)
+        ev("ui.resetTxt='LÖSCHEN'; openModal('reset');"); pg.locator('#reset-go').click()
+        try: pg.wait_for_function("()=>PH&&PH.length===0", timeout=15000)
+        except Exception: pass
+        pg.wait_for_timeout(300)
         check(ev("const r=await phTx('readonly',st=>st.getAll()); return r.length") == 0, "Alles löschen lässt Fotos übrig")
         for e in errs: probleme.append(f"[{theme}] JS-Fehler: {e}")
         ctx.close()
