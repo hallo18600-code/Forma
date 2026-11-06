@@ -41,13 +41,14 @@ function renderHeute(){
     ${dayBlock()}
   </div>`;
 }
-// "Dein Tag": Wasser, Schritte, Schlaf, Training, Routine, Supplements an einem Ort
+// "Dein Tag": Wasser, Schritte, Schlaf, Hautbild, Training, Routine, Supplements an einem Ort
 function dayBlock(){
   const d=day(), p=state.profile, stepGoal=p.stepGoal||10000;
   const wo=state.workouts.filter(w=>w.date===state.date);
   const rt=rDone(state.date), sups=state.stack.filter(x=>d.taken[x]).length;
   const sl=d.sleep, slTxt=sl==null?"Noch nicht eingetragen":de(sl,1)+" h"+(sl>=7?" ✓":"");
-  const checks=[d.meals.length>0, d.water>=p.waterTarget, (d.steps||0)>=stepGoal, sl!=null&&sl>=7, rt.n>0&&rt.c===rt.n, state.stack.length>0&&sups===state.stack.length];
+  const sk=skinVal(state.date);
+  const checks=[d.meals.length>0, d.water>=p.waterTarget, (d.steps||0)>=stepGoal, sl!=null&&sl>=7, sk!=null, rt.n>0&&rt.c===rt.n, state.stack.length>0&&sups===state.stack.length];
   const done=checks.filter(Boolean).length;
   const bar=pct=>`<div class="mbar"><i style="width:${Math.min(100,Math.max(0,pct*100))}%"></i></div>`;
   return `<div class="section"><h2>Dein Tag</h2><span class="sub">${done}/${checks.length} erledigt</span></div>
@@ -68,6 +69,12 @@ function dayBlock(){
         <div class="grow"><div class="meal-name">Schlaf</div><div class="sub">${slTxt}</div>${sl!=null?bar(sl/8):""}</div>
         <div class="row"><button class="plus" data-act="sleep-adj" data-v="-0.5" aria-label="Eine halbe Stunde weniger">−</button>
         <button class="plus dark" data-act="sleep-adj" data-v="0.5" aria-label="Eine halbe Stunde mehr">+</button></div>
+      </div>
+      <div class="meal-row">
+        <div class="bubble">✨</div>
+        <div class="grow"><div class="meal-name">Hautbild</div><div class="sub">${sk==null?"Noch nicht bewertet":sk+" / 10"}</div>${sk!=null?bar(sk/10):""}</div>
+        <div class="row"><button class="plus" data-act="skin-adj" data-v="-1" aria-label="Hautbild einen Punkt schlechter">−</button>
+        <button class="plus dark" data-act="skin-adj" data-v="1" aria-label="Hautbild einen Punkt besser">+</button></div>
       </div>
       <button class="meal-row" data-act="tab" data-v="sport">
         <div class="bubble">🏋️</div>

@@ -1,4 +1,4 @@
-// Health Maxxing – Haut-Check: morgens die Haut von 1 bis 10 bewerten, nach 7 Einträgen zeigt der Verlauf Auffälligkeiten.
+// Health Maxxing – Hautbild: im Tagebuch unter „Dein Tag“ die Haut von 1 bis 10 bewerten, nach 7 Einträgen zeigt der Verlauf die Hautanalyse.
 // Verglichen wird nur mit eigenen Einträgen: Zucker, Fast Food, Milchprodukte und Wasser vom Vortag, Schlaf der letzten Nacht.
 // Wichtig: Es sind Auffälligkeiten in den eigenen Daten, keine Ursachen und keine Diagnose.
 
@@ -47,17 +47,6 @@ function skinProgress(n){
   const left=Math.max(0,SK_MIN-n);
   return `<div class="skprog"><div class="skdots">${Array.from({length:SK_MIN},(_,i)=>`<i class="${i<n?"on":""}"></i>`).join("")}</div>
     <span class="sub">${left?`Analyse in ${left} ${left===1?"Tag":"Tagen"}`:"Analyse ist bereit"}</span></div>`;
-}
-
-// Coach: statt „Tipp für heute“ eine kleine Haut-Check-Karte – erst ab dem zweiten Tag, nur bis heute bewertet ist
-function skinCoachDue(){
-  const t=todayIso(); if(skinVal(t)!=null) return false;
-  const first=state.rStart||Object.keys(state.days).sort()[0]||t;
-  return first<t;
-}
-function skinCoachCard(){
-  return `<div class="card tipcard skcoach"><div class="row gap-3"><span class="tip-ico">✨</span><span class="grow"><span class="tipk">Haut-Check</span><b>Wie ist deine Haut heute?</b></span></div>
-    ${skinScale(null,"skin-pop")}</div>`;
 }
 
 // Verlauf: Karte „Haut“ mit Verlauf, Durchschnitt und Auffälligkeiten

@@ -705,7 +705,7 @@ function renderCoach(){
   const tip = coachToday()[0];
   return `<div class="scroll pad">
     <div class="topbar"><div><h1>Coach</h1><div class="sub">Ein paar Fragen, dann ein einfacher Plan</div></div></div>
-    ${skinCoachDue()?skinCoachCard():tip?`<button class="card tipcard" data-act="tab" data-v="${tip.go}"><span class="tip-ico">${tip.e}</span><span class="grow"><span class="tipk">Tipp für heute</span><b>${tip.t}</b>${tip.bar!=null?`<span class="tip-bar"><i style="width:${Math.round(tip.bar*100)}%"></i></span>`:""}<span class="sub">${tip.d}</span></span><span class="chev">›</span></button>`:""}
+    ${tip?`<button class="card tipcard" data-act="tab" data-v="${tip.go}"><span class="tip-ico">${tip.e}</span><span class="grow"><span class="tipk">Tipp für heute</span><b>${tip.t}</b>${tip.bar!=null?`<span class="tip-bar"><i style="width:${Math.round(tip.bar*100)}%"></i></span>`:""}<span class="sub">${tip.d}</span></span><span class="chev">›</span></button>`:""}
     <div class="section"><h2>Deine Themen</h2></div>
     <div class="card meals">
     ${coachTopics().sort((a,b)=>coachPrio(b.id)-coachPrio(a.id)).map(t=>{
