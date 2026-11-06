@@ -162,6 +162,7 @@ function renderVerlauf(){
     <div class="section"><h2>Gewicht</h2></div>
     ${weightView()}
     ${sleepCard()}
+    ${skinCard()}
     ${stepsCard()}
     ${photoSection()}
   </div>`;
