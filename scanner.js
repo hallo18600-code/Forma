@@ -153,11 +153,11 @@ function scanResults(){
   const q=ui.query.trim().toLowerCase(), mode="text";
   const pool=mode==="care"?CARE:mode==="sup"?SUPS:foods().filter(p=>!p.hidden);
   // Ohne Suchtext: oben die schlauen Vorschläge (vorschlaege.js), darunter die Grundlebensmittel ohne Doppelte
-  if(!q){ const tb=scanTabBody(); if(tb!=null) return tb; }   // Reiter „Zuletzt“ / „Favoriten“
-  const top=q?"":sugBlock(), seen=q||!top?null:sugIds();
+  // Filter „Alle“: oft Gegessenes oben · Filter „Favoriten“: Favoriten oben (vorschlaege.js). Beim Suchen nichts davon.
+  const top=q?"":scanTop(), seen=q||!top?null:scanTopIds();
   const ts=qTokens(q), found0=(q?rankSort(pool.filter(p=>{ const x=hay(p); return ts.every(w=>x.includes(w)); }),q):pool.filter(p=>!seen||!seen.has(p.id))).slice(0,12);
   let found=found0, more=""; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const lim=ui.scanMax||30, ids=new Set(found0.map(p=>p.id)), d=dbSearch(q,lim); found=found0.concat(d.filter(p=>!ids.has(p.id))); if(d.length>=lim) more=`<button class="pill ghost w-full mt-3" data-act="scan-more">Mehr anzeigen</button>`; }
-  const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button>`:""}</div>`; };
+  const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${favOn(p.id)?`<i class="yfav-dot" aria-hidden="true">★</i>`:""}${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button>`:""}</div>`; };
   const hint=(mode==="text"&&q.length>=2&&!FOODDB.ok)?`<p class="sub">Produktdatenbank nicht geladen (foods.json fehlt oder lädt noch). Es werden nur Basis-Einträge durchsucht.</p>`:"";
   return top+hint+(found.map(row).join("")||`<p class="sub li">Nichts gefunden.</p><button class="pill ghost w-full" data-act="more-go" data-v="nobc">Eigenes Lebensmittel anlegen</button>`)+more;
 }

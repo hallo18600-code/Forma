@@ -494,10 +494,18 @@ p { margin:var(--s-2) 0; }
 .adneed div { background:var(--fill-2); border-radius:var(--r-l); padding:var(--s-3); text-align:center; }
 .adneed b { display:block; font-size:var(--fs-l); }
 .adneed span { font-size:var(--fs-s); color:var(--ink-2); }
-/* Plus-Blatt: Reiter Für dich · Zuletzt · Favoriten, Stern im Lebensmittel-Blatt */
-.ytabs { margin:var(--s-1) 0 var(--s-2); }
-#scan-results { min-height:min(420px,50vh); }   /* gleiche Höhe beim Wechsel der Reiter */
-.yempty { text-align:center; padding:var(--s-8) var(--s-4); }
+/* Plus-Blatt: Filter „Alle · ★ Favoriten“, Stern im Lebensmittel-Blatt */
+.yfilter { display:flex; gap:var(--s-2); margin:var(--s-1) 0 var(--s-1); }
+.yfilter button { position:relative; display:inline-flex; align-items:center; gap:6px; min-height:38px; padding:0 var(--s-4); border-radius:var(--r-full); background:var(--surface); border:1.5px solid var(--line-strong); font-size:var(--fs-s); font-weight:700; color:var(--ink-2); transition:background .15s, border-color .15s, color .15s; }
+.yfilter button::after { content:""; position:absolute; inset:-4px 0; }
+.yfilter button.on { background:var(--accent-soft); border-color:var(--accent); color:var(--on-accent-soft); }
+.yfilter button:active { transform:scale(.97); }
+.yf-star { font-style:normal; color:var(--star); font-size:1.05em; line-height:1; }
+.yf-n { font-style:normal; min-width:20px; height:20px; padding:0 6px; border-radius:var(--r-full); background:var(--fill); color:var(--ink-2); font-size:12px; display:grid; place-items:center; }
+.yfilter button.on .yf-n { background:var(--accent); color:var(--on-accent); }
+.yfav-empty { display:flex; align-items:center; gap:var(--s-3); background:var(--fill-2); border-radius:var(--r-l); padding:var(--s-3) var(--s-4); }
+.yfav-big { font-size:28px; color:var(--star); line-height:1; }
+.yfav-empty b { display:block; font-size:var(--fs-m); }
 .yfav { width:var(--tap); height:var(--tap); border-radius:50%; font-size:var(--fs-l); color:var(--ink-3); display:grid; place-items:center; justify-self:end; }
 .yfav.on { color:var(--star); }
 .yfav-dot { font-style:normal; color:var(--star); font-size:.8em; margin-right:var(--s-1); }

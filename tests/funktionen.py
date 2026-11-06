@@ -75,19 +75,6 @@ VORSCHLAEGE = r"""()=>{ F={}; let n=0;
  ["ei","hähnchen","skyr","brot","cola","xyzq"].forEach(q=>{ ui.query=q; const a=scanResults(); const keep=state.days; state.days={}; const b=scanResults(); state.days=keep; if(a!==b) fail("Suche verändert durch Verlauf",q); });
  // Leerer Zustand: kein Vorschlag, keine Überschrift
  newState(); ui.query=""; ui.addSlot="breakfast"; if(sugBlock()!=="") fail("Vorschlagsblock ohne Verlauf","");
- // Zuletzt gegessen: jedes Lebensmittel einmal, neueste zuerst, nur gültige
- for(let it=0;it<2000;it++){ n++;
-  newState(); const T=todayIso(), log=[];
-  for(let i=ri(0,70);i>=0;i--){ if(Math.random()<.4) continue; const d=state.days[addDays(T,-i)]=blankDay();
-   for(let k=ri(0,5);k>0;k--){ const id=Math.random()<.05?"weg-"+uid():rnd(pool).id; d.meals.push({uid:uid(),id,slot:rnd(slots),portion:ri(1,400)}); log.push({i,id}); } }
-  const R=recentList(), ids=R.map(x=>x.food.id);
-  if(new Set(ids).size!==ids.length) fail("Zuletzt: doppelt","");
-  if(R.length>25) fail("Zuletzt: zu viele","");
-  if(R.some(x=>!foods().some(f=>f.id===x.food.id)||x.food.hidden||!(x.amt.portion>0))) fail("Zuletzt: ungültiger Eintrag","");
-  // Erwartete Reihenfolge unabhängig nachrechnen
-  const want=[]; for(let i=0;i<=60;i++){ const d=state.days[addDays(T,-i)]; if(!d) continue; for(let k=d.meals.length-1;k>=0;k--){ const m=d.meals[k]; if(!want.includes(m.id)&&foods().some(f=>f.id===m.id&&!f.hidden)) want.push(m.id); } }
-  if(ids.join()!==want.slice(0,25).join()) fail("Zuletzt: falsche Reihenfolge",ids.slice(0,3).join()+" vs "+want.slice(0,3).join());
- }
  // Favoriten: an/aus, keine Doppelten, übersteht Speichern/Import, kaputte Werte werden bereinigt
  newState(); n++;
  if(!favToggle("ei")||!favToggle("lachs")||favs().join()!=="lachs,ei") fail("Favorit hinzufügen falsch",favs().join());
@@ -96,10 +83,40 @@ VORSCHLAEGE = r"""()=>{ F={}; let n=0;
  favToggle("ei"); const st=normalize(JSON.parse(JSON.stringify(state))); if(st.favs.join()!=="ei,lachs") fail("Favoriten nach Laden weg",st.favs.join());
  const im=checkImport('{"app":"Health Maxxing","data":{"profile":{},"favs":["ei","ei",5,null,"<b>x","lachs"]}}');
  if(!im||im.favs.join()!=="ei,bx,lachs") fail("Favoriten aus Datei nicht bereinigt",im&&JSON.stringify(im.favs));
- ["fuer","zuletzt","fav"].forEach(t=>{ ui.scanTab=t; ui.query=""; const h=scanResults(); if(/undefined|NaN/.test(h)) fail("undefined/NaN im Reiter",t); if(t==="fav"&&!h.includes('data-id="ei"')) fail("Favorit fehlt im Reiter",""); });
- state.favs=["gibtsnicht","ei"]; ui.scanTab="fav"; if(scanResults().includes("gibtsnicht")) fail("Gelöschter Favorit angezeigt","");
- ui.scanTab="fav"; ui.query="ei"; if(scanResults().includes('data-act="sug-add"')&&!scanResults().includes("quick-add")) fail("Suche ignoriert Reiter nicht","");
- ui.scanTab="fuer"; ui.query="";
+ // Filter „Alle · Favoriten“: unten steht immer „Alle Lebensmittel“, nichts doppelt, kein Ausgebautes
+ const plusIds=h=>[...h.matchAll(/data-act="(?:sug-add|quick-add)" data-id="([^"]+)"/g)].map(m=>m[1]);
+ for(let it=0;it<3000;it++){ n++;
+  newState(); const T=todayIso();
+  for(let i=ri(0,40);i>=1;i--){ if(Math.random()<.3) continue; const d=state.days[addDays(T,-i)]=blankDay(); for(let k=ri(0,4);k>0;k--) d.meals.push({uid:uid(),id:rnd(pool).id,slot:rnd(slots),portion:ri(5,400)}); }
+  state.favs=pool.slice().sort(()=>Math.random()-.5).slice(0,ri(0,8)).map(p=>p.id); if(Math.random()<.1) state.favs.push("weg-"+uid());
+  ui.addSlot=rnd(slots); ui.query="";
+  for(const t of ["alle","fav",undefined,"quatsch"]){ ui.scanTab=t; const h=scanResults(), ids=plusIds(h), d0=`${it} ${t}`;
+   if(/undefined|NaN/.test(h)) fail("undefined/NaN im Filter",d0);
+   if(new Set(ids).size!==ids.length) fail("Lebensmittel doppelt im Filter",d0);
+   if(/Zuletzt|zuletzt gegessen|Für dich|yrep|Wie gestern/.test(h)) fail("Ausgebautes taucht wieder auf",d0);
+   const want=state.favs.filter(id=>foods().some(f=>f.id===id&&!f.hidden));
+   if(t==="fav"){
+    if(!h.includes("Deine Favoriten")||!h.includes("Alle Lebensmittel")) fail("Favoriten-Filter: Überschriften fehlen",d0);
+    if(ids.slice(0,want.length).join()!==want.join()) fail("Favoriten-Filter: Favoriten nicht oben in richtiger Reihenfolge",d0);
+    if(ids.length<=want.length) fail("Favoriten-Filter: Alle Lebensmittel fehlen darunter",d0);
+    if(!want.length&&!h.includes("Noch keine Favoriten")) fail("Favoriten-Filter: Hinweis fehlt",d0);
+    if(h.includes("weg-")) fail("Gelöschter Favorit angezeigt",d0);
+   } else {
+    if(h.includes("Deine Favoriten")) fail("Alle-Filter zeigt Favoriten-Bereich",d0);
+    if(!ids.length) fail("Alle-Filter leer",d0);
+   }
+   // Jeder Favorit trägt einen Stern, kein anderes Lebensmittel
+   const tmp=document.createElement("div"); tmp.innerHTML=h;
+   tmp.querySelectorAll(".yrow").forEach(r=>{ const id=(r.querySelector("[data-act=sug-add],[data-act=quick-add]")||{}).dataset; if(!id) return; const star=!!r.querySelector(".yfav-dot"); if(star!==favOn(id.id)) fail("Stern falsch",d0+" "+id.id); });
+  }
+  // Filter-Knöpfe: genau zwei, Zahl der Favoriten richtig
+  const ft=scanTabs(); ui.scanTab="fav"; const ft2=scanTabs();
+  if((ft.match(/data-act="scan-tab"/g)||[]).length!==2) fail("Nicht genau zwei Filter","");
+  const nf=favList().length; if(nf&&!ft2.includes(`<em class="yf-n notr">${nf}</em>`)) fail("Favoriten-Zahl falsch",nf); if(!nf&&ft2.includes("yf-n")) fail("Zahl ohne Favoriten","");
+  // Beim Suchen: kein oberer Bereich
+  ui.query=rnd(["ei","sk","hähn","xyzq"]); const hs=scanResults(); if(/Deine Favoriten|Oft gegessen|data-act="sug-add"/.test(hs)) fail("Suche zeigt Filter-Bereich",ui.query);
+ }
+ ui.scanTab="alle"; ui.query="";
  return {n,F};
 }"""
 
@@ -307,20 +324,31 @@ def klicktest(b):
                 check(shown == str(ev("return dayScore().score")), "Tages-Score Zahl falsch")
                 click(".dsrow"); check(ev("return ui.modal&&ui.modal.type") == "dayscore", "Tages-Score-Blatt öffnet nicht")
                 click('.sheet-card [data-act="close"]')
-            # Reiter im Plus-Blatt: Zuletzt + Favoriten
+            # Filter im Plus-Blatt: Alle · Favoriten
             click('[data-type="scan"][data-slot="snack"]')
-            check(pg.locator('[data-act="scan-tab"]').count() == 3, "Reiter fehlen")
-            click('[data-act="scan-tab"][data-v="zuletzt"]')
-            check(pg.locator('#scan-results [data-act="sug-add"]').first.get_attribute("data-id") == pid, "Zuletzt: zuletzt gegessenes nicht oben")
+            check(pg.locator('[data-act="scan-tab"]').count() == 2, "Filter fehlen")
+            check(pg.locator('[data-act="scan-tab"][data-v="alle"].on').count() == 1, "Alle ist nicht vorausgewählt")
+            check(pg.locator('.yfilter .yf-n').inner_text().strip() == "1", "Favoriten-Zahl falsch")
             click('[data-act="scan-tab"][data-v="fav"]')
-            check(pg.locator('#scan-results [data-act="sug-add"]').count() == 1 and pg.locator('#scan-results .yfav-dot').count() == 1, "Favoriten-Reiter falsch")
+            check(pg.locator('[data-act="scan-tab"][data-v="fav"].on').count() == 1, "Favoriten-Filter nicht aktiv")
+            check(pg.locator('#scan-results [data-act="sug-add"]').count() == 1 and pg.locator('#scan-results [data-act="sug-add"]').first.get_attribute("data-id") == pid, "Favoriten-Filter falsch")
+            check(pg.locator('#scan-results [data-act="quick-add"]').count() > 0, "Unter den Favoriten fehlen alle Lebensmittel")
             n0 = ev("return day().meals.length"); click('#scan-results [data-act="sug-add"]')
-            check(ev("return day().meals.length") == n0 + 1 and ev("return day().meals[day().meals.length-1].slot") == "snack", "+ im Favoriten-Reiter trägt nicht ein")
+            check(ev("return day().meals.length") == n0 + 1 and ev("return day().meals[day().meals.length-1].slot") == "snack", "+ bei Favoriten trägt nicht ein")
+            click('#scan-results [data-act="quick-add"]')
+            check(ev("return day().meals.length") == n0 + 2, "+ unter den Favoriten trägt nicht ein")
             pg.locator('input[data-act="query"]').fill("ba"); pg.wait_for_timeout(200)
-            check(pg.locator('[data-act="scan-tab"]').count() == 0, "Reiter bleiben beim Suchen")
+            check(pg.locator('[data-act="scan-tab"]').count() == 0, "Filter bleiben beim Suchen")
             pg.locator('input[data-act="query"]').fill(""); pg.wait_for_timeout(200)
-            check(pg.locator('[data-act="scan-tab"]').count() == 3, "Reiter kommen nach dem Suchen nicht zurück")
-            click('.ynm'); click('[data-act="fav"]'); click('[data-act="back-scan"]')
+            check(pg.locator('[data-act="scan-tab"]').count() == 2 and pg.locator('[data-act="scan-tab"][data-v="fav"].on').count() == 1, "Filter nach dem Suchen falsch")
+            # Favorit wieder entfernen → Hinweis, darunter weiter alle Lebensmittel
+            click('#scan-results .ynm'); click('[data-act="fav"]'); click('[data-act="back-scan"]')
+            check(pg.locator('.yfav-empty').count() == 1 and pg.locator('#scan-results [data-act="quick-add"]').count() > 0, "Leerer Favoriten-Filter falsch")
+            click('[data-act="scan-tab"][data-v="alle"]')
+            check(pg.locator('.yfav-empty').count() == 0, "Alle zeigt Favoriten-Hinweis")
+            click('.sheet-card [data-act="close"]')
+            click('[data-type="scan"][data-slot="snack"]')
+            check(pg.locator('[data-act="scan-tab"][data-v="alle"].on').count() == 1, "Beim Öffnen nicht wieder auf Alle")
             click('.sheet-card [data-act="close"]')
             ev("state.favs=[]; save(); day().meals=day().meals.filter(m=>m.slot!=='snack'); save(); render();")
             # Alles löschen per Eintrag → Score verschwindet

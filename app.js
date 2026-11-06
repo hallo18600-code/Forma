@@ -634,7 +634,7 @@ document.getElementById("app").addEventListener("click", e=>{
     if(el.dataset.slot) ui.addSlot=el.dataset.slot;
     if(el.dataset.type==="weigh") ui.draftKg=lastWeight();
     if(el.dataset.type==="gym"){ ui.gymRes=null; ui.gymErr=false; }
-    if(el.dataset.type==="scan"){ ui.query=""; ui.scanView="list"; ui.scanTab="fuer"; }
+    if(el.dataset.type==="scan"){ ui.query=""; ui.scanView="list"; ui.scanTab="alle"; }
     if(el.dataset.type==="product") ensureDb(el.dataset.id); openModal(el.dataset.type, el.dataset.id); return;
   }
   else if(act==="close"){ closeModal(); return; }
@@ -655,7 +655,7 @@ document.getElementById("app").addEventListener("click", e=>{
     const a=lastAmount(it.id, ui.addSlot||"snack")||sugDefault(it), m=Object.assign({uid:uid(),id:it.id,slot:ui.addSlot||"snack"},a);
     day().meals.push(m); syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+amtTxt(it,m));
   }
-  else if(act==="scan-tab"){ ui.scanTab=el.dataset.v; }
+  else if(act==="scan-tab"){ ui.scanTab=el.dataset.v==="fav"?"fav":"alle"; }
   else if(act==="fav"){ const on=favToggle(el.dataset.id); toast(on?"Zu den Favoriten":"Aus den Favoriten"); return; }
   else if(act==="ai-mic"){ aiMic(); return; }
   else if(act==="ai-ex"){ ui.aiText=el.dataset.v; ui.aiOv={}; aiParse(); }

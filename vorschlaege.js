@@ -81,38 +81,26 @@ function favToggle(id){
 }
 function favList(){ return favs().map(sugFood).filter(Boolean); }
 
-// ---------- Zuletzt gegessen: jedes Lebensmittel einmal, das zuletzt gegessene oben (letzte 60 Tage) ----------
-function recentList(limit){
-  const base=state.date||todayIso(), seen=new Set(), out=[];
-  for(let i=0;i<=SUG_DAYS&&out.length<(limit||25);i++){
-    const d=state.days[addDays(base,-i)]; if(!d||!Array.isArray(d.meals)) continue;
-    for(let k=d.meals.length-1;k>=0&&out.length<(limit||25);k--){
-      const m=d.meals[k]; if(!m||!m.id||seen.has(m.id)||!(m.portion>0)) continue;
-      const p=sugFood(m.id); seen.add(m.id); if(p) out.push({food:p,amt:sugAmt(p,m)});
-    }
-  }
-  return out;
-}
-
-// Reiter oben im „+“-Blatt (nur ohne Suchtext): Für dich · Zuletzt · Favoriten
-const SCAN_TABS=[["fuer","Für dich"],["zuletzt","Zuletzt"],["fav","Favoriten"]];
+// ---------- Filter oben im „+“-Blatt (nur ohne Suchtext): Alle · ★ Favoriten ----------
+// Bei beiden steht darunter immer die normale Liste „Alle Lebensmittel“ – es wirkt also nie leer.
+function scanFilter(){ return ui.scanTab==="fav"?"fav":"alle"; }
 function scanTabs(){
-  const t=ui.scanTab||"fuer";
-  return `<div class="seg ytabs" role="tablist">${SCAN_TABS.map(([k,l])=>`<button class="${t===k?"on":""}" role="tab" aria-selected="${t===k}" data-act="scan-tab" data-v="${k}">${l}</button>`).join("")}</div>`;
+  const t=scanFilter(), n=favList().length;
+  const chip=(k,inner)=>`<button class="${t===k?"on":""}" role="tab" aria-selected="${t===k}" data-act="scan-tab" data-v="${k}">${inner}</button>`;
+  return `<div class="yfilter" role="tablist">${chip("alle","Alle")}${chip("fav",`<i class="yf-star" aria-hidden="true">★</i><span>Favoriten</span>${n?`<em class="yf-n notr">${n}</em>`:""}`)}</div>`;
 }
-function scanTabBody(){
-  const t=ui.scanTab||"fuer", slot=ui.addSlot||"snack";
-  if(t==="zuletzt"){
-    const L=recentList();
-    return L.length?L.map(x=>sugRow(x.food,x.amt)).join(""):`<p class="sub yempty">Hier erscheint, was du zuletzt gegessen hast.</p>`;
-  }
-  if(t==="fav"){
-    const L=favList();
-    return L.length?L.map(p=>sugRow(p,lastAmount(p.id,slot)||sugDefault(p))).join(""):`<p class="sub yempty">Noch keine Favoriten. Öffne ein Lebensmittel und tippe auf ☆.</p>`;
-  }
-  return null;   // „Für dich“: Vorschläge + alle Lebensmittel (scanResults)
+// Favoriten-Bereich (mit der zuletzt gegessenen Menge, sonst der üblichen Portion)
+function favBlock(){
+  const slot=ui.addSlot||"snack", L=favList();
+  const body=L.length?L.map(p=>sugRow(p,lastAmount(p.id,slot)||sugDefault(p))).join("")
+    :`<div class="yfav-empty"><span class="yfav-big" aria-hidden="true">☆</span><div><b>Noch keine Favoriten</b><div class="sub">Öffne ein Lebensmittel und tippe oben auf ☆.</div></div></div>`;
+  return `<div class="ylabel">Deine Favoriten</div>${body}<div class="ylabel">Alle Lebensmittel</div>`;
 }
-// „Für dich“: Vorschläge oben (nur ohne Suchtext)
+// Oberer Bereich je nach Filter und welche Lebensmittel darin schon stehen (damit unten nichts doppelt ist)
+function scanTop(){ return scanFilter()==="fav"?favBlock():sugBlock(); }
+function scanTopIds(){ return scanFilter()==="fav"?new Set(favList().map(p=>p.id)):sugIds(); }
+
+// Filter „Alle“: Vorschläge oben (nur ohne Suchtext)
 function sugBlock(){
   const slot=ui.addSlot||"snack", list=foodSuggest(slot);
   if(!list.length) return "";
