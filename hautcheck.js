@@ -1,9 +1,8 @@
 // Health Maxxing – Hautbild: im Tagebuch unter „Dein Tag“ die Haut von 1 bis 10 bewerten, nach 7 Einträgen zeigt der Verlauf die Hautanalyse.
-// Verglichen wird nur mit eigenen Einträgen: Zucker, Fast Food, Milchprodukte und Wasser vom Vortag, Schlaf der letzten Nacht.
+// Verglichen wird nur mit eigenen Einträgen: Zucker, Fast Food, Milchprodukte, Wasser und Tages-Score vom Vortag, Schlaf der letzten Nacht.
 // Wichtig: Es sind Auffälligkeiten in den eigenen Daten, keine Ursachen und keine Diagnose.
 
 const SK_MIN=7;            // ab so vielen Einträgen gibt es die Analyse
-const SK_SUGAR=50;         // ab so viel Gramm Zucker am Tag gilt der Tag als „viel Zucker“
 const SK_CAT=new Map();    // Lebensmittel-Art pro Produkt merken (schneller)
 
 function skinVal(s){ const v=(state.days[s]||{}).skin; return Number.isFinite(v)&&v>=1&&v<=10?v:null; }
@@ -13,30 +12,133 @@ function skinItems(s){
   const out=[]; d.meals.forEach(m=>{ if(!m||!(m.portion>0)) return; const p=foods().find(x=>x.id===m.id); if(p&&!p.hidden&&p.type!=="sup"&&p.type!=="care") out.push({p,g:m.portion}); });
   return out.length?out:null;
 }
-// Jede Frage gibt pro Tag ja / nein / null (keine Daten) zurück
-const SK_FACTORS=[
-  {id:"sugar", emo:"🍬", txt:"Nach Tagen mit viel Zucker", f:s=>{ const it=skinItems(addDays(s,-1)); if(!it) return null;
-    return it.reduce((a,x)=>a+(Number.isFinite(x.p.sugar)?x.p.sugar*x.g/100:0),0)>=SK_SUGAR; }},
-  {id:"fastfood", emo:"🍔", txt:"Nach Tagen mit Fast Food", f:s=>{ const it=skinItems(addDays(s,-1)); if(!it) return null;
-    return it.some(x=>(skinCat(x.p)||{}).id==="fastfood"); }},
-  {id:"dairy", emo:"🥛", txt:"Nach Tagen mit Milchprodukten", f:s=>{ const it=skinItems(addDays(s,-1)); if(!it) return null;
-    return it.some(x=>(skinCat(x.p)||{}).d===1); }},
-  {id:"sleep", emo:"😴", txt:"Nach Nächten mit 7 h Schlaf oder mehr", f:s=>{ const v=(state.days[s]||{}).sleep; return v==null?null:v>=7; }},
-  {id:"water", emo:"💧", txt:"Nach Tagen mit genug Wasser", f:s=>{ const d=state.days[addDays(s,-1)]; if(!d||!(d.water>0)) return null;
-    return d.water>=(state.profile.waterTarget||8); }}
-];
 function skinDays(){ return Object.keys(state.days).filter(s=>skinVal(s)!=null).sort(); }
 function skinAvg(list){ return list.length?list.reduce((a,b)=>a+b,0)/list.length:null; }
-// Auffälligkeiten: Unterschied im Schnitt zwischen „ja“- und „nein“-Tagen, mind. 2 Tage je Gruppe, mind. 0,5 Punkte
+
+// ---------- Hautanalyse ----------
+// Grundidee: Für jeden bewerteten Tag schauen wir auf den Vortag (Essen, Wasser) und die letzte Nacht (Schlaf).
+// Statt einfach Durchschnitte zu vergleichen, rechnen wir eine kleine lineare Regression mit schrittweiser Auswahl:
+// So wird z. B. ein Milchprodukt nicht „schuldig“, nur weil es oft an Zucker-Tagen gegessen wurde.
+// Regeln, damit kein Unsinn herauskommt:
+//  • Schlechte Gewohnheiten (Zucker, Fast Food, Milch, wenig Schlaf/Wasser, schwache Ernährung) dürfen nur als MINUS erscheinen,
+//    gute Gewohnheiten (sehr gute Ernährung, guter Tag rundum) nur als PLUS. Alles andere wird nie angezeigt.
+//  • Nur Tage mit ausreichend eingetragenem Essen zählen für Essens-Fragen (sonst sähe „nichts eingetragen“ aus wie „kein Zucker“).
+//  • Jede Gruppe braucht mind. 3 Tage, der Effekt mind. 0,8 Punkte und eine klare statistische Sicherheit (t ≥ SK_T).
+//  • Höchstens 3 Auffälligkeiten.
+const SK_T=2.2, SK_EFF=0.8, SK_GRP=3, SK_MAXF=3;
+function skinDayInfo(s){
+  const d=state.days[s]; if(!d||!Array.isArray(d.meals)) return null;
+  let kcal=0, unk=0, sugar=0, n=0, fast=false, dairy=false;
+  d.meals.forEach(m=>{ if(!m||!(m.portion>0)) return; const p=foods().find(x=>x.id===m.id); if(!p||p.type==="sup"||p.type==="care") return;
+    const k=Math.max(0,(p.kcal||0)*m.portion/100); kcal+=k; n++;
+    if(!p.hidden){ const c=skinCat(p)||{}; if(c.id==="fastfood") fast=true; if(c.d===1) dairy=true; }
+    if(Number.isFinite(p.sugar)) sugar+=p.sugar*m.portion/100; else unk+=k; });
+  let goal=1800; try{ goal=targets().kcal||goal; }catch(e){}
+  const logged=n>=2&&kcal>=goal*0.4;          // genug eingetragen, um den Tag zu beurteilen
+  let ds=null; try{ const x=typeof dayScore==="function"?dayScore(s):null; ds=x?x.score:null; }catch(e){}
+  return { logged, kcal, sugar:logged&&unk<=kcal*0.3?sugar:null, fast:logged?fast:null, dairy:logged?dairy:null, score:logged?ds:null,
+    water:d.water>0?d.water:null };
+}
+// Merkmale: 1 = trifft zu, 0 = trifft nicht zu, null = keine Daten. dir: -1 darf nur schlechter machen, +1 nur besser.
+function skinFeatures(rows){
+  const wt=state.profile.waterTarget||8, pick=(vals,opts)=>{ for(const o of opts){ const a=vals.filter(v=>v!=null&&o.f(v)).length, b=vals.filter(v=>v!=null&&!o.f(v)).length; if(a>=SK_GRP&&b>=SK_GRP) return o; } return opts[0]; };
+  const sug=pick(rows.map(r=>r.prev&&r.prev.sugar),[{f:v=>v>=50,t:"über 50 g"},{f:v=>v>=75,t:"über 75 g"},{f:v=>v>=35,t:"über 35 g"}]);
+  const slp=pick(rows.map(r=>r.sleep),[{f:v=>v<7,t:"unter 7 h",h:7},{f:v=>v<6.5,t:"unter 6,5 h",h:6.5},{f:v=>v<6,t:"unter 6 h",h:6},{f:v=>v<7.5,t:"unter 7,5 h",h:7.5}]);
+  const hi=pick(rows.map(r=>r.prev&&r.prev.score),[{f:v=>v>=85,t:"Tages-Score ab 85"},{f:v=>v>=80,t:"Tages-Score ab 80"},{f:v=>v>=75,t:"Tages-Score ab 75"}]);
+  const wat=pick(rows.map(r=>r.prev&&r.prev.water),[{f:v=>v<wt,t:`unter ${wt} Gläsern`},{f:v=>v<Math.round(wt*0.75),t:`unter ${Math.round(wt*0.75)} Gläsern`}]);
+  const v=(r,k)=>r.prev?r.prev[k]:null, b=x=>x==null?null:x?1:0;
+  const F=[
+    {id:"sugar", k:"viel Zucker", dir:-1, emo:"🍬", t:"Viel Zucker am Vortag", sub:sug.t, x:r=>{ const q=v(r,"sugar"); return q==null?null:b(sug.f(q)); }},
+    {id:"fast", k:"Fast Food",  dir:-1, emo:"🍔", t:"Fast Food am Vortag", sub:"", x:r=>b(v(r,"fast"))},
+    {id:"dairy", k:"Milchprodukte", dir:-1, emo:"🥛", t:"Milchprodukte am Vortag", sub:"", x:r=>b(v(r,"dairy"))},
+    {id:"sleep", k:"wenig Schlaf", dir:-1, emo:"😴", t:"Wenig Schlaf", sub:slp.t, x:r=>r.sleep==null?null:b(slp.f(r.sleep))},
+    {id:"water", k:"wenig Wasser", dir:-1, emo:"💧", t:"Wenig Wasser am Vortag", sub:wat.t, x:r=>{ const q=v(r,"water"); return q==null?null:b(wat.f(q)); }},
+    {id:"high",  dir:1,  emo:"🥩", t:"Sehr gute Ernährung am Vortag", sub:hi.t, x:r=>{ const q=v(r,"score"); return q==null?null:b(hi.f(q)); }}
+  ];
+  // Kombinationen: schlechte Ernährung UND wenig Schlaf (z. B. viel Zucker am Vorabend + kurze Nacht)
+  const B0=F.find(f=>f.id==="sleep");
+  for(const A of F.filter(f=>f.id==="sugar"||f.id==="fast")){ const B=B0;
+    const nm=(A.k+" + "+B.k); F.push({id:A.id+"+"+B.id, dir:-1, combo:[A.id,B.id], emo:A.emo+B.emo, t:nm.charAt(0).toUpperCase()+nm.slice(1)+(A.id!=="sleep"&&B.id!=="sleep"?" am Vortag":""), sub:[A.sub,B.sub].filter(Boolean).join(" · "),
+      x:r=>{ const a=A.x(r), c=B.x(r); return a==null||c==null?null:a&&c?1:0; }}); }
+  return F;
+}
+// Kleinste-Quadrate-Lösung mit Standardfehlern (Gauß-Jordan, max. 5×5)
+function skinOLS(X,y){
+  const n=y.length, p=X[0].length, A=Array.from({length:p},(_,i)=>Array.from({length:2*p},(_,j)=>j<p?X.reduce((s,r)=>s+r[i]*r[j],0):(j-p===i?1:0)));
+  for(let c=0;c<p;c++){ let m=c; for(let r=c+1;r<p;r++) if(Math.abs(A[r][c])>Math.abs(A[m][c])) m=r; if(Math.abs(A[m][c])<1e-9) return null;
+    [A[c],A[m]]=[A[m],A[c]]; const pv=A[c][c]; for(let j=0;j<2*p;j++) A[c][j]/=pv;
+    for(let r=0;r<p;r++) if(r!==c){ const f=A[r][c]; if(f) for(let j=0;j<2*p;j++) A[r][j]-=f*A[c][j]; } }
+  const inv=A.map(r=>r.slice(p)), Xy=Array.from({length:p},(_,i)=>X.reduce((s,r,k)=>s+r[i]*y[k],0));
+  const beta=inv.map(r=>r.reduce((s,v,j)=>s+v*Xy[j],0));
+  const rss=X.reduce((s,r,k)=>{ const e=y[k]-r.reduce((a,v,j)=>a+v*beta[j],0); return s+e*e; },0);
+  const df=n-p; if(df<3) return null;
+  const sig2=Math.max(rss/df,0.25);           // Untergrenze: Bewertungen sind grob (ganze Punkte)
+  return { beta, se:inv.map((r,i)=>Math.sqrt(Math.max(0,r[i])*sig2)), rss };
+}
+// Fester Zufallsgenerator (gleiche Daten → gleiches Ergebnis, nichts springt beim Neuladen)
+function skinRng(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
+const SK_MEMO={key:null,fp:null,val:null};
 function skinInsights(){
   const all=skinDays(); if(all.length<SK_MIN) return [];
-  return SK_FACTORS.map(fc=>{
-    const yes=[], no=[];
-    all.forEach(s=>{ const r=fc.f(s); if(r===true) yes.push(skinVal(s)); else if(r===false) no.push(skinVal(s)); });
-    if(yes.length<2||no.length<2) return null;
-    const diff=Math.round((skinAvg(yes)-skinAvg(no))*10)/10;
-    return Math.abs(diff)>=0.5?{fc,diff,n:yes.length}:null;
-  }).filter(Boolean).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff)).slice(0,3);
+  // Schneller Fingerabdruck der Daten: nur neu rechnen, wenn sich etwas geändert hat (sonst ruckelt jeder Tipp)
+  const fp=state.profile.goal+"|"+state.profile.waterTarget+"|"+state.customs.length+"|"+all.map(s=>{ const d=state.days[s], y=state.days[addDays(s,-1)]||{};
+    return s+":"+d.skin+":"+(d.sleep??"")+":"+(y.water||0)+":"+(y.meals||[]).map(m=>m&&m.id+"*"+m.portion).join(","); }).join(";");
+  if(SK_MEMO.fp===fp) return SK_MEMO.val;
+  const rows=all.map(s=>({s, y:skinVal(s), prev:skinDayInfo(addDays(s,-1)), sleep:(()=>{ const v=(state.days[s]||{}).sleep; return v==null?null:+v; })()}));
+  const ys=rows.map(r=>r.y); if(Math.max(...ys)-Math.min(...ys)<2){ SK_MEMO.fp=fp; SK_MEMO.val=[]; return []; }   // Haut immer (fast) gleich bewertet → nichts zu erkennen
+  const F=skinFeatures(rows), X=F.map(f=>rows.map(r=>f.x(r)));
+  const key=JSON.stringify([ys,X,F.map(f=>f.sub)]); if(SK_MEMO.key===key){ SK_MEMO.fp=fp; return SK_MEMO.val; }
+  const idx=f=>F.indexOf(f);
+  // Modell mit den Merkmalen „set“ für die Hautwerte „y“
+  const fit=(set,y)=>{
+    const R=[]; for(let k=0;k<rows.length;k++) if(set.every(f=>X[idx(f)][k]!=null)) R.push(k);
+    if(R.length<Math.max(SK_MIN,set.length+5)) return null;
+    for(const f of set){ const ones=R.filter(k=>X[idx(f)][k]===1).length; if(ones<SK_GRP||R.length-ones<SK_GRP) return null; }
+    const o=skinOLS(R.map(k=>[1,...set.map(f=>X[idx(f)][k])]),R.map(k=>y[k])); return o&&{o,R};
+  };
+  const tOf=(m,k)=>m.o.beta[k]/(m.o.se[k]||1e9);
+  // Stärkstes einzelnes Muster (in der erlaubten Richtung) – für den Zufallsvergleich
+  const maxStat=y=>{ let mx=0; for(const f of F){ const m=fit([f],y); if(m){ const t=tOf(m,1)*f.dir; if(t>mx) mx=t; } } return mx; };
+  // Permutationstest: Hautwerte 200× mischen. Nur was stärker ist als 95 % der gemischten Fälle, zählt.
+  const rnd=skinRng(key.length*7919+ys.reduce((a,v,i)=>a+v*(i+1)*31,0)), null_=[];
+  for(let p=0;p<200;p++){ const y=ys.slice(); for(let i=y.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [y[i],y[j]]=[y[j],y[i]]; } null_.push(maxStat(y)); }
+  null_.sort((a,b)=>a-b); const T=Math.max(SK_T, null_[Math.floor(null_.length*0.95)]);
+  const chosen=[];
+  while(chosen.length<SK_MAXF){
+    let best=null; const cand=[];
+    for(const f of F){
+      if(chosen.includes(f)) continue;
+      if(f.combo&&chosen.some(c=>f.combo.includes(c.id)||c.combo)) continue;   // keine doppelte Aussage
+      if(!f.combo&&chosen.some(c=>c.combo&&c.combo.includes(f.id))) continue;
+      const m=fit([...chosen,f],ys); if(!m) continue;
+      const k=chosen.length+1, b=m.o.beta[k], t=tOf(m,k);
+      if(Math.sign(b)!==f.dir||Math.abs(b)<SK_EFF||Math.abs(t)<T*(chosen.length?1.15:1)) continue;   // weitere Auffälligkeiten brauchen etwas mehr Sicherheit
+      // Kombination nur, wenn sie deutlich mehr erklärt als jede Gewohnheit allein
+      if(f.combo){ const single=f.combo.map(id=>fit([...chosen,F.find(x=>x.id===id)],ys)).map(q=>q?q.o.beta[k]:0);
+        if(single.some(v=>!(b<=v-0.5))) continue; }
+      cand.push({f,b,t});
+    }
+    // Gegencheck: Die Auffälligkeit muss bestehen bleiben, wenn man jede andere Gewohnheit herausrechnet.
+    // (Sonst bekäme z. B. Milch die Schuld, nur weil sie oft zusammen mit Zucker gegessen wird.)
+    cand.sort((a,c)=>Math.abs(c.t)-Math.abs(a.t));
+    const k=chosen.length+1;
+    best=cand.find(c=>F.every(g=>{
+      if(g===c.f||chosen.includes(g)||(c.f.combo&&c.f.combo.includes(g.id))||(g.combo&&(g.combo.includes(c.f.id)||c.f.combo))) return true;
+      const m2=fit([...chosen,c.f,g],ys); if(!m2) return true;
+      const b2=m2.o.beta[k], t2=tOf(m2,k);
+      return Math.sign(b2)===c.f.dir&&Math.abs(b2)>=SK_EFF*0.7&&Math.abs(t2)>=1.8;
+    }));
+    if(!best) break;
+    chosen.push(best.f);
+  }
+  let res=[];
+  if(chosen.length){
+    const m=fit(chosen,ys);   // endgültige Werte aus dem gemeinsamen Modell; jede Auffälligkeit muss dort weiter bestehen
+    if(m) res=chosen.map((f,i)=>({f, diff:Math.round(m.o.beta[i+1]*10)/10, n:m.R.filter(k=>X[idx(f)][k]===1).length, t:tOf(m,i+1)}))
+      .filter(x=>Math.sign(x.diff)===x.f.dir&&Math.abs(x.diff)>=SK_EFF&&Math.abs(x.t)>=SK_T)
+      .sort((a,b)=>(a.diff<0?0:1)-(b.diff<0?0:1)||Math.abs(b.diff)-Math.abs(a.diff));
+  }
+  SK_MEMO.key=key; SK_MEMO.fp=fp; SK_MEMO.val=res; return res;
 }
 function skinTone(v){ return v<=4?"bad":v<=6?"warn":"ok"; }
 function skinScale(cur,act){
@@ -65,10 +167,12 @@ function skinCard(){
     <text x="${W-P}" y="${H-1}" text-anchor="end" font-size="12" fill="${tc("ink-2")}">${labelDate(state.date)}</text></svg>`;
   const ins=skinInsights();
   const edit=cur==null||ui.skinEdit;
-  const analysis=n<SK_MIN?`<div class="skbox">${skinProgress(n)}<div class="sub mt-2">Danach siehst du hier, was dir auffällt: Zucker, Fast Food, Milchprodukte, Schlaf und Wasser.</div></div>`
-    :ins.length?`<div class="skins">${ins.map(x=>`<div class="skin-row"><div class="bubble">${x.fc.emo}</div><div class="grow">${x.fc.txt}</div><span class="skdelta ${x.diff<0?"down":"up"}">${x.diff>0?"+":"−"}${de(Math.abs(x.diff),1)}</span></div>`).join("")}</div>
-      <div class="sub mt-2">Unterschied deiner Haut im Schnitt (Punkte). Zeigt Auffälligkeiten in deinen Einträgen, keine Ursachen.</div>`
-    :`<div class="skbox sub">Noch keine klaren Muster. Je mehr Tage du einträgst, desto genauer wird es.</div>`;
+  const analysis=n<SK_MIN?`<div class="skbox">${skinProgress(n)}<div class="sub mt-2">Danach siehst du hier, was deinem Hautbild schadet oder guttut: Zucker, Fast Food, Milchprodukte, Schlaf, Wasser und deine Ernährung.</div></div>`
+    :ins.length?`<div class="skins">${ins.map(x=>`<div class="skin-row"><div class="bubble${x.f.combo?" duo":""}">${x.f.emo}</div><div class="grow"><b>${esc(x.f.t)}</b><div class="sub">${[x.f.sub,x.n+" "+(x.n===1?"Tag":"Tage")].filter(Boolean).join(" · ")}</div></div><span class="skdelta ${x.diff<0?"down":"up"}">${x.diff>0?"+":"−"}${de(Math.abs(x.diff),1)}</span></div>`).join("")}</div>
+      <div class="sub mt-2">Hautbild am Tag danach, verglichen mit deinen anderen Tagen (Punkte). Zeigt Auffälligkeiten in deinen Einträgen, keine Ursachen.</div>`
+    :all.filter(s=>{ const i=skinDayInfo(addDays(s,-1)); return i&&i.logged; }).length<SK_MIN
+      ?`<div class="skbox sub">Für die Analyse fehlen noch Tage mit vollständig eingetragenem Essen. Trag am Vortag möglichst alles ein, was du isst.</div>`
+      :`<div class="skbox sub">Noch keine klaren Muster. Trag weiter Essen, Schlaf und Hautbild ein, dann wird es genauer.</div>`;
   return `<div class="section"><h2>Hautanalyse</h2><span class="sub">Ø ${fmt(skinAvg(v30))} · 30 Tage</span></div>
   <div class="card">
     <div class="row space"><div><b>${labelDate(state.date)}</b><div class="sub">Wie ist deine Haut?</div></div>
