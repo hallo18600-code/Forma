@@ -49,21 +49,15 @@ function skinProgress(n){
     <span class="sub">${left?`Analyse in ${left} ${left===1?"Tag":"Tagen"}`:"Analyse ist bereit"}</span></div>`;
 }
 
-// Pop-up: beim ersten Öffnen am Tag einmal von unten einblenden (nicht wichtiger als der Rest der App)
-function skinAsk(){
-  try{
-    if(window.NO_SKIN_ASK||!state.onboarded||(typeof termsOk==="function"&&!termsOk())||ui.modal||ui.workout) return;
-    const t=todayIso(), d=state.days[t]||(state.days[t]=blankDay());
-    if(skinVal(t)!=null||d.skinAsked) return;
-    d.skinAsked=1; save(); openModal("skincheck");
-  }catch(e){}
+// Coach: statt „Tipp für heute“ eine kleine Haut-Check-Karte – erst ab dem zweiten Tag, nur bis heute bewertet ist
+function skinCoachDue(){
+  const t=todayIso(); if(skinVal(t)!=null) return false;
+  const first=state.rStart||Object.keys(state.days).sort()[0]||t;
+  return first<t;
 }
-function skinCheckSheet(){
-  const n=skinDays().length;
-  return `<div class="t-c"><div class="skemo">✨</div><h2>Wie ist deine Haut heute?</h2><p class="sub">Einmal antippen. Daraus entsteht deine Hautanalyse.</p></div>
-    ${skinScale(null,"skin-pop")}
-    ${n<SK_MIN?skinProgress(n):""}
-    <div class="gap"></div><button class="pill ghost w-full" data-act="close">Später</button>`;
+function skinCoachCard(){
+  return `<div class="card tipcard skcoach"><div class="row gap-3"><span class="tip-ico">✨</span><span class="grow"><span class="tipk">Haut-Check</span><b>Wie ist deine Haut heute?</b></span></div>
+    ${skinScale(null,"skin-pop")}</div>`;
 }
 
 // Verlauf: Karte „Haut“ mit Verlauf, Durchschnitt und Auffälligkeiten

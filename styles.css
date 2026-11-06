@@ -1140,6 +1140,10 @@ details.tip[open] .chev { transform:rotate(90deg); }
 .ob-opt b { hyphens:auto; -webkit-hyphens:auto; overflow-wrap:break-word; }
 
 /* Haut-Check (hautcheck.js) */
+.skcoach { display:block; }
+.skcoach .grow { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.skcoach .skscale { margin-top:var(--s-3); gap:4px; }
+.skcoach .skscale button { height:38px; font-size:var(--fs-s); background:var(--surface); }
 .skemo { width:56px; height:56px; margin:var(--s-2) auto var(--s-3); border-radius:var(--r-full); background:var(--hero-tint); display:grid; place-items:center; font-size:28px; }
 .skscale { display:grid; grid-template-columns:repeat(10,minmax(0,1fr)); gap:5px; margin-top:var(--s-4); }
 .skscale button { height:44px; border-radius:var(--r-m); font-weight:800; font-size:var(--fs-m); background:var(--fill-2); color:var(--ink); transition:transform .12s, background .12s; }

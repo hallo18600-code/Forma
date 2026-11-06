@@ -512,7 +512,6 @@ function renderModal(){
   if(type==="details") inner=detailsSheet();
   if(type==="rem") inner=remSheet();
   if(type==="dayscore") inner=dayScoreSheet();
-  if(type==="skincheck") inner=skinCheckSheet();
   if(type==="photo") inner=photoSheet(payload);
   if(type==="ph-add") inner=phAddSheet();
   if(type==="ph-date") inner=phDateSheet();
@@ -749,7 +748,7 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="water"){ day().water = day().water===+el.dataset.v ? +el.dataset.v-1 : +el.dataset.v; syncAuto(state.date); save(); }
   else if(act==="skin-rate"){ const d=day(); d.skin=Math.max(1,Math.min(10,Math.round(+el.dataset.v))); delete d.skinSkip; ui.skinEdit=false; save(); }
-  else if(act==="skin-pop"){ const t=todayIso(), d=day(t); d.skin=Math.max(1,Math.min(10,Math.round(+el.dataset.v))); ui.modal=null; save(); const left=SK_MIN-skinDays().length; toast(left>0?"Gespeichert · Analyse in "+left+(left===1?" Tag":" Tagen"):"Gespeichert · siehe Verlauf"); }
+  else if(act==="skin-pop"){ const t=todayIso(), d=day(t); d.skin=Math.max(1,Math.min(10,Math.round(+el.dataset.v))); ui.modal=null; save(); const left=SK_MIN-skinDays().length; toast(left>0?"Gespeichert · Hautanalyse in "+left+(left===1?" Tag":" Tagen"):"Gespeichert · siehe Verlauf"); }
   else if(act==="skin-edit"){ ui.skinEdit=true; }
   else if(act==="sleep-adj"){ const d=day(); d.sleep=d.sleep==null?7:Math.max(0,Math.min(14,Math.round((d.sleep+ +el.dataset.v)*2)/2)); save(); }
   else if(act==="water-add"){ day().water=(day().water||0)+1; syncAuto(state.date); save(); }
@@ -1058,8 +1057,7 @@ document.getElementById("app").addEventListener("input", e=>{
 applyTheme();
 render();
 try{ remSoon(); }catch(e){}
-setTimeout(skinAsk,700);   // Haut-Pop-up einmal am Tag (hautcheck.js)
-document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") setTimeout(skinAsk,500); });
+
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")) window.addEventListener("load",()=>{ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} });
 

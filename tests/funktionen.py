@@ -280,7 +280,7 @@ def klicktest(b):
         if True:
             ctx = b.new_context(locale="de-DE", viewport={"width": 390, "height": 844}, timezone_id=tz)
             ctx.grant_permissions(["notifications"], origin=URL.split("/index")[0])
-            pg = ctx.new_page(); pg.add_init_script("window.NO_SKIN_ASK=1"); errs = []
+            pg = ctx.new_page(); errs = []
             if os.environ.get("TEST_SLOW"):   # langsamen Rechner nachstellen
                 ctx.new_cdp_session(pg).send("Emulation.setCPUThrottlingRate", {"rate": float(os.environ["TEST_SLOW"])})
             if zeit: pg.clock.set_fixed_time(zeit)
@@ -417,7 +417,7 @@ def fototest(b):
     quer = png(tmp + "/quer.png", 1600, 900, (90, 90, 120))
     falsch = tmp + "/text.txt"; open(falsch, "w").write("kein Bild")
     for theme in ["light", "dark"]:
-        ctx = b.new_context(locale="de-DE", viewport={"width": 390, "height": 844}); pg = ctx.new_page(); pg.add_init_script("window.NO_SKIN_ASK=1"); errs = []
+        ctx = b.new_context(locale="de-DE", viewport={"width": 390, "height": 844}); pg = ctx.new_page(); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
         if theme == "dark":   # einmal wie ein langsames Handy (Prozessor 6× gebremst)
@@ -525,7 +525,7 @@ def fototest(b):
 def main():
     bad = 0
     with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page(locale="de-DE", timezone_id=os.environ.get("TEST_TZ") or None); pg.add_init_script("window.NO_SKIN_ASK=1"); errs = []
+        b = p.chromium.launch(); pg = b.new_page(locale="de-DE", timezone_id=os.environ.get("TEST_TZ") or None); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(URL); pg.wait_for_timeout(1500)
         pg.evaluate("()=>{" + HELP + "}")
