@@ -248,7 +248,7 @@ FUERDICH = r"""async ()=>{
 def main():
     bad = 0
     with sync_playwright() as p:
-        b = p.chromium.launch(); pg = b.new_page(locale="de-DE"); errs = []
+        b = p.chromium.launch(); pg = b.new_page(locale="de-DE"); pg.add_init_script("window.NO_SKIN_ASK=1"); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(URL); pg.wait_for_timeout(1500)
         for name, js in [("Richtwerte", RICHTWERTE), ("Coach", COACH), ("Passt zur Person", PASST), ("Lebensmittel", ESSEN), ("Für dich & Begründungen", FUERDICH)]:

@@ -39,8 +39,8 @@ function skinInsights(){
   }).filter(Boolean).sort((a,b)=>Math.abs(b.diff)-Math.abs(a.diff)).slice(0,3);
 }
 function skinTone(v){ return v<=4?"bad":v<=6?"warn":"ok"; }
-function skinScale(cur){
-  return `<div class="skscale">${Array.from({length:10},(_,i)=>i+1).map(v=>`<button class="sk-${skinTone(v)} ${cur===v?"on":""}" data-act="skin-rate" data-v="${v}" aria-label="Haut ${v} von 10">${v}</button>`).join("")}</div>
+function skinScale(cur,act){
+  return `<div class="skscale">${Array.from({length:10},(_,i)=>i+1).map(v=>`<button class="sk-${skinTone(v)} ${cur===v?"on":""}" data-act="${act||"skin-rate"}" data-v="${v}" aria-label="Haut ${v} von 10">${v}</button>`).join("")}</div>
     <div class="skends"><span>schlecht</span><span>sehr gut</span></div>`;
 }
 function skinProgress(n){
@@ -49,17 +49,21 @@ function skinProgress(n){
     <span class="sub">${left?`Analyse in ${left} ${left===1?"Tag":"Tagen"}`:"Analyse ist bereit"}</span></div>`;
 }
 
-// Tagebuch: kleine Karte ganz oben, nur heute, verschwindet nach der Antwort
-function skinCheckCard(){
-  if(state.date!==todayIso()) return "";
-  const d=day(); if(skinVal(state.date)!=null||d.skinSkip) return "";
+// Pop-up: beim ersten Öffnen am Tag einmal von unten einblenden (nicht wichtiger als der Rest der App)
+function skinAsk(){
+  try{
+    if(window.NO_SKIN_ASK||!state.onboarded||(typeof termsOk==="function"&&!termsOk())||ui.modal||ui.workout) return;
+    const t=todayIso(), d=state.days[t]||(state.days[t]=blankDay());
+    if(skinVal(t)!=null||d.skinAsked) return;
+    d.skinAsked=1; save(); openModal("skincheck");
+  }catch(e){}
+}
+function skinCheckSheet(){
   const n=skinDays().length;
-  return `<div class="card skcard">
-    <div class="row space"><div class="row gap-3"><div class="bubble skbub">✨</div><div><b class="sktitle">Wie ist deine Haut heute?</b><div class="sub">Einmal antippen, fertig.</div></div></div>
-    <button class="skx" data-act="skin-skip" aria-label="Heute überspringen">×</button></div>
-    ${skinScale(null)}
+  return `<div class="t-c"><div class="skemo">✨</div><h2>Wie ist deine Haut heute?</h2><p class="sub">Einmal antippen. Daraus entsteht deine Hautanalyse.</p></div>
+    ${skinScale(null,"skin-pop")}
     ${n<SK_MIN?skinProgress(n):""}
-  </div>`;
+    <div class="gap"></div><button class="pill ghost w-full" data-act="close">Später</button>`;
 }
 
 // Verlauf: Karte „Haut“ mit Verlauf, Durchschnitt und Auffälligkeiten
@@ -82,14 +86,14 @@ function skinCard(){
     :ins.length?`<div class="skins">${ins.map(x=>`<div class="skin-row"><div class="bubble">${x.fc.emo}</div><div class="grow">${x.fc.txt}</div><span class="skdelta ${x.diff<0?"down":"up"}">${x.diff>0?"+":"−"}${de(Math.abs(x.diff),1)}</span></div>`).join("")}</div>
       <div class="sub mt-2">Unterschied deiner Haut im Schnitt (Punkte). Zeigt Auffälligkeiten in deinen Einträgen, keine Ursachen.</div>`
     :`<div class="skbox sub">Noch keine klaren Muster. Je mehr Tage du einträgst, desto genauer wird es.</div>`;
-  return `<div class="section"><h2>Haut</h2><span class="sub">Ø ${fmt(skinAvg(v30))} · 30 Tage</span></div>
+  return `<div class="section"><h2>Hautanalyse</h2><span class="sub">Ø ${fmt(skinAvg(v30))} · 30 Tage</span></div>
   <div class="card">
     <div class="row space"><div><b>${labelDate(state.date)}</b><div class="sub">Wie ist deine Haut?</div></div>
       ${edit?"":`<button class="row gap-2" data-act="skin-edit"><span class="skbig sk-${skinTone(cur)}">${cur}</span><span class="sub">/ 10 ›</span></button>`}</div>
     ${edit?`<div class="mt-3">${skinScale(cur)}</div>`:""}
     <div class="mt-3">${v30.length?svg:`<div class="sub li">Bewerte deine Haut, dann erscheint hier der Verlauf.</div>`}</div>
     <div class="kpi"><div><span>Ø 7 Tage</span><b>${fmt(skinAvg(v7))}</b></div><div><span>Ø 30 Tage</span><b>${fmt(skinAvg(v30))}</b></div><div><span>Einträge</span><b>${n}</b></div></div>
-    <div class="skhead">Analyse</div>
+    <div class="skhead">Auffälligkeiten</div>
     ${analysis}
   </div>`;
 }
