@@ -72,7 +72,7 @@ function dayBlock(){
       </div>
       <div class="meal-row">
         <div class="bubble">✨</div>
-        <div class="grow"><div class="meal-name">Hautbild</div><div class="sub">${sk==null?"Noch nicht bewertet":sk+" / 10"}</div>${sk!=null?bar(sk/10):""}</div>
+        <div class="grow"><div class="meal-name">${state.date===todayIso()?"Heutiges Hautbild":"Hautbild"}</div><div class="sub">${sk==null?"Noch nicht bewertet":sk+" / 10"}</div>${sk!=null?bar(sk/10):""}</div>
         <div class="row"><button class="plus" data-act="skin-adj" data-v="-1" aria-label="Hautbild einen Punkt schlechter">−</button>
         <button class="plus dark" data-act="skin-adj" data-v="1" aria-label="Hautbild einen Punkt besser">+</button></div>
       </div>
