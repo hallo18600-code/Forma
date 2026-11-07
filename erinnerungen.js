@@ -1,4 +1,4 @@
-// Health Maxxing – Erinnerungen (Essen, Wasser, Wiegen, Supplements).
+// Life Maxxing – Erinnerungen (Essen, Wasser, Wiegen, Supplements).
 // Schlau: Eine Erinnerung kommt nur, wenn das noch offen ist (Frühstück schon eingetragen → keine Frühstücks-Erinnerung).
 //
 // Zwei Wege:

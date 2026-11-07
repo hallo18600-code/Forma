@@ -1,4 +1,4 @@
-// Health Maxxing – Übungs-Männchen: eigene, einfache SVG-Figur mit Bewegungs-Animation.
+// Life Maxxing – Übungs-Männchen: eigene, einfache SVG-Figur mit Bewegungs-Animation.
 // Jede Übung nutzt ein Bewegungsmuster (Start-Pose A, End-Pose B). Die Figur pendelt weich zwischen A und B.
 // Seitenansicht ("side") oder Frontansicht ("front"). Muskeln werden farbig hervorgehoben.
 

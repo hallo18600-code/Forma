@@ -1,4 +1,4 @@
-// Health Maxxing – Lebensmittel-Bewertung (naturbelassen / primal), je Ziel eigene Logik.
+// Life Maxxing – Lebensmittel-Bewertung (naturbelassen / primal), je Ziel eigene Logik.
 // Ablauf: 1. Lebensmittel-Art am Namen erkennen  2. Grundwert je Ziel  3. Nährwerte feinjustieren
 //         4. Verarbeitung & Ersatzstoffe abziehen  5. Persönliches (Vegan, Unverträglichkeiten, Fokus)
 // Ausgabe: score + kurze Texte "gut" und "schlecht" (keine Punkte-Rechnung).

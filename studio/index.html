@@ -148,7 +148,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
 <div class="wrap">
   <header>
     <div class="mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#3cff8f" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l7-7 7 7"/><path d="M5 20l7-7 7 7"/></svg></div>
-    <div><h1>Slide-Studio</h1><div class="sub" id="sub">Health Maxxing · TikTok-Slideshows · <span id="ver"></span></div></div>
+    <div><h1>Slide-Studio</h1><div class="sub" id="sub">Life Maxxing · TikTok-Slideshows · <span id="ver"></span></div></div>
   </header>
 
   <p class="label">Content-Art</p>
@@ -170,7 +170,7 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
         <div class="pair"><button id="btnCopy" type="button">Text kopieren</button><button id="btnNext" type="button">Nächster ›</button></div>
         <p class="status" id="saveStatus"></p>
       </div>
-      <p class="legal-short">⚠️ Posten nur mit Werbung für Health Maxxing. Hinweis auf die App nicht rausschneiden. <a href="#dTerms" id="lnkTerms">Bedingungen</a></p>
+      <p class="legal-short">⚠️ Posten nur mit Werbung für Life Maxxing. Hinweis auf die App nicht rausschneiden. <a href="#dTerms" id="lnkTerms">Bedingungen</a></p>
       <p class="desc" id="desc"></p>
       <div id="ovList" style="display:grid;gap:14px"></div>
       <p>Falls nichts passiert: jedes Bild <b>lange gedrückt halten</b> → <b>„Zu Fotos hinzufügen“</b>.</p>
@@ -227,15 +227,15 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
   <details id="dTerms">
     <summary>Nutzungsbedingungen für Creator</summary>
     <div class="body legal">
-      <p><b>Die Slides aus diesem Studio dürfen nur zur Werbung für die App Health Maxxing gepostet werden.</b></p>
+      <p><b>Die Slides aus diesem Studio dürfen nur zur Werbung für die App Life Maxxing gepostet werden.</b></p>
       <p>Wer Slides von hier postet, erklärt sich mit diesen Bedingungen einverstanden:</p>
       <ul>
-        <li>Jeder Post muss erkennbar für Health Maxxing werben (z.&nbsp;B. App-Name, #healthmaxxing oder App-Slide).</li>
+        <li>Jeder Post muss erkennbar für Life Maxxing werben (z.&nbsp;B. App-Name, #lifemaxxing oder App-Slide).</li>
         <li>Der Hinweis auf die App darf nicht herausgeschnitten, überdeckt, verändert oder gelöscht werden – auch nicht nachträglich.</li>
         <li>Der Post muss als Werbung gekennzeichnet sein (z.&nbsp;B. „Werbung“ oder TikToks Werbe-Kennzeichnung).</li>
-        <li>Eine Nutzung ohne Werbung für Health Maxxing, für andere Apps/Produkte oder ein Weitergeben der Slides an Dritte ist nicht erlaubt.</li>
+        <li>Eine Nutzung ohne Werbung für Life Maxxing, für andere Apps/Produkte oder ein Weitergeben der Slides an Dritte ist nicht erlaubt.</li>
       </ul>
-      <p>Die Slides sind urheberrechtlich geschützt. Bei Verstößen erlischt das Nutzungsrecht sofort. Der Anbieter von Health Maxxing behält sich rechtliche Schritte vor, insbesondere Löschung, Unterlassung und Schadensersatz.</p>
+      <p>Die Slides sind urheberrechtlich geschützt. Bei Verstößen erlischt das Nutzungsrecht sofort. Der Anbieter von Life Maxxing behält sich rechtliche Schritte vor, insbesondere Löschung, Unterlassung und Schadensersatz.</p>
     </div>
   </details>
 </div>
@@ -2099,7 +2099,7 @@ function planPost(series, n, lang) {
   const niche = (SERIES[series].niche || slides[0].niche) || ['#realfood', '#wholefoods'];
   const broad = lang === 'de' ? ['#ernährung', '#gesundessen'] : ['#nutrition', '#healthtips'];
   // immer #fyp + #viral, danach passend zum Video (TikTok erlaubt max. 5)
-  const tags = ['#fyp', '#viral', ...niche, '#healthmaxxing', ...broad].filter((t, i, a) => a.indexOf(t) === i).slice(0, 5);
+  const tags = ['#fyp', '#viral', ...niche, '#lifemaxxing', ...broad].filter((t, i, a) => a.indexOf(t) === i).slice(0, 5);
   const desc = `Follow for better Health/Looks 🤝\n\n${tags.join(' ')}`;
   // fürs nächste Mal merken, was gerade dran war (mehr Abwechslung)
   recent.series = [series, ...recent.series.filter(x => x !== series)].slice(0, 4);

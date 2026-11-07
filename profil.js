@@ -1,4 +1,4 @@
-// Health Maxxing – Profil
+// Life Maxxing – Profil
 function renderProfil(){
   const p=state.profile, t=targets();
   return `<div class="scroll pad">

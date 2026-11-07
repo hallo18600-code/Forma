@@ -1,4 +1,4 @@
-"""Automatische Sicherheitsprüfung für Health Maxxing.
+"""Automatische Sicherheitsprüfung für Life Maxxing.
 
 Rechnet sehr viele Profile, Coach-Antworten und alle Lebensmittel durch und prüft feste Regeln
 (keine kaputten Zahlen, Mindestgrenzen, kein Defizit bei Untergewicht, keine Abstürze …).

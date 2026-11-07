@@ -1,4 +1,4 @@
-// Health Maxxing – Trainingsverlauf aus anderen Gym-Apps übernehmen (Hevy, Strong).
+// Life Maxxing – Trainingsverlauf aus anderen Gym-Apps übernehmen (Hevy, Strong).
 // Die Datei wird nur im Browser gelesen, nichts geht ins Internet.
 // Bekannte Übungen werden auf eigene Übungen gelegt, unbekannte als "Eigene Übung" angelegt.
 
@@ -288,7 +288,7 @@ function gymBody(app){
       </div>
       ${r.skipped?`<p class="sub">${r.skipped} waren schon da und wurden übersprungen.</p>`:""}
     </div>`;
-  return `<div class="gi-app"><span class="gi-emo">${A.emo}</span><b>${A.name}</b><span class="gi-arrow">→</span><img class="gi-emo gi-hm" src="icon-192.png" alt=""><b>Health Maxxing</b></div>
+  return `<div class="gi-app"><span class="gi-emo">${A.emo}</span><b>${A.name}</b><span class="gi-arrow">→</span><img class="gi-emo gi-hm" src="icon-192.png" alt=""><b>Life Maxxing</b></div>
     <ol class="gi-steps">${A.path.concat("Datei hier auswählen").map((t,i)=>`<li><span>${i+1}</span>${esc(t)}</li>`).join("")}</ol>
     ${ui.gymErr?`<div class="warn">${app==="other"?"Die Datei konnte nicht gelesen werden. Sie braucht Spalten für Datum, Übung und Wiederholungen oder Gewicht.":`Das ist keine ${A.name}-Datei. Bitte die exportierte CSV-Datei wählen.`}</div>`:""}
     ${app==="other"&&!ui.gymErr?`<p class="gi-note">Klappt mit fast jeder App, die eine CSV-Datei mit Datum, Übung, Gewicht und Wiederholungen exportiert.</p>`:""}

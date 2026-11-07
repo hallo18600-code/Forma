@@ -1,4 +1,4 @@
-// Health Maxxing – Willkommen, Fragebogen (eine Frage pro Seite) und persönlicher Plan
+// Life Maxxing – Willkommen, Fragebogen (eine Frage pro Seite) und persönlicher Plan
 
 const OB_GOALS = {
   muscle:["💪","Kraft und Masse aufbauen, mit leichtem Kalorienplus"],
@@ -122,7 +122,7 @@ function renderWelcome(){
   const rows=["M28 80 L50 60 L72 80","M28 62 L50 42 L72 62","M28 44 L50 24 L72 44"];
   return `<div class="screen wlscreen" style="--wl-t:-${t}ms">
     <div class="scroll wl">
-      <div class="row space wl-top"><div class="logo">health maxxing</div><button class="chip notr" data-act="open" data-type="lang" aria-label="Sprache">🌐 ${LANG.toUpperCase()}</button></div>
+      <div class="row space wl-top"><div class="logo">life maxxing</div><button class="chip notr" data-act="open" data-type="lang" aria-label="Sprache">🌐 ${LANG.toUpperCase()}</button></div>
       <div class="wl-stage" aria-hidden="true">
         <svg class="wl-chev" viewBox="0 0 100 100">
           <g class="wl-glow">${rows.map((d,i)=>`<path class="c${i}" d="${d}"/>`).join("")}</g>
@@ -172,7 +172,7 @@ function renderOnboard(){
   let body="", can=true;
   if(st.kind==="adult"){
     body=`<div class="ob-opts">${obOpt({v:"1",l:"Ja, ich bin 18 oder älter",e:"✅"},p.adult,false,"ob-adult")}${obOpt({v:"0",l:"Nein",e:"✋"},state.obMinor,false,"ob-adult")}</div>
-      ${state.obMinor?`<div class="warn">Health Maxxing ist erst ab 18.</div>`:""}`;
+      ${state.obMinor?`<div class="warn">Life Maxxing ist erst ab 18.</div>`:""}`;
     can=!!p.adult;
   } else if(st.kind==="terms"){
     body=termsBody();

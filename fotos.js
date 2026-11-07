@@ -1,4 +1,4 @@
-// Health Maxxing – Fortschrittsfotos: ganz unten im Verlauf, Vergleich nebeneinander.
+// Life Maxxing – Fortschrittsfotos: ganz unten im Verlauf, Vergleich nebeneinander.
 // Fotos bleiben nur auf dem Gerät. Sie liegen in IndexedDB (nicht im normalen Speicher, der ist für Bilder zu klein)
 // und sind deshalb NICHT in der Datensicherung (Datei) enthalten. „Alles löschen“ löscht sie mit.
 // Jedes Foto wird beim Speichern verkleinert (längste Seite 1280 px, JPEG), damit der Speicher nicht vollläuft.

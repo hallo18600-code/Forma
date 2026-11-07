@@ -1,4 +1,4 @@
-// Health Maxxing – Tagebuch: Heute-Ansicht, Mahlzeiten, Lebensmittel-Details
+// Life Maxxing – Tagebuch: Heute-Ansicht, Mahlzeiten, Lebensmittel-Details
 function renderHeute(){
   const t=targets(), tot=totals(), goalK=t.kcal, remain=Math.max(0, goalK-tot.kcal);
   const d=day();

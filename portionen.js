@@ -1,4 +1,4 @@
-// Health Maxxing – Portionsgrößen: Esslöffel, Teller, Scheibe, Glas … statt nur Gramm
+// Life Maxxing – Portionsgrößen: Esslöffel, Teller, Scheibe, Glas … statt nur Gramm
 // Jedes Lebensmittel bekommt passende Einheiten (aus dem Namen und den Gramm-Angaben der Datenbank).
 // Gespeichert wird weiter in Gramm (portion). Zusätzlich merkt sich ein Eintrag Einheit (u) und Anzahl (q) für die Anzeige.
 

@@ -1,4 +1,4 @@
-// Health Maxxing – Übersetzungen
+// Life Maxxing – Übersetzungen
 // Die App ist auf Deutsch geschrieben. Für andere Sprachen wird nach jedem Aufbau der Text auf dem Bildschirm
 // übersetzt (Wörterbuch in i18n/<sprache>.js). Zahlen werden dabei als Platzhalter behandelt ({0}, {1} …),
 // zusammengesetzte Texte („A · B“) Stück für Stück. Gespeicherte Werte bleiben deutsch, die Logik ändert sich nicht.

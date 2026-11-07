@@ -1,4 +1,4 @@
-// Health Maxxing – Training: Übungen, Pläne, Live-Training, Kalender, Statistik
+// Life Maxxing – Training: Übungen, Pläne, Live-Training, Kalender, Statistik
 
 // Wählbare Pausenzeiten in Sekunden (Auswahl liegt in state.profile.restSec)
 const REST_OPTS=[60,90,120,180];

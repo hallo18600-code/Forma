@@ -1,4 +1,4 @@
-// Health Maxxing – Schlaue Vorschläge beim Essen-Eintragen (wie bei Yazio).
+// Life Maxxing – Schlaue Vorschläge beim Essen-Eintragen (wie bei Yazio).
 // Wer etwas öfter isst, sieht es beim „+“ direkt oben – passend zur Mahlzeit und mit der zuletzt gegessenen Menge.
 // Alles wird nur aus dem eigenen Tagebuch auf dem Gerät berechnet.
 //

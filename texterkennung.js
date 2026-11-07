@@ -1,4 +1,4 @@
-// Health Maxxing – Texterkennung: „2 Eier, eine Scheibe Brot mit Butter und ein Kaffee“ → Einträge fürs Tagebuch.
+// Life Maxxing – Texterkennung: „2 Eier, eine Scheibe Brot mit Butter und ein Kaffee“ → Einträge fürs Tagebuch.
 // Läuft komplett auf dem Gerät (kein Server). Ablauf:
 //   1. Text aufbereiten (Brüche, Kommazahlen, Bereiche, „3x“)  2. in Teile schneiden (Komma, „und“, „mit“ …)
 //   3. je Teil Menge, Einheit, Größe und Mahlzeit erkennen     4. Lebensmittel suchen (genau, Mehrzahl, Tippfehler,

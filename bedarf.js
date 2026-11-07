@@ -1,4 +1,4 @@
-// Health Maxxing – Kalorienbedarf lernt mit (Idee wie bei MacroFactor).
+// Life Maxxing – Kalorienbedarf lernt mit (Idee wie bei MacroFactor).
 // Die Formel im Fragebogen ist nur eine Schätzung. Aus dem, was jemand wirklich isst, und wie sich das Gewicht
 // dabei verändert, sieht man den echten Verbrauch:
 //   echter Verbrauch ≈ Durchschnitt gegessen − Gewichtsänderung pro Tag × 7.700 kcal

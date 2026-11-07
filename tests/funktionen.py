@@ -81,7 +81,7 @@ VORSCHLAEGE = r"""()=>{ F={}; let n=0;
  if(favToggle("ei")||favOn("ei")) fail("Favorit entfernen falsch","");
  if(favToggle("gibtsnicht")!==false||favOn("gibtsnicht")) fail("Unbekanntes Lebensmittel als Favorit","");
  favToggle("ei"); const st=normalize(JSON.parse(JSON.stringify(state))); if(st.favs.join()!=="ei,lachs") fail("Favoriten nach Laden weg",st.favs.join());
- const im=checkImport('{"app":"Health Maxxing","data":{"profile":{},"favs":["ei","ei",5,null,"<b>x","lachs"]}}');
+ const im=checkImport('{"app":"Life Maxxing","data":{"profile":{},"favs":["ei","ei",5,null,"<b>x","lachs"]}}');
  if(!im||im.favs.join()!=="ei,bx,lachs") fail("Favoriten aus Datei nicht bereinigt",im&&JSON.stringify(im.favs));
  // Filter „Alle · Favoriten“: unten steht immer „Alle Lebensmittel“, nichts doppelt, kein Ausgebautes
  const plusIds=h=>[...h.matchAll(/data-act="(?:sug-add|quick-add)" data-id="([^"]+)"/g)].map(m=>m[1]);
@@ -169,8 +169,8 @@ BEDARF = r"""()=>{ F={}; let n=0; const T0=todayIso();
  newState(); for(let i=0;i<20;i++){ state.weights.push({date:addDays(T0,-1),kg:80}); state.days[addDays(T0,-i-1)]={...blankDay(),meals:[{uid:uid(),id:"skyr",portion:3000,slot:"lunch"}]}; }
  if(adaptAnalyze().ok) fail("Gleicher Tag ergibt ok","");
  // Import mit kaputtem Faktor wird bereinigt
- for(const bad of ['"x"','{"ratio":"abc"}','{"ratio":null}','5']){ const d=checkImport('{"app":"Health Maxxing","data":{"profile":{},"adapt":'+bad+'}}'); n++; if(d&&d.adapt) fail("Kaputter Faktor nach Import",bad); }
- const ok=checkImport('{"app":"Health Maxxing","data":{"profile":{},"adapt":{"ratio":1.1,"week":"2026-01-05"}}}'); if(!ok||!ok.adapt||ok.adapt.ratio!==1.1) fail("Gültiger Faktor geht beim Import verloren","");
+ for(const bad of ['"x"','{"ratio":"abc"}','{"ratio":null}','5']){ const d=checkImport('{"app":"Life Maxxing","data":{"profile":{},"adapt":'+bad+'}}'); n++; if(d&&d.adapt) fail("Kaputter Faktor nach Import",bad); }
+ const ok=checkImport('{"app":"Life Maxxing","data":{"profile":{},"adapt":{"ratio":1.1,"week":"2026-01-05"}}}'); if(!ok||!ok.adapt||ok.adapt.ratio!==1.1) fail("Gültiger Faktor geht beim Import verloren","");
  state.adapt={ratio:5}; if(adaptRatio()!==1) fail("Faktor 5 wird benutzt",""); state.adapt={ratio:"1.1"}; if(adaptRatio()!==1.1) fail("Faktor als Text nicht gelesen","");
  return {n,F};
 }"""

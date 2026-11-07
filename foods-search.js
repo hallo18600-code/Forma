@@ -1,4 +1,4 @@
-// Health Maxxing – Lebensmittel-Datenbank und Suche (die Texterkennung steht in texterkennung.js)
+// Life Maxxing – Lebensmittel-Datenbank und Suche (die Texterkennung steht in texterkennung.js)
 const BC_ICON=`<svg width="34" height="34" viewBox="0 0 34 34"><g fill="currentColor"><rect x="4" y="7" width="2" height="16"/><rect x="8" y="7" width="3" height="16"/><rect x="13" y="7" width="1.5" height="16"/><rect x="17" y="7" width="3" height="16"/><rect x="22" y="7" width="2" height="16"/><rect x="26" y="7" width="3" height="16"/></g><rect x="3" y="15" width="28" height="2" fill="#e5483a"/></svg>`;  // Balken in Textfarbe, Laser-Strich rot
 const FOODDB={rows:[],lc:[],by:new Map(),ok:false};
 async function loadFoodDb(){

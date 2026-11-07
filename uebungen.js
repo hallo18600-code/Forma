@@ -1,4 +1,4 @@
-// Health Maxxing – Übungs-Bibliothek: Liste, Suche, Detailseite mit Männchen, Muskeln und Fortschritts-Diagramm.
+// Life Maxxing – Übungs-Bibliothek: Liste, Suche, Detailseite mit Männchen, Muskeln und Fortschritts-Diagramm.
 // Wird nach data.js und figur.js geladen und füllt EX.
 
 const MUSKEL = {

@@ -1,4 +1,4 @@
-// Health Maxxing – Tages-Score: wie gut (naturbelassen, passend zum Ziel) war das Essen an diesem Tag?
+// Life Maxxing – Tages-Score: wie gut (naturbelassen, passend zum Ziel) war das Essen an diesem Tag?
 // Rechnung: Durchschnitt der Lebensmittel-Scores, gewichtet nach Kalorien – ein voller Teller zählt mehr als ein Teelöffel.
 // Damit Getränke ohne Kalorien (Wasser, Zero) nicht ganz wegfallen, zählt jeder Eintrag mindestens wie 20 kcal.
 // Gleiche Lebensmittel werden zusammengefasst. „Schnell hinzufügen“-Einträge (nur Kalorien, kein echtes Lebensmittel) zählen nicht.

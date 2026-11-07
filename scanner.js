@@ -1,4 +1,4 @@
-// Health Maxxing – Barcode-Scanner, Kamera, KI-Eingabe und Scan-Ansichten
+// Life Maxxing – Barcode-Scanner, Kamera, KI-Eingabe und Scan-Ansichten
 const cam={s:null,t:null,r:null};
 // Barcode-Bibliothek (ZXing) nur laden, wenn das Gerät keinen eingebauten Scanner hat – und erst beim Scannen.
 // Zuerst die lokale Kopie (vendor/zxing.min.js, keine Daten an Dritte); fehlt sie, einmalig vom CDN.

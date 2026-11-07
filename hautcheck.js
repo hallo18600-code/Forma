@@ -1,4 +1,4 @@
-// Health Maxxing – Hautbild: im Tagebuch unter „Dein Tag“ die Haut von 1 bis 10 bewerten, nach 7 Einträgen zeigt der Verlauf die Hautanalyse.
+// Life Maxxing – Hautbild: im Tagebuch unter „Dein Tag“ die Haut von 1 bis 10 bewerten, nach 7 Einträgen zeigt der Verlauf die Hautanalyse.
 // Verglichen wird nur mit eigenen Einträgen: Zucker, Fast Food, Milchprodukte, Wasser und Tages-Score vom Vortag, Schlaf der letzten Nacht.
 // Wichtig: Es sind Auffälligkeiten in den eigenen Daten, keine Ursachen und keine Diagnose.
 

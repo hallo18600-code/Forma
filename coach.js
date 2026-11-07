@@ -1,4 +1,4 @@
-// Health Maxxing – Coach: Pläne, Quiz, Routine, Produkte, Supplements, Haut
+// Life Maxxing – Coach: Pläne, Quiz, Routine, Produkte, Supplements, Haut
 function coachPlans(){
   const skin = skinType();
   const sun = state.skin.sonne === "Täglich" ? "LSF behalten, auch bei Wolken." : "LSF in den Morgen, bevor du rausgehst.";
