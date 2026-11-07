@@ -26,13 +26,23 @@ function skinAvg(list){ return list.length?list.reduce((a,b)=>a+b,0)/list.length
 //  • Jede Gruppe braucht mind. 3 Tage, der Effekt mind. 0,8 Punkte und eine klare statistische Sicherheit (t ≥ SK_T).
 //  • Höchstens 3 Auffälligkeiten.
 const SK_T=2.2, SK_EFF=0.8, SK_GRP=3, SK_MAXF=3;
+const SK_NATURAL=new Set(["fruit","berries","banana","vitc","veg","skinveg","sweetpotato","avocado","legume","potato"]);
+const SK_MILKY=new Set(["dairy","kefir","protdairy"]);
+const SK_MILK=100;          // ab so viel Milchprodukt (g, Käse ×3) zählt ein Tag als „Milchprodukte“
+const SK_BLOCK=3;           // Zufallsvergleich in 3-Tages-Blöcken (Haut und Gewohnheiten ändern sich nicht täglich neu)
 function skinDayInfo(s){
   const d=state.days[s]; if(!d||!Array.isArray(d.meals)) return null;
-  let kcal=0, unk=0, sugar=0, n=0, fast=false, dairy=false;
+  let kcal=0, unk=0, sugar=0, n=0, fast=false, milk=0;
   d.meals.forEach(m=>{ if(!m||!(m.portion>0)) return; const p=foods().find(x=>x.id===m.id); if(!p||p.type==="sup"||p.type==="care") return;
     const k=Math.max(0,(p.kcal||0)*m.portion/100); kcal+=k; n++;
-    if(!p.hidden){ const c=skinCat(p)||{}; if(c.id==="fastfood") fast=true; if(c.d===1) dairy=true; }
-    if(Number.isFinite(p.sugar)) sugar+=p.sugar*m.portion/100; else unk+=k; });
+    const c=(!p.hidden&&skinCat(p))||{};
+    if(c.id==="fastfood") fast=true;
+    // Milchprodukte: erst ab nennenswerter Menge (Schuss Milch im Kaffee zählt nicht). Käse ist konzentrierte Milch (×3), Butter fast nur Fett.
+    if(c.d===1&&c.id!=="butter") milk+=m.portion*(c.id==="cheese"?3:1);
+    // Zucker = freier/zugesetzter Zucker: Zucker in ganzem Obst & Gemüse zählt nicht, bei Milchprodukten nur, was über den Milchzucker (~5 g) hinausgeht
+    if(Number.isFinite(p.sugar)){ const su=SK_NATURAL.has(c.id)?0:SK_MILKY.has(c.id)?Math.max(0,p.sugar-5):p.sugar; sugar+=su*m.portion/100; }
+    else if(!SK_NATURAL.has(c.id)) unk+=k; });
+  const dairy=milk>=SK_MILK;
   let goal=1800; try{ goal=targets().kcal||goal; }catch(e){}
   const logged=n>=2&&kcal>=goal*0.4;          // genug eingetragen, um den Tag zu beurteilen
   let ds=null; try{ const x=typeof dayScore==="function"?dayScore(s):null; ds=x?x.score:null; }catch(e){}
@@ -42,7 +52,7 @@ function skinDayInfo(s){
 // Merkmale: 1 = trifft zu, 0 = trifft nicht zu, null = keine Daten. dir: -1 darf nur schlechter machen, +1 nur besser.
 function skinFeatures(rows){
   const wt=state.profile.waterTarget||8, pick=(vals,opts)=>{ for(const o of opts){ const a=vals.filter(v=>v!=null&&o.f(v)).length, b=vals.filter(v=>v!=null&&!o.f(v)).length; if(a>=SK_GRP&&b>=SK_GRP) return o; } return opts[0]; };
-  const sug=pick(rows.map(r=>r.prev&&r.prev.sugar),[{f:v=>v>=50,t:"über 50 g"},{f:v=>v>=75,t:"über 75 g"},{f:v=>v>=35,t:"über 35 g"}]);
+  const sug=pick(rows.map(r=>r.prev&&r.prev.sugar),[{f:v=>v>=50,t:"über 50 g zugesetzt"},{f:v=>v>=35,t:"über 35 g zugesetzt"},{f:v=>v>=75,t:"über 75 g zugesetzt"},{f:v=>v>=25,t:"über 25 g zugesetzt"}]);
   const slp=pick(rows.map(r=>r.sleep),[{f:v=>v<7,t:"unter 7 h",h:7},{f:v=>v<6.5,t:"unter 6,5 h",h:6.5},{f:v=>v<6,t:"unter 6 h",h:6},{f:v=>v<7.5,t:"unter 7,5 h",h:7.5}]);
   const hi=pick(rows.map(r=>r.prev&&r.prev.score),[{f:v=>v>=85,t:"Tages-Score ab 85"},{f:v=>v>=80,t:"Tages-Score ab 80"},{f:v=>v>=75,t:"Tages-Score ab 75"}]);
   const wat=pick(rows.map(r=>r.prev&&r.prev.water),[{f:v=>v<wt,t:`unter ${wt} Gläsern`},{f:v=>v<Math.round(wt*0.75),t:`unter ${Math.round(wt*0.75)} Gläsern`}]);
@@ -50,7 +60,7 @@ function skinFeatures(rows){
   const F=[
     {id:"sugar", k:"viel Zucker", dir:-1, emo:"🍬", t:"Viel Zucker am Vortag", sub:sug.t, x:r=>{ const q=v(r,"sugar"); return q==null?null:b(sug.f(q)); }},
     {id:"fast", k:"Fast Food",  dir:-1, emo:"🍔", t:"Fast Food am Vortag", sub:"", x:r=>b(v(r,"fast"))},
-    {id:"dairy", k:"Milchprodukte", dir:-1, emo:"🥛", t:"Milchprodukte am Vortag", sub:"", x:r=>b(v(r,"dairy"))},
+    {id:"dairy", k:"Milchprodukte", dir:-1, emo:"🥛", t:"Milchprodukte am Vortag", sub:"ab "+SK_MILK+" g", x:r=>b(v(r,"dairy"))},
     {id:"sleep", k:"wenig Schlaf", dir:-1, emo:"😴", t:"Wenig Schlaf", sub:slp.t, x:r=>r.sleep==null?null:b(slp.f(r.sleep))},
     {id:"water", k:"wenig Wasser", dir:-1, emo:"💧", t:"Wenig Wasser am Vortag", sub:wat.t, x:r=>{ const q=v(r,"water"); return q==null?null:b(wat.f(q)); }},
     {id:"high",  dir:1,  emo:"🥩", t:"Sehr gute Ernährung am Vortag", sub:hi.t, x:r=>{ const q=v(r,"score"); return q==null?null:b(hi.f(q)); }}
@@ -101,7 +111,11 @@ function skinInsights(){
   const maxStat=y=>{ let mx=0; for(const f of F){ const m=fit([f],y); if(m){ const t=tOf(m,1)*f.dir; if(t>mx) mx=t; } } return mx; };
   // Permutationstest: Hautwerte 200× mischen. Nur was stärker ist als 95 % der gemischten Fälle, zählt.
   const rnd=skinRng(key.length*7919+ys.reduce((a,v,i)=>a+v*(i+1)*31,0)), null_=[];
-  for(let p=0;p<200;p++){ const y=ys.slice(); for(let i=y.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [y[i],y[j]]=[y[j],y[i]]; } null_.push(maxStat(y)); }
+  // In Blöcken mischen: Hautbild und Gewohnheiten halten oft mehrere Tage an. Einzeln gemischt sähe Zufall zu „sicher“ aus.
+  const blocks=[]; for(let i=0;i<ys.length;i+=SK_BLOCK) blocks.push(ys.slice(i,i+SK_BLOCK));
+  for(let p=0;p<200;p++){ const B=blocks.slice(), off=Math.floor(rnd()*SK_BLOCK);
+    for(let i=B.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [B[i],B[j]]=[B[j],B[i]]; }
+    const flat=[].concat(...B), y=flat.slice(off).concat(flat.slice(0,off)); null_.push(maxStat(y)); }
   null_.sort((a,b)=>a-b); const T=Math.max(SK_T, null_[Math.floor(null_.length*0.95)]);
   const chosen=[];
   while(chosen.length<SK_MAXF){

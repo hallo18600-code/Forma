@@ -41,6 +41,8 @@ JS = r"""(cfg)=>{
   for(let i=days;i>=0;i--){ const s=addDays(T,-i), d=state.days[s]=blankDay();
    const style=R(); // manche Tage sehr sauber, manche schwach
    const h={ sugar:R()<cfg.pSugar, fast:R()<cfg.pFast, dairy:false, clean:style<cfg.pClean };
+   // Gewohnheiten in Phasen (z. B. eine Woche mit viel Süßem): mit Wahrscheinlichkeit „streak“ wie gestern
+   const yH=H[addDays(s,-1)]; if(cfg.streak&&yH){ if(R()<cfg.streak) h.sugar=yH.sugar; if(R()<cfg.streak) h.fast=yH.fast; if(R()<cfg.streak) h.clean=yH.clean; }
    if(h.clean){ h.sugar=false; h.fast=false; }
    h.dairy = cfg.dairyWithSugar ? (h.sugar ? R()<.8 : R()<.2) : R()<.5;
    if(h.clean&&!cfg.dairyWithSugar) h.dairy=R()<.3;
@@ -60,8 +62,10 @@ JS = r"""(cfg)=>{
    h.sleep=d.sleep;
   }
   // Haut am Tag s hängt vom Vortag (und der letzten Nacht) ab
-  for(let i=days-1;i>=0;i--){ const s=addDays(T,-i), y=H[addDays(T,-i-1)], h=H[s]; if(R()>cfg.pRate) continue;
-   let v=cfg.base+rn()*cfg.noise;
+  let ar=0;   // Hautbild hält an: Rauschen mit Gedächtnis (cfg.ar = Korrelation von Tag zu Tag)
+  for(let i=days-1;i>=0;i--){ const s=addDays(T,-i), y=H[addDays(T,-i-1)], h=H[s];
+   ar=(cfg.ar||0)*ar+Math.sqrt(1-(cfg.ar||0)**2)*rn(); if(R()>cfg.pRate) continue;
+   let v=cfg.base+ar*cfg.noise;
    const eff=cfg.eff||{};
    if(eff.sugar&&y.sugar) v+=eff.sugar;
    if(eff.dairy&&y.dairy) v+=eff.dairy;
@@ -93,6 +97,9 @@ SZ = [
   ("Sehr gute Ernährung hilft (5–8 Wochen)", dict(eff={"clean":2}, want=["high","sugar","fast"], dmin=35, dmax=60), dict(minFound=.12)),
   ("Zucker schadet deutlich (3–5 Wochen)", dict(eff={"sugar":-3}, want=["sugar","sugar+sleep"], dmin=21, dmax=35), dict(minFound=.6)),
   ("Zufall, lange Tagebücher (5–8 Wochen)", dict(eff={}, dmin=35, dmax=60), dict(maxAny=.07)),
+  # Realistischer: Haut ändert sich langsam und Gewohnheiten kommen in Phasen → Zufallsmuster sehen „echter“ aus
+  ("Zufall, Haut & Gewohnheiten in Phasen (3–8 Wochen)", dict(eff={}, dmin=21, dmax=60, ar=.7, streak=.7), dict(maxAny=.08)),
+  ("Zucker schadet, Haut & Gewohnheiten in Phasen (5–8 Wochen)", dict(eff={"sugar":-2}, want=["sugar","sugar+sleep"], dmin=35, dmax=60, ar=.7, streak=.7), dict(minFound=.3)),
 ]
 
 def main():

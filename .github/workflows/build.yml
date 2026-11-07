@@ -1,6 +1,10 @@
 name: Build food data
 on:
   workflow_dispatch:
+  # Neu bauen, sobald sich die Aufbereitung ändert (z. B. Kalorien-Prüfung, NOVA-Schätzung)
+  push:
+    branches: [main]
+    paths: [build_foods.py]
   schedule:
     - cron: "0 3 1 * *"
 permissions:

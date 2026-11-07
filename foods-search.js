@@ -10,6 +10,7 @@ async function loadFoodDb(){
     FOODDB.rows=j.rows||[]; FOODDB.nm=FOODDB.rows.map(x=>NORM(x[1])); FOODDB.lc=FOODDB.rows.map(x=>NORM(x[1]+" "+(x[2]||"")));
     FOODDB.rows.forEach((x,i)=>FOODDB.by.set(x[0],i)); FOODDB.ok=FOODDB.rows.length>0;
     if(!FOODDB.ok) return;
+    dbRefresh();
     // Tippt jemand gerade (Suche, Name, Text)? Dann nur die Trefferliste auffrischen, sonst geht die Tastatur zu.
     const a=document.activeElement;
     if(a&&/^(INPUT|TEXTAREA)$/.test(a.tagName)){
@@ -18,7 +19,8 @@ async function loadFoodDb(){
     } else render();
   }catch(e){}
 }
-function dbItem(x){ return {id:"db-"+x[0],type:"custom",src:"off",name:x[1],brand:x[2]||"",emoji:(typeof supEmoji==="function"&&supEmoji({name:x[1],protein:x[4],sugar:x[7],kcal:x[3]}))||"📦",kcal:Math.round(x[3]),protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7]??undefined,fiber:x[8]??undefined,salt:x[9]??undefined,sat:x[10]??undefined,processed:(x[11]||0)>=4,nova:x[11]||undefined,bc:x[0]}; }
+function dbItem(x){ return {id:"db-"+x[0],type:"custom",src:"off",name:x[1],brand:x[2]||"",emoji:(typeof supEmoji==="function"&&supEmoji({name:x[1],protein:x[4],sugar:x[7],kcal:x[3]}))||"📦",kcal:Math.round(x[3]),protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7]??undefined,fiber:x[8]??undefined,salt:x[9]??undefined,sat:x[10]??undefined,processed:(x[11]||0)>=4,nova:x[11]>0?x[11]:undefined,novaEst:x[11]<0?-x[11]:undefined,warn:x[12]===1?1:undefined,bc:x[0]}; }
+// Spalte 11: NOVA (negativ = vom Build geschätzt), Spalte 12: 1 = Kalorien passen nicht zu den Makros (siehe build_foods.py)
 function qTokens(q){ return NORM(q).split(/\s+/).filter(Boolean).map(w=>w.length>=7?w.replace(/(en|n|e|s)$/,""):w); }
 function hay(p){ return NORM(p.name+" "+(p.brand||"")+" "+((p.al||[]).join(" "))); }
 function foodRank(p,q){
@@ -43,4 +45,13 @@ function dbSearch(q,limit){
   return res.slice(0,limit||30).map(r=>dbItem(FOODDB.rows[r[1]]));
 }
 function dbGet(code){ let i=FOODDB.by.get(code); if(i==null) i=FOODDB.by.get("0"+code); if(i==null&&code.length===13&&code[0]==="0") i=FOODDB.by.get(code.slice(1)); return i==null?null:dbItem(FOODDB.rows[i]); }
+// Schon gespeicherte Datenbank-Produkte mit der neuen Datenbank abgleichen: NOVA-Schätzung und Kalorien-Hinweis
+// nachtragen (nur diese Felder, eigene Änderungen bleiben unberührt)
+function dbRefresh(){
+  let ch=false;
+  (state.customs||[]).forEach(c=>{ if(!c||!String(c.id).startsWith("db-")) return; const i=FOODDB.by.get(c.bc||String(c.id).slice(3)); if(i==null) return;
+    const f=dbItem(FOODDB.rows[i]);
+    for(const k of ["novaEst","warn"]) if(c[k]!==f[k]&&!(c[k]==null&&f[k]==null)){ if(f[k]==null) delete c[k]; else c[k]=f[k]; ch=true; } });
+  if(ch){ if(typeof SK_CAT!=="undefined") SK_CAT.clear(); save(); }
+}
 function ensureDb(id){ id=String(id); if(id.startsWith("db-")&&!foods().some(x=>x.id===id)){ const it=dbGet(id.slice(3)); if(it){ state.customs.push(it); save(); } } }

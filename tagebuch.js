@@ -155,7 +155,8 @@ function foodSheet(it,sc){
       <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
       <div class="ftable" id="ftable">${fTable(it,g)}</div>
     </div>
-    <p class="sub fnote">${src}</p>
+    <p class="sub fnote">${src}${(sc.est||[]).length?" · Geschätzt: "+sc.est.map(k=>({su:"Zucker",fi:"Ballaststoffe",sa:"Salz",nova:"Verarbeitung"})[k]).filter(Boolean).join(", "):""}</p>
+    ${sc.warn?`<p class="sub fnote">⚠️ Kalorien und Makros passen hier nicht zusammen. Bitte mit der Packung vergleichen.</p>`:""}
     <div class="amt ${ui.amtOpen?"open":""}" ${ui.amtOpen?`data-once="amt"`:""}>
       <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>
       <div class="amt-compact" id="amt-compact">${amtCompact(it)}</div>

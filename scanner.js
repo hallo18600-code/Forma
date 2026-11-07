@@ -32,14 +32,27 @@ async function offLookup(code){
   if(!r.ok) return null;
   const j=await r.json(); if(j.status!==1||!j.product) return null;
   const n=j.product.nutriments||{}, g=k=>+n[k]||0;
-  const kcal=g("energy-kcal_100g")||Math.round(g("energy_100g")/4.184), name=(j.product.product_name||"").trim();
+  // Fehlende Angaben bleiben leer (nicht 0): sonst sähe z. B. ein Produkt ohne Zuckerangabe zuckerfrei aus
+  const opt=k=>n[k]==null||n[k]===""||!Number.isFinite(+n[k])?undefined:+n[k];
+  let kcal=g("energy-kcal_100g")||Math.round(g("energy_100g")/4.184);
+  const name=(j.product.product_name||"").trim();
   if(!name||!kcal) return null;
   // Gleiche Plausibilitäts-Prüfung wie bei der eingebauten Liste (build_foods.py): offensichtlich falsche Einträge nicht übernehmen
   const p=g("proteins_100g"), c=g("carbohydrates_100g"), f=g("fat_100g"), calc=p*4+c*4+f*9, brand=(j.product.brands||"").split(",")[0].trim();
   const sonder=/(alkohol|bier|beer|wein|wine|sekt|likör|schnaps|vodka|wodka|whisk|kaugummi|zuckerfrei|sugar ?free|xylit|erythrit|allulos|süßstoff)/i.test(name+" "+brand);
   if(kcal>950||p+c+f>100.5||g("salt_100g")>100) return null;
+  // Kalorien gegen Makros (wie build_foods.py): kJ statt kcal eingetragen → umrechnen; kJ-Angabe passt besser → nehmen; sonst markieren
+  const fib=opt("fiber_100g"), calc2=calc+(fib||0)*2, near=(a,b)=>Math.abs(a-b)<=Math.max(20,0.12*Math.max(a,b));
+  let warn;
+  if(!sonder&&calc2>=30&&!(Math.abs(kcal-calc2)<=Math.max(40,0.2*Math.max(kcal,calc2)))){
+    const kk=g("energy-kj_100g")/4.184;
+    if(kcal>=120&&kcal/calc2>=3.8&&kcal/calc2<=4.6) kcal=kcal/4.184;
+    else if(kk>0&&near(kk,calc2)&&!near(kk,kcal)) kcal=kk;
+    else warn=1;
+  }
   if(!sonder&&Math.max(kcal,calc)>60&&Math.abs(calc-kcal)>80&&Math.abs(calc-kcal)/Math.max(kcal,calc)>0.4) return null;
-  return {id:"off-"+code,type:"custom",src:"off",name,brand:brand||"Open Food Facts",emoji:"📦",kcal:Math.round(kcal),protein:p,carbs:c,fat:f,sugar:Math.min(g("sugars_100g"),c),fiber:g("fiber_100g"),salt:g("salt_100g"),sat:Math.min(g("saturated-fat_100g"),f),processed:(+j.product.nova_group||0)>=4,nova:+j.product.nova_group||undefined,bc:code};
+  const su=opt("sugars_100g"), sat=opt("saturated-fat_100g");
+  return {id:"off-"+code,type:"custom",src:"off",name,brand:brand||"Open Food Facts",emoji:"📦",kcal:Math.round(kcal),protein:p,carbs:c,fat:f,sugar:su==null?undefined:Math.min(su,c),fiber:fib,salt:opt("salt_100g"),sat:sat==null?undefined:Math.min(sat,f),processed:(+j.product.nova_group||0)>=4,nova:+j.product.nova_group||undefined,warn,bc:code};
 }
 async function bcLookup(code){
   code=String(code||"").replace(/\D/g,"");

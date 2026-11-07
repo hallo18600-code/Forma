@@ -17,3 +17,4 @@ jobs:
           sleep 2
           python tests/pruefung.py
           python tests/funktionen.py
+          python tests/bewertung_daten.py

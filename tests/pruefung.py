@@ -66,6 +66,9 @@ COACH = r"""()=>{
    const s=JSON.stringify(r);
    for(const b of ["undefined","NaN","Infinity","[object"]) if(s.includes(b)) fail(`'${b}' im Coach-Text (${ar})`,s.slice(0,160));
    if(/Minoxidil|Ketoconazol|Rosazea/.test(s)) fail("Arzneimittel/Diagnose im Coach ("+ar+")",s.slice(0,160));
+   // Heilversprechen sind rechtlich heikel (Heilmittelwerbegesetz) und fachlich unseriös
+   const hv=s.match(/\b(heilt|heilen|garantiert|garantie|entgiftet|entgiften|detox|bewiesen|wundermittel|verhindert (Krebs|Akne|Haarausfall)|100 ?% sicher)\b/i);
+   if(hv) fail("Heilversprechen im Coach ("+ar+")",hv[0]+" … "+s.slice(Math.max(0,s.indexOf(hv[0])-60),s.indexOf(hv[0])+60));
    if(ar==="aussehen"&&bmi<18.5&&/senken|Defizit/.test(s)) fail("Coach rät Untergewichtigen zum Defizit",`BMI ${bmi.toFixed(1)}`);
    if(sex==="m"&&/Schwangerschaft|Stillzeit/.test(s)) fail("Schwangerschafts-Hinweis bei Männern ("+ar+")","");
   }
