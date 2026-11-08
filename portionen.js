@@ -84,7 +84,11 @@ function unitsFor(it){
   let u=null, ml=false;
   const plates=T=>[["teller_k",R(T*.6),"teller_k"],["teller",T,"teller",1],["teller_g",R(T*1.4),"teller_g"]];
   const pieces=(p,ic)=>[["stueck_k",R(p*.7),"stueck_k"],["stueck",p,ic||"stueck",1],["stueck_g",R(p*1.3),"stueck_g"]];
-  const drinkRe=/ (wasser|water|eau|mineralwasser|sprudel|cola|limo|limonade|fanta|sprite|eistee|ice tea|saft|juice|jus|nektar|schorle|smoothie|kaffee|coffee|espresso|cappuccino|latte|macchiato|flat white|tee|tea|milch|milk|lait|kakao|trinkschokolade|kefir|buttermilch|ayran|lassi|bier|beer|pils|radler|weizen|wein|wine|sekt|prosecco|champagner|energy|red bull|mate|kombucha|shake|getrank|cider|limonata|spritz|aperol|hugo) |drink|saft |milch |wasser /;
+  const drinkRe=/ (wasser|water|eau|mineralwasser|sprudel|cola|limo|limonade|fanta|sprite|eistee|ice tea|saft|juice|jus|nektar|schorle|smoothie|kaffee|coffee|espresso|cappuccino|latte|macchiato|flat white|tee|tea|milch|milk|lait|kakao|trinkschokolade|kefir|buttermilch|ayran|lassi|bier|beer|pils|radler|weizen|wein|wine|sekt|prosecco|champagner|energy|red bull|mate|kombucha|shake|getrank|cider|limonata|spritz|aperol|hugo) |drink|saft |milch |wasser |schorle |limonade |nektar |tee |wein |bier |kakao |kaffee |getrank |sirup |[^u]cola |kola | (pepsi|mezzo ?mix|spezi|capri ?sun|almdudler|bionade|gatorade|powerade|volvic|evian|vittel|gerolsteiner|adelholzener|perrier|pellegrino|apollinaris|oatly|hafer ?drink|monster|rockstar|vio) /;
+  // Kein Getränk, auch wenn ein Getränke-Wort drinsteckt (Kakao-Pudding, Saftschinken, Milchreis …)
+  // (gilt nicht, wenn der Name klar ein Getränk sagt: Joghurtdrink, Reisdrink, Protein-Drink Schokolade)
+  const noDrinkRe=/pudding|dessert|joghurt|jogurt|yoghurt|quark|skyr|milchreis|milch reis| reis |schinken|wurst|brot|kuchen|keks|riegel|schnitte|schokolade|sorbet|gelee|gummi|bonbon|pulver|kapsel| pads |bohnen|gemahlen|eiscreme|praline|waffel|tafel|kaugummi|loslich|instant|freeze|gefriergetrocknet|beutel/;
+  const isDrinkRe=/drink|trink|getrank|liter|saft |schorle|eistee|eis tee/;
   // 0. Supplements: Kreatin im Messlöffel, Kapseln & Tabletten als Stück
   if(has(/kreatin|creatin/)&&kc<100) u=[["mess",5,"mess",1],["tl",4]];
   else if(has(/kapsel|tablette|softgel|brausetabl|dragee/)) u=[["stueck",1,"stueck",1]];
@@ -119,7 +123,7 @@ function unitsFor(it){
   else if(has(/kuchen|torte|muffin|brownie|donut|berliner|krapfen|plunder|schnecke|strudel|tarte|cheesecake|waffel |crepe/)&&!has(/reibekuchen|kartoffelpuffer/)) u=[["stueck",sw||pw||80,has(/donut|muffin|berliner|krapfen|waffel|crepe|pfannkuchen/)?"keks":"kuchen",1]];
   else if(has(/keks|cookie|platzchen|zwieback|waffel|biskuit|oreo|leibniz|prinzen|lebkuchen|spekulatius|reiswaffel|maiswaffel/)) u=[["stueck",sw||pw||10,"keks",1],["packung",sw||pw?R((sw||pw)*15):150,"packung"]];
   else if(has(/pudding|mousse|panna cotta|griesbrei|gries |milchreis|dessert|tiramisu|creme brulee/)) u=[["el",20],["becher",pw||125,"becher",1],["schale",200,"schale"]];
-  else if(has(/ eis |eiscreme|speiseeis|gelato|sorbet|magnum|cornetto|stieleis|ice cream/)) u=[["kugel",pw||50,"kugel",1],["becher",150,"becher"]];
+  else if(has(/ eis |eiscreme|speiseeis|gelato|sorbet|magnum|cornetto|stieleis|ice cream/)&&!has(/ tee |eistee|kaffee/)) u=[["kugel",pw||50,"kugel",1],["becher",150,"becher"]];
   else if(has(/porridge|haferbrei|overnight oats/)) u=[["schale",pw||250,"schale",1]];
   else if(kc>200&&has(/hafer|flocken|musli|granola|cornflakes|crunchy|knusper|cerealien|cereal|oats|smacks|loops|pops /)) u=[["el",10],["schale",50,"schale",1],["schale_g",80,"schale_g"]];
   else if(kc>=350&&has(/schoko|chocolate|chocolat|zartbitter|vollmilch|praline|ritter sport|milka|lindt|toblerone|cacao|noir |dark /)) u=[["stueckchen",5,"stueckchen"],["reihe",20,"reihe",1],["tafel",100,"tafel"]];
@@ -144,10 +148,10 @@ function unitsFor(it){
   else if(has(/thunfisch|tuna|sardine|makrele in|hering in|fisch in/)&&kc<300) u=[["el",20],["dose",140,"dose",1]];
   else if(has(/nugget|frikadelle|bulette|cevapcici|fischstabchen|bratwurst|wurstchen|wiener|frankfurter|krakauer|knacker|falafel|bratling|burger|patty|patties/)) u=[["stueck",pw||(has(/nugget/)?20:has(/burger|patty|patties/)?110:has(/frikadelle|bulette|bratling/)?80:has(/cevapcici/)?25:has(/falafel/)?17:has(/fischstabchen/)?28:has(/bratwurst/)?100:50),"wurst",1]];
   else if(has(/tofu|seitan|tempeh/)) u=[["scheibe",50,"stueckchen"],["portion",100,"portion",1],["packung",200,"packung"]];
-  else if(has(/hahnchen|huhn|chicken|pute|truthahn|rind|kalb|schwein|lamm|steak|schnitzel|filet|braten|kotelett|keule|schenkel|lachs|salmon|fisch|forelle|kabeljau|seelachs|hering|makrele|dorade|zander|tilapia|pangasius| ente | gans|hirsch| reh|leber|gyros|pulled|geflugel|fleisch/)) u=[["handflaeche",100,"steak"],["stueck",pw||150,"steak",1]];
+  else if(has(/hahnchen|huhn|chicken|pute|truthahn|rind|kalb|schwein|lamm|steak|schnitzel|filet|braten|kotelett|keule|schenkel|lachs|salmon|fisch|forelle|kabeljau|seelachs|hering|makrele|dorade|zander|tilapia|pangasius| ente | gans|hirsch| reh|leber|gyros|pulled|geflugel|fleisch/)&&!has(/fruchtfleisch|saft |getrank/)) u=[["handflaeche",100,"steak"],["stueck",pw||150,"steak",1]];
   // 7. Getränke (Milliliter statt Gramm)
   else if(has(/whisky|whiskey|wodka|vodka| rum |gin |likor|schnaps| korn |tequila|obstler|grappa|ouzo|jagermeister/)){ ml=true; u=[["shot",20,"shot",1],["glas",40,"glas"]]; }
-  else if(kc<=120&&has(drinkRe)){
+  else if(it.liquid!==false&&(it.liquid===true||kc<=120)&&has(drinkRe)&&(has(isDrinkRe)||!has(noDrinkRe))){
     ml=true;
     if(hasN(/espresso/)) u=[["tasse",30,"tasse",1]];
     else if(has(/kaffee|coffee|cappuccino|latte|macchiato|flat white| tee |tea |kakao|trinkschokolade/)) u=[["tasse",pw||200,"tasse",1],["becher",300,"becher"]];
@@ -193,7 +197,11 @@ function unitsFor(it){
   // 13. Sonst: was die Datenbank weiß
   if(!u&&pw) u=[["stueck",pw,"stueck",1]];
   if(!u&&sw) u=[["scheibe",sw,"scheibe",1]];
+  // Packung in ml (aus der Datenbank), aber am Namen nicht als Getränk erkannt (z. B. „Volvic“): Glas & Flasche
+  if(!u&&it.liquid===true){ u=[["glas",200,"glas",1],["flasche",500,"flasche"]]; }
   if(!u) u=[["el",15],["portion",100,"portion"]];
+  // Die Packungsangabe hat immer Vorrang vor dem Namen: ml bleibt ml, g bleibt g
+  if(it.liquid===true) ml=true; else if(it.liquid===false) ml=false;
   const out=u.filter(x=>x&&x[1]>0).map(([k,g,ic,d])=>({k,g:Math.max(1,R(g)),ic:ic||k,d:!!d}));
   out.push({k:"g",g:1,ic:ml?"messbecher":"waage",ml});
   return out;

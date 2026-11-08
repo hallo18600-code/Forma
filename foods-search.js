@@ -19,8 +19,8 @@ async function loadFoodDb(){
     } else render();
   }catch(e){}
 }
-function dbItem(x){ return {id:"db-"+x[0],type:"custom",src:"off",name:x[1],brand:x[2]||"",emoji:(typeof supEmoji==="function"&&supEmoji({name:x[1],protein:x[4],sugar:x[7],kcal:x[3]}))||"📦",kcal:Math.round(x[3]),protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7]??undefined,fiber:x[8]??undefined,salt:x[9]??undefined,sat:x[10]??undefined,processed:(x[11]||0)>=4,nova:x[11]>0?x[11]:undefined,novaEst:x[11]<0?-x[11]:undefined,warn:x[12]===1?1:undefined,bc:x[0]}; }
-// Spalte 11: NOVA (negativ = vom Build geschätzt), Spalte 12: 1 = Kalorien passen nicht zu den Makros (siehe build_foods.py)
+function dbItem(x){ return {id:"db-"+x[0],type:"custom",src:"off",name:x[1],brand:x[2]||"",emoji:(typeof supEmoji==="function"&&supEmoji({name:x[1],protein:x[4],sugar:x[7],kcal:x[3]}))||"📦",kcal:Math.round(x[3]),protein:x[4]||0,carbs:x[5]||0,fat:x[6]||0,sugar:x[7]??undefined,fiber:x[8]??undefined,salt:x[9]??undefined,sat:x[10]??undefined,processed:(x[11]||0)>=4,nova:x[11]>0?x[11]:undefined,warn:x[12]&1?1:undefined,liquid:x[12]&2?true:x[12]&4?false:undefined,bc:x[0]}; }
+// Spalte 12 (Bits, siehe build_foods.py): 1 = Kalorien passen nicht zu den Makros, 2 = Packung in ml, 4 = Packung in g
 function qTokens(q){ return NORM(q).split(/\s+/).filter(Boolean).map(w=>w.length>=7?w.replace(/(en|n|e|s)$/,""):w); }
 function hay(p){ return NORM(p.name+" "+(p.brand||"")+" "+((p.al||[]).join(" "))); }
 function foodRank(p,q){
@@ -51,7 +51,8 @@ function dbRefresh(){
   let ch=false;
   (state.customs||[]).forEach(c=>{ if(!c||!String(c.id).startsWith("db-")) return; const i=FOODDB.by.get(c.bc||String(c.id).slice(3)); if(i==null) return;
     const f=dbItem(FOODDB.rows[i]);
-    for(const k of ["novaEst","warn"]) if(c[k]!==f[k]&&!(c[k]==null&&f[k]==null)){ if(f[k]==null) delete c[k]; else c[k]=f[k]; ch=true; } });
+    if(c.novaEst!=null){ delete c.novaEst; ch=true; }   // alte Schätzung (gibt es nicht mehr)
+    for(const k of ["warn","liquid"]) if(c[k]!==f[k]&&!(c[k]==null&&f[k]==null)){ if(f[k]==null) delete c[k]; else c[k]=f[k]; ch=true; } });
   if(ch){ if(typeof SK_CAT!=="undefined") SK_CAT.clear(); save(); }
 }
 function ensureDb(id){ id=String(id); if(id.startsWith("db-")&&!foods().some(x=>x.id===id)){ const it=dbGet(id.slice(3)); if(it){ state.customs.push(it); save(); } } }

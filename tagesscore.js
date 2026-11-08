@@ -12,7 +12,7 @@ function dayScore(s){
   d.meals.forEach(m=>{
     if(!m||!(m.portion>0)) return;
     const p=foods().find(x=>x.id===m.id); if(!p||p.hidden) return;
-    const sc=+scored(p).score; if(!Number.isFinite(sc)) return;
+    const r=scored(p).score; if(r==null) return; const sc=+r; if(!Number.isFinite(sc)) return;   // ohne Score (Angaben fehlen): zählt nicht
     const k=Math.max(0,line(p,m.portion).kcal||0), e=by.get(p.id)||{p,score:Math.max(0,Math.min(100,sc)),kcal:0,w:0};
     e.kcal+=k; e.w+=Math.max(DS_MIN_W,k); by.set(p.id,e);
   });

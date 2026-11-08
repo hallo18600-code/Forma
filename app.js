@@ -143,7 +143,9 @@ function totals(s){
     return a;
   }, {kcal:0, protein:0, carbs:0, fat:0});
 }
-function scoreClass(n){ return n>=75?"s-good":n>=50?"s-mid":"s-bad"; }
+function scoreClass(n){ return n==null?"s-none":n>=75?"s-good":n>=50?"s-mid":"s-bad"; }
+// Score-Kästchen in Listen; ohne Score (Angaben fehlen in der Datenbank) ein Strich
+function scoreChip(n){ return `<div class="score ${scoreClass(n)}">${n==null?"–":n}</div>`; }
 function finish(parts){
   const raw=parts.reduce((a,x)=>a+x[1],0);
   const ps=parts.slice(1).filter(x=>x[1]).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]));

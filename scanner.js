@@ -52,7 +52,10 @@ async function offLookup(code){
   }
   if(!sonder&&Math.max(kcal,calc)>60&&Math.abs(calc-kcal)>80&&Math.abs(calc-kcal)/Math.max(kcal,calc)>0.4) return null;
   const su=opt("sugars_100g"), sat=opt("saturated-fat_100g");
-  return {id:"off-"+code,type:"custom",src:"off",name,brand:brand||"Open Food Facts",emoji:"📦",kcal:Math.round(kcal),protein:p,carbs:c,fat:f,sugar:su==null?undefined:Math.min(su,c),fiber:fib,salt:opt("salt_100g"),sat:sat==null?undefined:Math.min(sat,f),processed:(+j.product.nova_group||0)>=4,nova:+j.product.nova_group||undefined,warn,bc:code};
+  // Milliliter oder Gramm laut Packungsangabe („500 ml“, „250 g“), nicht aus dem Namen geraten
+  const qu=String(j.product.quantity||"")+" "+String(j.product.product_quantity_unit||"");
+  const liquid=/\d\s*(ml|cl|dl|l|ltr|liter|litre)\b|^\s*ml\s*$/i.test(qu)||/\bml\b/i.test(j.product.product_quantity_unit||"")?true:/\d\s*(g|gr|kg|gramm)\b/i.test(qu)||/^g$/i.test(j.product.product_quantity_unit||"")?false:undefined;
+  return {id:"off-"+code,type:"custom",src:"off",name,brand:brand||"Open Food Facts",emoji:"📦",kcal:Math.round(kcal),protein:p,carbs:c,fat:f,sugar:su==null?undefined:Math.min(su,c),fiber:fib,salt:opt("salt_100g"),sat:sat==null?undefined:Math.min(sat,f),processed:(+j.product.nova_group||0)>=4,nova:+j.product.nova_group||undefined,warn,liquid,bc:code};
 }
 async function bcLookup(code){
   code=String(code||"").replace(/\D/g,"");
@@ -170,7 +173,7 @@ function scanResults(){
   const top=q?"":scanTop(), seen=q||!top?null:scanTopIds();
   const ts=qTokens(q), found0=(q?rankSort(pool.filter(p=>{ const x=hay(p); return ts.every(w=>x.includes(w)); }),q):pool.filter(p=>!seen||!seen.has(p.id))).slice(0,12);
   let found=found0, more=""; if(mode==="text"&&q.length>=2&&FOODDB.ok){ const lim=ui.scanMax||30, ids=new Set(found0.map(p=>p.id)), d=dbSearch(q,lim); found=found0.concat(d.filter(p=>!ids.has(p.id))); if(d.length>=lim) more=`<button class="pill ghost w-full mt-3" data-act="scan-more">Mehr anzeigen</button>`; }
-  const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${favOn(p.id)?`<i class="yfav-dot" aria-hidden="true">★</i>`:""}${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div>${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button>`:""}</div>`; };
+  const row=p=>{ const sc=scored(p).score; return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${favOn(p.id)?`<i class="yfav-dot" aria-hidden="true">★</i>`:""}${esc(p.name)}</b><div class="sub">${esc(p.brand||"")}${p.kcal?(p.brand?" · ":"")+"100 g":""}</div></button>${p.kcal?`<span class="ykc">${p.kcal} kcal</span>`:""}${scoreChip(sc)}${mode==="text"?`<button class="yplus" data-act="quick-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button>`:""}</div>`; };
   const hint=(mode==="text"&&q.length>=2&&!FOODDB.ok)?`<p class="sub">Produktdatenbank nicht geladen (foods.json fehlt oder lädt noch). Es werden nur Basis-Einträge durchsucht.</p>`:"";
   return top+hint+(found.map(row).join("")||`<p class="sub li">Nichts gefunden.</p><button class="pill ghost w-full" data-act="more-go" data-v="nobc">Eigenes Lebensmittel anlegen</button>`)+more;
 }

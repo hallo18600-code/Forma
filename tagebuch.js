@@ -126,6 +126,7 @@ function fTable(it,g){
 function qClass(n){ return scoreClass(n).replace("s-","q-"); }
 // Bewertungs-Ring (SVG), Farbe nach Wert
 function rateRing(n){
+  if(n==null) return `<div class="fring q-none"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="trk"/></svg><div class="fring-t"><b>–</b><small>von 100</small></div></div><div class="flabel q-none">Angaben fehlen</div>`;
   const r=52, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(100,n))/100), cls=qClass(n);
   const lab=n>=85?"Sehr gut":n>=70?"Gut":n>=50?"Okay":n>=30?"Mäßig":"Schlecht";
   // Zahl im Ring, Einstufung als eigenes Etikett darunter
@@ -143,9 +144,9 @@ function foodSheet(it,sc){
   return `<div class="yhead"><button class="yback" data-act="${ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><button class="yfav ${fav?"on":""}" data-act="fav" data-id="${it.id}" aria-pressed="${fav}" aria-label="${fav?"Aus den Favoriten":"Zu den Favoriten"}">${fav?"★":"☆"}</button></div>
     <div class="fhead"><span class="femo">${esc(it.emoji||"🍽️")}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
     ${rateRing(sc.score)}
-    <div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
+    ${sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} in der Datenbank. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p></div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
-    </div>
+    </div>`}
     ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Stärken</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
     ${(sc.bad||[]).length?`<div class="fcard"><b class="fcard-t">Schwächen</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
     ${(sc.perso||[]).length?`<div class="fcard"><div class="fcard-h"><b>Für dich</b><span class="sub">aus deinen Antworten</span></div><ul class="fpc">${sc.perso.map(x=>`<li class="${x.v>0?"p":"c"}">${esc(x.t)} <span class="fsrc">${x.v>0?"+":"−"}${Math.abs(x.v)} · ${esc(x.src)}</span></li>`).join("")}</ul></div>`:""}
@@ -155,7 +156,7 @@ function foodSheet(it,sc){
       <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
       <div class="ftable" id="ftable">${fTable(it,g)}</div>
     </div>
-    <p class="sub fnote">${src}${(sc.est||[]).length?" · Geschätzt: "+sc.est.map(k=>({su:"Zucker",fi:"Ballaststoffe",sa:"Salz",nova:"Verarbeitung"})[k]).filter(Boolean).join(", "):""}</p>
+    <p class="sub fnote">${src}${(sc.unknown||[]).length?" · Keine Angabe: "+sc.unknown.join(", "):""}</p>
     ${sc.warn?`<p class="sub fnote">⚠️ Kalorien und Makros passen hier nicht zusammen. Bitte mit der Packung vergleichen.</p>`:""}
     <div class="amt ${ui.amtOpen?"open":""}" ${ui.amtOpen?`data-once="amt"`:""}>
       <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>

@@ -176,7 +176,7 @@ BEDARF = r"""()=>{ F={}; let n=0; const T0=todayIso();
 }"""
 
 # ---------- 3) Tages-Score ----------
-TAGESSCORE = r"""()=>{ F={}; let n=0; const pool=foods().filter(p=>!p.hidden).concat(FOODDB.ok?FOODDB.rows.slice(0,500).map(dbItem):[]);
+TAGESSCORE = r"""()=>{ F={}; let n=0; const pool=foods().filter(p=>!p.hidden).concat(FOODDB.ok?FOODDB.rows.slice(0,500).map(dbItem).filter(x=>!rMissing(x).length):[]);
  for(let it=0;it<20000;it++){ n++;
   newState(); state.profile.goal=rnd(["muscle","lose","skin","energy"]); state.customs=pool.filter(p=>String(p.id).startsWith("db-"));
   state.customs.push({id:"q-1",type:"custom",hidden:true,name:"Schnell",kcal:700,protein:0,carbs:0,fat:0});

@@ -68,7 +68,7 @@ function lastAmount(id, slot){
 function sugDefault(p){ const d=unitsFor(p).find(x=>x.d); return d?{portion:d.g,u:d.k,q:1}:{portion:100}; }
 function sugRow(p,amt){
   const sc=scored(p).score, kc=line(p,amt.portion).kcal, fav=favOn(p.id);
-  return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${fav?`<i class="yfav-dot" aria-hidden="true">★</i>`:""}${esc(p.name)}</b><div class="sub notr">${esc(amtTxt(p,amt))}</div></button>${showKcal()?`<span class="ykc">${kc} kcal</span>`:""}<div class="score ${scoreClass(sc)}">${sc}</div><button class="yplus" data-act="sug-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button></div>`;
+  return `<div class="yrow"><button class="grow ynm" data-act="open" data-type="product" data-id="${p.id}"><b>${fav?`<i class="yfav-dot" aria-hidden="true">★</i>`:""}${esc(p.name)}</b><div class="sub notr">${esc(amtTxt(p,amt))}</div></button>${showKcal()?`<span class="ykc">${kc} kcal</span>`:""}${scoreChip(sc)}<button class="yplus" data-act="sug-add" data-id="${p.id}" aria-label="${esc(p.name)} hinzufügen">+</button></div>`;
 }
 
 // ---------- Favoriten ----------

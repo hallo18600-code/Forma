@@ -80,7 +80,7 @@ COACH = r"""()=>{
 # ---------- 3) Alle Lebensmittel × alle Ziele ----------
 ESSEN = r"""async ()=>{
  await loadFoodDb(); const F={}; const fail=(k,ex)=>{ (F[k]=F[k]||{n:0,ex:[]}).n++; if(F[k].ex.length<3) F[k].ex.push(ex); };
- const items=allItems().concat(FOODDB.rows.map(dbItem)); let n=0;
+ const items=allItems().concat(FOODDB.rows.map(dbItem).filter(x=>!rMissing(x).length)); let n=0;
  if(FOODDB.rows.length<1000) fail("Produktdatenbank fehlt oder ist zu klein",String(FOODDB.rows.length));
  for(const it of items){
   if((+it.protein||0)+(+it.carbs||0)+(+it.fat||0)>100.5) fail("Datenfehler: Makros über 100 g",it.name);
@@ -97,7 +97,7 @@ ESSEN = r"""async ()=>{
   }
  }
  // Texte dürfen den Nährwerten nicht widersprechen
- for(const it of FOODDB.rows.slice(0,20000).map(dbItem)){
+ for(const it of FOODDB.rows.slice(0,20000).map(dbItem).filter(x=>!rMissing(x).length)){
   const C=rClassify(it), kc=C.nut.kc, pr=+it.protein||0, fa=+it.fat||0, su=+it.sugar||0, sup=rSupKind(it,C.h,C.cat);
   if(sup) continue;
   for(const g of ["muscle","lose","skin","energy"]){ const r=scoreFood(it,g), good=r.good.join(" | "), bad=r.bad.join(" | ");
@@ -111,7 +111,7 @@ ESSEN = r"""async ()=>{
   }
  }
  // Feste Beispiele, die nie wieder falsch werden dürfen (Name/Marke als Suchmuster, Prüfung auf Art und Score)
- const ALL=foods().concat(FOODDB.rows.map(dbItem)), S=it=>["muscle","lose","skin","energy"].map(g=>scoreFood(it,g).score);
+ const ALL=foods().concat(FOODDB.rows.map(dbItem).filter(x=>!rMissing(x).length)), S=it=>["muscle","lose","skin","energy"].map(g=>scoreFood(it,g).score);
  const GOLD=[
   ["^Coca-Cola$","Coca-Cola", (s,c)=>Math.max(...s)<=20, "Cola höchstens 20"],
   ["leberk[aä]s","", (s,c)=>c!=="organ", "Leberkäse ist keine Innerei"],
@@ -220,7 +220,7 @@ FUERDICH = r"""async ()=>{
  }
  // Zufällige Antworten: Lebensstil-Anpassung bleibt begrenzt, jeder Eintrag hat Text, Quelle und Richtung
  const rnd=a=>a[Math.floor(Math.random()*a.length)], areas=["haut","haare","schlaf","aussehen","gesundheit"];
- const items=foods().concat(FOODDB.rows.slice(0,3000).map(dbItem));
+ const items=foods().concat(FOODDB.rows.slice(0,3000).map(dbItem).filter(x=>!rMissing(x).length));
  for(let i=0;i<300;i++){
   state.profile=Object.assign({},P0,base,{sex:rnd(["m","w"]),age:rnd([20,40,70]),goal:rnd(G),fish:rnd(["oft","wenig"]),trainFreq:rnd(["Gar nicht","3–4× pro Woche"]),trainType:rnd(["Krafttraining","Ausdauer","Beides"])});
   state.coach.answers={};
@@ -236,7 +236,7 @@ FUERDICH = r"""async ()=>{
  }
  // Jede Bewertung hat mindestens einen Grund; gute Zahl → Stärke, schlechte → Schwäche; kein Widerspruch
  state.profile=Object.assign({},P0,base); state.coach.answers={};
- for(const it of foods().concat(FOODDB.rows.slice(0,30000).map(dbItem))) for(const g of G){ const r=scoreFood(it,g); n++; const d=`${it.name} (${g}) ${r.score}`;
+ for(const it of foods().concat(FOODDB.rows.slice(0,30000).map(dbItem).filter(x=>!rMissing(x).length))) for(const g of G){ const r=scoreFood(it,g); n++; const d=`${it.name} (${g}) ${r.score}`;
   if(!r.good.length&&!r.bad.length) fail("Bewertung ohne Begründung",d);
   if(r.score>=70&&!r.good.length&&!rSupKind(it,rClassify(it).h,rClassify(it).cat)) fail("Gute Zahl ohne Stärke",d+" -"+r.bad);
   if(r.score<50&&!r.bad.length&&!rSupKind(it,rClassify(it).h,rClassify(it).cat)) fail("Schlechte Zahl ohne Schwäche",d+" +"+r.good);

@@ -368,6 +368,8 @@ p { margin:var(--s-2) 0; }
 .score.lg { width:60px; height:60px; border-radius:var(--r-l); font-size:var(--fs-l); }
 .s-good { background:var(--accent-soft); color:var(--on-accent-soft); }
 .s-mid { background:var(--warn-soft); color:var(--on-warn-soft); }
+.s-none { background:var(--fill-2); color:var(--ink-2); }   /* kein Score: Angaben fehlen */
+.fring.q-none .fring-t b, .flabel.q-none { color:var(--ink-2); }
 .s-bad { background:var(--bad-soft); color:var(--on-bad-soft); }
 
 /* Hinweis-Kästen */
