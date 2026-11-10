@@ -7,7 +7,8 @@ async function loadFoodDb(){
     // Erster Besuch (noch ohne Service Worker): Datei gleich für offline speichern, sonst fehlt sie beim ersten Offline-Start
     if(window.caches&&!(navigator.serviceWorker&&navigator.serviceWorker.controller)){ const cp=r.clone(); caches.open("forma-data").then(c=>c.put("foods.json",cp)).catch(()=>{}); }
     const j=await r.json();
-    FOODDB.rows=j.rows||[]; FOODDB.nm=FOODDB.rows.map(x=>NORM(x[1])); FOODDB.lc=FOODDB.rows.map(x=>NORM(x[1]+" "+(x[2]||"")));
+    // Fehlen Protein, Kohlenhydrate oder Fett, müsste die App 0 g anzeigen – solche Zeilen fliegen raus (auch aus einer alten gespeicherten Datei)
+    FOODDB.rows=(j.rows||[]).filter(x=>x&&x[3]!=null&&x[4]!=null&&x[5]!=null&&x[6]!=null); FOODDB.nm=FOODDB.rows.map(x=>NORM(x[1])); FOODDB.lc=FOODDB.rows.map(x=>NORM(x[1]+" "+(x[2]||"")));
     FOODDB.rows.forEach((x,i)=>FOODDB.by.set(x[0],i)); FOODDB.ok=FOODDB.rows.length>0;
     if(!FOODDB.ok) return;
     dbRefresh();
@@ -45,14 +46,15 @@ function dbSearch(q,limit){
   return res.slice(0,limit||30).map(r=>dbItem(FOODDB.rows[r[1]]));
 }
 function dbGet(code){ let i=FOODDB.by.get(code); if(i==null) i=FOODDB.by.get("0"+code); if(i==null&&code.length===13&&code[0]==="0") i=FOODDB.by.get(code.slice(1)); return i==null?null:dbItem(FOODDB.rows[i]); }
-// Schon gespeicherte Datenbank-Produkte mit der neuen Datenbank abgleichen: NOVA-Schätzung und Kalorien-Hinweis
-// nachtragen (nur diese Felder, eigene Änderungen bleiben unberührt)
+// Schon gespeicherte Datenbank-Produkte mit der neuen Datenbank abgleichen (Nährwerte, Verarbeitungsgrad, Kalorien-Hinweis, Einheit).
+// Datenbank-Produkte lassen sich in der App nicht bearbeiten, es geht also nichts Eigenes verloren.
 function dbRefresh(){
   let ch=false;
   (state.customs||[]).forEach(c=>{ if(!c||!String(c.id).startsWith("db-")) return; const i=FOODDB.by.get(c.bc||String(c.id).slice(3)); if(i==null) return;
     const f=dbItem(FOODDB.rows[i]);
     if(c.novaEst!=null){ delete c.novaEst; ch=true; }   // alte Schätzung (gibt es nicht mehr)
-    for(const k of ["warn","liquid"]) if(c[k]!==f[k]&&!(c[k]==null&&f[k]==null)){ if(f[k]==null) delete c[k]; else c[k]=f[k]; ch=true; } });
+    // Nährwerte mit abgleichen: Wird ein Fehler in der Datenbank korrigiert, stimmt auch das gespeicherte Produkt wieder
+    for(const k of ["name","brand","kcal","protein","carbs","fat","sugar","fiber","salt","sat","nova","processed","warn","liquid"]) if(c[k]!==f[k]&&!(c[k]==null&&f[k]==null)){ if(f[k]==null) delete c[k]; else c[k]=f[k]; ch=true; } });
   if(ch){ if(typeof SK_CAT!=="undefined") SK_CAT.clear(); save(); }
 }
 function ensureDb(id){ id=String(id); if(id.startsWith("db-")&&!foods().some(x=>x.id===id)){ const it=dbGet(id.slice(3)); if(it){ state.customs.push(it); save(); } } }

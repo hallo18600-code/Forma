@@ -29,6 +29,29 @@ slimRoutine();
 let ui = { modal:null, toast:null, scanMode:"text", query:"", addSlot:"breakfast", draftKg:76, portion:100, workout:null, rest:0, tick:null, wrange:"30", plan:null, planDay:0, exQuery:"", dash:null, cal:"month" };
 try{ if(gymRemap()) save(); }catch(e){}   // früher importierte Übungen nachträglich erkennen
 
+// Laufendes Training übersteht Neuladen und Schließen (Handys beenden Apps im Hintergrund oft von selbst).
+// Es liegt getrennt vom übrigen Speicher und ist nicht in der Datensicherung.
+const LIVE_KEY="forma-live-v1"; let liveLast=null;
+function liveSave(){
+  try{ const s=ui.workout?JSON.stringify(ui.workout):null; if(s===liveLast) return; liveLast=s;
+    if(s) localStorage.setItem(LIVE_KEY,s); else localStorage.removeItem(LIVE_KEY); }catch(e){}
+}
+function liveRestore(){
+  try{
+    const raw=localStorage.getItem(LIVE_KEY); if(!raw) return;
+    const w=JSON.parse(raw), now=Date.now();
+    // Nur ein Training von heute (höchstens 12 Stunden alt) wird fortgesetzt, alles andere verworfen
+    if(!state.onboarded||!w||typeof w!=="object"||!Array.isArray(w.exercises)||!Number.isFinite(w.t0)||w.t0>now||now-w.t0>12*3600e3){ localStorage.removeItem(LIVE_KEY); return; }
+    const c=x=>String(x==null?"":x).replace(/[^\w-]/g,""), num=(v,max)=>{ v=+v; return Number.isFinite(v)?Math.max(0,Math.min(max,v)):0; };
+    ui.workout={ name:String(w.name||"Training").replace(/[<>]/g,"").slice(0,80), t0:w.t0, routineId:w.routineId?c(w.routineId):null, dayId:w.dayId?c(w.dayId):undefined,
+      exercises:w.exercises.filter(e=>e&&typeof e==="object"&&e.id!=null).map(e=>({id:c(e.id), sets:(Array.isArray(e.sets)?e.sets:[]).filter(s=>s&&typeof s==="object").map(s=>({kg:num(s.kg,1000), reps:Math.round(num(s.reps,1000)), done:!!s.done}))})) };
+    startTick();
+  }catch(e){ try{ localStorage.removeItem(LIVE_KEY); }catch(_){} }
+}
+liveRestore();
+// Wasser- und Schrittziel folgen Gewicht, Training und Ziel – solange sie nicht von Hand eingestellt wurden
+function autoGoals(){ const p=state.profile; if(!state.obDone) return; if(!p.waterManual) p.waterTarget=waterGoal(); if(p.stepAuto) p.stepGoal=stepGoalFor(); }
+
 function load(){
   try {
     const raw = localStorage.getItem(KEY);
@@ -44,6 +67,9 @@ function normalize(s){
     s.date = s.date || todayIso(); s.ob = s.ob||{}; migrateCoach(s);
     s.favs=Array.isArray(s.favs)?[...new Set(s.favs.filter(x=>typeof x==="string"&&x))]:[];
     if(s.adapt!=null&&(typeof s.adapt!=="object"||s.adapt.ratio==null||s.adapt.ratio===""||!Number.isFinite(+s.adapt.ratio))) delete s.adapt;
+    // Eigene Lebensmittel aus älteren Versionen: Zucker wurde nie abgefragt, „0“ war nur ein Platzhalter → als unbekannt führen (kein geschätzter Score)
+    s.customs=s.customs.filter(c=>c&&typeof c==="object"&&c.id!=null);
+    s.customs.forEach(c=>{ if(c.type==="custom"&&!c.src&&!c.v&&c.sugar===0&&c.salt===undefined&&/^(c|q)-/.test(String(c.id))) delete c.sugar; });
     // Kaputte Tagebuch-Einträge (z. B. aus einer fremden Datei) entfernen, sonst stürzen Rechnungen ab
     Object.keys(s.days).forEach(k=>{ const d=s.days[k]; if(!d||typeof d!=="object"){ delete s.days[k]; return; } d.meals=Array.isArray(d.meals)?d.meals.filter(m=>m&&typeof m==="object"&&m.id!=null):[]; });
     return s;
@@ -547,7 +573,7 @@ function renderModal(){
   if(type==="reset") inner=resetSheet();
   return `<div class="sheet ${type==="ex-map"?"top":""}" data-act="close"><div class="sheet-card" data-act="stop"><div class="grab"></div>${inner}</div></div>`;
 }
-function render(){ try{ ensureRoutine(); }catch(e){} try{ adaptCheck(); }catch(e){}
+function render(){ try{ ensureRoutine(); }catch(e){} try{ adaptCheck(); }catch(e){} liveSave();
   const root=document.getElementById("app");
   const gate=state.onboarded&&(!termsOk()||ui.termsPending);
   let html = !state.onboarded ? (state.step==null ? renderWelcome() : renderOnboard()) : gate ? renderTermsGate() : renderApp();
@@ -622,7 +648,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="ob-finish"){ obFinish(); }
   else if(act==="ob-close"){ state.obRedo=false; state.onboarded=true; state.step=null; save(); }
   else if(act==="ob-redo"){ state.ob=Object.assign({},state.ob,{sex:1,goal:1,activity:1,fish:1,sups:1,target:1,weight:1}); state.obRedo=true; state.onboarded=false; state.step=Math.max(1,obSteps().findIndex(x=>x.id==="name")); ui.modal=null; save(); }
-  else if(act==="set"){ p[el.dataset.k]=el.dataset.v; save(); }
+  else if(act==="set"){ p[el.dataset.k]=el.dataset.v; autoGoals(); save(); }
   else if(act==="pref"){ prefSet(el.dataset.id,el.dataset.v); }
   else if(act==="set-num"){ p[el.dataset.k]=parseFloat(el.dataset.v); save(); }
   else if(act==="set-bool"){ p.adult=true; save(); }
@@ -637,13 +663,14 @@ document.getElementById("app").addEventListener("click", e=>{
     if(el.dataset.type==="weigh") ui.draftKg=lastWeight();
     if(el.dataset.type==="gym"){ ui.gymRes=null; ui.gymErr=false; }
     if(el.dataset.type==="scan"){ ui.query=""; ui.scanView="list"; ui.scanTab="alle"; }
+    if(el.dataset.type==="scan"||el.dataset.type==="custom") ui.fDraft=null;
     if(el.dataset.type==="product") ensureDb(el.dataset.id); openModal(el.dataset.type, el.dataset.id); return;
   }
   else if(act==="close"){ closeModal(); return; }
   else if(act==="scan-view"){ stopCam(); ui.scanView=el.dataset.v; ui.camMsg=""; if(el.dataset.v==="ai"){ aiParse(); setTimeout(()=>{ const t=document.getElementById("ai-text"); if(t&&!t.value) t.focus(); },60); } }
   else if(act==="cam-start"){ startCam(); return; }
   else if(act==="bc-lookup"){ const i=document.getElementById("bc-input"); bcLookup(i&&i.value); return; }
-  else if(act==="more-go"){ const v=el.dataset.v; if(v==="quick") ui.scanView="quick"; else { ui.newBc=v==="bc"?"":null; ui.newBack="more"; ui.scanView="newfood"; } }
+  else if(act==="more-go"){ ui.fDraft=null; const v=el.dataset.v; if(v==="quick") ui.scanView="quick"; else { ui.newBc=v==="bc"?"":null; ui.newBack="more"; ui.scanView="newfood"; } }
   else if(act==="quick-add"){
     // „+“ in der Suche: eine übliche Portion (1 Banane, 1 EL Öl, 1 Glas Saft) statt pauschal 100 g
     ensureDb(el.dataset.id); const it=foods().find(x=>x.id===el.dataset.id); if(!it) return;
@@ -683,11 +710,12 @@ document.getElementById("app").addEventListener("click", e=>{
     toast(n?(gl?T("Im Tagebuch")+" · 💧 +"+gl:"Im Tagebuch"):gl?"💧 +"+gl:"Nichts hinzugefügt");
   }
   else if(act==="save-quick"){
+    formDraft();
     const g=id=>Math.max(0,+(document.getElementById(id).value||"").replace(",",".")||0), kcal=g("q-kcal");
     if(!kcal){ toast("Kalorien fehlen"); return; }
-    const it={id:"q-"+uid(),type:"custom",hidden:true,name:(document.getElementById("q-name").value||"").trim().slice(0,70)||"Schnell hinzugefügt",brand:"Schnell",emoji:"⚡",kcal,protein:g("q-p"),carbs:g("q-c"),fat:g("q-f"),sugar:0,processed:false};
+    const it={id:"q-"+uid(),type:"custom",hidden:true,name:(document.getElementById("q-name").value||"").trim().slice(0,70)||"Schnell hinzugefügt",brand:"Schnell",emoji:"⚡",v:2,kcal,protein:g("q-p"),carbs:g("q-c"),fat:g("q-f"),processed:false};
     state.customs.push(it); day().meals.push({uid:uid(),id:it.id,portion:100,slot:ui.addSlot||"snack"});
-    ui.scanView="list"; syncAuto(state.date); save(); toast("Hinzugefügt");
+    ui.fDraft=null; ui.scanView="list"; syncAuto(state.date); save(); toast("Hinzugefügt");
   }
   else if(act==="scan-mode") ui.scanMode=el.dataset.v;
   else if(act==="meal-open"){ ui.addSlot=el.dataset.slot; ui.dash="meal"; ui.modal=null; }
@@ -696,7 +724,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="del-meal2"){ day().meals=day().meals.filter(x=>x.uid!==ui.editUid); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gelöscht"); }
   else if(act==="ai-del"){ const it=(ui.aiRes||[])[+el.dataset.i]; if(it){ ui.aiOv=ui.aiOv||{}; ui.aiOv[it.key]={del:true}; ui.aiRes.splice(+el.dataset.i,1); } ui.aiOpen=null; if(!(ui.aiRes||[]).length) ui.aiRes=null; }
   else if(act==="steps-add"){ const i=document.getElementById("st-input"); if(i) i.value=(+i.value||0)+ +el.dataset.v; return; }
-  else if(act==="steps-save"){ const i=document.getElementById("st-input"); day().steps=Math.max(0,Math.round(+(i&&i.value)||0)); ui.modal=null; save(); toast("Gespeichert"); }
+  else if(act==="steps-save"){ const i=document.getElementById("st-input"); day().steps=Math.max(0,Math.min(200000,Math.round(+(i&&i.value)||0))); ui.modal=null; save(); toast("Gespeichert"); }
   else if(act==="step-goal"){ state.profile.stepGoal=+el.dataset.v; state.profile.stepAuto=false; save(); }
   else if(act==="scan-more"){ ui.scanMax=(ui.scanMax||30)+30; const bx=document.getElementById("scan-results"); if(bx) bx.innerHTML=scanResults(); return; }
   else if(act==="amt-open"||act==="amt-toggle"){
@@ -738,13 +766,19 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="del-meal"){ day().meals=day().meals.filter(m=>m.uid!==el.dataset.id); syncAuto(state.date); save(); }
   else if(act==="save-custom"){
+    formDraft();
     const name=(document.getElementById("c-name").value||"").trim().slice(0,70);
     if(!name){ toast("Name fehlt"); return; }
-    const num=id=>Math.max(0,+String(document.getElementById(id).value||"").replace(",",".")||0);   // keine negativen Werte
-    const item={ id:"c-"+uid(), type:"custom", name, brand:"Eigen", emoji:"🍽", kcal:num("c-kcal"), protein:num("c-p"), carbs:num("c-c"), fat:num("c-f"), sugar:0, processed:false };
+    // Leeres Feld = keine Angabe (nicht 0). Keine negativen Werte.
+    const num=id=>{ const el=document.getElementById(id), t=el?String(el.value).trim().replace(",","."):""; if(t==="") return undefined; const n=+t; return Number.isFinite(n)&&n>=0?n:NaN; };
+    const kcal=num("c-kcal"), pr=num("c-p"), cb=num("c-c"), fa=num("c-f"), su=num("c-s"), sa=num("c-sa");
+    if([kcal,pr,cb,fa].some(v=>v===undefined)){ toast("Bitte Kalorien, Protein, Kohlenhydrate und Fett eintragen"); return; }
+    // Grobe Prüfung gegen Tippfehler: Werte gelten pro 100 g
+    if([kcal,pr,cb,fa,su,sa].some(v=>Number.isNaN(v))||kcal>950||pr+cb+fa>100.5||(su!==undefined&&su>cb+0.5)||(sa!==undefined&&sa>100)){ toast("Bitte Werte prüfen (pro 100 g)"); return; }
+    const item={ id:"c-"+uid(), type:"custom", v:2, name, brand:"Eigen", emoji:"🍽", kcal:Math.round(kcal), protein:pr, carbs:cb, fat:fa, sugar:su===undefined?undefined:Math.min(su,cb), salt:sa, processed:false };
     const bcEl=document.getElementById("c-bc"); if(bcEl&&bcEl.value.trim()) item.bc=bcEl.value.replace(/\D/g,"");
     state.customs.push(item);
-    ui.scanView="list";
+    ui.fDraft=null; ui.scanView="list";
     day().meals.push({ uid:uid(), id:item.id, portion:100, slot:ui.addSlot||"snack" });
     syncAuto(state.date); ui.modal=null; save(); toast("Angelegt");
   }
@@ -799,7 +833,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="plan-prev"){ ui.planPrev=el.dataset.v; }
   else if(act==="plan-skip"){ state.planPicked="none"; save(); }
   else if(act==="coach-sups"){ openModal("area","sups-list"); return; }
-  else if(act==="coach-goal"){ state.profile.goal=el.dataset.v; const r=(state.coach.routine||[]).find(x=>x.topic==="aussehen"); if(r) r.title=coachAdvice("aussehen").routine.title; save(); toast(`Neuer Richtwert: ${de(targets().kcal)} kcal`); }
+  else if(act==="coach-goal"){ state.profile.goal=el.dataset.v; autoGoals(); const r=(state.coach.routine||[]).find(x=>x.topic==="aussehen"); if(r) r.title=coachAdvice("aussehen").routine.title; save(); toast(`Neuer Richtwert: ${de(targets().kcal)} kcal`); }
   else if(act==="coach-remove"){ state.coach.routine=(state.coach.routine||[]).filter(r=>r.topic!==el.dataset.topic); ui.modal=null; save(); toast("Aus der Routine entfernt"); }
   else if(act==="r-toggle"){ ui.rOpen=!ui.rOpen; }
   else if(act==="c-toggle"){ ui.cOpen=!ui.cOpen; }
@@ -830,7 +864,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="draft"){ ui.draftKg=Math.max(35, Math.min(220, +(ui.draftKg+ +el.dataset.d).toFixed(1))); }
   else if(act==="save-weight"){
     state.weights=state.weights.filter(w=>w.date!==state.date).concat({date:state.date, kg:+ui.draftKg}).sort((a,b)=>a.date<b.date?-1:1);
-    p.weight=lastWeight(); ui.modal=null; save(); toast("Gewicht gespeichert");
+    p.weight=lastWeight(); autoGoals(); ui.modal=null; save(); toast("Gewicht gespeichert");
   }
   else if(act==="toggle"){ p[el.dataset.k]=!p[el.dataset.k]; save(); }
   else if(act==="adapt-toggle"){ p.adaptive=p.adaptive===false; if(state.adapt) state.adapt.seen=true; save(); }
@@ -908,8 +942,11 @@ document.getElementById("app").addEventListener("click", e=>{
     const sets=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);
     const vol=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).reduce((a,s)=>a+s.kg*s.reps,0),0);
     if(!sets){ toast("Mindestens einen Satz abhaken"); return; }
-    state.workouts.push({ id:uid(), date:state.date, name:w.name, min:Math.max(1,Math.floor((Date.now()-w.t0)/60000)), seconds:Math.floor((Date.now()-w.t0)/1000), volume:vol, sets, exercises:w.exercises });
-    day().checks.sport=1; ui.workout=null; stopTick(); save(); toast("Training gespeichert");
+    // Ein Live-Training findet jetzt statt: Es zählt für heute, auch wenn im Tagebuch gerade ein anderer Tag offen ist
+    const t=todayIso();
+    state.workouts.push({ id:uid(), date:t, name:w.name, min:Math.max(1,Math.floor((Date.now()-w.t0)/60000)), seconds:Math.floor((Date.now()-w.t0)/1000), volume:Math.round(vol), sets, exercises:w.exercises });
+    state.workouts.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+    day(t).checks.sport=1; ui.workout=null; stopTick(); save(); toast("Training gespeichert");
   }
   else if(act==="toggle-set"){
     const s=ui.workout&&((ui.workout.exercises[+el.dataset.e]||{}).sets||[])[+el.dataset.s]; if(!s) return;
@@ -958,14 +995,14 @@ document.getElementById("app").addEventListener("click", e=>{
     const i=document.getElementById("w-edit-kg"), kg=+(String(i&&i.value||"").replace(",","."));
     if(!(kg>=35&&kg<=220)){ toast("Bitte 35–220 kg eingeben"); return; }
     const w=state.weights.find(x=>x.date===el.dataset.v); if(!w) return;
-    w.kg=+kg.toFixed(1); p.weight=lastWeight(); ui.modal={type:"entries"}; save(); toast("Gespeichert");
+    w.kg=+kg.toFixed(1); p.weight=lastWeight(); autoGoals(); ui.modal={type:"entries"}; save(); toast("Gespeichert");
   }
   else if(act==="w-del-ask"){ ui.confirmDel=true; }
   else if(act==="del-cancel"){ ui.confirmDel=false; }
   else if(act==="w-del-go"){
     const d=ui.modal&&ui.modal.payload;
     state.weights=state.weights.filter(x=>x.date!==d);
-    if(state.weights.length) p.weight=lastWeight();
+    if(state.weights.length){ p.weight=lastWeight(); autoGoals(); }
     ui.confirmDel=false; ui.modal={type:"entries"}; save(); toast("Eintrag gelöscht");
   }
   else if(act==="wo-edit"){
@@ -1008,7 +1045,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="backup"){ downloadBackup(); return; }
   else if(act==="reset-go"){
     if((ui.resetTxt||"").trim().toUpperCase()!=="LÖSCHEN") return;
-    try{ localStorage.removeItem(KEY); localStorage.removeItem(REM_FIRED); }catch(e){} state=fresh(); ui.resetTxt=""; ui.modal=null; applyTheme(); toast("Alle Daten gelöscht");
+    try{ localStorage.removeItem(KEY); localStorage.removeItem(REM_FIRED); }catch(e){} state=fresh(); ui.resetTxt=""; ui.modal=null; ui.workout=null; ui.plan=null; ui.dash=null; stopTick(); applyTheme(); toast("Alle Daten gelöscht");
     phClearAll().then(()=>render());   // Fortschrittsfotos (IndexedDB) auch löschen
   }
   render();
@@ -1047,6 +1084,7 @@ document.getElementById("app").addEventListener("input", e=>{
     const v=parseFloat(String(el.value).replace(",","."));
     if(el.dataset.act==="set-kg") st.kg=isFinite(v)?Math.max(0,Math.min(1000,Math.round(v*100)/100)):0;
     else st.reps=isFinite(v)?Math.max(0,Math.min(1000,Math.round(v))):0;
+    liveSave();
   }
   if(el.dataset.act==="plan-name") ui.plan.name=el.value;
   if(el.dataset.act==="day-name") ui.plan.days[+el.dataset.d].name=el.value;

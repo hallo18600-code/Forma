@@ -269,10 +269,13 @@ const R_BRANDS={
   plantmilk:["alpro","oatly","oat-ly!","provamel","rude health","isola bio","natumi"]
 };
 const R_BRAND_OF=new Map(); Object.entries(R_BRANDS).forEach(([id,l])=>l.forEach(b=>R_BRAND_OF.set(NORM(b).trim(),id)));
+const R_BRAND_EXACT=new Set(["river","fritz","heinz","becks"]);
 function brandCat(item){
   const b=NORM(item.brand||"").trim(); if(!b) return null;
   let id=R_BRAND_OF.get(b)||R_BRAND_OF.get(b.split(/[,;(]/)[0].trim());
-  if(!id){ for(const [k,v] of R_BRAND_OF) if(k.length>=5&&(b.startsWith(k+" ")||b===k)) { id=v; break; } }
+  // Markenanfang zählt auch („Lindt & Sprüngli“). Nicht bei Allerweltsnamen: „River Valley“ (Obstkonserven) ist nicht „River“ (Cola),
+  // „Fritz Mühlenbäckerei“ nicht „fritz“ (Limo), „Becks Cocoa“ nicht „Beck's“ (Bier).
+  if(!id){ for(const [k,v] of R_BRAND_OF) if(k.length>=5&&!R_BRAND_EXACT.has(k)&&(b.startsWith(k+" ")||b===k)) { id=v; break; } }
   return id||null;
 }
 const R_BYID={}; R_CATS.forEach(c=>R_BYID[c.id]=c);
@@ -432,7 +435,8 @@ function rClassify(item){
     // Gerichte mit Fleisch/Fisch (z. B. "Bauerntopf mit Hackfleisch", "Tagliatelle Wildlachs") als Gericht werten
     if(cat&&R_ANIMAL.includes(cat.id)&&!["broth","organ","cheese"].includes(cat.id)&&/(sauce|sosse|topf|salatbox|schlemmerfilet|a la |bordelaise|gratin|lasagne|tagliatelle|nudel|pasta|spaghetti|pizza|wrap|sandwich|burger|risotto|fertiggericht|mahlzeit|menu|suppe|eintopf)/.test(h)) cat=R_BYID[heavy?"readymeal":"mixedmeal"];
     const pc=rPlausible(cat,nut,heavy,h);
-    if(pc==="RETRY"){ if(["fruit","berries","vitc","banana","veg","skinveg"].includes(cat.id)&&nut.kc<70) drinkLike=true; skip.add(cat.id); cat=foodCat(item,skip); continue; }
+    // Getränk nur, wenn der Name auch nach Getränk klingt (sonst würde z. B. eine Banane mit zu niedrigen Kalorien zur Limo)
+    if(pc==="RETRY"){ if(["fruit","berries","vitc","banana","veg","skinveg"].includes(cat.id)&&nut.kc<70&&R_DRINKW.test(h)) drinkLike=true; skip.add(cat.id); cat=foodCat(item,skip); continue; }
     cat=pc; break;
   }
   if(!cat&&drinkLike) cat=nut.su>=2?R_BYID.softdrink:R_BYID.water;   // Limo/Schorle/aromatisiertes Wasser mit Obst im Namen
@@ -459,7 +463,7 @@ function rClassify(item){
   // (Schutzatmosphäre, Etikett). Ohne viel Salz, Zucker oder Würz-Hinweis im Namen ist es naturbelassen.
   if(heavy&&cat&&["poultry","redmeat","leanfish","fattyfish","egg","organ"].includes(cat.id)&&sa2<1.2&&su<3
      &&!/(marin|panier|gewurz|wurz|grill|bbq|barbecue|knusper|crispy|sauce|sosse|krauter|knoblauch|paprika|curry|teriyaki|honig|chili|gyros|kebab|doner|nugget|cordon|bacon|zubereit|gegart|sous vide)/.test(h)) heavy=false;
-  if(heavy&&cat&&["protdairy","dairy","kefir","cheese"].includes(cat.id)&&su<6&&sa2<2
+  if(heavy&&cat&&["protdairy","dairy","kefir","cheese"].includes(cat.id)&&su<6&&sa2<(cat.id==="cheese"?4.5:2)
      &&!/(frucht|erdbeer|himbeer|kirsch|pfirsich|mango|vanill|schoko|choco|karamell|caramel|nuss|stracciatella|light|zero|leicht|schmelz|zubereitung|scheiblett|streich|creme|dessert|pudding|drink|shake|protein|aroma|geschmack)/.test(h)) heavy=false;
   return {cat,nut,heavy,nova,h,words};
 }
@@ -504,8 +508,10 @@ const R_SUGAR_STEPS=[0,5,10,14,20,30,45,65];
 const R_NATSUGAR=new Set([...R_FRUITY,"veg","skinveg","dairy","kefir","protdairy","sugar","sweetpotato"]);
 // Fehlen bei einem Datenbank-Produkt Zucker oder Salz, gibt es keinen Score (statt zu schätzen).
 // Ausnahme: kaum Kohlenhydrate (≤ 0,5 g) – dann ist auch der Zucker sicher ≤ 0,5 g.
+// Gleiches gilt für selbst angelegte Lebensmittel: Was nicht eingetragen wurde, wird nicht als 0 gewertet.
 function rMissing(item){
-  if(!item||item.src!=="off"||item.type==="sup") return [];
+  if(!item||item.type==="sup") return [];
+  if(item.src!=="off"&&item.type!=="custom") return [];   // Basisdaten der App sind vollständig
   const no=v=>v==null||v===""||!Number.isFinite(+v), m=[];
   if(no(item.sugar)&&(+item.carbs||0)>0.5) m.push("Zucker");
   if(no(item.salt)) m.push("Salz");
@@ -663,7 +669,7 @@ function scoreFood0(item,goal){
     else if(low){ score+=[-1,2,-6,-2][gi]; if(g==="skin") bad("Fettarm: für die Haut eher ungünstiger",11); else if(g==="lose") good("Fettarm: weniger Kalorien",9); }
   }
   // Naturbelassenes Lebensmittel, aber stark verarbeitet (z. B. Fruchtjoghurt mit Zusätzen)
-  if(cat&&cat.w&&heavy){ score-=nova>=4?14:9; bad(["poultry","redmeat","leanfish","fattyfish"].includes(id)&&sa>=1.2&&!PROC,14); }
+  if(cat&&cat.w&&heavy){ score-=nova>=4?14:9; bad(PROC,14); }
   if(sa>1.5&&id!=="spice") { score-=Math.min(10,(sa-1.5)*4); bad((g==="skin"?"Viel Salz – kann aufschwemmen":"Viel Salz")+" ("+rG(sa)+" g)",9); }
   // Primal-Blick: Soja, Süßstoffe, Pflanzenöle im Namen
   if(!["soy","ersatz","sauce","plantmilk"].includes(id)&&/(soja|\bsoy\b)/.test(h)){ score-=8; bad("Enthält Soja – nicht naturbelassen",10); }
@@ -864,6 +870,8 @@ function rFill(pros,cons,score,c){
   if(heavy||nova>=4) n("Stark verarbeitet mit Zusätzen");
   if(fruity&&!heavy&&!drink) p("Vitamine & Mineralstoffe");
   let out=rateOut(score,pros,cons);
+  // Schwellen gelten für die angezeigte (gerundete) Zahl: 69,7 wird als 70 gezeigt und braucht dann auch eine Stärke
+  const sc=Math.round(score);
   const tryAdd=(L,dst,key)=>{ const before=out[key].length;
     const other=new Set(out[key==="good"?"bad":"good"].map(rTopic).filter(t=>!t.startsWith("micro")));
     while(L.length){ const x=L.shift(); if(other.has(rTopic(x.t))) continue; dst.push(x); const o=rateOut(score,pros,cons);
@@ -871,13 +879,16 @@ function rFill(pros,cons,score,c){
       dst.pop(); }
     return false; };
   const addP=()=>tryAdd(P,pros,"good"), addC=()=>tryAdd(C,cons,"bad");
-  if(score>=70&&!out.good.length) addP();
-  if(score<50&&!out.bad.length) addC();
-  if(score>=45&&score<75){ if(!out.good.length) addP(); if(!out.bad.length) addC(); }
+  if(sc>=70&&!out.good.length) addP();
+  if(sc<50&&!out.bad.length) addC();
+  if(sc>=45&&sc<75){ if(!out.good.length) addP(); if(!out.bad.length) addC(); }
   for(let i=0;i<4&&out.good.length+out.bad.length<2;i++){
-    const ok=score>=55?(addP()||addC()):(addC()||addP()); if(!ok) break; }
-  if(out.bad.some(t=>rTopic(t)==="proc")){ out.good=out.good.filter(t=>rTopic(t)!=="proc"); if(score>=70&&!out.good.length) addP(); }
-  if(score<50&&!out.bad.length) addC();
+    const ok=sc>=55?(addP()||addC()):(addC()||addP()); if(!ok) break; }
+  // „Stark verarbeitet“ und gleichzeitig „natürlich/naturbelassen“ loben widerspricht sich: solche Stärken ganz streichen (auch als Kandidat)
+  if(out.bad.some(t=>rTopic(t)==="proc")&&pros.some(x=>rTopic(x.t)==="proc")){
+    for(let i=pros.length-1;i>=0;i--) if(rTopic(pros[i].t)==="proc") pros.splice(i,1);
+    out=rateOut(score,pros,cons); if(sc>=70&&!out.good.length) addP(); }
+  if(sc<50&&!out.bad.length) addC();
   return out;
 }
 // Typische Nährwert-Bewertung je Art (Median aus 100.000 Produkten), Reihenfolge: Muskeln, Abnehmen, Haut, Energie
@@ -947,7 +958,7 @@ function rateList(sc){
 // Nur kleine Unterschiede (max. ±4), weil Haltung am Namen nicht sicher erkennbar ist.
 const R_ANIMAL=["poultry","redmeat","processedmeat","organ","broth","fattyfish","leanfish","egg","protdairy","kefir","dairy","cheese","butter"];
 const R_BIO_BRANDS=["rewe bio","edeka bio","biobio","bio bio","alnatura","gut bio","gutbio","k-bio","k bio","dmbio","dm bio","naturgut","natur gut","dennree","andechser","sobbeke","zuruck zum ursprung","enerbio","demeter","bioland","naturland","nur nur natur","schrozberger","uplander","glaserne molkerei","bio wertkost","bio sonne","bio organic","biotrend","ja! bio","spar natur pur","naturkind","alnavit","berchtesgadener land bio"];
-const R_BUDGET=["ja!","=ja","gut & gunstig","gut&gunstig","gut und gunstig","k-classic","k classic","kaufland classic","=tip","jeden tag","s-budget","muhlenhof","metzgerfrisch","meine metzgerei","gut ponholz","gut drei eichen","wiltmann","penny","=milsani","=milbona","=dulano"];
+const R_BUDGET=["ja!","=ja","gut & gunstig","gut&gunstig","gut und gunstig","k-classic","k classic","kaufland classic","=tip","jeden tag","s-budget","muhlenhof","metzgerfrisch","meine metzgerei","gut ponholz","gut drei eichen","penny","=milsani","=milbona","=dulano"];
 function rateQuality(item,id,h,add){
   const bn=" "+NORM(item.brand||"")+" ", all=h+bn, ani=R_ANIMAL.includes(id), fish=id==="fattyfish"||id==="leanfish";
   const bw=bn.trim().split(/[^a-z0-9!&-]+/).filter(Boolean);

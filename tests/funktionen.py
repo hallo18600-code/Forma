@@ -267,6 +267,54 @@ ERINNERUNGEN = r"""async ()=>{ F={}; let n=0; const T0=todayIso();
  return {n,F};
 }"""
 
+# ---------- 4b) Durchsicht Nov 2026: Daten ohne Schätzung, Bewertung ohne Ausreißer, Training bleibt erhalten ----------
+DURCHSICHT = r"""async ()=>{ F={}; let n=0; newState(); state.coach.answers={};
+ const G=["muscle","lose","skin","energy"], base=nm=>BASE_FOODS.find(z=>z.name===nm);
+ // Naturbelassenes Obst darf nie wie Limo bewertet werden (früher: Banane 15)
+ for(const nm of ["Banane","Apfel","Orange","Erdbeeren","Mango","Blaubeeren"]) for(const g of G){ n++; const a=scoreFood(base(nm),g).score, c=scoreFood(base("Cola"),g).score;
+  if(!(a>=45&&a>c+25)) fail("Obst zu schlecht bewertet",`${nm} (${g}) ${a}, Cola ${c}`); }
+ // Käse: 1,9 g und 2,0 g Salz dürfen keinen Sprung machen
+ const kaese=sa=>({id:"t-k"+sa,type:"custom",src:"off",name:"Gouda Holland mittelalt",brand:"Test",kcal:400,protein:25,carbs:0,fat:33,sugar:0,fiber:0,salt:sa,sat:22,nova:4,processed:true});
+ for(const g of G){ n++; const d=Math.abs(scoreFood(kaese(1.9),g).score-scoreFood(kaese(2.0),g).score); if(d>4) fail("Käse springt bei 2 g Salz",g+" "+d); }
+ // Marke „River Valley“ (Obstkonserven) ist keine Limo-Marke
+ n++; if(brandCat({brand:"River Valley"})==="softdrink"||brandCat({brand:"Fritz Mühlenbäckerei"})==="softdrink"||brandCat({brand:"River"})!=="softdrink"||brandCat({brand:"Lindt & Sprüngli"})!=="sweets") fail("Marken-Erkennung falsch","");
+ // Datenbank: keine Zeile ohne Protein/Kohlenhydrate/Fett, nichts mit unmöglich wenigen Kalorien
+ if(FOODDB.ok){ n++; const bad=FOODDB.rows.filter(x=>x[4]==null||x[5]==null||x[6]==null); if(bad.length) fail("Produkt ohne Protein/KH/Fett in der Liste",bad[0][1]);
+  const low=FOODDB.rows.filter(x=>x[3]<0.5*(x[4]*4+x[6]*9)-5); if(low.length) fail("Unmöglich wenige Kalorien in der Liste",low[0][1]+" "+low[0][3]); }
+ // Eigenes Lebensmittel: ohne Zucker/Salz kein Score, mit beidem ein Score; alte Einträge (Zucker 0 als Platzhalter) werden „unbekannt“
+ const own=o=>Object.assign({id:"c-t"+uid(),type:"custom",v:2,name:"Testkuchen",brand:"Eigen",kcal:400,protein:5,carbs:55,fat:18,processed:false},o);
+ n++; if(scoreFood(own({}),"energy").score!==null) fail("Eigenes Lebensmittel ohne Zucker hat Score","");
+ n++; if(scoreFood(own({sugar:30}),"energy").score!==null) fail("Eigenes Lebensmittel ohne Salz hat Score","");
+ n++; const so=scoreFood(own({sugar:30,salt:0.4}),"energy").score; if(!Number.isFinite(so)) fail("Eigenes Lebensmittel mit Zucker+Salz ohne Score",String(so));
+ n++; const alt=normalize({profile:{},customs:[{id:"c-alt",type:"custom",name:"Alt",kcal:300,protein:5,carbs:50,fat:9,sugar:0,processed:false},{id:"c-neu",type:"custom",v:2,name:"Neu",kcal:300,protein:5,carbs:50,fat:9,sugar:0,salt:0.1}]});
+ if(alt.customs[0].sugar!==undefined||alt.customs[1].sugar!==0) fail("Alte eigene Lebensmittel falsch umgestellt",JSON.stringify(alt.customs));
+ // Barcode-Abfrage: fehlende Angaben werden nie zu 0
+ const of=window.fetch, mk=nu=>async()=>({ok:true,json:async()=>({status:1,product:{product_name:"X",brands:"B",nutriments:nu}})});
+ try{
+  window.fetch=mk({"energy-kcal_100g":100,"carbohydrates_100g":20,"fat_100g":1}); n++; if(await offLookup("12345678")!==null) fail("Barcode ohne Protein übernommen","");
+  window.fetch=mk({"energy-kcal_100g":0,"proteins_100g":0,"carbohydrates_100g":0,"fat_100g":0}); n++; const z=await offLookup("12345678"); if(!z||z.kcal!==0) fail("0-kcal-Getränk nicht gefunden","");
+  window.fetch=mk({"energy-kcal_100g":1,"proteins_100g":20,"carbohydrates_100g":5,"fat_100g":3}); n++; if(await offLookup("12345678")!==null) fail("Unmögliche Kalorien übernommen","");
+  window.fetch=mk({"energy-kcal_100g":66,"proteins_100g":4,"carbohydrates_100g":5,"fat_100g":3.5}); n++; const o=await offLookup("12345678"); if(!o||o.kcal!==66||o.sugar!==undefined||o.salt!==undefined||o.warn) fail("Normales Produkt falsch übernommen",JSON.stringify(o));
+ } finally { window.fetch=of; }
+ // Laufendes Training: wird gesichert, kommt nach Neustart zurück, alte/kaputte Stände werden verworfen
+ const keepW=ui.workout, keepL=localStorage.getItem(LIVE_KEY);
+ try{
+  ui.workout={name:"Test",t0:Date.now()-60000,routineId:null,exercises:[{id:"bp",sets:[{kg:42.5,reps:6,done:true},{kg:40,reps:6,done:false}]}]}; liveSave();
+  ui.workout=null; liveRestore(); stopTick(); n++;
+  if(!ui.workout||ui.workout.exercises[0].sets[0].kg!==42.5||ui.workout.exercises[0].sets[0].done!==true||ui.workout.exercises[0].sets[1].done!==false) fail("Training kommt nicht zurück",JSON.stringify(ui.workout));
+  ui.workout=null; localStorage.setItem(LIVE_KEY,JSON.stringify({name:"x",t0:Date.now()-13*3600e3,exercises:[]})); liveRestore(); stopTick(); n++; if(ui.workout||localStorage.getItem(LIVE_KEY)) fail("Altes Training nicht verworfen","");
+  localStorage.setItem(LIVE_KEY,"kaputt{"); liveRestore(); stopTick(); n++; if(ui.workout||localStorage.getItem(LIVE_KEY)) fail("Kaputter Stand nicht verworfen","");
+  localStorage.setItem(LIVE_KEY,JSON.stringify({name:"<b>x</b>",t0:Date.now()-5000,exercises:[{id:"a\"><img>",sets:[{kg:"x",reps:-3,done:1}]}]})); liveRestore(); stopTick(); n++;
+  if(!ui.workout||/[<>"]/.test(ui.workout.name+ui.workout.exercises[0].id)||ui.workout.exercises[0].sets[0].kg!==0||ui.workout.exercises[0].sets[0].reps!==0) fail("Stand nicht bereinigt",JSON.stringify(ui.workout));
+ } finally { ui.workout=keepW; liveLast=null; if(keepL==null) localStorage.removeItem(LIVE_KEY); else localStorage.setItem(LIVE_KEY,keepL); }
+ // Wasser- und Schrittziel folgen Gewicht und Ziel, außer sie wurden von Hand gesetzt
+ newState(); state.obDone=true; state.profile.stepAuto=true; autoGoals(); n++;
+ if(state.profile.waterTarget!==waterGoal()||state.profile.stepGoal!==stepGoalFor()) fail("Ziele folgen nicht","");
+ state.profile.waterManual=true; state.profile.waterTarget=5; state.profile.stepAuto=false; state.profile.stepGoal=6000; state.profile.weight=130; autoGoals(); n++;
+ if(state.profile.waterTarget!==5||state.profile.stepGoal!==6000) fail("Eigene Ziele überschrieben","");
+ return {n,F};
+}"""
+
 # ---------- 5) Klick-Test wie ein Mensch ----------
 def klicktest(b):
     probleme = []
@@ -530,7 +578,7 @@ def main():
         pg.goto(URL); pg.wait_for_timeout(1500)
         pg.evaluate("()=>{" + HELP + "}")
         pg.evaluate("()=>new Promise(r=>{ const t=setInterval(()=>{ if(FOODDB.ok){ clearInterval(t); r(); } },200); setTimeout(()=>{ clearInterval(t); r(); },15000); })")
-        for name, js in [("Vorschläge", VORSCHLAEGE), ("Bedarf lernt mit", BEDARF), ("Tages-Score", TAGESSCORE), ("Erinnerungen", ERINNERUNGEN)]:
+        for name, js in [("Vorschläge", VORSCHLAEGE), ("Bedarf lernt mit", BEDARF), ("Tages-Score", TAGESSCORE), ("Erinnerungen", ERINNERUNGEN), ("Durchsicht", DURCHSICHT)]:
             r = pg.evaluate(js)
             print(f"\n=== {name}: {r['n']:,} Fälle geprüft".replace(",", "."))
             if not r["F"]: print("    ✅ alles in Ordnung")

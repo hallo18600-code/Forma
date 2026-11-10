@@ -179,7 +179,7 @@ Cashewkerne;Cashews;570;18;30;42;6;3;;;
 Erdnüsse;Erdnuss;600;26;8;49;4;8;;;
 Pistazien;;570;21;17;45;8;10;;;
 Sonnenblumenkerne;;584;21;11;51;2.6;8.6;;;
-Chiasamen;Chia;490;17;8;31;0;34;;;
+Chiasamen;Chia;445;17;8;31;0;34;;;
 Leinsamen;;500;18;2;42;1;27;;;
 Zartbitterschokolade;Bitterschokolade|Edelbitter;550;7;40;38;30;10;;;1
 Nutella;Nuss-Nougat-Creme|Nussnougatcreme;540;6;58;31;56;3;;;1

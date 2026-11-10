@@ -31,14 +31,18 @@ async function offLookup(code){
   const r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+code+".json?fields=product_name,brands,nutriments,nova_group");
   if(!r.ok) return null;
   const j=await r.json(); if(j.status!==1||!j.product) return null;
-  const n=j.product.nutriments||{}, g=k=>+n[k]||0;
+  const n=j.product.nutriments||{};
   // Fehlende Angaben bleiben leer (nicht 0): sonst sähe z. B. ein Produkt ohne Zuckerangabe zuckerfrei aus
-  const opt=k=>n[k]==null||n[k]===""||!Number.isFinite(+n[k])?undefined:+n[k];
-  let kcal=g("energy-kcal_100g")||Math.round(g("energy_100g")/4.184);
+  const opt=k=>n[k]==null||n[k]===""||!Number.isFinite(+n[k])?undefined:+n[k], g=k=>opt(k)||0;
+  let kcal=opt("energy-kcal_100g"); if(kcal==null){ const kj=opt("energy-kj_100g")??opt("energy_100g"); if(kj!=null) kcal=Math.round(kj/4.184); }
   const name=(j.product.product_name||"").trim();
-  if(!name||!kcal) return null;
   // Gleiche Plausibilitäts-Prüfung wie bei der eingebauten Liste (build_foods.py): offensichtlich falsche Einträge nicht übernehmen
-  const p=g("proteins_100g"), c=g("carbohydrates_100g"), f=g("fat_100g"), calc=p*4+c*4+f*9, brand=(j.product.brands||"").split(",")[0].trim();
+  const p=opt("proteins_100g"), c=opt("carbohydrates_100g"), f=opt("fat_100g");
+  // Fehlen Kalorien, Protein, Kohlenhydrate oder Fett, wird nichts übernommen (sonst stünde dort fälschlich 0) – dann legt man es selbst an
+  if(!name||kcal==null||p==null||c==null||f==null||kcal<0||p<0||c<0||f<0) return null;
+  const calc=p*4+c*4+f*9, mind=p*4+f*9, brand=(j.product.brands||"").split(",")[0].trim();
+  // 0 kcal trotz deutlicher Nährstoffe oder weniger Kalorien, als allein Protein und Fett liefern: sicher ein Fehler
+  if((kcal===0&&calc>=20)||kcal<0.5*mind-5) return null;
   const sonder=/(alkohol|bier|beer|wein|wine|sekt|likör|schnaps|vodka|wodka|whisk|kaugummi|zuckerfrei|sugar ?free|xylit|erythrit|allulos|süßstoff)/i.test(name+" "+brand);
   if(kcal>950||p+c+f>100.5||g("salt_100g")>100) return null;
   // Kalorien gegen Makros (wie build_foods.py): kJ statt kcal eingetragen → umrechnen; kJ-Angabe passt besser → nehmen; sonst markieren
@@ -51,6 +55,7 @@ async function offLookup(code){
     else warn=1;
   }
   if(!sonder&&Math.max(kcal,calc)>60&&Math.abs(calc-kcal)>80&&Math.abs(calc-kcal)/Math.max(kcal,calc)>0.4) return null;
+  if(kcal<0.75*mind-5) warn=1;
   const su=opt("sugars_100g"), sat=opt("saturated-fat_100g");
   // Milliliter oder Gramm laut Packungsangabe („500 ml“, „250 g“), nicht aus dem Namen geraten
   const qu=String(j.product.quantity||"")+" "+String(j.product.product_quantity_unit||"");
@@ -64,7 +69,7 @@ async function bcLookup(code){
   if(!f){ const d=dbGet(code); if(d){ ensureDb(d.id); f=foods().find(x=>x.id===d.id); } }
   if(!f&&location.protocol.startsWith("http")){ toast("Suche Produkt…"); try{ const it=await offLookup(code); if(it){ state.customs.push(it); save(); f=it; } }catch(e){} }
   if(f){ ui.modal={type:"product",payload:f.id}; ui.amtFor=null; render(); return; }
-  ui.newBc=code; ui.newBack="barcode"; ui.scanView="newfood"; toast("Nicht gefunden, leg es kurz an"); render();
+  ui.newBc=code; ui.newBack="barcode"; ui.fDraft=null; ui.scanView="newfood"; toast("Nicht gefunden, leg es kurz an"); render();
 }
 // Spracheingabe: Text wird angehängt und sofort erkannt. Zweites Tippen beendet das Zuhören.
 function aiMic(){
@@ -150,19 +155,16 @@ function moreView(){
 }
 function quickView(){
   return `${yHead("Schnell hinzufügen","more")}
-    <div class="field"><label>Name (optional)</label><input id="q-name" placeholder="Restaurant-Mittag"></div>
-    ${[["q-kcal","Kalorien (kcal)"],["q-p","Protein (g)"],["q-c","Kohlenhydrate (g)"],["q-f","Fett (g)"]].map(([i,l])=>`<div class="field"><label>${l}</label><input id="${i}" inputmode="decimal"></div>`).join("")}
+    <div class="field"><label for="q-name">Name (optional)</label><input id="q-name" placeholder="Restaurant-Mittag" maxlength="70" value="${fdv("q-name")}"></div>
+    ${[["q-kcal","Kalorien (kcal)"],["q-p","Protein (g)"],["q-c","Kohlenhydrate (g)"],["q-f","Fett (g)"]].map(([i,l])=>`<div class="field"><label for="${i}">${l}</label><input id="${i}" inputmode="decimal" autocomplete="off" value="${fdv(i)}"></div>`).join("")}
     <button class="yfertig" data-act="save-quick">Hinzufügen</button>`;
 }
 function newFoodView(){
   const bc=ui.newBc!=null;
   return `${yHead("Neues Lebensmittel",ui.newBack||"more")}
-    ${bc?`<div class="field"><label>Barcode</label><input id="c-bc" inputmode="numeric" value="${esc(ui.newBc)}"></div>`:""}
-    <div class="field"><label>Name</label><input id="c-name" placeholder="Cornflakes"></div>
-    <div class="field"><label>kcal / 100 g</label><input id="c-kcal" inputmode="numeric" value="100"></div>
-    <div class="field"><label>Protein / 100 g</label><input id="c-p" inputmode="decimal" value="5"></div>
-    <div class="field"><label>Kohlenhydrate / 100 g</label><input id="c-c" inputmode="decimal" value="12"></div>
-    <div class="field"><label>Fett / 100 g</label><input id="c-f" inputmode="decimal" value="3"></div>
+    ${bc?`<div class="field"><label>Barcode</label><input id="c-bc" inputmode="numeric" value="${fdv("c-bc",ui.newBc)}"></div>`:""}
+    <div class="field"><label for="c-name">Name</label><input id="c-name" placeholder="Cornflakes" maxlength="70" value="${fdv("c-name")}"></div>
+    ${customFields()}
     <button class="yfertig" data-act="save-custom">Speichern und eintragen</button>`;
 }
 function scanResults(){

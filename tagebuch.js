@@ -105,13 +105,21 @@ function renderMealPage(){
     ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}<span class="notr">${esc(amtTxt(p,m))}</span></div></div><span>${line(p,m.portion).kcal} kcal</span><i>›</i></button>`).join("")||`<p class="sub li">Noch nichts eingetragen.</p>`}
     <button class="yfertig" data-act="open" data-type="scan" data-slot="${slot.id}">Mehr hinzufügen</button>`;
 }
+// Felder für ein eigenes Lebensmittel: Werte pro 100 g von der Packung, nichts ist vorausgefüllt (keine erfundenen Zahlen).
+// Zucker und Salz sind freiwillig – ohne sie gibt es keinen Score (gleiche Regel wie bei Produkten aus der Datenbank).
+// Eingaben bleiben stehen, wenn ein Hinweis kommt (z. B. „Name fehlt“): formDraft() merkt sie sich vor dem Neuaufbau.
+const FORM_IDS=["c-name","c-bc","c-kcal","c-p","c-c","c-s","c-f","c-sa","q-name","q-kcal","q-p","q-c","q-f"];
+function formDraft(){ const d={}; FORM_IDS.forEach(id=>{ const el=document.getElementById(id); if(el) d[id]=el.value; }); ui.fDraft=d; }
+function fdv(id,fallback){ const v=(ui.fDraft||{})[id]; return esc(v!=null?v:(fallback||"")); }
+function customFields(){
+  const f=(id,l,mode)=>`<div class="field"><label for="${id}">${l}</label><input id="${id}" inputmode="${mode||"decimal"}" autocomplete="off" value="${fdv(id)}"></div>`;
+  return f("c-kcal","kcal / 100 g")+f("c-p","Protein / 100 g")+f("c-c","Kohlenhydrate / 100 g")+f("c-s","davon Zucker / 100 g (freiwillig)")+f("c-f","Fett / 100 g")+f("c-sa","Salz / 100 g (freiwillig)")
+    +`<p class="sub">Werte von der Packung. Ohne Zucker und Salz gibt es keinen Score.</p>`;
+}
 function customSheet(){
   return `<h2>Eigenes Lebensmittel</h2>
-    <div class="field"><label>Name</label><input id="c-name" placeholder="Overnight Oats"></div>
-    <div class="field"><label>kcal / 100 g</label><input id="c-kcal" inputmode="numeric" value="100"></div>
-    <div class="field"><label>Protein / 100 g</label><input id="c-p" inputmode="decimal" value="5"></div>
-    <div class="field"><label>Kohlenhydrate / 100 g</label><input id="c-c" inputmode="decimal" value="12"></div>
-    <div class="field"><label>Fett / 100 g</label><input id="c-f" inputmode="decimal" value="3"></div>
+    <div class="field"><label for="c-name">Name</label><input id="c-name" placeholder="Overnight Oats" maxlength="70" value="${fdv("c-name")}"></div>
+    ${customFields()}
     <div class="gap"></div><button class="pill primary" data-act="save-custom">Speichern und eintragen</button>`;
 }
 function fv(x,g){ if(x==null) return "–"; return String(Math.round(x*(g/100)*10)/10).replace(".",",")+" g"; }
@@ -144,7 +152,7 @@ function foodSheet(it,sc){
   return `<div class="yhead"><button class="yback" data-act="${ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><button class="yfav ${fav?"on":""}" data-act="fav" data-id="${it.id}" aria-pressed="${fav}" aria-label="${fav?"Aus den Favoriten":"Zu den Favoriten"}">${fav?"★":"☆"}</button></div>
     <div class="fhead"><span class="femo">${esc(it.emoji||"🍽️")}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
     ${rateRing(sc.score)}
-    ${sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} in der Datenbank. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p></div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
+    ${sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} ${it.src==="off"?"in der Datenbank":"in deinen Angaben"}. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p></div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
     </div>`}
     ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Stärken</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}

@@ -1,6 +1,7 @@
 """Baut foods.json aus Open Food Facts (deutsche Produkte, beliebteste zuerst).
 Spalten: Code, Name, Marke, kcal, Protein, Carbs, Fett, Zucker, Ballaststoffe, Salz, ges. Fett, NOVA, [Bits: 1 = Kalorien unstimmig, 2 = ml, 4 = g]
 Es wird nichts geschätzt: fehlt ein Wert in Open Food Facts, bleibt er leer.
+Fehlen Protein, Kohlenhydrate oder Fett ganz, kommt das Produkt nicht in die Liste (sonst stünde dort fälschlich 0 g).
 Daten: Open Food Facts, (c) Open Food Facts-Mitwirkende, ODbL 1.0."""
 import json, os, re, shutil, sys, urllib.request, datetime
 
@@ -44,8 +45,10 @@ def plausible(name, brand, kcal, p, c, f, s=None, fi=None, sa=None, sf=None):
     if KEIN_ESSEN.search(txt): return False
     if sa is not None and (sa > 100 or (sa > 25 and not SALZIG.search(txt))): return False
     if fi is not None and fi > 50 and not FASER.search(txt): return False
-    if None in (p, c, f): return True          # unvollständig: nicht beurteilbar
+    if None in (p, c, f): return False         # Protein, Kohlenhydrate oder Fett fehlen: Die App müsste 0 g anzeigen – lieber weglassen als schätzen
     if p + c + f > 100.5: return False
+    # Protein (4 kcal/g) und Fett (9 kcal/g) liefern sicher Energie: deutlich weniger Kalorien sind unmöglich (Platzhalter- oder Tippfehler)
+    if kcal < 0.5 * (p * 4 + f * 9) - 5: return False
     if SKIP.search(txt): return True
     calc = p * 4 + c * 4 + f * 9
     if kcal == 0 and calc >= 20: return False   # 0 kcal, aber deutlich Nährstoffe: Kalorien fehlen
@@ -59,7 +62,10 @@ r = lambda v: None if v is None else round(v, 1)
 #  - sonst unklar, welcher Wert stimmt: Produkt bleibt, wird aber markiert (App zeigt „bitte mit Packung vergleichen“)
 # Rückgabe: (kcal, Markierung 0/1)
 def pruefe_kcal(name, brand, kcal, kj, p, c, f, fi):
-    if None in (p, c, f) or SKIP.search(f"{name} {brand}"): return kcal, 0
+    if None in (p, c, f): return kcal, 0
+    # Weniger Kalorien, als allein Protein und Fett liefern: sicher ein Fehler (gilt auch für Alkohol und Süßstoff-Produkte)
+    if kcal < 0.75 * (p * 4 + f * 9) - 5: return kcal, 1
+    if SKIP.search(f"{name} {brand}"): return kcal, 0
     calc = p * 4 + c * 4 + f * 9 + (fi or 0) * 2
     nah = lambda a, b, rel, absol: abs(a - b) <= max(absol, rel * max(a, b))
     if calc < 30 and kcal < 60 or nah(kcal, calc, 0.2, 40): return kcal, 0

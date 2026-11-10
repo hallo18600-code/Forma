@@ -80,7 +80,7 @@ function renderSport(){
     <div class="card">
       <div class="kpi">
         <div><span>Einheiten</span><b>${week.length}</b><span>7 Tage</span></div>
-        <div><span>Volumen</span><b>${de(vol)}</b><span>kg</span></div>
+        <div><span>Volumen</span><b>${de(Math.round(vol))}</b><span>kg</span></div>
         <div><span>Routinen</span><b>${plans.length}</b><span>angelegt</span></div>
       </div>
       <div class="wbars">${days.map(s=>{
@@ -148,7 +148,7 @@ function renderLive(){
         <button class="pill primary sm" data-act="finish-wo">Fertig</button>
       </div>
       <div class="stats">
-        <div><b>${vol} kg</b><span>Volumen</span></div>
+        <div><b>${de(Math.round(vol))} kg</b><span>Volumen</span></div>
         <div><b>${done}/${sets}</b><span>Sätze</span></div>
         <div><b class="t-rest">${ui.rest||0}s</b><span>Pause</span></div>
       </div>
@@ -312,8 +312,8 @@ function renderStats(){
     </div>
     <div class="gap"></div>
     <div class="card">
-      <div class="row space"><b>Volumen</b><span class="sub">7 Tage ${vol(week)} kg</span></div>
-      <div class="sub">Vorwoche ${vol(prev)} kg</div>
+      <div class="row space"><b>Volumen</b><span class="sub">7 Tage ${de(Math.round(vol(week)))} kg</span></div>
+      <div class="sub">Vorwoche ${de(Math.round(vol(prev)))} kg</div>
       <div class="vbars">${bars.map(v=>`<i style="height:${Math.max(4,v/max*72)}px"></i>`).join("")}</div>
       <div class="sub">8 Wochen, kg × Wiederholungen</div>
     </div>`;

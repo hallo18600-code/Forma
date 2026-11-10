@@ -36,14 +36,17 @@ function privacySheet(inApp=true){
   return `<h2>Datenschutz</h2>
     ${li("Verantwortlich",anbieterHtml()+"<br>E-Mail: "+ANBIETER.mail)}
     ${li("Nur auf deinem Gerät","Profil, Essen, Training, Gewicht und Routine speichert die App nur auf diesem Gerät. Kein Konto, kein eigener Server, keine Werbung, kein Tracking, keine Analyse-Tools.")}
-    ${li("Gesundheitsdaten","Angaben wie Gewicht, Essen oder Haut verlassen dein Gerät nicht. Wir haben keinen Zugriff darauf.")}
+    ${li("Gesundheitsdaten","Angaben wie Gewicht, Essen, Schlaf oder Haut verlassen dein Gerät nicht. Wir haben keinen Zugriff darauf.")}
+    ${li("Fortschrittsfotos","Fotos, die du hinzufügst, speichert die App verkleinert nur auf diesem Gerät. Sie werden nicht gesendet und sind nicht in der Datensicherung. „Alles löschen“ entfernt auch sie.")}
     ${li("Barcode-Suche","Fehlt ein Produkt in der eingebauten Liste, fragt die App die Barcode-Nummer bei Open Food Facts (openfoodfacts.org, Frankreich) ab. Gesendet wird nur die Nummer und, wie bei jeder Internet-Anfrage, deine IP-Adresse. Rechtsgrundlage: Art. 6 Abs. 1 lit. b DSGVO.")}
-    ${li("Kamera","Nur zum Scannen von Barcodes. Bilder werden nicht gespeichert oder gesendet.")}
+    ${li("Kamera","Zum Scannen von Barcodes und für Fortschrittsfotos, wenn du eines aufnimmst. Beim Scannen wird kein Bild gespeichert. Es wird nichts gesendet.")}
+    ${li("Erinnerungen","Mitteilungen gibt es nur, wenn du sie einschaltest. Sie entstehen auf deinem Gerät, dafür wird nichts an einen Server gesendet.")}
+    ${li("Dateien aus anderen Apps","Trainingsdaten aus anderen Apps und eigene Sicherungen liest die App nur auf deinem Gerät. Sie werden nicht hochgeladen.")}
     ${li("Sprache","Nur wenn du „Sprechen“ tippst. Die Erkennung übernimmt dein Browser bzw. Handy; dessen Anbieter kann die Aufnahme dafür verarbeiten.")}
     ${app?li("App-Store-Version",storeApp):inApp?li("Hosting",webHosting):li("Web-Version",webHosting)+li("App-Store-Version",storeApp)}
     ${li("Exportieren und löschen","Profil → Daten exportieren. Profil → Alles löschen entfernt alles sofort und endgültig.")}
     ${li("Deine Rechte","Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung, Datenübertragung und Widerspruch. Schreib dafür an die E-Mail oben. Du kannst dich auch beim Bayerischen Landesamt für Datenschutzaufsicht (lda.bayern.de) beschweren.")}
     ${li("Alter","Die App ist nur für Erwachsene ab 18 Jahren gedacht.")}
-    <p class="sub">Stand: Oktober 2026</p>
+    <p class="sub">Stand: November 2026</p>
     ${okBtn(inApp)}`;
 }
