@@ -639,11 +639,13 @@ const RULES = {
   en: ['shop the edges of the supermarket.', 'if it has a cartoon on it, skip it.', 'if it doesn’t rot, don’t eat it.', 'one ingredient only.', 'if grandma wouldn’t know it, skip it.', 'eat food, not products.', 'if it has a TV ad, don’t buy it.', 'fruit is nature’s candy.', 'protein with every meal.', 'drink water, not calories.',
     'eat like your great-grandparents.', 'can’t pronounce it? don’t eat it.', 'more than 5 ingredients? put it back.', 'butter over margarine.', 'cook it yourself.', 'eat meals, not snacks.', 'don’t drink your sugar.', 'eat seasonal.', 'eat fish twice a week.', 'fried in seed oil? skip it.', 'buy at your regional supermarket.', 'fats are not your enemy.', 'sugar is not your enemy.',
     'never buy "low-fat".', 'never buy "high protein".', 'red meat is not the enemy.', 'white bread is bad for you.', 'if it was alive, eat it. if it was made, skip it.', 'eat what you can hunt, fish or pick.', 'eat like a caveman.', 'dessert comes from a tree.', 'carbs before the gym.', 'colors from nature, not from a lab.',
-    'honey over sugar.', 'wild fish over farmed.', 'grass-fed when you can.', 'eat the fat.', 'coffee, not energy drinks.', 'your breakfast needs eggs.', 'eat like a king, not like a kid.'],
+    'honey over sugar.', 'wild fish over farmed.', 'grass-fed when you can.', 'eat the fat.', 'coffee, not energy drinks.', 'your breakfast needs eggs.', 'eat like a king, not like a kid.',
+    'milk comes from a cow, not an oat.', 'steak over shakes.', 'food from a farm, not a factory.', 'eat from the sea.', 'no label, no problem.', 'eat it the way it grew.', 'potatoes over pasta.', 'nuts, not chips.', 'dates over candy.', 'dark chocolate only.', 'hungry? eat eggs.', 'coconut water over sports drinks.'],
   de: ['Kauf am Rand des Supermarkts ein.', 'Ist ein Comic drauf, lass es liegen.', 'Wenn es nicht verdirbt, iss es nicht.', 'Nur eine Zutat.', 'Kennt Oma es nicht, lass es weg.', 'Iss Lebensmittel, keine Produkte.', 'Hat es Fernsehwerbung, kauf es nicht.', 'Obst ist die Süßigkeit der Natur.', 'Protein zu jeder Mahlzeit.', 'Trink Wasser, keine Kalorien.',
     'Iss wie deine Urgroßeltern.', 'Kannst du es nicht aussprechen, iss es nicht.', 'Mehr als 5 Zutaten? Leg es zurück.', 'Butter statt Margarine.', 'Koch selbst.', 'Iss Mahlzeiten, keine Snacks.', 'Trink keinen Zucker.', 'Iss saisonal.', 'Iss zweimal pro Woche Fisch.', 'In Pflanzenöl frittiert? Lass es.', 'Kauf regional ein.', 'Fett ist nicht dein Feind.', 'Zucker ist nicht dein Feind.',
     'Kauf nie „fettarm“.', 'Kauf nie „High Protein“.', 'Rotes Fleisch ist nicht der Feind.', 'Weißbrot ist schlecht für dich.', 'Hat es gelebt, iss es. Wurde es gemacht, lass es.', 'Iss, was du jagen, fischen oder pflücken kannst.', 'Iss wie ein Höhlenmensch.', 'Nachtisch wächst am Baum.', 'Carbs vor dem Gym.', 'Farben aus der Natur, nicht aus dem Labor.',
-    'Honig statt Zucker.', 'Wildfisch statt Zuchtfisch.', 'Weidehaltung, wenn es geht.', 'Iss das Fett.', 'Kaffee, keine Energydrinks.', 'Zum Frühstück gehören Eier.', 'Iss wie ein König, nicht wie ein Kind.'],
+    'Honig statt Zucker.', 'Wildfisch statt Zuchtfisch.', 'Weidehaltung, wenn es geht.', 'Iss das Fett.', 'Kaffee, keine Energydrinks.', 'Zum Frühstück gehören Eier.', 'Iss wie ein König, nicht wie ein Kind.',
+    'Milch kommt von der Kuh, nicht vom Hafer.', 'Steak statt Shakes.', 'Essen vom Hof, nicht aus der Fabrik.', 'Iss aus dem Meer.', 'Kein Etikett, kein Problem.', 'Iss es so, wie es gewachsen ist.', 'Kartoffeln statt Nudeln.', 'Nüsse statt Chips.', 'Datteln statt Süßigkeiten.', 'Nur dunkle Schokolade.', 'Hunger? Iss Eier.', 'Kokoswasser statt Sportgetränke.'],
   foods: [
     ['steak', 'eggs', 'milk', 'apples', 'carrots', 'salmon', 'cheese', 'tomatoes'],
     ['eggs', 'apples', 'oranges', 'potatoes', 'banana', 'carrots', 'steak'],
@@ -685,6 +687,18 @@ const RULES = {
     ['coffee'],
     ['eggs'],
     ['steak', 'oysters', 'berries', 'salmon', 'mango', 'eggs'],
+    ['milk'],
+    ['steak'],
+    ['eggs', 'milk', 'beef', 'potatoes', 'apples', 'butter', 'cheese', 'carrots'],
+    ['salmon', 'oysters', 'shrimp', 'mussels', 'mackerel', 'tuna'],
+    ['apples', 'potatoes', 'carrots', 'banana', 'tomatoes', 'oranges', 'pears', 'peppers'],
+    ['apples', 'carrots', 'potatoes', 'tomatoes', 'beets', 'cherries', 'pears', 'berries'],
+    ['potatoes', 'sweetpotato'],
+    ['walnuts', 'almonds', 'nuts'],
+    ['dates'],
+    ['chocolate'],
+    ['eggs'],
+    ['coconutwater'],
   ],
 };
 // typische Lebensmittel des Landes
@@ -1731,26 +1745,29 @@ function vibeFoods(ids, used, k) {
   ids = [...new Set(ids)];
   if (ids.length <= k) return shuffle(ids);
   const fresh = id => used.has('food:' + id) ? 0 : 1;   // in diesem Post noch nicht gezeigt
-  let best = null, bestScore = -1e9;
-  for (let t = 0; t < 8; t++) {
-    const seeds = shuffle(ids).sort((a, b) => fresh(b) - fresh(a));
-    const out = [seeds[t % Math.min(seeds.length, 4)]];
+  // Von jedem Lebensmittel aus eine passende Gruppe bauen; unter gleich gut passenden entscheidet der Zufall.
+  // (Früher gewann immer dieselbe „beste“ Gruppe → manche Lebensmittel kamen nie dran.)
+  const build = seed => {
+    const out = [seed];
     while (out.length < k) {
-      let cand = null, cs = -1e9;
-      for (const id of shuffle(ids)) {
+      let top = -1e9, cands = [];
+      for (const id of ids) {
         if (out.includes(id)) continue;
-        const comps = out.map(o => vcomp(o, id));
-        const sc = Math.min(...comps) * 10 + comps.reduce((a, b) => a + b, 0) + fresh(id) * 2 - (out.some(o => twinOf(o, id)) ? 30 : 0) + rnd();
-        if (sc > cs) { cs = sc; cand = id; }
+        const sc = Math.min(...out.map(o => vcomp(o, id))) * 2 + fresh(id) - (out.some(o => twinOf(o, id)) ? 10 : 0);
+        if (sc > top) { top = sc; cands = [id]; } else if (sc === top) cands.push(id);
       }
-      out.push(cand);
+      out.push(pick(cands));
     }
-    let pmin = 3, psum = 0;
-    for (let a = 0; a < out.length; a++) for (let b = a + 1; b < out.length; b++) { const c = vcomp(out[a], out[b]); pmin = Math.min(pmin, c); psum += c; }
-    const score = pmin * 100 + psum * 3 + out.reduce((a, id) => a + fresh(id), 0) * 4 + rnd() * 6;
-    if (score > bestScore) { bestScore = score; best = out; }
-  }
-  return best;
+    return out;
+  };
+  const quality = out => { let q = 3;
+    for (let a = 0; a < out.length; a++) for (let b = a + 1; b < out.length; b++) q = Math.min(q, twinOf(out[a], out[b]) ? -1 : vcomp(out[a], out[b]));
+    return q; };
+  const sets = ids.map(seed => { const out = build(seed); return { out, q: quality(out), f: fresh(seed) }; });
+  const best = Math.max(...sets.map(x => x.q));
+  let ok = sets.filter(x => x.q >= Math.min(best, 2));           // nur Gruppen, die gut zusammenpassen (nie Steak neben Obst)
+  if (ok.some(x => x.f)) ok = ok.filter(x => x.f);              // lieber mit Essen starten, das im Post noch nicht dran war
+  return pick(ok).out;
 }
 function chooseFour(pred, used, k = 4) {
   // echte Fotos zuerst, je Essen nur einmal; Fotos aus früheren Slides dieses Posts möglichst nicht wiederholen
@@ -1764,6 +1781,8 @@ function chooseFour(pred, used, k = 4) {
   const want = vibeFoods(real.map(p => p.food), used, k);
   for (const id of want) { const p = real.find(p => p.food === id && !used.has(p.id)) || real.find(p => p.food === id); if (p && out.length < k) take(p); }
   for (const f of shuffle(Object.values(FOODS).filter(f => pred(f) && f.id !== 'other' && !foods.has(f.id) && !hasPhoto(f.id)))) if (out.length < k && !real.length) { out.push({ food: f, demo: true }); foods.add(f.id); }
+  // noch Plätze frei (Regel mit nur 1–3 Lebensmitteln): reihum weitere Fotos, damit nicht ein Essen alle Plätze bekommt
+  for (let r = 0; r < k && out.length < k; r++) for (const id of shuffle(want)) { const p = out.length < k && real.find(p => p.food === id && !out.some(o => o.id === p.id)); if (p) take(p); }
   for (const p of real) if (out.length < k && !out.some(o => o.id === p.id)) take(p);
   while (out.length < k) out.push({ food: pick(Object.values(FOODS).filter(pred)), demo: true });
   return shuffle(out);
@@ -1874,7 +1893,8 @@ function planSlides(series, n, lang) {
   if (series === 'rules') {
     // Stapel: alle Regeln kommen einmal dran, bevor sich eine wiederholt (früher sortiert → immer die ersten Regeln vorne)
     const list = RULES[lang];
-    let deck = (recent.ruleDeck || []).filter(i => i < list.length);
+    let deck = recent.ruleN === list.length ? (recent.ruleDeck || []).filter(i => i < list.length) : [];   // neue Regeln dazugekommen → Stapel neu mischen
+    recent.ruleN = list.length;
     const idx = [];
     while (idx.length < n) {
       if (!deck.length) deck = shuffle(list.map((_, i) => i).filter(i => !idx.includes(i)));
