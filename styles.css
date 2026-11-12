@@ -685,6 +685,9 @@ p { margin:var(--s-2) 0; }
 .kpi b { display:block; font-size:var(--fs-l); letter-spacing:-.02em; line-height:1.2; }
 .kpi span { font-size:var(--fs-s); color:var(--ink-2); }
 .card > .kpi:first-child { margin-top:0; }
+.kpi.k1 { grid-template-columns:1fr; }
+.kpi.k2 { grid-template-columns:1fr 1fr; }
+.tipgrp + .kpi { margin-top:var(--s-1); margin-bottom:var(--s-3); }
 .wbars { display:flex; align-items:flex-end; gap:var(--s-2); height:104px; margin-top:var(--s-4); }
 .wbar { flex:1; display:flex; flex-direction:column; align-items:center; gap:var(--s-2); height:100%; justify-content:flex-end; }
 .wbar i { width:100%; max-width:20px; border-radius:var(--r-s); background:var(--track); min-height:6px; }

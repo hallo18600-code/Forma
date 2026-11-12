@@ -23,7 +23,7 @@ function skinAvg(list){ return list.length?list.reduce((a,b)=>a+b,0)/list.length
 //  • Schlechte Gewohnheiten (Zucker, Fast Food, Milch, wenig Schlaf/Wasser, schwache Ernährung) dürfen nur als MINUS erscheinen,
 //    gute Gewohnheiten (sehr gute Ernährung, guter Tag rundum) nur als PLUS. Alles andere wird nie angezeigt.
 //  • Nur Tage mit ausreichend eingetragenem Essen zählen für Essens-Fragen (sonst sähe „nichts eingetragen“ aus wie „kein Zucker“).
-//  • Jede Gruppe braucht mind. 3 Tage, der Effekt mind. 0,8 Punkte und eine klare statistische Sicherheit (t ≥ SK_T).
+//  • Jede Gruppe braucht mind. 3 Tage, der Effekt mind. 0,8 Punkte und eine klare statistische Sicherheit (t ≥ SK_T und stärker als 97,5 % von 400 Zufalls-Mischungen).
 //  • Höchstens 3 Auffälligkeiten.
 const SK_T=2.2, SK_EFF=0.8, SK_GRP=3, SK_MAXF=3;
 const SK_NATURAL=new Set(["fruit","berries","banana","vitc","veg","skinveg","sweetpotato","avocado","legume","potato"]);
@@ -87,7 +87,12 @@ function skinOLS(X,y){
 }
 // Fester Zufallsgenerator (gleiche Daten → gleiches Ergebnis, nichts springt beim Neuladen)
 function skinRng(seed){ let a=seed>>>0; return ()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; }; }
-const SK_MEMO={key:null,fp:null,val:null};
+// info: was sich überhaupt vergleichen ließ (für die Anzeige „Kein klarer Unterschied bei …“ / „Noch zu wenig Vergleichstage …“)
+const SK_MEMO={key:null,fp:null,val:null,info:null};
+const SK_NAMES={sugar:"Zucker",fast:"Fast Food",dairy:"Milchprodukte",sleep:"Schlaf",water:"Wasser",high:"Sehr gute Ernährung"};
+function skinInfo(){ skinInsights(); return SK_MEMO.info||{}; }
+// Angezeigte Differenz: bei einer einzelnen Auffälligkeit genau der Abstand der beiden gezeigten Durchschnitte (überall dieselbe Zahl)
+function skinDiff(x){ return x.m1!=null?Math.round((x.m1-x.m0)*10)/10:x.diff; }
 function skinInsights(){
   const all=skinDays(); if(all.length<SK_MIN) return [];
   // Schneller Fingerabdruck der Daten: nur neu rechnen, wenn sich etwas geändert hat (sonst ruckelt jeder Tipp)
@@ -95,10 +100,13 @@ function skinInsights(){
     return s+":"+d.skin+":"+(d.sleep??"")+":"+(y.water||0)+":"+(y.meals||[]).map(m=>m&&m.id+"*"+m.portion).join(","); }).join(";");
   if(SK_MEMO.fp===fp) return SK_MEMO.val;
   const rows=all.map(s=>({s, y:skinVal(s), prev:skinDayInfo(addDays(s,-1)), sleep:(()=>{ const v=(state.days[s]||{}).sleep; return v==null?null:+v; })()}));
-  const ys=rows.map(r=>r.y); if(Math.max(...ys)-Math.min(...ys)<2){ SK_MEMO.fp=fp; SK_MEMO.val=[]; return []; }   // Haut immer (fast) gleich bewertet → nichts zu erkennen
+  const ys=rows.map(r=>r.y); if(Math.max(...ys)-Math.min(...ys)<2){ SK_MEMO.fp=fp; SK_MEMO.key=null; SK_MEMO.val=[]; SK_MEMO.info={flat:true}; return []; }   // Haut immer (fast) gleich bewertet → nichts zu erkennen
   const F=skinFeatures(rows), X=F.map(f=>rows.map(r=>f.x(r)));
   const key=JSON.stringify([ys,X,F.map(f=>f.sub)]); if(SK_MEMO.key===key){ SK_MEMO.fp=fp; return SK_MEMO.val; }
   const idx=f=>F.indexOf(f);
+  // Je Gewohnheit: an wie vielen Tagen traf sie zu / nicht zu? Vergleichbar ist sie erst mit je mind. 3 Tagen (und 7 insgesamt).
+  const cov=F.filter(f=>!f.combo).map(f=>{ const x=X[idx(f)], ones=x.filter(v=>v===1).length, zeros=x.filter(v=>v===0).length;
+    return {id:f.id, name:SK_NAMES[f.id]||f.t, ones, zeros, ok:ones>=SK_GRP&&zeros>=SK_GRP&&ones+zeros>=SK_MIN}; });
   // Modell mit den Merkmalen „set“ für die Hautwerte „y“
   const fit=(set,y)=>{
     const R=[]; for(let k=0;k<rows.length;k++) if(set.every(f=>X[idx(f)][k]!=null)) R.push(k);
@@ -109,14 +117,15 @@ function skinInsights(){
   const tOf=(m,k)=>m.o.beta[k]/(m.o.se[k]||1e9);
   // Stärkstes einzelnes Muster (in der erlaubten Richtung) – für den Zufallsvergleich
   const maxStat=y=>{ let mx=0; for(const f of F){ const m=fit([f],y); if(m){ const t=tOf(m,1)*f.dir; if(t>mx) mx=t; } } return mx; };
-  // Permutationstest: Hautwerte 200× mischen. Nur was stärker ist als 95 % der gemischten Fälle, zählt.
+  // Permutationstest: Hautwerte 400× mischen. Nur was stärker ist als 97,5 % der gemischten Fälle, zählt
+  // (streng, damit reiner Zufall möglichst selten als Auffälligkeit erscheint).
   const rnd=skinRng(key.length*7919+ys.reduce((a,v,i)=>a+v*(i+1)*31,0)), null_=[];
   // In Blöcken mischen: Hautbild und Gewohnheiten halten oft mehrere Tage an. Einzeln gemischt sähe Zufall zu „sicher“ aus.
   const blocks=[]; for(let i=0;i<ys.length;i+=SK_BLOCK) blocks.push(ys.slice(i,i+SK_BLOCK));
-  for(let p=0;p<200;p++){ const B=blocks.slice(), off=Math.floor(rnd()*SK_BLOCK);
+  for(let p=0;p<400;p++){ const B=blocks.slice(), off=Math.floor(rnd()*SK_BLOCK);
     for(let i=B.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [B[i],B[j]]=[B[j],B[i]]; }
     const flat=[].concat(...B), y=flat.slice(off).concat(flat.slice(0,off)); null_.push(maxStat(y)); }
-  null_.sort((a,b)=>a-b); const T=Math.max(SK_T, null_[Math.floor(null_.length*0.95)]);
+  null_.sort((a,b)=>a-b); const T=Math.max(SK_T, null_[Math.floor(null_.length*0.975)]);
   const chosen=[];
   while(chosen.length<SK_MAXF){
     let best=null; const cand=[];
@@ -151,8 +160,12 @@ function skinInsights(){
     if(m) res=chosen.map((f,i)=>({f, diff:Math.round(m.o.beta[i+1]*10)/10, n:m.R.filter(k=>X[idx(f)][k]===1).length, t:tOf(m,i+1)}))
       .filter(x=>Math.sign(x.diff)===x.f.dir&&Math.abs(x.diff)>=SK_EFF&&Math.abs(x.t)>=SK_T)
       .sort((a,b)=>(a.diff<0?0:1)-(b.diff<0?0:1)||Math.abs(b.diff)-Math.abs(a.diff));
+    // Bei genau einer Auffälligkeit zusätzlich die beiden echten Durchschnitte (bei mehreren wären sie nicht mehr sauber trennbar)
+    if(res.length===1){ const f=res[0].f, m1=fit([f],ys);
+      if(m1){ const a=m1.R.filter(k=>X[idx(f)][k]===1).map(k=>ys[k]), b=m1.R.filter(k=>X[idx(f)][k]===0).map(k=>ys[k]);
+        if(a.length&&b.length){ res[0].m1=Math.round(skinAvg(a)*10)/10; res[0].m0=Math.round(skinAvg(b)*10)/10; } } }
   }
-  SK_MEMO.key=key; SK_MEMO.fp=fp; SK_MEMO.val=res; return res;
+  SK_MEMO.key=key; SK_MEMO.fp=fp; SK_MEMO.val=res; SK_MEMO.info={cov}; return res;
 }
 function skinTone(v){ return v<=4?"bad":v<=6?"warn":"ok"; }
 function skinScale(cur,act){
@@ -179,14 +192,17 @@ function skinCard(){
   const svg=`<svg class="chart" viewBox="0 0 ${W} ${H}">${bars}
     <text x="${P}" y="${H-1}" font-size="12" fill="${tc("ink-2")}">${parseIso(pts[0].s).getDate()}.${parseIso(pts[0].s).getMonth()+1}.</text>
     <text x="${W-P}" y="${H-1}" text-anchor="end" font-size="12" fill="${tc("ink-2")}">${labelDate(state.date)}</text></svg>`;
-  const ins=skinInsights();
+  const ins=skinInsights(), info=n>=SK_MIN?skinInfo():{};
   const edit=cur==null||ui.skinEdit;
+  const cov=info.cov||[], tested=cov.filter(c=>c.ok&&!ins.some(x=>x.f.id===c.id||(x.f.combo||[]).includes(c.id))).map(c=>c.name), few=cov.filter(c=>!c.ok).map(c=>c.name);
+  const fewTxt=few.length?`Noch zu wenig Vergleichstage: ${few.join(", ")}.`:"";
   const analysis=n<SK_MIN?`<div class="skbox">${skinProgress(n)}<div class="sub mt-2">Danach siehst du hier, was deinem Hautbild schadet oder guttut: Zucker, Fast Food, Milchprodukte, Schlaf, Wasser und deine Ernährung.</div></div>`
-    :ins.length?`<div class="skins">${ins.map(x=>`<div class="skin-row"><div class="bubble${x.f.combo?" duo":""}">${x.f.emo}</div><div class="grow"><b>${esc(x.f.t)}</b><div class="sub">${[x.f.sub,x.n+" "+(x.n===1?"Tag":"Tage")].filter(Boolean).join(" · ")}</div></div><span class="skdelta ${x.diff<0?"down":"up"}">${x.diff>0?"+":"−"}${de(Math.abs(x.diff),1)}</span></div>`).join("")}</div>
-      <div class="sub mt-2">Hautbild am Tag danach, verglichen mit deinen anderen Tagen (Punkte). Zeigt Auffälligkeiten in deinen Einträgen, keine Ursachen.</div>`
+    :ins.length?`<div class="skins">${ins.map(x=>`<div class="skin-row"><div class="bubble${x.f.combo?" duo":""}">${x.f.emo}</div><div class="grow"><b>${esc(x.f.t)}</b><div class="sub">${[x.f.sub,x.n+" "+(x.n===1?"Tag":"Tage")].filter(Boolean).join(" · ")}</div>${x.m1!=null?`<div class="sub">Ø ${de(x.m1,1)} danach · Ø ${de(x.m0,1)} an anderen Tagen</div>`:""}</div><span class="skdelta ${x.diff<0?"down":"up"}">${x.diff>0?"+":"−"}${de(Math.abs(skinDiff(x)),1)}</span></div>`).join("")}</div>
+      <div class="sub mt-2">Hautbild am Tag danach, verglichen mit deinen anderen Tagen (Punkte). Zeigt Auffälligkeiten in deinen Einträgen, keine Ursachen.${fewTxt?" "+fewTxt:""}</div>`
+    :info.flat?`<div class="skbox sub">Du hast dein Hautbild bisher fast immer gleich bewertet. Deshalb gibt es nichts zu vergleichen.</div>`
     :all.filter(s=>{ const i=skinDayInfo(addDays(s,-1)); return i&&i.logged; }).length<SK_MIN
       ?`<div class="skbox sub">Für die Analyse fehlen noch Tage mit vollständig eingetragenem Essen. Trag am Vortag möglichst alles ein, was du isst.</div>`
-      :`<div class="skbox sub">Noch keine klaren Muster. Trag weiter Essen, Schlaf und Hautbild ein, dann wird es genauer.</div>`;
+      :`<div class="skbox sub">${tested.length?`Kein klarer Unterschied bei: ${tested.join(", ")}.`:"Noch keine klaren Muster."} ${fewTxt||"Trag weiter Essen, Schlaf und Hautbild ein, dann wird es genauer."}</div>`;
   return `<div class="section"><h2>Hautanalyse</h2><span class="sub">Ø ${fmt(skinAvg(v30))} · 30 Tage</span></div>
   <div class="card">
     <div class="row space"><div><b>${labelDate(state.date)}</b><div class="sub">Wie ist deine Haut?</div></div>

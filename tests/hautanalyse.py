@@ -87,18 +87,20 @@ JS = r"""(cfg)=>{
 }"""
 
 BASE = dict(runs=150, dmin=14, dmax=45, pSugar=.35, pFast=.2, pClean=.3, pLog=.85, pSleep=.85, pRate=.85, base=6.5, noise=1.2, dairyWithSugar=False)
+# Nov 2026: Der Zufallsvergleich ist strenger (97,5 % statt 95 %). Reiner Zufall darf jetzt höchstens in 5 % der Tagebücher
+# etwas anzeigen (vorher 7 %). Dafür werden schwache echte Zusammenhänge etwas seltener gefunden – lieber nichts zeigen als etwas Falsches.
 SZ = [
-  ("Zufall: nichts hängt zusammen", dict(eff={}), dict(maxAny=.07)),
-  ("Milch macht Haut besser (darf nie erscheinen)", dict(eff={"dairy":2}), dict(forbid=["dairy"], maxAny=.07)),
+  ("Zufall: nichts hängt zusammen", dict(eff={}), dict(maxAny=.05)),
+  ("Milch macht Haut besser (darf nie erscheinen)", dict(eff={"dairy":2}), dict(forbid=["dairy"], maxAny=.05)),
   ("Zucker schadet, Milch oft dabei (2–4 Wochen)", dict(eff={"sugar":-2}, dairyWithSugar=True, want=["sugar","sugar+sleep"]), dict(maxShare={"dairy":.04})),
   ("Zucker schadet, Milch oft dabei (5–8 Wochen)", dict(eff={"sugar":-2}, dairyWithSugar=True, want=["sugar","sugar+sleep"], dmin=35, dmax=60), dict(minFound=.6, maxShare={"dairy":.04})),
-  ("Zucker + wenig Schlaf zusammen (5–8 Wochen)", dict(eff={"combo":-3}, want=["sugar+sleep","sugar","sleep"], dmin=35, dmax=60), dict(minFound=.35)),
-  ("Fast Food schadet (5–8 Wochen)", dict(eff={"fast":-2}, want=["fast","fast+sleep"], dmin=35, dmax=60), dict(minFound=.5)),
-  ("Sehr gute Ernährung hilft (5–8 Wochen)", dict(eff={"clean":2}, want=["high","sugar","fast"], dmin=35, dmax=60), dict(minFound=.12)),
+  ("Zucker + wenig Schlaf zusammen (5–8 Wochen)", dict(eff={"combo":-3}, want=["sugar+sleep","sugar","sleep"], dmin=35, dmax=60), dict(minFound=.25)),
+  ("Fast Food schadet (5–8 Wochen)", dict(eff={"fast":-2}, want=["fast","fast+sleep"], dmin=35, dmax=60), dict(minFound=.4)),
+  ("Sehr gute Ernährung hilft (5–8 Wochen)", dict(eff={"clean":2}, want=["high","sugar","fast"], dmin=35, dmax=60), dict(minFound=.04)),
   ("Zucker schadet deutlich (3–5 Wochen)", dict(eff={"sugar":-3}, want=["sugar","sugar+sleep"], dmin=21, dmax=35), dict(minFound=.6)),
-  ("Zufall, lange Tagebücher (5–8 Wochen)", dict(eff={}, dmin=35, dmax=60), dict(maxAny=.07)),
+  ("Zufall, lange Tagebücher (5–8 Wochen)", dict(eff={}, dmin=35, dmax=60), dict(maxAny=.05)),
   # Realistischer: Haut ändert sich langsam und Gewohnheiten kommen in Phasen → Zufallsmuster sehen „echter“ aus
-  ("Zufall, Haut & Gewohnheiten in Phasen (3–8 Wochen)", dict(eff={}, dmin=21, dmax=60, ar=.7, streak=.7), dict(maxAny=.08)),
+  ("Zufall, Haut & Gewohnheiten in Phasen (3–8 Wochen)", dict(eff={}, dmin=21, dmax=60, ar=.7, streak=.7), dict(maxAny=.06)),
   ("Zucker schadet, Haut & Gewohnheiten in Phasen (5–8 Wochen)", dict(eff={"sugar":-2}, want=["sugar","sugar+sleep"], dmin=35, dmax=60, ar=.7, streak=.7), dict(minFound=.3)),
 ]
 

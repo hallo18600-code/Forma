@@ -315,6 +315,81 @@ DURCHSICHT = r"""async ()=>{ F={}; let n=0; newState(); state.coach.answers={};
  return {n,F};
 }"""
 
+# ---------- 4c) Coach „Aus deinen Einträgen“ und Hautanalyse: jede gezeigte Zahl wird unabhängig nachgerechnet ----------
+EINTRAEGE = r"""()=>{ F={}; let n=0; const T0=todayIso(), pool=BASE_FOODS.filter(f=>f.type==="food"||!f.type).slice(0,120);
+ const avg=a=>a.reduce((x,y)=>x+y,0)/a.length, r1=v=>Math.round(v*10)/10;
+ const fill=()=>{ const a={}; for(const ar of ["haut","schlaf","aussehen","gesundheit"]){ const x={}; a[ar]=x; for(const q of coachQuiz(ar)){ if(q.skip&&q.skip(x)) continue; x[q.k]=q.multi?[rnd(q.opts.filter(o=>o!==q.none))]:rnd(q.opts); } } return a; };
+ for(let it=0;it<1500;it++){ n++;
+  newState(); state.obDone=true; state.profile.goal=rnd(["muscle","lose","skin","energy"]); state.profile.waterTarget=ri(6,12); state.profile.stepGoal=rnd([6000,8000,10000,12000]);
+  const span=ri(0,45), pS=Math.random(), pW=Math.random(), pSt=Math.random(), pM=Math.random(), pSk=Math.random();
+  for(let i=0;i<=span;i++){ const s=addDays(T0,-i); if(Math.random()<.15) continue; const d=day(s);
+   if(Math.random()<pS) d.sleep=rnd([0,4.5,5,5.5,6,6.5,7,7.5,8,9]); if(Math.random()<pW) d.water=ri(0,12); if(Math.random()<pSt) d.steps=ri(0,16000); if(Math.random()<pSk) d.skin=ri(1,10);
+   if(Math.random()<pM){ const k=ri(1,6); for(let j=0;j<k;j++) d.meals.push({uid:uid(),id:rnd(pool).id,slot:rnd(SLOTS).id,portion:rnd([0,30,100,250,500])}); } }
+  const nW=ri(0,14); for(let j=0;j<nW;j++) state.workouts.push({id:uid(),date:addDays(T0,-ri(0,40)),name:"T",min:30,seconds:1800,volume:0,sets:0,exercises:[]});
+  state.workouts.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  state.coach.answers=fill();
+  const keys0=Object.keys(state.days).length, c=coachData();
+  if(Object.keys(state.days).length!==keys0) fail("coachData legt Tage an","");
+  // Unabhängig nachrechnen
+  const D=[]; for(let i=1;i<=14;i++) D.push(addDays(T0,-i)); const SD=[T0].concat(D.slice(0,13)), g=s=>state.days[s];
+  const sl=SD.map(s=>g(s)&&g(s).sleep).filter(v=>v!=null&&v>0), wa=D.map(s=>g(s)&&g(s).water).filter(v=>v>0), st=D.map(s=>g(s)&&g(s).steps).filter(v=>v>0);
+  const chk=(k,list,val)=>{ if(list.length<5){ if(c[k]) fail("Wert trotz weniger als 5 Einträgen",k+" "+list.length); return; } if(!c[k]) return fail("Wert fehlt trotz genug Einträgen",k); if(c[k].n!==list.length||Math.abs(c[k].v-val)>1e-9) fail("Durchschnitt falsch",`${k}: ${c[k].v} statt ${val}`); };
+  chk("sleep",sl,sl.length?r1(avg(sl)):0); chk("water",wa,wa.length?r1(avg(wa)):0); chk("steps",st,st.length?Math.round(avg(st)):0);
+  if(c.sleep&&c.sleep.short!==sl.filter(v=>v<7).length) fail("Anzahl kurzer Nächte falsch","");
+  const kG=targets().kcal, sum=(s,f)=>g(s).meals.reduce((a,m)=>{ const p=foods().find(x=>x.id===m.id); return p?a+(f==="kcal"?Math.round(p.kcal*m.portion/100):+((p.protein||0)*m.portion/100).toFixed(1)):a; },0);
+  const full=D.filter(s=>g(s)&&g(s).meals.filter(m=>m.portion>0).length>=2&&sum(s,"kcal")>=kG*0.6);
+  chk("protein",full,full.length?Math.round(avg(full.map(s=>sum(s,"protein")))):0); chk("kcal",full,full.length?Math.round(avg(full.map(s=>sum(s,"kcal")))):0);
+  const used=Object.keys(state.days).filter(s=>{ const d=g(s); return d.meals.length||d.water>0||d.steps>0||d.sleep!=null||d.skin!=null; }).concat(state.workouts.map(w=>w.date)).sort()[0];
+  const w0=addDays(T0,-27), tn=new Set(state.workouts.filter(w=>w.date>=w0&&w.date<=T0).map(w=>w.date)).size;
+  if(used&&used<=w0){ if(!c.train||c.train.n!==tn||c.train.v!==r1(tn/4)) fail("Trainingstage falsch",JSON.stringify(c.train)+" "+tn); } else if(c.train) fail("Training gezeigt, obwohl die App noch keine 4 Wochen genutzt wird","");
+  const sk=(a,b)=>{ const l=[]; for(let i=a;i<=b;i++){ const d=g(addDays(T0,-i)); if(d&&d.skin) l.push(d.skin); } return l; }, s1=sk(0,6), s2=sk(7,13);
+  if(s1.length>=4&&s2.length>=4){ if(!c.skin||c.skin.v!==r1(avg(s1))||c.skin.prev!==r1(avg(s2))) fail("Hautbild-Durchschnitt falsch",""); } else if(c.skin) fail("Hautbild gezeigt trotz zu wenig Bewertungen","");
+  // Anzeige und Tipps: keine kaputten Zahlen, Text passt zu den Daten
+  const A=state.coach.answers;
+  for(const ar of ["haut","schlaf","aussehen","gesundheit"]){ let adv, h; try{ adv=coachAdvice(ar); h=coachFactsHtml(ar)+areaSheet(ar); }catch(e){ fail("Absturz im Coach ("+ar+")",e.message); continue; }
+   if(/undefined|NaN|null|Infinity/.test(h)) fail("Kaputte Zahl im Coach",ar);
+   const txt=JSON.stringify(adv.items);
+   if(ar==="schlaf"){ const bed=/ins Bett/.test(txt), m=txt.match(/Dein Schnitt: ([\d.,]+) h in (\d+) Nächten/);
+    if(c.sleep){ if(bed!==(c.sleep.v<7)) fail("Schlaf-Tipp passt nicht zum eingetragenen Schlaf",c.sleep.v+" "+bed); if(bed&&(!m||m[1]!==de(c.sleep.v,1)||+m[2]!==c.sleep.n)) fail("Schlaf-Zahl im Tipp falsch",txt.slice(0,160)); }
+    else { if(m) fail("Schlaf-Schnitt ohne Daten",""); if(bed!==(A.schlaf.stunden==="Unter 6"||A.schlaf.stunden==="6–7")) fail("Schlaf-Tipp passt nicht zur Antwort",""); } }
+   if(ar==="gesundheit"){ const m=txt.match(/Dein Schnitt: ([\d.,]+) von (\d+) Gläsern/); if(m&&(!c.water||m[1]!==de(c.water.v,1)||+m[2]!==state.profile.waterTarget||!(c.water.v<state.profile.waterTarget*0.75))) fail("Wasser-Zahl im Tipp falsch",txt.slice(0,200));
+    const mp=txt.match(/Dein Schnitt: (\d+) g an (\d+) eingetragenen Tagen/); if(mp&&(!c.protein||+mp[1]!==c.protein.v||+mp[2]!==c.protein.n||!(c.protein.v<targets().protein*0.8))) fail("Protein-Zahl im Tipp falsch",""); }
+   if(ar==="aussehen"){ if(/Dein Schnitt: [\d.]+ Schritte/.test(txt)&&!c.steps) fail("Schritte ohne Daten",""); if(/Bei dir zuletzt/.test(txt)&&!c.train) fail("Training ohne Daten",""); if(/Dein Schnitt: [\d.]+ kcal/.test(txt)&&!c.kcal) fail("Kalorien ohne Daten",""); }
+  }
+  if(/Dein Schnitt|Bei dir zuletzt|In deinen Einträgen/.test(JSON.stringify(coachAdvice("haare").items))) fail("Haare: Zahl ohne Datengrundlage","");
+ }
+ // Ohne Einträge: keine Kacheln, keine „Dein Schnitt“-Sätze (alles wie vorher)
+ newState(); state.coach.answers=fill(); n++;
+ for(const ar of ["haut","schlaf","aussehen","gesundheit","haare"]){ if(coachFactsHtml(ar)!=="") fail("Kacheln ohne Einträge",ar); if(/Dein Schnitt|Bei dir zuletzt|In deinen Einträgen/.test(JSON.stringify(coachAdvice(ar).items))) fail("Persönliche Zahl ohne Einträge",ar); }
+ // Hautanalyse: Durchschnitte, Vergleichs-Status und der Coach-Tipp müssen zu den Rohdaten passen
+ let shown=0;
+ for(let it=0;it<120;it++){ n++;
+  newState(); state.obDone=true; state.coach.answers=fill(); state.coach.answers.haut={bild:"Normal",stoert:["Unreinheiten"],art:"Entzündete Pickel",sonne:"Täglich",empf:"Nein"};
+  const days=ri(10,45), eff=it%3===0?0:-ri(2,3), cola=BASE_FOODS.find(f=>f.name==="Cola"), base=["Haferflocken","Hähnchenbrust","Reis gekocht"].map(x=>BASE_FOODS.find(f=>f.name===x));
+  for(let i=days;i>=0;i--){ const s=addDays(T0,-i), d=day(s), sweet=Math.random()<.35; d._sw=sweet;
+   d.meals=base.map(p=>({uid:uid(),id:p.id,slot:"lunch",portion:300})); if(sweet) d.meals.push({uid:uid(),id:cola.id,slot:"snack",portion:1000});
+   d.sleep=rnd([6,6.5,7,7.5,8]); d.water=ri(3,10); const y=state.days[addDays(s,-1)];
+   d.skin=Math.max(1,Math.min(10,Math.round(6.5+(y&&y._sw?eff:0)+(Math.random()*2-1)))); }
+  let ins, info; try{ ins=skinInsights(); info=skinInfo(); }catch(e){ fail("Absturz in der Hautanalyse",e.message); continue; }
+  if(ins.length&&info.flat) fail("Auffälligkeit trotz gleichbleibender Bewertung","");
+  for(const cv of (info.cov||[])){ if(cv.ok!==(cv.ones>=3&&cv.zeros>=3&&cv.ones+cv.zeros>=7)) fail("Vergleichs-Status falsch",JSON.stringify(cv)); }
+  const all=skinDays(), sugarDay=s=>{ const i=skinDayInfo(addDays(s,-1)); return i&&i.sugar!=null?i.sugar:null; };
+  for(const x of ins){ if(Math.sign(x.diff)!==x.f.dir||Math.sign(skinDiff(x))!==x.f.dir) fail("Falsche Richtung","");
+   if((x.m1!=null)!==(ins.length===1)) fail("Durchschnitte nur bei genau einer Auffälligkeit","");
+   if(x.m1!=null&&Math.abs((x.m1-x.m0)-x.diff)>0.11) fail("Durchschnitte passen nicht zur Differenz",`${x.m1} ${x.m0} ${x.diff}`);
+   const c=(info.cov||[]).find(q=>q.id===x.f.id); if(c&&!c.ok) fail("Auffälligkeit ohne genug Vergleichstage",x.f.id);
+   if(x.f.id==="sugar"&&x.m1!=null){ shown++; const thr=+x.f.sub.match(/\d+/)[0], a=[], b=[]; all.forEach(s=>{ const q=sugarDay(s); if(q==null) return; (q>=thr?a:b).push(state.days[s].skin); });
+    if(r1(avg(a))!==x.m1||r1(avg(b))!==x.m0||a.length!==x.n) fail("Hautbild-Durchschnitt stimmt nicht mit den Rohdaten",`${r1(avg(a))}/${x.m1} ${r1(avg(b))}/${x.m0} ${a.length}/${x.n}`); } }
+  const h=skinCard(); if(/undefined|NaN|null|Infinity/.test(h)) fail("Kaputte Zahl in der Hautanalyse","");
+  const neg=ins.filter(x=>x.diff<0)[0], tips=JSON.stringify(foodTips("haut",state.coach.answers.haut)), m=tips.match(/um ([\d.,]+) Punkte niedriger/);
+  if(!!m!==!!neg) fail("Coach-Hauttipp passt nicht zur Analyse",String(!!neg));
+  if(m&&m[1]!==de(Math.abs(skinDiff(neg)),1)) fail("Coach nennt andere Zahl als die Hautanalyse",m[1]);
+  if(m&&neg.m1!=null&&!h.includes("−"+de(Math.abs(skinDiff(neg)),1))) fail("Karte zeigt andere Zahl","");
+ }
+ if(shown<10) fail("Prüfung hat zu wenige Auffälligkeiten gesehen",String(shown));
+ return {n,F};
+}"""
+
 # ---------- 5) Klick-Test wie ein Mensch ----------
 def klicktest(b):
     probleme = []
@@ -578,7 +653,7 @@ def main():
         pg.goto(URL); pg.wait_for_timeout(1500)
         pg.evaluate("()=>{" + HELP + "}")
         pg.evaluate("()=>new Promise(r=>{ const t=setInterval(()=>{ if(FOODDB.ok){ clearInterval(t); r(); } },200); setTimeout(()=>{ clearInterval(t); r(); },15000); })")
-        for name, js in [("Vorschläge", VORSCHLAEGE), ("Bedarf lernt mit", BEDARF), ("Tages-Score", TAGESSCORE), ("Erinnerungen", ERINNERUNGEN), ("Durchsicht", DURCHSICHT)]:
+        for name, js in [("Vorschläge", VORSCHLAEGE), ("Bedarf lernt mit", BEDARF), ("Tages-Score", TAGESSCORE), ("Erinnerungen", ERINNERUNGEN), ("Durchsicht", DURCHSICHT), ("Einträge & Hautanalyse", EINTRAEGE)]:
             r = pg.evaluate(js)
             print(f"\n=== {name}: {r['n']:,} Fälle geprüft".replace(",", "."))
             if not r["F"]: print("    ✅ alles in Ordnung")

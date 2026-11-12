@@ -195,6 +195,50 @@ const cap=t=>t?t[0].toUpperCase()+t.slice(1):"";
 const R_LABEL={haut:"Skincare", haare:"Haarpflege", schlaf:"Schlafroutine", aussehen:"Looksmaxxing", gesundheit:"Ernährung", sups:"Supplements"};
 function rLabel(r){ return R_LABEL[r.topic]||r.title; }
 function rShort(r){ if(["haut","haare","schlaf","aussehen","gesundheit"].includes(r.topic)){ try{ const x=coachAdvice(r.topic).routine; if(x&&x.short) return x.short; }catch(e){} } return r.title; }
+// ---------- Aus deinen Einträgen ----------
+// Echte Durchschnitte aus dem Tagebuch der letzten 14 Tage. Nichts wird geschätzt oder hochgerechnet:
+// Ein Wert erscheint nur mit mindestens 5 Einträgen. Heute zählt nur beim Schlaf mit (die Nacht ist vorbei, der Tag noch nicht).
+// Essen zählt nur an Tagen, die ausreichend eingetragen sind (gleiche Regel wie in der Hautanalyse).
+const CF_DAYS=14, CF_MIN=5, CF_MEMO={fp:null,val:null};
+function coachData(){
+  const t0=todayIso(), D=[]; for(let i=1;i<=CF_DAYS;i++) D.push(addDays(t0,-i));
+  const SD=[t0].concat(D.slice(0,CF_DAYS-1)), g=s=>state.days[s]||null;
+  const kGoal=targets().kcal||1800;
+  const fp=t0+"|"+kGoal+"|"+state.customs.length+"|"+state.workouts.map(w=>w.date).join(",")+"|"+SD.concat(D[CF_DAYS-1]).map(s=>{ const d=g(s); return d?(d.sleep??"")+":"+(d.water||0)+":"+(d.steps||0)+":"+(d.skin||"")+":"+(d.meals||[]).map(m=>m&&m.id+"*"+m.portion).join(","):""; }).join(";");
+  if(CF_MEMO.fp===fp) return CF_MEMO.val;
+  const avg=a=>a.reduce((x,y)=>x+y,0)/a.length, r1=v=>Math.round(v*10)/10, o={};
+  const sl=SD.map(s=>g(s)&&g(s).sleep).filter(v=>v!=null&&Number.isFinite(+v)&&+v>0).map(Number);
+  if(sl.length>=CF_MIN) o.sleep={v:r1(avg(sl)), n:sl.length, short:sl.filter(v=>v<7).length};
+  const wa=D.map(s=>g(s)&&g(s).water).filter(v=>Number.isFinite(v)&&v>0);
+  if(wa.length>=CF_MIN) o.water={v:r1(avg(wa)), n:wa.length};
+  const st=D.map(s=>g(s)&&g(s).steps).filter(v=>Number.isFinite(v)&&v>0);
+  if(st.length>=CF_MIN) o.steps={v:Math.round(avg(st)), n:st.length};
+  // Ein Tag zählt nur, wenn er weitgehend eingetragen ist (mind. 2 Einträge und 60 % des Kalorien-Richtwerts) – sonst sähe „wenig eingetragen“ aus wie „wenig gegessen“
+  const full=D.filter(s=>{ const d=g(s); if(!d||!Array.isArray(d.meals)||d.meals.filter(m=>m&&m.portion>0).length<2) return false; return totals(s).kcal>=kGoal*0.6; });
+  if(full.length>=CF_MIN){ const T=full.map(s=>totals(s)); o.protein={v:Math.round(avg(T.map(x=>x.protein))), n:full.length}; o.kcal={v:Math.round(avg(T.map(x=>x.kcal))), n:full.length}; }
+  // Training: Trainingstage pro Woche in den letzten 4 Wochen – nur, wenn die App schon so lange genutzt wird
+  const used=Object.keys(state.days).filter(s=>{ const d=state.days[s]; return d&&((d.meals||[]).length||d.water>0||d.steps>0||d.sleep!=null||d.skin!=null); }).concat(state.workouts.map(w=>w.date)).sort()[0];
+  const w0=addDays(t0,-27);
+  if(used&&used<=w0){ const n=new Set(state.workouts.filter(w=>w.date>=w0&&w.date<=t0).map(w=>w.date)).size; o.train={v:r1(n/4), n}; }
+  // Hautbild: letzte 7 Tage und die 7 Tage davor (je mindestens 4 Bewertungen)
+  const sk=(a,b)=>{ const l=[]; for(let i=a;i<=b;i++){ const d=g(addDays(t0,-i)); if(d&&Number.isFinite(d.skin)&&d.skin>=1&&d.skin<=10) l.push(d.skin); } return l; };
+  const s1=sk(0,6), s2=sk(7,13);
+  if(s1.length>=4&&s2.length>=4) o.skin={v:r1(avg(s1)), prev:r1(avg(s2)), n:s1.length};
+  CF_MEMO.fp=fp; CF_MEMO.val=o; return o;
+}
+// Bis zu 3 Zahlen je Thema für die Kacheln oben im Coach-Thema
+function coachFacts(id){
+  const c=coachData(), p=state.profile, t=targets(), out=[];
+  if(id==="schlaf"&&c.sleep){ out.push(["Ø Schlaf",de(c.sleep.v,1)+" h"],["Unter 7 h",c.sleep.short+" von "+c.sleep.n]); }
+  if(id==="gesundheit"){ if(c.water) out.push(["Ø Wasser",de(c.water.v,1)+" / "+(p.waterTarget||8)]); if(c.protein) out.push(["Ø Protein",c.protein.v+" / "+t.protein+" g"]); }
+  if(id==="aussehen"){ if(c.train) out.push(["Training / Woche",de(c.train.v,1)+"×"]); if(c.steps) out.push(["Ø Schritte",de(c.steps.v)]); if(c.kcal) out.push(["Ø Kalorien",de(c.kcal.v)]); }
+  if(id==="haut"&&c.skin){ out.push(["Hautbild 7 Tage",de(c.skin.v,1)],["7 Tage davor",de(c.skin.prev,1)]); }
+  return out.slice(0,3);
+}
+function coachFactsHtml(id){
+  const f=coachFacts(id); if(!f.length) return "";
+  return `<div class="tipgrp">Aus deinen Einträgen · ${CF_DAYS} Tage</div><div class="kpi k${f.length}">${f.map(([l,v])=>`<div><span>${l}</span><b>${esc(v)}</b></div>`).join("")}</div>`;
+}
 // ---------- Coach-Tipps ----------
 // Ein Tipp: k = Kurzname für den Routine-Punkt (null = einmalige Sache, kommt nicht in die Routine),
 // title = einfacher Tipp, detail = ganz kurze Begründung (wird in „…“ gezeigt). Beides bewusst knapp halten.
@@ -442,10 +486,13 @@ function schlafAdvice(a){
   const bed=wake-480, caf=bed-480, dim=bed-60;
   const alk=((state.coach.answers||{}).gesundheit||{}).alk==="Mehrmals pro Woche";
   const g=[];
-  if(a.morgen==="Gerädert"&&(a.stunden==="7–8"||a.stunden==="Über 8"))
+  // Eingetragener Schlaf (mind. 5 Nächte) geht vor der Angabe aus dem Fragebogen
+  const ms=coachData().sleep;
+  const enough=ms?ms.v>=7:(a.stunden==="7–8"||a.stunden==="Über 8"), short=ms?ms.v<7:(a.stunden==="Unter 6"||a.stunden==="6–7");
+  if(a.morgen==="Gerädert"&&enough)
     g.push([tip(null,"Schnarchen? Ärztlich abklären","Wer trotz genug Schlaf müde ist, hat manchmal nächtliche Atemaussetzer.",{must:1})]);
-  if(a.stunden==="Unter 6"||a.stunden==="6–7")
-    g.push([tip(`Bett ${hm(bed)}`,`Um ${hm(bed)} ins Bett`,"Ziel sind 7–9 Stunden. Jede Woche 15 Minuten früher.",{s:"Früher ins Bett"})]);
+  if(short)
+    g.push([tip(`Bett ${hm(bed)}`,`Um ${hm(bed)} ins Bett`,(ms?`Dein Schnitt: ${de(ms.v,1)} h in ${ms.n} Nächten. `:"")+"Ziel sind 7–9 Stunden. Jede Woche 15 Minuten früher.",{s:"Früher ins Bett"})]);
   if(a.ein==="Dauert") g.push([tip("Morgenlicht","10 Min Tageslicht nach dem Aufstehen","Stellt die innere Uhr auf Tag ein."),
     tip("20-Min-Regel","Nach 20 Min wach: kurz aufstehen","So verbindet dein Kopf das Bett mit Schlaf statt mit Grübeln.")]);
   if(a.ein==="Wach in der Nacht") g.push([tip("16–19 °C","Schlafzimmer auf 16–19 °C","In einem kühlen Raum schläft man besser durch."),
@@ -506,30 +553,31 @@ function muskelTips(a,lvl,g,fatGoal,prot,lifts){
   const gym=a.gym||"", beginner=gym==="Gym, Anfänger"||gym==="Noch gar nicht";
   const ea=(state.coach.answers||{}).gesundheit||{}, vegan=ea.stil==="Vegan";
   const noWhey=vegan||(ea.meiden||[]).includes("Milchprodukte")||(ea.intol||[]).includes("Laktose");
+  const cd=coachData();
   const surplus=lvl<=1&&g!=="muscle"&&g!=="lose"&&!fatGoal&&((+state.profile.weight||70)/Math.pow(state.profile.height/100,2)<30||leanStated()), G={grp:"Training"};
   return [
-    tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why,Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
+    tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why+(cd.train?` Bei dir zuletzt: ${de(cd.train.v,1)}× pro Woche.`:""),Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
     tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wiederholungen oder eine schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche eine Wiederholung mehr.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
-    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:`1,6–2,2 g pro kg Körpergewicht gelten als ideal. Am einfachsten über ${proteinFoodTxt(dietCtx())}.`,Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
+    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:(cd.protein?`Dein Schnitt: ${cd.protein.v} g an ${cd.protein.n} eingetragenen Tagen. `:"")+`1,6–2,2 g pro kg Körpergewicht gelten als ideal. Am einfachsten über ${proteinFoodTxt(dietCtx())}.`,Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
     tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher",vegan?"Reiswaffeln mit Marmelade oder eine Banane.":"Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
     tip("Kreatin","3–5 g Kreatin täglich","Erhöht die Leistung bei kurzem, intensivem Krafttraining. Fehlt Protein im Essen, hilft "+(noWhey?"pflanzliches Proteinpulver.":"Whey."),Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
   ];
 }
 function aussehenAdvice(a){
-  const ziel=a.ziel||[], lvl=kfaLevel(a), g=state.profile.goal, t=targets(), p=state.profile;
+  const ziel=a.ziel||[], lvl=kfaLevel(a), g=state.profile.goal, t=targets(), p=state.profile, cd=coachData();
   const bmiNow=(+p.weight||70)/Math.pow(p.height/100,2), under=bmiNow<18.5;   // Untergewicht: nie zum Defizit raten
   const lifts=["Krafttraining","Beides"].includes(p.trainType);
   const fatGoal=ziel.includes("Weniger Bauchfett")||ziel.includes("Gesicht definierter");
   const hm2=Math.pow(p.height/100,2), prot=Math.max(t.protein, Math.round(Math.min(p.weight,25*hm2)*1.6));
   let cal=null;
   if(!under&&(lvl>=3||(lvl===2&&fatGoal&&g!=="muscle")))
-    cal = g==="lose" ? tip("Defizit halten",`Bei ${de(t.kcal)} kcal bleiben`,"So verlierst du Fett und behältst deine Muskeln.")
+    cal = g==="lose" ? tip("Defizit halten",`Bei ${de(t.kcal)} kcal bleiben`,(cd.kcal?`Dein Schnitt: ${de(cd.kcal.v)} kcal an ${cd.kcal.n} eingetragenen Tagen. `:"")+"So verlierst du Fett und behältst deine Muskeln.")
       : tip("Leichtes Defizit",`Kalorien auf ${de(kcalFor("lose"))} senken`,"Bauch und Gesicht werden erst schlanker, wenn der Körperfettanteil sinkt.",{act:"coach-goal",v:"lose",label:"Kalorienziel senken",once:1});
   // Hoher BMI zählt nicht als „zu viel Fett“, wenn der KFA selbst als niedrig angegeben ist (muskulös)
   const lean = g==="lose"&&(under||(lvl===0&&(bmiNow<30||kfaStated()!==null))) ? tip("Muskeln aufbauen","Nicht weiter abnehmen","Du bist schon schlank. Mehr Muskeln geben dir jetzt mehr Form.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen",once:1}) : null;
   const sit = (a.sitzen||knownSitzen())==="Über 8" ? tip("Stündlich aufstehen","Jede Stunde 2 Min aufstehen","Das entlastet den Rücken und regt den Kreislauf an.") : null;
   const G={
-    "Weniger Bauchfett":[cal, tip(`${de(Math.max(8000,p.stepGoal||8000))} Schritte`,`${de(Math.max(8000,p.stepGoal||8000))}+ Schritte am Tag`,"Verbraucht Energie, ohne viel Hunger zu machen."),
+    "Weniger Bauchfett":[cal, tip(`${de(Math.max(8000,p.stepGoal||8000))} Schritte`,`${de(Math.max(8000,p.stepGoal||8000))}+ Schritte am Tag`,(cd.steps?`Dein Schnitt: ${de(cd.steps.v)} Schritte an ${cd.steps.n} Tagen. `:"")+"Verbraucht Energie, ohne viel Hunger zu machen."),
       tip(null,"Bauchübungen allein reichen nicht","Fett lässt sich nicht gezielt an einer Stelle abbauen.")],
     "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Achte auf Nasenatmung und eine aufrechte Kopfhaltung. Dass sich die Kieferform dadurch ändert, ist nicht belegt.")],
     "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern und Face Pulls ziehen die Schultern nach hinten.",{once:1}),
@@ -576,7 +624,12 @@ function gesundheitAdvice(a){
     if(a.bauch==="Oft") note="Mit Schmerzen, Gewichtsverlust oder Blut im Stuhl: Arzt.";
   }
   if(a.gemuese==="Selten"||a.gemuese==="1× am Tag") g.push([tip("Gemüse 2× am Tag","Mittags und abends eine Handvoll Gemüse","Liefert Ballaststoffe und Vitamine und macht satt.")]);
-  if(a.wasser==="Unter 1 Liter") g.push([tip("Wasser zu jeder Mahlzeit","Ein Glas Wasser zu jeder Mahlzeit","Schon leichter Flüssigkeitsmangel kann müde machen.")]);
+  // Eingetragenes Wasser (mind. 5 Tage) geht vor der Angabe aus dem Fragebogen
+  const cd=coachData(), lowW=cd.water?cd.water.v<glasses*0.75:a.wasser==="Unter 1 Liter";
+  if(lowW) g.push([tip("Wasser zu jeder Mahlzeit","Ein Glas Wasser zu jeder Mahlzeit",(cd.water?`Dein Schnitt: ${de(cd.water.v,1)} von ${glasses} Gläsern. `:"")+"Schon leichter Flüssigkeitsmangel kann müde machen.")]);
+  const tp=targets().protein;
+  if(cd.protein&&cd.protein.v<tp*0.8&&!(dc.primal||(a.meiden||[]).includes("Fertigprodukte")))
+    g.push([tip("Protein",`${tp} g Protein am Tag`,`Dein Schnitt: ${cd.protein.v} g an ${cd.protein.n} eingetragenen Tagen. Am einfachsten über ${proteinFoodTxt(dc)}.`,{e:"🍗"})]);
   if(a.trink==="Täglich") g.push([tip("Sprudel statt Softdrink","Softdrink gegen Sprudel tauschen","0,5 l Cola enthalten rund 53 g Zucker.")]);
   if(a.alk==="Mehrmals pro Woche") g.push([tip("Mo–Do alkoholfrei","Montag bis Donnerstag alkoholfrei","Gut für Schlaf, Leber und Regeneration.")]);
   if(intol.includes("Gluten")) g.push([tip(null,"Vor glutenfrei: Zöliakie-Test","Ohne Gluten ist der Test sonst nicht aussagekräftig.",{must:1})]);
@@ -619,7 +672,16 @@ function foodTips(id,a){
   const d=dietCtx(), out=[];
   if(id==="haut"){
     const st=hautList(a);
-    if(st.includes("Unreinheiten")&&a.art!=="Tiefe, schmerzhafte Knoten"){
+    // Eigene Auffälligkeit aus der Hautanalyse (falls vorhanden): als Test vorschlagen, nicht als Ursache behaupten
+    let own=null; try{ own=(skinInsights()||[]).filter(x=>x.diff<0)[0]||null; }catch(e){}
+    if(own){
+      const W={sugar:["Weniger Zucker","2 Wochen weniger Zucker testen","Tagen mit viel Zucker"],fast:["Ohne Fast Food","2 Wochen ohne Fast Food testen","Tagen mit Fast Food"],
+        dairy:["Weniger Milchprodukte","2 Wochen weniger Milchprodukte testen","Tagen mit Milchprodukten"],sleep:["Mehr Schlaf","2 Wochen mindestens 7 h schlafen","Nächten mit wenig Schlaf"],
+        water:["Mehr Wasser","2 Wochen das Wasserziel einhalten","Tagen mit wenig Wasser"],"sugar+sleep":["Weniger Zucker, mehr Schlaf","2 Wochen weniger Zucker und mindestens 7 h Schlaf","Tagen mit viel Zucker und wenig Schlaf"],
+        "fast+sleep":["Ohne Fast Food, mehr Schlaf","2 Wochen ohne Fast Food und mindestens 7 h Schlaf","Tagen mit Fast Food und wenig Schlaf"]}[own.f.id];
+      if(W) out.push(tip(W[0],W[1],`In deinen Einträgen war dein Hautbild nach ${W[2]} um ${de(Math.abs(skinDiff(own)),1)} Punkte niedriger. Ob es daran liegt, zeigt der Test.`,{e:own.f.emo.slice(0,2)}));
+    }
+    if(st.includes("Unreinheiten")&&a.art!=="Tiefe, schmerzhafte Knoten"&&!(own&&/sugar|dairy/.test(own.f.id))){
       // Nur testen, was man nicht schon meidet
       const what=d.noSugar&&d.noMilk?"Weißmehl und Süßes":d.noSugar?"Milch":d.noMilk?"Zucker und Weißmehl":"Zucker und Milch";
       out.push(tip("4-Wochen-Test","4 Wochen wenig "+what,`Bei manchen Menschen hängen Unreinheiten mit ${d.noSugar&&!d.noMilk?"Milch":d.noMilk?"stark zuckerhaltigem Essen":"stark zuckerhaltigem Essen und Milch"} zusammen. Der Test zeigt, ob das bei dir so ist.`,{e:"🍬"}));
@@ -928,6 +990,7 @@ function areaSheet(id){
   });
   if(advice.note) rows.push(fold("⚠️",/arzt/i.test(advice.note)?"Wann zum Arzt":"Wichtig","",`<span>${esc(advice.note)}</span>`));
   return `<h2>${topic.title}</h2><p class="sub">${esc(advice.lead)}</p>
+    ${coachFactsHtml(id)}
     <div class="tips">${rows.join("")}</div>
     <div class="gap"></div>
     ${inRt
