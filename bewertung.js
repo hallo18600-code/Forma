@@ -317,7 +317,8 @@ function rPlausible(cat,n,heavy,h){
   if(["poultry","redmeat","leanfish","fattyfish"].includes(id)&&n.pr<11) return dish;
   if(id==="organ"&&n.pr<10) return dish;
   if(id==="egg"&&n.pr<8) return dish;
-  if(id==="protdairy"&&n.pr<6) return R_BYID.dairy;
+  // „Quark“ im Namen reicht nicht: Ein gezuckertes Dessert mit wenig Protein (z. B. „Quarkiger Genuss“, 6 g Protein, 13 g Zucker) ist kein Protein-Milchprodukt
+  if(id==="protdairy"&&(n.pr<6||(n.pr<8&&n.su>7))) return R_BYID.dairy;
   if(id==="cheese"&&n.pr<8&&n.su>12) return R_BYID.sweets;          // Käsekuchen-Eis, "Cheesecake"-Pralinen
   if(id==="cheese"&&n.pr<8&&n.kc<150) return dish;                  // Salat mit Mozzarella
   if(id==="cheese"&&n.pr<8) return n.kc>350&&n.fa>15&&n.cb>10?R_BYID.chips:n.cb>10&&n.fa<25?dish:R_BYID.dairy; // Käse-Snack; "Pasta 5-Käse" ist ein Gericht
