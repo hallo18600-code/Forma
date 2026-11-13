@@ -87,13 +87,13 @@ function toast(m){
   ui.toast=m; render(); clearTimeout(ui.toastT);
   ui.toastT=setTimeout(()=>{ if(ui.toast!==m) return; ui.toast=null; const t=document.querySelector("#app > .toast"); if(t){ t.classList.add("out"); setTimeout(()=>t.remove(),180); } }, 1600);
 }
-function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; ui.amtFor=null; render(); }
+function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; ui.amtFor=null; ui.altBack=null; ui.fillFor=null; render(); }
 // Menge für einen Tagebuch-Eintrag: Gramm plus (falls gewählt) Einheit und Anzahl
 function amtEntry(){
   const g=Math.max(1,Math.round(+ui.portion||100));
   return ui.unit&&ui.unit!=="g"?{portion:g,u:ui.unit,q:ui.qty||1}:{portion:g};
 }
-function closeModal(){ stopCam(); if(ui.modal&&ui.modal.type==="ph-date") phPendingCancel(); ui.modal=null; render(); }
+function closeModal(){ stopCam(); if(ui.modal&&ui.modal.type==="ph-date") phPendingCancel(); ui.modal=null; ui.altBack=null; ui.fillFor=null; render(); }
 
 // Richtwerte aus dem Fragebogen. Grundumsatz nach Mifflin-St Jeor, Alltag (ohne Sport) + Training getrennt.
 // Gespeichert ist die Alltags-Stufe (1.3/1.4/1.55/1.7), gerechnet wird mit dem Faktor ohne Sport.
@@ -719,7 +719,7 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="scan-mode") ui.scanMode=el.dataset.v;
   else if(act==="meal-open"){ ui.addSlot=el.dataset.slot; ui.dash="meal"; ui.modal=null; }
-  else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.amtFor=null; } }
+  else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.amtFor=null; ui.altBack=null; ui.fillFor=null; } }
   else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid); if(m){ const e=amtEntry(); delete m.u; delete m.q; Object.assign(m,e); } ui.editUid=null; ui.amtFor=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
   else if(act==="del-meal2"){ day().meals=day().meals.filter(x=>x.uid!==ui.editUid); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gelöscht"); }
   else if(act==="ai-del"){ const it=(ui.aiRes||[])[+el.dataset.i]; if(it){ ui.aiOv=ui.aiOv||{}; ui.aiOv[it.key]={del:true}; ui.aiRes.splice(+el.dataset.i,1); } ui.aiOpen=null; if(!(ui.aiRes||[]).length) ui.aiRes=null; }
@@ -734,6 +734,9 @@ document.getElementById("app").addEventListener("click", e=>{
     const i=document.getElementById("portion"); if(i){ if(open){ i.focus(); i.select(); } else i.blur(); }
     return;
   }
+  // Bessere Alternative antippen: Produkt öffnen, Zurück führt wieder zum vorherigen Lebensmittel
+  else if(act==="alt-open"){ const m=ui.modal; if(!m||m.type!=="product") return; const back={id:m.payload,editUid:ui.editUid,prev:ui.altBack}; openModal("product",el.dataset.id); ui.altBack=back; render(); return; }
+  else if(act==="alt-back"){ const b=ui.altBack; if(!b) return; openModal("product",b.id); ui.editUid=b.editUid||null; ui.altBack=b.prev||null; render(); return; }
   else if(act==="back-scan"){ ui.scanView="list"; openModal("scan"); return; }
   else if(act==="portion-set"){ ui.unit="g"; ui.qty=null; ui.portion=+el.dataset.v; const it=allItems().find(p=>p.id===(ui.modal&&ui.modal.payload)); if(it){ amtRefresh(it); return; } }
   else if(act==="amt-mode"){
@@ -781,6 +784,22 @@ document.getElementById("app").addEventListener("click", e=>{
     ui.fDraft=null; ui.scanView="list";
     day().meals.push({ uid:uid(), id:item.id, portion:100, slot:ui.addSlot||"snack" });
     syncAuto(state.date); ui.modal=null; save(); toast("Angelegt");
+  }
+  else if(act==="fill-open"){ ui.fillFor=el.dataset.id; ui.fillDraft=null; render(); setTimeout(()=>{ const i=document.getElementById("fill-s")||document.getElementById("fill-sa"); if(i) i.focus(); },60); return; }
+  else if(act==="fill-save"){
+    const id=el.dataset.id; ensureDb(id);
+    const c=(state.customs||[]).find(x=>x&&x.id===id&&x.src==="off"); if(!c) return;
+    const num=k=>{ const e=document.getElementById(k); if(!e) return null; const t=String(e.value).trim().replace(",","."); if(t==="") return undefined; const n=+t; return Number.isFinite(n)&&n>=0?n:NaN; };
+    const dv=k=>{ const e=document.getElementById(k); return e?String(e.value).slice(0,12):""; }; ui.fillDraft={s:dv("fill-s"),sa:dv("fill-sa")};
+    const su=num("fill-s"), sa=num("fill-sa"), cb=+c.carbs||0;
+    if(su===undefined||sa===undefined){ toast("Bitte alle Felder ausfüllen"); return; }
+    if(Number.isNaN(su)||Number.isNaN(sa)){ toast("Bitte Werte prüfen"); return; }
+    if(su!=null&&su>cb+0.5){ toast("Zucker kann nicht mehr sein als die Kohlenhydrate ("+String(cb).replace(".",",")+" g)"); return; }
+    if(sa!=null&&sa>100){ toast("Bitte Werte prüfen"); return; }
+    c.fill=Object.assign({},c.fill);
+    if(su!=null){ c.sugar=Math.min(su,cb); c.fill.sugar=c.sugar; }
+    if(sa!=null){ c.salt=sa; c.fill.salt=sa; }
+    ui.fillFor=null; ui.fillDraft=null; if(typeof SK_CAT!=="undefined") SK_CAT.clear(); save(); toast("Gespeichert"); return;
   }
   else if(act==="water"){ day().water = day().water===+el.dataset.v ? +el.dataset.v-1 : +el.dataset.v; syncAuto(state.date); save(); }
   else if(act==="skin-rate"){ const d=day(); d.skin=Math.max(1,Math.min(10,Math.round(+el.dataset.v))); delete d.skinSkip; ui.skinEdit=false; save(); }

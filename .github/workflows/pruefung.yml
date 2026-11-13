@@ -18,3 +18,4 @@ jobs:
           python tests/pruefung.py
           python tests/funktionen.py
           python tests/bewertung_daten.py
+          python tests/alternativen.py

@@ -40,6 +40,7 @@ function dbSearch(q,limit){
     if(!ok) continue;
     const n=FOODDB.nm[i]; if(n.startsWith(ts[0])) sc+=2;
     sc-=Math.min(n.length,60)/60;
+    const r=FOODDB.rows[i]; if((r[7]==null&&(r[5]||0)>0.5)||r[9]==null) sc-=1.5;   // Zucker oder Salz fehlen (kein Score): weiter nach hinten
     res.push([sc,i]);
   }
   res.sort((x,y)=>y[0]-x[0]||x[1]-y[1]);
@@ -54,6 +55,8 @@ function dbRefresh(){
     const f=dbItem(FOODDB.rows[i]);
     if(c.novaEst!=null){ delete c.novaEst; ch=true; }   // alte Schätzung (gibt es nicht mehr)
     // Nährwerte mit abgleichen: Wird ein Fehler in der Datenbank korrigiert, stimmt auch das gespeicherte Produkt wieder
+    // Selbst von der Packung ergänzte Werte (Zucker, Salz) bleiben, solange die Datenbank dazu nichts hat
+    if(c.fill){ for(const k of ["sugar","salt"]) if(c.fill[k]!=null){ if(f[k]==null) f[k]=k==="sugar"?Math.min(c.fill[k],+f.carbs||0):c.fill[k]; else { delete c.fill[k]; ch=true; } } if(!Object.keys(c.fill).length){ delete c.fill; ch=true; } }
     for(const k of ["name","brand","kcal","protein","carbs","fat","sugar","fiber","salt","sat","nova","processed","warn","liquid"]) if(c[k]!==f[k]&&!(c[k]==null&&f[k]==null)){ if(f[k]==null) delete c[k]; else c[k]=f[k]; ch=true; } });
   if(ch){ if(typeof SK_CAT!=="undefined") SK_CAT.clear(); save(); }
 }

@@ -122,6 +122,15 @@ function customSheet(){
     ${customFields()}
     <div class="gap"></div><button class="pill primary" data-act="save-custom">Speichern und eintragen</button>`;
 }
+// Fehlen Zucker oder Salz in der Datenbank, kann man die Werte von der Packung ergänzen (echte Angaben statt Schätzung)
+function fillForm(it,sc){
+  const per=it.liquid?"100 ml":"100 g";
+  if(ui.fillFor!==it.id) return `<button class="pill ghost w-full ffill-btn" data-act="fill-open" data-id="${esc(it.id)}">Werte von der Packung ergänzen</button>`;
+  const d=ui.fillDraft||{}, f=(id,l,v)=>`<div class="field"><label for="${id}">${l} / ${per}</label><input id="${id}" inputmode="decimal" autocomplete="off" value="${esc(v||"")}"></div>`;
+  return `<div class="ffill">${sc.missing.includes("Zucker")?f("fill-s","davon Zucker",d.s):""}${sc.missing.includes("Salz")?f("fill-sa","Salz",d.sa):""}
+    <p class="sub">Nur eintragen, was auf der Packung steht.</p>
+    <button class="pill primary w-full" data-act="fill-save" data-id="${esc(it.id)}">Speichern</button></div>`;
+}
 function fv(x,g){ if(x==null) return "–"; return String(Math.round(x*(g/100)*10)/10).replace(".",",")+" g"; }
 function fMacros(it,g){
   return [[Math.round((it.kcal||0)*g/100)+" kcal","Kalorien"],[fv(it.carbs||0,g),"Kohlenhydrate"],[fv(it.protein||0,g),"Eiweiß"],[fv(it.fat||0,g),"Fett"]].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join("");
@@ -149,22 +158,23 @@ function foodSheet(it,sc){
   const intol=((state.coach.answers.gesundheit||{}).intol||[]).some(x=>x!=="Nein, alles okay");
   const list=(arr,cls)=>arr.map(t=>`<li class="${cls}">${esc(t)}</li>`).join("");
   const fav=favOn(it.id);
-  return `<div class="yhead"><button class="yback" data-act="${ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><button class="yfav ${fav?"on":""}" data-act="fav" data-id="${it.id}" aria-pressed="${fav}" aria-label="${fav?"Aus den Favoriten":"Zu den Favoriten"}">${fav?"★":"☆"}</button></div>
+  return `<div class="yhead"><button class="yback" data-act="${ui.altBack?"alt-back":ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><button class="yfav ${fav?"on":""}" data-act="fav" data-id="${it.id}" aria-pressed="${fav}" aria-label="${fav?"Aus den Favoriten":"Zu den Favoriten"}">${fav?"★":"☆"}</button></div>
     <div class="fhead"><span class="femo">${esc(it.emoji||"🍽️")}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
     ${rateRing(sc.score)}
-    ${sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} ${it.src==="off"?"in der Datenbank":"in deinen Angaben"}. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p></div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
+    ${sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} ${it.src==="off"?"in der Datenbank":"in deinen Angaben"}. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p>${it.src==="off"?fillForm(it,sc):""}</div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
     </div>`}
     ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Stärken</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
     ${(sc.bad||[]).length?`<div class="fcard"><b class="fcard-t">Schwächen</b><ul class="fpc">${list(sc.bad,"c")}</ul></div>`:""}
     ${(sc.perso||[]).length?`<div class="fcard"><div class="fcard-h"><b>Für dich</b><span class="sub">aus deinen Antworten</span></div><ul class="fpc">${sc.perso.map(x=>`<li class="${x.v>0?"p":"c"}">${esc(x.t)} <span class="fsrc">${x.v>0?"+":"−"}${Math.abs(x.v)} · ${esc(x.src)}</span></li>`).join("")}</ul></div>`:""}
     ${(sc.notes||[]).length?`<div class="fcard fhint"><b class="fcard-t">Hinweis</b><ul class="fpc">${list(sc.notes,"n")}</ul><p class="sub">Ändert die Bewertung nicht. Die zeigt nur, wie gesund es ist und wie gut es zu deinem Ziel passt.</p></div>`:""}
+    ${typeof altCard==="function"?altCard(it,sc):""}
     ${intol?`<p class="sub fnote">Unverträglichkeiten erkennt die App nur am Namen. Bitte Zutaten prüfen.</p>`:""}
     <div class="fcard"><b class="fcard-t">Makros <span class="sub">· <span id="fgram">${g}</span> g</span></b>
       <div class="fmacros" id="fmacros">${fMacros(it,g)}</div>
       <div class="ftable" id="ftable">${fTable(it,g)}</div>
     </div>
-    <p class="sub fnote">${src}${(sc.unknown||[]).length?" · Keine Angabe: "+sc.unknown.join(", "):""}</p>
+    <p class="sub fnote">${src}${it.fill&&Object.keys(it.fill).length?" · "+(it.fill.sugar!=null&&it.fill.salt!=null?"Zucker und Salz von dir ergänzt":it.fill.sugar!=null?"Zucker von dir ergänzt":"Salz von dir ergänzt"):""}${(sc.unknown||[]).length?" · Keine Angabe: "+sc.unknown.join(", "):""}</p>
     ${sc.warn?`<p class="sub fnote">⚠️ Kalorien und Makros passen hier nicht zusammen. Bitte mit der Packung vergleichen.</p>`:""}
     <div class="amt ${ui.amtOpen?"open":""}" ${ui.amtOpen?`data-once="amt"`:""}>
       <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>

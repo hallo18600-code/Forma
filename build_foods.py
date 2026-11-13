@@ -1,6 +1,7 @@
 """Baut foods.json aus Open Food Facts (deutsche Produkte, beliebteste zuerst).
 Spalten: Code, Name, Marke, kcal, Protein, Carbs, Fett, Zucker, Ballaststoffe, Salz, ges. Fett, NOVA, [Bits: 1 = Kalorien unstimmig, 2 = ml, 4 = g]
 Es wird nichts geschätzt: fehlt ein Wert in Open Food Facts, bleibt er leer.
+Ausnahme ohne Schätzung: fehlt Salz, steht aber Natrium da, gilt Salz = Natrium × 2,5 (so ist „Salz“ in der LMIV definiert).
 Fehlen Protein, Kohlenhydrate oder Fett ganz, kommt das Produkt nicht in die Liste (sonst stünde dort fälschlich 0 g).
 Daten: Open Food Facts, (c) Open Food Facts-Mitwirkende, ODbL 1.0."""
 import json, os, re, shutil, sys, urllib.request, datetime
@@ -20,7 +21,7 @@ N = lambda c: f'TRY_CAST("{c}" AS DOUBLE)'
 sql = f"""
 SELECT code, product_name, brands,
   {N('energy-kcal_100g')} kcal, coalesce({N('energy-kj_100g')}, {N('energy_100g')}) kj, {N('proteins_100g')} p, {N('carbohydrates_100g')} c, {N('fat_100g')} f,
-  {N('sugars_100g')} s, {N('fiber_100g')} fi, {N('salt_100g')} sa, {N('saturated-fat_100g')} sf,
+  {N('sugars_100g')} s, {N('fiber_100g')} fi, {N('salt_100g')} sa, {N('sodium_100g')} na, {N('saturated-fat_100g')} sf,
   TRY_CAST(nova_group AS INTEGER) nova, quantity
 FROM read_csv('{SRC}', delim='\t', header=true, all_varchar=true, quote='', escape='', ignore_errors=true)
 WHERE countries_tags LIKE '%en:germany%'
@@ -111,8 +112,10 @@ if NUR_PRUEFEN:
         json.dump({**alt, "rows": rows}, fh, ensure_ascii=False, separators=(",", ":"))
     sys.exit(0)
 import duckdb
-for code, name, brands, kcal, kj, p, c, f, s, fi, sa, sf, nova, menge in duckdb.connect().execute(sql).fetchall():
+for code, name, brands, kcal, kj, p, c, f, s, fi, sa, na, sf, nova, menge in duckdb.connect().execute(sql).fetchall():
+    # Salz fehlt, Natrium steht drauf: Salz = Natrium × 2,5 (gesetzliche Definition, LMIV Anhang I Nr. 11) – keine Schätzung
     kcal, warn = pruefe_kcal(name, brands or "", kcal, kj, p, c, f, fi)
+    if sa is None and na is not None and na >= 0 and plausible(name, brands or "", kcal, p, c, f, s, fi, na * 2.5, sf): sa = na * 2.5
     if not plausible(name, brands or "", kcal, p, c, f, s, fi, sa, sf): continue
     row = [code, name.strip()[:70], (brands or "").split(",")[0].strip()[:30], round(kcal), r(p), r(c), r(f), r(kuerze(s, c)), r(fi), r(sa), r(kuerze(sf, f)), nova if nova and 1 <= nova <= 4 else None]
     row.append((1 if warn else 0) | einheit(menge))

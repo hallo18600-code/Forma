@@ -616,6 +616,14 @@ p { margin:var(--s-2) 0; }
 .ftable .sub2 b { font-weight:400; }
 /* Neutraler Hinweis (z. B. vegetarisch, Vorlieben) – ändert die Bewertung nicht */
 .fhint { background:var(--fill-2); }
+/* Bessere Alternativen: schlichte Zeilen, Antippen öffnet das Produkt */
+.ffill-btn, .ffill { margin-top:var(--s-3); }
+.falt .fcard-t { margin-bottom:var(--s-1); }
+.falt-row { display:flex; align-items:center; gap:var(--s-3); width:100%; padding:var(--s-2) 0; background:none; border:0; color:inherit; font:inherit; text-align:left; cursor:pointer; }
+.falt-row + .falt-row { border-top:1px solid var(--line); }
+.falt-emo { font-size:22px; width:28px; text-align:center; flex:none; }
+.falt-nm { font-size:var(--fs-m); font-weight:600; }
+.falt-go { color:var(--ink-3); font-size:20px; flex:none; }
 .fpc li.n::before { background:var(--ink-3); }
 .fhint .sub { margin-top:var(--s-2); }
 .fsrc { display:block; font-size:var(--fs-s,12px); color:var(--ink-3); margin-top:2px; }
