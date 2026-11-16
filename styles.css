@@ -1187,3 +1187,4 @@ details.tip[open] .chev { transform:rotate(90deg); }
 .skdelta.down { background:var(--bad-soft); color:var(--on-bad-soft); }
 .skdelta.up { background:var(--accent-soft); color:var(--on-accent-soft); }
 .bigw-in { font-size:var(--fs-xl); font-weight:800; text-align:center; letter-spacing:-.03em; }
+.yfertig.off { opacity:.55; }

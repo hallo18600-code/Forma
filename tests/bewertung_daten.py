@@ -26,7 +26,9 @@ JS = r"""()=>{
  let n=0, mono=0, monoN=0, none=0;
  for(let i=0;i<rows.length;i++){ const x=rows[i], it=dbItem(x), C=rClassify(it);
   const missSu=x[7]==null&&x[5]>0.5, missSa=x[9]==null;
+  const impl=!missSu&&!missSa&&rImplausible(it).length>0;   // offensichtlich falsche Werte: kein Score (eigene Prüfung in tests/werte.py)
   for(const g of G){ const r=scoreFood(it,g); n++; const t=r.good.concat(r.bad).join(" | "), d=`${it.name} (${it.brand||""}, ${g}) → ${r.score}`;
+   if(impl){ if(r.score!==null||!r.noScore) fail("Score trotz unstimmiger Werte",d); continue; }
    if(missSu||missSa){ if(r.score!==null||!r.noScore) fail("Score trotz fehlender Angabe",d+(missSu?" Zucker fehlt":"")+(missSa?" Salz fehlt":"")); else if(g==="muscle") none++; continue; }
    if(!Number.isFinite(r.score)||r.score<0||r.score>100) fail("Ungültiger Score",d);
    if(/vermutlich|geschätzt|geschaetzt/i.test(t)) fail("Schätz-Text",d+" | "+t);
@@ -34,7 +36,7 @@ JS = r"""()=>{
    if(x[11]&&(r.unknown||[]).includes("Verarbeitungsgrad")) fail("„Verarbeitungsgrad unbekannt“ obwohl bekannt",d);
    if(!x[11]&&!(r.unknown||[]).includes("Verarbeitungsgrad")) fail("Fehlender Verarbeitungsgrad nicht angezeigt",d);
   }
-  if(missSu||missSa) continue;
+  if(missSu||missSa||impl) continue;
   // +10 g Zucker (Kohlenhydrate und Kalorien passend dazu) darf nie besser machen – bei Arten, deren Zucker nicht natürlich ist
   if(i%4===0&&x[7]!=null&&x[3]>=30&&!(C.cat&&R_NATSUGAR.has(C.cat.id))){
    const b=Object.assign({},it,{sugar:it.sugar+10,carbs:it.carbs+10,kcal:it.kcal+40});
@@ -54,7 +56,7 @@ JS = r"""()=>{
    const f1=p[8]!=null&&q[8]!=null; if(f1&&Math.abs(p[8]-q[8])>Math.max(0.6,0.1*Math.max(p[8],q[8]))) continue;
    if((p[8]==null)!==(q[8]==null)) continue;   // nur einer hat Ballaststoffe: andere Datenlage (ohne Angabe kein Ballaststoff-Bonus)
    const tol=8;
-   const A=dbItem(p), B=dbItem(q); if(rMissing(A).length||rMissing(B).length) continue; dup++;
+   const A=dbItem(p), B=dbItem(q); if(rMissing(A).length||rMissing(B).length||rImplausible(A).length||rImplausible(B).length) continue; dup++;
    for(const g of G){ const d=Math.abs(S(A,g)-S(B,g)); if(d>tol) fail("Gleiches Produkt, anderer Score",`${p[1]} (${p[2]}, ${g}) ${S(A,g)} vs ${S(B,g)}`); } } }
  M.dubletten=dup;
  // 5) Datenbank

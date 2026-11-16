@@ -102,7 +102,7 @@ function renderMealPage(){
   return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button><b>${slot.name}</b></div>
     <div class="mealhero s-${slot.id}"><span>${marks[slot.id]}</span></div>
     <div class="mgrid${showKcal()?"":" three"}">${showKcal()?`<div><b>${tot.kcal.toLocaleString(LOC)} kcal</b><span>Kalorien</span></div>`:""}<div><b>${f(tot.carbs)}</b><span>Kohlenhydrate</span></div><div><b>${f(tot.protein)}</b><span>Eiweiß</span></div><div><b>${f(tot.fat)}</b><span>Fett</span></div></div>
-    ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}<span class="notr">${esc(amtTxt(p,m))}</span></div></div>${showKcal()?`<span>${line(p,m.portion).kcal} kcal</span>`:""}<i>›</i></button>`).join("")||`<p class="sub li">Noch nichts eingetragen.</p>`}
+    ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}<span class="notr">${esc(amtTxt(p,m))}</span>${typeof rImplausible==="function"&&rImplausible(p).length?` · <span class="t-bad">⚠️ Werte prüfen</span>`:""}</div></div>${showKcal()?`<span>${line(p,m.portion).kcal} kcal</span>`:""}<i>›</i></button>`).join("")||`<p class="sub li">Noch nichts eingetragen.</p>`}
     <button class="yfertig" data-act="open" data-type="scan" data-slot="${slot.id}">Mehr hinzufügen</button>`;
 }
 // Felder für ein eigenes Lebensmittel: Werte pro 100 g von der Packung, nichts ist vorausgefüllt (keine erfundenen Zahlen).
@@ -131,6 +131,21 @@ function fillForm(it,sc){
     <p class="sub">Nur eintragen, was auf der Packung steht.</p>
     <button class="pill primary w-full" data-act="fill-save" data-id="${esc(it.id)}">Speichern</button></div>`;
 }
+// Unstimmige Werte: Gründe zeigen, Werte bestätigen oder von der Packung korrigieren
+function implCard(it,sc){
+  const per=it.liquid?"100 ml":"100 g", open=ui.fixFor===it.id, d=ui.fixDraft||{};
+  const v=x=>x==null||x===""?"":String(x).replace(".",",");
+  const f=(id,l,val)=>`<div class="field"><label for="${id}">${l} / ${per}</label><input id="${id}" inputmode="decimal" autocomplete="off" value="${esc(val)}"></div>`;
+  return `<div class="fcard fhint"><b class="fcard-t">Werte prüfen</b>
+    <p class="sub">Hier stimmt offensichtlich etwas nicht. Deshalb gibt es keinen Score, und das Produkt lässt sich erst eintragen, wenn die Werte geprüft sind.</p>
+    <ul class="fpc">${rImplTxt(sc.implaus).map(x=>`<li class="c">${esc(x)}</li>`).join("")}</ul>
+    ${open?`<div class="ffill">${f("fx-k","Kalorien (kcal)",d.k!=null?d.k:v(it.kcal))}${f("fx-p","Eiweiß (g)",d.p!=null?d.p:v(it.protein))}${f("fx-c","Kohlenhydrate (g)",d.c!=null?d.c:v(it.carbs))}${f("fx-s","davon Zucker (g)",d.s!=null?d.s:v(it.sugar))}${f("fx-f","Fett (g)",d.f!=null?d.f:v(it.fat))}${f("fx-sa","Salz (g)",d.sa!=null?d.sa:v(it.salt))}
+      <p class="sub">Nur eintragen, was auf der Packung steht (pro ${per}).</p>
+      <button class="pill primary w-full" data-act="fix-save" data-id="${esc(it.id)}">Speichern</button></div>`
+    :`<button class="pill primary w-full ffill-btn" data-act="fix-open" data-id="${esc(it.id)}">Werte von der Packung eintragen</button>
+      <button class="pill ghost w-full ffill-btn" data-act="impl-ok" data-id="${esc(it.id)}">Stimmt genau so mit der Packung überein</button>`}
+  </div>`;
+}
 function fv(x,g){ if(x==null) return "–"; return String(Math.round(x*(g/100)*10)/10).replace(".",",")+" g"; }
 function fMacros(it,g){
   return [[Math.round((it.kcal||0)*g/100)+" kcal","Kalorien"],[fv(it.carbs||0,g),"Kohlenhydrate"],[fv(it.protein||0,g),"Eiweiß"],[fv(it.fat||0,g),"Fett"]].map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join("");
@@ -142,8 +157,8 @@ function fTable(it,g){
 // Farbstufe für Ring und Balken (eigene Klassen, die Score-Badges haben einen Hintergrund)
 function qClass(n){ return scoreClass(n).replace("s-","q-"); }
 // Bewertungs-Ring (SVG), Farbe nach Wert
-function rateRing(n){
-  if(n==null) return `<div class="fring q-none"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="trk"/></svg><div class="fring-t"><b>–</b><small>von 100</small></div></div><div class="flabel q-none">Angaben fehlen</div>`;
+function rateRing(n,none){
+  if(n==null) return `<div class="fring q-none"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="trk"/></svg><div class="fring-t"><b>–</b><small>von 100</small></div></div><div class="flabel q-none">${none||"Angaben fehlen"}</div>`;
   const r=52, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(100,n))/100), cls=qClass(n);
   const lab=n>=85?"Sehr gut":n>=70?"Gut":n>=50?"Okay":n>=30?"Mäßig":"Schlecht";
   // Zahl im Ring, Einstufung als eigenes Etikett darunter
@@ -160,8 +175,8 @@ function foodSheet(it,sc){
   const fav=favOn(it.id);
   return `<div class="yhead"><button class="yback" data-act="${ui.altBack?"alt-back":ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><button class="yfav ${fav?"on":""}" data-act="fav" data-id="${it.id}" aria-pressed="${fav}" aria-label="${fav?"Aus den Favoriten":"Zu den Favoriten"}">${fav?"★":"☆"}</button></div>
     <div class="fhead"><span class="femo">${esc(it.emoji||"🍽️")}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
-    ${rateRing(sc.score)}
-    ${sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} ${it.src==="off"?"in der Datenbank":"in deinen Angaben"}. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p>${it.src==="off"||it.type==="custom"&&!it.hidden?fillForm(it,sc):""}</div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
+    ${rateRing(sc.score,(sc.implaus||[]).length?"Werte unstimmig":"")}
+    ${(sc.implaus||[]).length?implCard(it,sc):sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} ${it.src==="off"?"in der Datenbank":"in deinen Angaben"}. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p>${it.src==="off"||it.type==="custom"&&!it.hidden?fillForm(it,sc):""}</div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
     </div>`}
     ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Stärken</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}
@@ -175,11 +190,12 @@ function foodSheet(it,sc){
       <div class="ftable" id="ftable">${fTable(it,g)}</div>
     </div>
     <p class="sub fnote">${src}${it.fill&&Object.keys(it.fill).length?" · "+(it.fill.sugar!=null&&it.fill.salt!=null?"Zucker und Salz von dir ergänzt":it.fill.sugar!=null?"Zucker von dir ergänzt":"Salz von dir ergänzt"):""}${(sc.unknown||[]).length?" · Keine Angabe: "+sc.unknown.join(", "):""}</p>
-    ${sc.warn?`<p class="sub fnote">⚠️ Kalorien und Makros passen hier nicht zusammen. Bitte mit der Packung vergleichen.</p>`:""}
+    ${sc.warn&&!(sc.implaus||[]).length?`<p class="sub fnote">⚠️ Kalorien und Makros passen hier nicht ganz zusammen. Bitte mit der Packung vergleichen.</p>`:""}
+    ${(()=>{ const d=typeof rDupKcal==="function"&&!(sc.implaus||[]).length&&!it.ok?rDupKcal(it):null; return d?`<p class="sub fnote">ℹ️ Dieses Produkt steht auch mit anderen Werten in der Datenbank (${[...new Set(d)].slice(0,2).join(" bzw. ")} kcal). Bitte kurz mit der Packung vergleichen.</p>`:""; })()}
     <div class="amt ${ui.amtOpen?"open":""}" ${ui.amtOpen?`data-once="amt"`:""}>
       <button class="amt-grab" data-act="amt-toggle" aria-label="Menge"></button>
       <div class="amt-compact" id="amt-compact">${amtCompact(it)}</div>
       <div class="amt-body" id="amt-body">${amtBody(it)}</div>
-      ${ui.editUid?`<button class="yfertig static" data-act="save-meal">Speichern</button><button class="pill w-full t-bad" data-act="del-meal2">Eintrag löschen</button>`:`<button class="yfertig static" data-act="log-food" data-id="${it.id}">Hinzufügen</button>`}
+      ${ui.editUid?`<button class="yfertig static" data-act="save-meal">Speichern</button><button class="pill w-full t-bad" data-act="del-meal2">Eintrag löschen</button>`:(sc.implaus||[]).length?`<button class="yfertig static off" data-act="impl-hint" data-id="${it.id}">Erst Werte prüfen</button>`:`<button class="yfertig static" data-act="log-food" data-id="${it.id}">Hinzufügen</button>`}
     </div>`;
 }

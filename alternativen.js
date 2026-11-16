@@ -15,7 +15,7 @@ const ALT_MAP={
   alcohol:["Wasser","Tee"],
   coffeemilk:["Kaffee","Tee"],
   plantmilk:["Milch 1,5 %","Vollmilch"],
-  sweets:h=>/(schoko|chocolate|chocolat|praline|riegel|bar\b)/.test(h)?["Zartbitterschokolade","Datteln","Walnüsse","Blaubeeren"]:["Blaubeeren","Erdbeeren","Datteln","Apfel","Zartbitterschokolade"],
+  sweets:h=>/(schoko|chocolate|chocolat|cioccolat|cokolad|czekolad|zartbitter|praline|riegel|bar\b)/.test(h)?["Zartbitterschokolade","Datteln","Walnüsse","Blaubeeren"]:["Blaubeeren","Erdbeeren","Datteln","Apfel","Zartbitterschokolade"],
   sugar:h=>/(marmelade|konfiture|fruchtaufstrich|confiture|jam|gelee)/.test(h)?["Blaubeeren","Erdbeeren","Himbeeren","Honig"]:["Honig","Datteln"],
   cereal:["Haferflocken","Porridge"],
   proteinbar:["Skyr Natur","Magerquark","Griechischer Joghurt","Mandeln"],
@@ -28,19 +28,32 @@ const ALT_MAP={
     :/(doner|kebab|durum|gyros|wrap)/.test(h)?["Hähnchenbrust","Putenbrust","Gulasch"]
     :["Gulasch","Chili con Carne","Hähnchenbrust"],
   // Brühe, Würzpulver und „Fix für …“ sind Zutaten, keine Mahlzeit: dafür keine Alternative
-  readymeal:h=>/(bruhe|bouillon|brodo|caldo|=kub|fond|pulver|wurfel|wurze|gewurz| fix |fix fur|basis fur|sauce|sosse|soße)/.test(h.replace(/ kub /," =kub "))?[]:["Gulasch","Chili con Carne","Hühnersuppe","Gemüsesuppe","Linseneintopf"],
+  readymeal:h=>/(bruhe|bouillon|brodo|caldo|=kub|fond|pulver|wurfel|wurze|gewurz| fix |fix fur|basis fur|base|paste|sauce|sosse|soße)/.test(h.replace(/ kub /," =kub "))?[]
+    :/(pure|puree|stampf|kartoffel|knodel|klosse|spatzle|kroketten|gratin)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Kartoffelknödel"]
+    :/(suppe|soup|zuppa|soupe|eintopf)/.test(h)?["Gemüsesuppe","Hühnersuppe","Linseneintopf"]
+    :/(hering|matjes|lachs|fisch|thunfisch|forelle|makrele|garnele|shrimp)/.test(h)?["Lachsfilet","Hering","Forelle","Kabeljau"]
+    :/(schnitzel|cordon|nugget|hahnchen|chicken|pute)/.test(h)?["Hähnchenbrust","Putenbrust","Curry"]
+    :/(kuchen|torte|stich|strudel|dessert|pudding|creme brulee|tiramisu)/.test(h)?[]
+    :["Gulasch","Chili con Carne","Hühnersuppe","Gemüsesuppe","Linseneintopf"],
   processedmeat:["Putenbrust","Hähnchenbrust","Rindersteak","Ei"],
-  ersatz:["Hähnchenbrust","Rindersteak","Ei","Lachsfilet","Linsen gekocht","Kichererbsen"],
+  // Veganer Käse → Käse, veganer Joghurt → Joghurt, sonst Fleisch/Ei/Hülsenfrüchte
+  ersatz:h=>/(kase|cheese|mozzarella|gouda|feta|parmesan|reibe|frischkase|camembert|cheddar)/.test(h)?["Mozzarella","Hüttenkäse","Feta"]
+    :/(joghurt|yog|quark|skyr|dessert)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]
+    :/(aufschnitt|schinken|salami|wurst|mortadella)/.test(h)?["Putenbrust","Kochschinken","Ei"]
+    :["Hähnchenbrust","Rindersteak","Ei","Lachsfilet","Linsen gekocht","Kichererbsen"],
   soy:["Ei","Hähnchenbrust","Lachsfilet","Linsen gekocht","Kichererbsen"],
   refined:h=>/(nudel|pasta|spaghetti|penne|fusilli|maccheroni|tortiglioni|farfalle|lasagne|tagliatelle|gnocchi|couscous)/.test(h)?["Kartoffeln gekocht","Reis gekocht","Quinoa gekocht","Süßkartoffel"]
     :/(brot|brotchen|toast|semmel|baguette|wrap|tortilla|bagel|pain|ciabatta|weckle)/.test(h)?["Vollkornbrot","Roggenbrot","Vollkornbrötchen"]:[],
   wholewheat:h=>/(nudel|pasta|spaghetti|penne|fusilli)/.test(h)?["Kartoffeln gekocht","Reis gekocht","Quinoa gekocht","Süßkartoffel"]:[],
   margarine:["Butter","Olivenöl"],
   seedoil:["Olivenöl","Butter"],
-  sauce:h=>/(mayo|majo|remoulade|aioli|dressing|vinaigrette|salatsauce|salatcreme)/.test(h)?["Olivenöl","Senf"]:["Tomatensauce","Senf"],
+  sauce:h=>/(mayo|majo|remoulade|aioli|dressing|vinaigrette|salatsauce|salatcreme)/.test(h)?["Olivenöl","Senf"]
+    :/(dip|aufstrich|spread|creme|hummus|tapenade|guacamole)/.test(h)?[]
+    :/(pesto|sugo|pastasauce|pasta sauce|bolognese|arrabbiata|napoli|tomate|tomato)/.test(h)?["Tomatensauce"]
+    :["Tomatensauce","Senf"],
   peanut:["Mandeln","Walnüsse","Cashewkerne"],
   driedfruit:["Blaubeeren","Apfel","Erdbeeren","Banane"],
-  dairy:h=>/(milch|drink|shake|kakao|kefir|=latte|getrank)/.test(h)?[]:/(kase|cheese)/.test(h)?["Hüttenkäse","Magerquark","Skyr Natur"]:["Naturjoghurt 1,5 %","Skyr Natur","Magerquark","Griechischer Joghurt"],
+  dairy:h=>/(milch|drink|shake|kakao|cacao|cocoa|nesquik|kaba|ovomaltine|banania|kefir|=latte|getrank|sahne|cream|creme)/.test(h)?[]:/(kase|cheese)/.test(h)?["Hüttenkäse","Magerquark","Skyr Natur"]:["Naturjoghurt 1,5 %","Skyr Natur","Magerquark","Griechischer Joghurt"],
   cheese:["Hüttenkäse","Magerquark","Mozzarella"],
   honey:["Blaubeeren","Datteln"]
 };

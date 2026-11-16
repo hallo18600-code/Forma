@@ -53,6 +53,8 @@ function dbRefresh(){
   let ch=false;
   (state.customs||[]).forEach(c=>{ if(!c||!String(c.id).startsWith("db-")) return; const i=FOODDB.by.get(c.bc||String(c.id).slice(3)); if(i==null) return;
     const f=dbItem(FOODDB.rows[i]);
+    // Von der Packung korrigierte Werte bleiben (die Datenbank hatte dort offensichtliche Fehler)
+    if(c.fix){ Object.assign(f,c.fix); delete f.warn; }
     if(c.novaEst!=null){ delete c.novaEst; ch=true; }   // alte Schätzung (gibt es nicht mehr)
     // Nährwerte mit abgleichen: Wird ein Fehler in der Datenbank korrigiert, stimmt auch das gespeicherte Produkt wieder
     // Selbst von der Packung ergänzte Werte (Zucker, Salz) bleiben, solange die Datenbank dazu nichts hat

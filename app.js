@@ -88,7 +88,12 @@ function toast(m){
   ui.toast=m; render(); clearTimeout(ui.toastT);
   ui.toastT=setTimeout(()=>{ if(ui.toast!==m) return; ui.toast=null; const t=document.querySelector("#app > .toast"); if(t){ t.classList.add("out"); setTimeout(()=>t.remove(),180); } }, 1600);
 }
-function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; ui.amtFor=null; ui.altBack=null; ui.fillFor=null; render(); }
+function openModal(type, payload){ ui.modal={type, payload}; ui.amtOpen=false; ui.editUid=null; ui.amtFor=null; ui.altBack=null; ui.fillFor=null; ui.fixFor=null; ui.fixDraft=null; ui.fixWarn=null; render(); }
+// Produkte mit unstimmigen Werten erst nach Prüfung eintragen: statt einzutragen die Produktseite öffnen
+function implBlock(it){
+  if(!it||typeof rImplausible!=="function"||!rImplausible(it).length) return false;
+  openModal("product",it.id); toast("Bitte zuerst die Werte prüfen"); return true;
+}
 // Menge für einen Tagebuch-Eintrag: Gramm plus (falls gewählt) Einheit und Anzahl
 function amtEntry(){
   const g=Math.max(1,Math.round(+ui.portion||100));
@@ -675,6 +680,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="quick-add"){
     // „+“ in der Suche: eine übliche Portion (1 Banane, 1 EL Öl, 1 Glas Saft) statt pauschal 100 g
     ensureDb(el.dataset.id); const it=foods().find(x=>x.id===el.dataset.id); if(!it) return;
+    if(implBlock(it)) return;
     const d=unitsFor(it).find(x=>x.d), m={uid:uid(),id:it.id,portion:d?d.g:100,slot:ui.addSlot||"snack"};
     if(d){ m.u=d.k; m.q=1; }
     day().meals.push(m); syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+amtTxt(it,m));
@@ -682,6 +688,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="sug-add"){
     // Vorschlag: mit der zuletzt gegessenen Menge eintragen
     const it=foods().find(x=>x.id===el.dataset.id); if(!it) return;
+    if(implBlock(it)) return;
     const a=lastAmount(it.id, ui.addSlot||"snack")||sugDefault(it), m=Object.assign({uid:uid(),id:it.id,slot:ui.addSlot||"snack"},a);
     day().meals.push(m); syncAuto(state.date); save(); toast(T("Hinzugefügt")+" · "+amtTxt(it,m));
   }
@@ -697,23 +704,28 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="ai-find"){ ui.query=el.dataset.v||""; ui.scanMax=30; ui.scanView="list"; }
   else if(act==="ai-add"){
     // Essen ins Tagebuch (Mahlzeit aus dem Text, sonst die gewählte), Wasser in den Wasser-Zähler
-    let n=0, gl=0;
+    let n=0, gl=0; const skip=[];
     (ui.aiRes||[]).forEach(i=>{
       if(!(i.grams>0)) return;
       if(i.water){ gl+=i.glasses||Math.max(1,Math.round(i.grams/250)); return; }
-      ensureDb(i.ref); if(!foods().some(f=>f.id===i.ref)) return;
+      ensureDb(i.ref); const fi=foods().find(f=>f.id===i.ref); if(!fi) return;
+      if(typeof rImplausible==="function"&&rImplausible(fi).length){ skip.push(fi.name); return; }
       const m={uid:uid(), id:i.ref, portion:i.grams, slot:i.slot||ui.addSlot||"snack"};
       if(i.u&&i.q){ m.u=i.u; m.q=i.q; }
       day().meals.push(m); n++;
     });
     if(gl) day().water=(day().water||0)+gl;
     ui.aiRes=null; ui.aiText=""; ui.aiOv={}; ui.aiOpen=null; ui.aiMiss=[]; ui.aiIgn=[]; ui.scanView="list"; syncAuto(state.date); save();
+    if(skip.length){ toast(T("Nicht eingetragen (Werte unstimmig)")+": "+skip.slice(0,2).join(", ")); return; }
     toast(n?(gl?T("Im Tagebuch")+" · 💧 +"+gl:"Im Tagebuch"):gl?"💧 +"+gl:"Nichts hinzugefügt");
   }
   else if(act==="save-quick"){
     formDraft();
     const g=id=>Math.max(0,+(document.getElementById(id).value||"").replace(",",".")||0), kcal=g("q-kcal");
     if(!kcal){ toast("Kalorien fehlen"); return; }
+    { const p=g("q-p"), c=g("q-c"), f=g("q-f"), calc=4*p+4*c+9*f, sig=[kcal,p,c,f].join("|");
+      if(calc>0&&Math.abs(kcal-calc)>Math.max(40,0.25*Math.max(kcal,calc))&&ui.quickWarn!==sig){ ui.quickWarn=sig; toast(T("Bitte nochmal prüfen")+": "+T("Kalorien passen nicht zu Eiweiß, Kohlenhydraten und Fett")); return; }
+      ui.quickWarn=null; }
     const it={id:"q-"+uid(),type:"custom",hidden:true,name:(document.getElementById("q-name").value||"").trim().slice(0,70)||"Schnell hinzugefügt",brand:"Schnell",emoji:"⚡",v:2,kcal,protein:g("q-p"),carbs:g("q-c"),fat:g("q-f"),processed:false};
     state.customs.push(it); day().meals.push({uid:uid(),id:it.id,portion:100,slot:ui.addSlot||"snack"});
     ui.fDraft=null; ui.scanView="list"; syncAuto(state.date); save(); toast("Hinzugefügt");
@@ -764,6 +776,7 @@ document.getElementById("app").addEventListener("click", e=>{
     amtRefresh(it,act==="qty"); return;
   }
   else if(act==="log-food"){
+    { const it=foods().find(x=>x.id===el.dataset.id); if(it&&typeof rImplausible==="function"&&rImplausible(it).length){ toast("Bitte zuerst die Werte prüfen"); return; } }
     day().meals.push({ uid:uid(), id:el.dataset.id, slot:ui.addSlot, ...amtEntry() });
     ui.amtFor=null;
     syncAuto(state.date); ui.modal=null; save(); toast("Im Tagebuch");
@@ -781,10 +794,37 @@ document.getElementById("app").addEventListener("click", e=>{
     if([kcal,pr,cb,fa,su,sa].some(v=>Number.isNaN(v))||kcal>950||pr+cb+fa>100.5||(su!==undefined&&su>cb+0.5)||(sa!==undefined&&sa>100)){ toast("Bitte Werte prüfen (pro 100 g)"); return; }
     const item={ id:"c-"+uid(), type:"custom", v:2, name, brand:"Eigen", emoji:"🍽", kcal:Math.round(kcal), protein:pr, carbs:cb, fat:fa, sugar:su===undefined?undefined:Math.min(su,cb), salt:sa, processed:false };
     const bcEl=document.getElementById("c-bc"); if(bcEl&&bcEl.value.trim()) item.bc=bcEl.value.replace(/\D/g,"");
+    // Werte passen nicht zusammen (Tippfehler?): einmal darauf hinweisen, beim zweiten Speichern gelten sie
+    { const bad=typeof rImplausible==="function"?rImplausible(item):[], sig=typeof rImplSig==="function"?rImplSig(item):"";
+      if(bad.length){ if(ui.customWarn!==sig){ ui.customWarn=sig; toast(T("Bitte nochmal prüfen")+": "+T(rImplTxt(bad)[0])); return; } item.ok=sig; }
+      ui.customWarn=null; }
     state.customs.push(item);
     ui.fDraft=null; ui.scanView="list";
     day().meals.push({ uid:uid(), id:item.id, portion:100, slot:ui.addSlot||"snack" });
     syncAuto(state.date); ui.modal=null; save(); toast("Angelegt");
+  }
+  else if(act==="impl-hint"){ toast("Bitte zuerst die Werte prüfen"); return; }
+  else if(act==="impl-ok"){
+    const id=el.dataset.id; ensureDb(id); const c=(state.customs||[]).find(x=>x&&x.id===id); if(!c) return;
+    c.ok=rImplSig(c); if(typeof SK_CAT!=="undefined") SK_CAT.clear(); save(); toast("Bestätigt"); return;
+  }
+  else if(act==="fix-open"){ ui.fixFor=el.dataset.id; ui.fixDraft=null; ui.fixWarn=null; render(); setTimeout(()=>{ const i=document.getElementById("fx-k"); if(i) i.focus(); },60); return; }
+  else if(act==="fix-save"){
+    const id=el.dataset.id; ensureDb(id); const c=(state.customs||[]).find(x=>x&&x.id===id); if(!c) return;
+    const raw=k=>{ const e=document.getElementById(k); return e?String(e.value).trim().slice(0,12):""; };
+    const num=k=>{ const t=raw(k).replace(",","."); if(t==="") return undefined; const n=+t; return Number.isFinite(n)&&n>=0?n:NaN; };
+    ui.fixDraft={k:raw("fx-k"),p:raw("fx-p"),c:raw("fx-c"),s:raw("fx-s"),f:raw("fx-f"),sa:raw("fx-sa")};
+    const v={kcal:num("fx-k"),protein:num("fx-p"),carbs:num("fx-c"),sugar:num("fx-s"),fat:num("fx-f"),salt:num("fx-sa")};
+    if(Object.values(v).some(x=>x===undefined)){ toast("Bitte alle Felder ausfüllen"); return; }
+    if(Object.values(v).some(x=>Number.isNaN(x))||v.kcal>950||v.protein+v.carbs+v.fat>100.5||v.salt>100){ toast("Bitte Werte prüfen (pro 100 g)"); return; }
+    if(v.sugar>v.carbs+0.5){ toast("Zucker kann nicht mehr sein als die Kohlenhydrate"); return; }
+    const test=Object.assign({},c,v,{kcal:Math.round(v.kcal),ok:undefined}), sig=rImplSig(test), still=rImplausible(test);
+    // Passen die eingetippten Werte noch immer nicht zusammen: einmal nachfragen, beim zweiten Speichern gelten sie
+    if(still.length&&ui.fixWarn!==sig){ ui.fixWarn=sig; toast(T("Bitte nochmal prüfen")+": "+T(rImplTxt(still)[0])); return; }
+    Object.assign(c,{kcal:Math.round(v.kcal),protein:v.protein,carbs:v.carbs,sugar:Math.min(v.sugar,v.carbs),fat:v.fat,salt:v.salt});
+    c.fix={kcal:c.kcal,protein:c.protein,carbs:c.carbs,sugar:c.sugar,fat:c.fat,salt:c.salt}; delete c.warn; delete c.fill;
+    c.ok=rImplSig(c);
+    ui.fixFor=null; ui.fixDraft=null; ui.fixWarn=null; if(typeof SK_CAT!=="undefined") SK_CAT.clear(); save(); toast("Gespeichert"); return;
   }
   else if(act==="fill-open"){ ui.fillFor=el.dataset.id; ui.fillDraft=null; render(); setTimeout(()=>{ const i=document.getElementById("fill-s")||document.getElementById("fill-sa"); if(i) i.focus(); },60); return; }
   else if(act==="fill-save"){
