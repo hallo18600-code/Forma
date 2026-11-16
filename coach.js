@@ -558,7 +558,7 @@ function muskelTips(a,lvl,g,fatGoal,prot,lifts){
   return [
     tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why+(cd.train?` Bei dir zuletzt: ${de(cd.train.v,1)}× pro Woche.`:""),Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
     tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wiederholungen oder eine schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche eine Wiederholung mehr.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
-    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:(cd.protein?`Dein Schnitt: ${cd.protein.v} g an ${cd.protein.n} eingetragenen Tagen. `:"")+`1,6–2,2 g pro kg Körpergewicht gelten als ideal. Am einfachsten über ${proteinFoodTxt(dietCtx())}.`,Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
+    tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:(cd.protein?`Dein Schnitt: ${cd.protein.v} g an ${cd.protein.n} eingetragenen Tagen. `:"")+((+state.profile.weight||70)>25*Math.pow(state.profile.height/100,2)&&!leanStated()?"1,6–2,2 g pro kg gelten als ideal – bei höherem Gewicht bezogen auf das Normalgewicht.":"1,6–2,2 g pro kg Körpergewicht gelten als ideal.")+` Am einfachsten über ${proteinFoodTxt(dietCtx())}.`,Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
     tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher",vegan?"Reiswaffeln mit Marmelade oder eine Banane.":"Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
     tip("Kreatin","3–5 g Kreatin täglich","Erhöht die Leistung bei kurzem, intensivem Krafttraining. Fehlt Protein im Essen, hilft "+(noWhey?"pflanzliches Proteinpulver.":"Whey."),Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
   ];
@@ -880,7 +880,7 @@ function rMonth(y,mo){
   const first=new Date(y,mo,1), pad=(first.getDay()+6)%7, count=new Date(y,mo+1,0).getDate();
   const heads=["Mo","Di","Mi","Do","Fr","Sa","So"].map(d=>`<div class="sub">${d}</div>`).join("");
   let cells="<div></div>".repeat(pad);
-  for(let d=1;d<=count;d++){ const s=iso(new Date(y,mo,d)), r=rDone(s); cells+=`<button class="calcell" data-act="r-pick" data-v="${s}"><div class="cdot ${rState(s)} ${s===todayIso()?"today":""}">${d}</div><div class="cname">${r.c?r.c+"/"+r.n:""}</div></button>`; }
+  for(let d=1;d<=count;d++){ const s=iso(new Date(y,mo,d)), r=rDone(s); cells+=`<button class="calcell" data-act="r-pick" data-v="${s}" ${s>todayIso()?"disabled":""}><div class="cdot ${rState(s)} ${s===todayIso()?"today":""}">${d}</div><div class="cname">${r.c?r.c+"/"+r.n:""}</div></button>`; }
   return `<h2 class="month-h">${first.toLocaleDateString(LOC,{month:"long",year:"numeric"})}</h2><div class="calgrid">${heads}${cells}</div>`;
 }
 function renderRoutineDash(){

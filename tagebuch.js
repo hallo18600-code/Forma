@@ -101,8 +101,8 @@ function renderMealPage(){
   const marks={breakfast:"☕",lunch:"🍝",dinner:"🥗",snack:"🍎"};
   return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button><b>${slot.name}</b></div>
     <div class="mealhero s-${slot.id}"><span>${marks[slot.id]}</span></div>
-    <div class="mgrid"><div><b>${tot.kcal.toLocaleString(LOC)} kcal</b><span>Kalorien</span></div><div><b>${f(tot.carbs)}</b><span>Kohlenhydrate</span></div><div><b>${f(tot.protein)}</b><span>Eiweiß</span></div><div><b>${f(tot.fat)}</b><span>Fett</span></div></div>
-    ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}<span class="notr">${esc(amtTxt(p,m))}</span></div></div><span>${line(p,m.portion).kcal} kcal</span><i>›</i></button>`).join("")||`<p class="sub li">Noch nichts eingetragen.</p>`}
+    <div class="mgrid${showKcal()?"":" three"}">${showKcal()?`<div><b>${tot.kcal.toLocaleString(LOC)} kcal</b><span>Kalorien</span></div>`:""}<div><b>${f(tot.carbs)}</b><span>Kohlenhydrate</span></div><div><b>${f(tot.protein)}</b><span>Eiweiß</span></div><div><b>${f(tot.fat)}</b><span>Fett</span></div></div>
+    ${items.map(({m,p})=>`<button class="mrow" data-act="meal-edit" data-uid="${m.uid}"><div class="grow"><b>${esc(p.name)}</b><div class="sub">${p.brand?esc(p.brand)+", ":""}<span class="notr">${esc(amtTxt(p,m))}</span></div></div>${showKcal()?`<span>${line(p,m.portion).kcal} kcal</span>`:""}<i>›</i></button>`).join("")||`<p class="sub li">Noch nichts eingetragen.</p>`}
     <button class="yfertig" data-act="open" data-type="scan" data-slot="${slot.id}">Mehr hinzufügen</button>`;
 }
 // Felder für ein eigenes Lebensmittel: Werte pro 100 g von der Packung, nichts ist vorausgefüllt (keine erfundenen Zahlen).
@@ -161,7 +161,7 @@ function foodSheet(it,sc){
   return `<div class="yhead"><button class="yback" data-act="${ui.altBack?"alt-back":ui.editUid?"close":"back-scan"}">‹</button><b>${slot?slot.name:"Lebensmittel"}</b><button class="yfav ${fav?"on":""}" data-act="fav" data-id="${it.id}" aria-pressed="${fav}" aria-label="${fav?"Aus den Favoriten":"Zu den Favoriten"}">${fav?"★":"☆"}</button></div>
     <div class="fhead"><span class="femo">${esc(it.emoji||"🍽️")}</span><div class="grow"><h2>${esc(it.name)}</h2>${it.brand?`<div class="sub">${esc(it.brand)}</div>`:""}</div></div>
     ${rateRing(sc.score)}
-    ${sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} ${it.src==="off"?"in der Datenbank":"in deinen Angaben"}. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p>${it.src==="off"?fillForm(it,sc):""}</div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
+    ${sc.noScore?`<div class="fcard fhint"><b class="fcard-t">Kein Score</b><p class="sub">${esc(sc.missing.join(" und "))} ${sc.missing.length>1?"fehlen":"fehlt"} ${it.src==="off"?"in der Datenbank":"in deinen Angaben"}. Wir schätzen nichts, deshalb gibt es hier keine Bewertung.</p>${it.src==="off"||it.type==="custom"&&!it.hidden?fillForm(it,sc):""}</div>`:`<div class="fcard"><div class="fcard-h"><b>Deine Ziele</b><span class="sub">${esc(persoTags().slice(1,3).join(" · "))}</span></div>
       ${order.map(id=>{ const v=all[id]; return `<div class="fgoal ${id===main?"main":""}"><span>${GOAL_SHORT[id]}</span><i class="${qClass(v)}"><u style="width:${v}%"></u></i><b class="${qClass(v)}">${v}</b></div>`; }).join("")}
     </div>`}
     ${(sc.good||[]).length?`<div class="fcard"><b class="fcard-t">Stärken</b><ul class="fpc">${list(sc.good,"p")}</ul></div>`:""}

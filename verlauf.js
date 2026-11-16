@@ -40,7 +40,7 @@ function weightView(){
   const hm = state.profile.height/100;
   const head = selW
     ? `<div class="row baseline"><b class="t-l">${de(selW.kg,1)} kg</b><span class="sub">BMI ${de(selW.kg/(hm*hm),1)} · <b style="color:var(--accent)">${selW.date.split("-").reverse().join(".")}</b></span></div>`
-    : `<div class="row baseline"><b class="t-l">${de(avg,1)} kg</b><span class="sub">BMI ${de(bmi(),1)} · Schnitt</span></div>`;
+    : `<div class="row baseline"><b class="t-l">${de(avg,1)} kg</b><span class="sub">BMI ${de(avg/(hm*hm),1)} · Schnitt</span></div>`;
   const area = pts.length ? `M${pts[0][0]},${H-pad} L${line.replace(/ /g," L")} L${pts[pts.length-1][0]},${H-pad} Z` : "";
   const gy = H-pad - ((goal-min)/(max-min))*(H-2*pad);
   return `<div class="card">
@@ -156,7 +156,7 @@ function renderVerlauf(){
   const weekDone=days.reduce((n,s)=>n+routine.filter(r=>routineOn(r.id,s)).length,0);
   return `<div class="scroll pad">
     <div class="topbar"><div><h1>Verlauf</h1><div class="sub">Diese Woche</div></div></div>
-    <div class="weekdays">${days.map(s=>`<button class="daydot ${s===state.date?"on":""}" data-act="pick-day" data-v="${s}"><span>${weekday(s)}</span><b>${parseIso(s).getDate()}</b></button>`).join("")}</div>
+    <div class="weekdays">${days.map(s=>`<button class="daydot ${s===state.date?"on":""}" data-act="pick-day" data-v="${s}" ${s>todayIso()?"disabled":""}><span>${weekday(s)}</span><b>${parseIso(s).getDate()}</b></button>`).join("")}</div>
     <div class="gap"></div>
     ${routineBlock()}
     <div class="section"><h2>Gewicht</h2></div>
@@ -181,9 +181,9 @@ function weighSheet(){
   const span=weightSpan();
   return `<h2>Waage</h2>
     <div class="sub">${labelDate(state.date)}</div>
-    <div class="t-c py-2"><div class="bigw">${de(ui.draftKg,1)}</div><div class="sub">kg</div></div>
-    <div class="stepper"><button class="plus" data-act="draft" data-d="-0.1">−</button><span class="sub">0,1 kg</span><button class="plus" data-act="draft" data-d="0.1">+</button></div>
-    <div class="kpi"><div><span>BMI</span><b>${de(bmi(),1)}</b></div><div><span>Richtwert</span><b>${span.low}–${span.high}</b></div><div><span>Ziel</span><b>${state.profile.target}</b></div></div>
+    <div class="field"><label for="w-new-kg">Gewicht in kg</label><input id="w-new-kg" class="bigw-in" data-act="w-kg" type="text" inputmode="decimal" autocomplete="off" value="${numIn(Number(ui.draftKg).toFixed(1))}"></div>
+    <div class="stepper"><button class="plus" data-act="draft" data-d="-0.1" aria-label="0,1 kg weniger">−</button><span class="sub">0,1 kg</span><button class="plus" data-act="draft" data-d="0.1" aria-label="0,1 kg mehr">+</button></div>
+    <div class="kpi"><div><span>BMI</span><b>${de(ui.draftKg/((state.profile.height/100)**2),1)}</b></div><div><span>Richtwert</span><b>${span.low}–${span.high}</b></div><div><span>Ziel</span><b>${de(state.profile.target,state.profile.target%1?1:0)}</b></div></div>
     <div class="gap"></div><button class="pill primary" data-act="save-weight">Speichern</button>`;
 }
 // Einen Wiegepunkt bearbeiten oder löschen
@@ -197,7 +197,7 @@ function weightEditSheet(date){
     <div class="gap"></div><button class="pill ghost w-full" data-act="del-cancel">Abbrechen</button>`;
   return `<h2>Gewicht bearbeiten</h2>
     <div class="sub">${when}</div>
-    <div class="field"><label for="w-edit-kg">Gewicht in kg</label><input id="w-edit-kg" data-act="w-kg" type="number" inputmode="decimal" step="0.1" min="35" max="220" value="${Number(ui.draftKg).toFixed(1)}"></div>
+    <div class="field"><label for="w-edit-kg">Gewicht in kg</label><input id="w-edit-kg" data-act="w-kg" type="text" inputmode="decimal" autocomplete="off" value="${numIn(Number(ui.draftKg).toFixed(1))}"></div>
     <div class="stepper"><button class="plus" data-act="w-edit-step" data-d="-0.1">−</button><span class="sub">0,1 kg</span><button class="plus" data-act="w-edit-step" data-d="0.1">+</button></div>
     <div class="gap"></div><button class="pill primary" data-act="w-save" data-v="${date}">Speichern</button>
     <div class="gap"></div><button class="pill ghost w-full t-bad" data-act="w-del-ask">Eintrag löschen</button>`;

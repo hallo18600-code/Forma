@@ -441,6 +441,9 @@ p { margin:var(--s-2) 0; }
 .mgrid div:nth-child(n+3) { border-bottom:0; }
 .mgrid b { display:block; font-size:var(--fs-m); }
 .mgrid span { font-size:var(--fs-s); color:var(--ink-2); }
+.mgrid.three { grid-template-columns:1fr 1fr 1fr; }
+.mgrid.three div { border-bottom:0; border-right:1px solid var(--line); }
+.mgrid.three div:last-child { border-right:0; }
 .mrow { display:flex; align-items:center; gap:var(--s-3); width:100%; min-height:60px; text-align:left; border-bottom:1px solid var(--line); padding:var(--s-3) var(--s-1); }
 .mrow span { white-space:nowrap; }
 .mrow i { font-style:normal; font-size:var(--fs-l); color:var(--ink-3); }
@@ -1183,3 +1186,4 @@ details.tip[open] .chev { transform:rotate(90deg); }
 .skdelta { font-weight:800; font-size:var(--fs-s); padding:var(--s-1) var(--s-2); border-radius:var(--r-full); flex:none; }
 .skdelta.down { background:var(--bad-soft); color:var(--on-bad-soft); }
 .skdelta.up { background:var(--accent-soft); color:var(--on-accent-soft); }
+.bigw-in { font-size:var(--fs-xl); font-weight:800; text-align:center; letter-spacing:-.03em; }

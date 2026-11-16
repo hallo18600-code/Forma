@@ -71,7 +71,8 @@ function normalize(s){
     s.customs=s.customs.filter(c=>c&&typeof c==="object"&&c.id!=null);
     s.customs.forEach(c=>{ if(c.type==="custom"&&!c.src&&!c.v&&c.sugar===0&&c.salt===undefined&&/^(c|q)-/.test(String(c.id))) delete c.sugar; });
     // Kaputte Tagebuch-Einträge (z. B. aus einer fremden Datei) entfernen, sonst stürzen Rechnungen ab
-    Object.keys(s.days).forEach(k=>{ const d=s.days[k]; if(!d||typeof d!=="object"){ delete s.days[k]; return; } d.meals=Array.isArray(d.meals)?d.meals.filter(m=>m&&typeof m==="object"&&m.id!=null):[]; });
+    Object.keys(s.days).forEach(k=>{ const d=s.days[k]; if(!d||typeof d!=="object"){ delete s.days[k]; return; } d.meals=Array.isArray(d.meals)?d.meals.filter(m=>m&&typeof m==="object"&&m.id!=null):[];
+      ["checks","taken","routine"].forEach(x=>{ if(!d[x]||typeof d[x]!=="object"||Array.isArray(d[x])) d[x]={}; }); if(!Number.isFinite(+d.water)||d.water<0) d.water=0; else d.water=+d.water; });
     return s;
 }
 function save(){
@@ -179,10 +180,10 @@ function finish(parts){
 }
 // Erkennung am Produktnamen (Stichwörter). Nur ein Hinweis, keine Garantie.
 const FOOD_KW={
-  lak:{has:["milch","joghurt","jogurt","quark","kase","skyr","sahne","butter","rahm","schmand","mozzarella","pudding","kefir","molke","whey","feta","gouda","parmesan","cheese","cappuccino","=latte","=eis"],not:["laktosefrei","lactosefrei","hafermilch","sojamilch","mandelmilch","kokosmilch","reismilch","vegan","erdnussbutter","kakaobutter","mandelbutter"]},
-  glu:{has:["brot","toast","nudel","pasta","spaghetti","penne","fusilli","lasagne","pizza","weizen","dinkel","roggen","gerste","couscous","bulgur","keks","kuchen","croissant","brezel","breze","semmel","schrippe","cracker","musli","granola","hafer","zwieback","waffel","muffin","baguette","wrap","gnocchi","maultasche","spatzle","knodel","paniert","seitan","=bier"],not:["glutenfrei","reiswaffel","maiswaffel","aufstrich"]},
-  nut:{has:["nuss","mandel","cashew","pistazie","pekan","macadamia","nutella","nougat","marzipan","praline"],not:["kokos","muskat","genuss"]},
-  meat:{has:["fleisch","huhn","hahnchen","hendl","pute","truthahn","rind","schwein","kalb","lamm","salami","schinken","wurst","speck","bacon","hack","doner","kebab","gyros","chicken","beef","leberkas","frikadelle","bulette","schnitzel","steak","lachs","thunfisch","fisch","garnele","shrimp","krabbe","hering","makrele","sardine","forelle","kabeljau","surimi","gelatine"],not:["vegan","veggie","vegetar","fleischlos","flammkuchen"]},
+  lak:{has:["milch","joghurt","jogurt","quark","kase","skyr","sahne","butter","rahm","schmand","mozzarella","pudding","kefir","molke","whey","feta","gouda","parmesan","cheese","cappuccino","=latte","=eis"],not:["laktosefrei","lactosefrei","hafermilch","sojamilch","mandelmilch","kokosmilch","reismilch","vegan","erdnussbutter","kakaobutter","mandelbutter","leberkas","fleischkas"]},
+  glu:{has:["brot","toast","nudel","pasta","spaghetti","penne","fusilli","lasagne","pizza","weizen","dinkel","roggen","gerste","couscous","bulgur","keks","kuchen","croissant","brezel","breze","semmel","schrippe","cracker","musli","granola","hafer","zwieback","waffel","muffin","baguette","wrap","gnocchi","maultasche","spatzle","knodel","paniert","seitan","=bier","malz"],not:["glutenfrei","reiswaffel","maiswaffel","aufstrich","buchweizen","schmalz"]},
+  nut:{has:["nuss","mandel","cashew","pistazie","pekan","macadamia","nutella","nougat","marzipan","praline","studentenfutter","trail mix"],not:["kokos","muskat","genuss"]},
+  meat:{has:["fleisch","huhn","hahnchen","hendl","pute","truthahn","rind","schwein","kalb","lamm","salami","schinken","wurst","speck","bacon","hack","doner","kebab","gyros","chicken","beef","leberkas","frikadelle","bulette","schnitzel","steak","lachs","thunfisch","fisch","garnele","shrimp","krabbe","hering","makrele","sardine","forelle","kabeljau","surimi","gelatine","gummibar"],not:["vegan","veggie","vegetar","fleischlos","flammkuchen"]},
   egg:{has:["=ei","=eier","eier","ruhrei","spiegelei","omelett","mayonnaise","=mayo","honig"],not:["vegan"]},
   caf:{has:["kaffee","espresso","cappuccino","cola","=latte","=energy","energydrink","=mate","matcha","schwarztee"],not:["entkoffeiniert","koffeinfrei"]}
 };
@@ -656,7 +657,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="tab"){ state.tab=el.dataset.v; ui.modal=null; save(); }
   else if(act==="shift"){ const next=addDays(state.date, +el.dataset.d); if(next<=todayIso()){ state.date=next; save(); } }
   else if(act==="today"){ state.date=todayIso(); save(); }
-  else if(act==="pick-day"){ state.date=el.dataset.v; save(); }
+  else if(act==="pick-day"){ const v=el.dataset.v; if(/^\d{4}-\d{2}-\d{2}$/.test(v||"")&&v<=todayIso()){ state.date=v; save(); } }
   else if(act==="dash"){ ui.dash=el.dataset.id; ui.modal=null; }
   else if(act==="open"){
     if(el.dataset.slot) ui.addSlot=el.dataset.slot;
@@ -788,7 +789,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="fill-open"){ ui.fillFor=el.dataset.id; ui.fillDraft=null; render(); setTimeout(()=>{ const i=document.getElementById("fill-s")||document.getElementById("fill-sa"); if(i) i.focus(); },60); return; }
   else if(act==="fill-save"){
     const id=el.dataset.id; ensureDb(id);
-    const c=(state.customs||[]).find(x=>x&&x.id===id&&x.src==="off"); if(!c) return;
+    const c=(state.customs||[]).find(x=>x&&x.id===id&&(x.src==="off"||x.type==="custom"&&!x.hidden)); if(!c) return;
     const num=k=>{ const e=document.getElementById(k); if(!e) return null; const t=String(e.value).trim().replace(",","."); if(t==="") return undefined; const n=+t; return Number.isFinite(n)&&n>=0?n:NaN; };
     const dv=k=>{ const e=document.getElementById(k); return e?String(e.value).slice(0,12):""; }; ui.fillDraft={s:dv("fill-s"),sa:dv("fill-sa")};
     const su=num("fill-s"), sa=num("fill-sa"), cb=+c.carbs||0;
@@ -857,7 +858,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="r-toggle"){ ui.rOpen=!ui.rOpen; }
   else if(act==="c-toggle"){ ui.cOpen=!ui.cOpen; }
   else if(act==="rhint"){ state.rHint=1; save(); }
-  else if(act==="r-pick"){ state.date=el.dataset.v; ui.rcal="day"; save(); }
+  else if(act==="r-pick"){ const v=el.dataset.v; if(/^\d{4}-\d{2}-\d{2}$/.test(v||"")&&v<=todayIso()){ state.date=v; ui.rcal="day"; save(); } }
   else if(act==="rcal-mode"){ ui.rcal=el.dataset.v; ui.rOff=0; }
   else if(act==="rcal-nav"){ ui.rOff=Math.min(0,(ui.rOff||0)+ +el.dataset.v); }
   else if(act==="routine-add"){
@@ -880,8 +881,11 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="skin"){ state.skin[el.dataset.k]=el.dataset.v; save(); }
   else if(act==="skin-done"){ state.hautPlan=true; save(); toast("Plan gespeichert"); }
   else if(act==="mark-pflege"){ day().checks.pflege=1; ui.modal=null; save(); toast("Pflege notiert"); }
-  else if(act==="draft"){ ui.draftKg=Math.max(35, Math.min(220, +(ui.draftKg+ +el.dataset.d).toFixed(1))); }
+  else if(act==="draft"){ const i=document.getElementById("w-new-kg"), v=i?+String(i.value).replace(",","."):NaN; ui.draftKg=Math.max(35, Math.min(220, +((Number.isFinite(v)&&v>0?v:ui.draftKg)+ +el.dataset.d).toFixed(1))); if(i){ i.value=numIn(ui.draftKg.toFixed(1)); return; } }
   else if(act==="save-weight"){
+    const i=document.getElementById("w-new-kg"), v=i?+String(i.value).replace(",","."):+ui.draftKg;
+    if(!(v>=35&&v<=220)){ toast("Bitte 35–220 kg eingeben"); return; }
+    ui.draftKg=+v.toFixed(1);
     state.weights=state.weights.filter(w=>w.date!==state.date).concat({date:state.date, kg:+ui.draftKg}).sort((a,b)=>a.date<b.date?-1:1);
     p.weight=lastWeight(); autoGoals(); ui.modal=null; save(); toast("Gewicht gespeichert");
   }
@@ -1009,7 +1013,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="goal-weeks"){ const gw=goalWeeks()||8; state.profile.goalDate=addDays(todayIso(), 7*gw); save(); toast(`Ziel in ${gw} Wochen`); }
   else if(act==="affiliate") toast("Anzeige · Score bleibt gleich");
   else if(act==="w-edit"){ const w=state.weights.find(x=>x.date===el.dataset.v); if(!w) return; ui.draftKg=w.kg; openModal("w-edit", w.date); ui.confirmDel=false; render(); return; }
-  else if(act==="w-edit-step"){ const i=document.getElementById("w-edit-kg"); const v=+((i&&i.value)||ui.draftKg).toString().replace(",","."); ui.draftKg=Math.max(35,Math.min(220,+((v||ui.draftKg)+ +el.dataset.d).toFixed(1))); if(i){ i.value=ui.draftKg.toFixed(1); return; } }
+  else if(act==="w-edit-step"){ const i=document.getElementById("w-edit-kg"); const v=+((i&&i.value)||ui.draftKg).toString().replace(",","."); ui.draftKg=Math.max(35,Math.min(220,+((v||ui.draftKg)+ +el.dataset.d).toFixed(1))); if(i){ i.value=numIn(ui.draftKg.toFixed(1)); return; } }
   else if(act==="w-save"){
     const i=document.getElementById("w-edit-kg"), kg=+(String(i&&i.value||"").replace(",","."));
     if(!(kg>=35&&kg<=220)){ toast("Bitte 35–220 kg eingeben"); return; }

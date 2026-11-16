@@ -79,7 +79,7 @@ function renderSport(){
       <button class="plus dark" data-act="new-plan" aria-label="Neue Routine">+</button></div>
     <div class="card">
       <div class="kpi">
-        <div><span>Einheiten</span><b>${week.length}</b><span>7 Tage</span></div>
+        <div><span>Einheiten</span><b>${week.length}</b><span>diese Woche</span></div>
         <div><span>Volumen</span><b>${de(Math.round(vol))}</b><span>kg</span></div>
         <div><span>Routinen</span><b>${plans.length}</b><span>angelegt</span></div>
       </div>
