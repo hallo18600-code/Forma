@@ -8,10 +8,10 @@ const DS_MIN_W=20;
 
 function dayScore(s){
   const d=state.days[s||state.date]; if(!d||!Array.isArray(d.meals)) return null;
-  const by=new Map();
+  const by=new Map(), FM=typeof SK_FM!=="undefined"&&SK_FM;   // in der Hautanalyse: Lebensmittel schon nachschlagbar
   d.meals.forEach(m=>{
     if(!m||!(m.portion>0)) return;
-    const p=foods().find(x=>x.id===m.id); if(!p||p.hidden) return;
+    const p=FM?FM.get(m.id):foods().find(x=>x.id===m.id); if(!p||p.hidden) return;
     const r=scored(p).score; if(r==null) return; const sc=+r; if(!Number.isFinite(sc)) return;   // ohne Score (Angaben fehlen): zählt nicht
     const k=Math.max(0,line(p,m.portion).kcal||0), e=by.get(p.id)||{p,score:Math.max(0,Math.min(100,sc)),kcal:0,w:0};
     e.kcal+=k; e.w+=Math.max(DS_MIN_W,k); by.set(p.id,e);

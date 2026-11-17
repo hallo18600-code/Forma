@@ -54,7 +54,7 @@ function weightView(){
         </svg>
         <div class="mid"><span class="sub">Fortschritt ${Math.round(pct*100)} %</span><b>${de(last,1)}</b><span class="sub">kg · ${labelDate(all.length?all[all.length-1].date:todayIso())}</span></div>
       </div>
-      <div class="wside"><span class="sub">Weiter</span><b>${de(next,1)}</b><span class="sub">kg</span></div>
+      <div class="wside"><span class="sub">Zwischenziel</span><b>${de(next,1)}</b><span class="sub">kg</span></div>
     </div>
     <div class="row space mt-2">
       <div><span class="sub">Start</span><b class="d-block">${de(start,1)} kg</b><span class="sub">${startDate.split("-").reverse().join(".")}</span></div>

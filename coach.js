@@ -881,7 +881,7 @@ function rMonth(y,mo){
   const heads=["Mo","Di","Mi","Do","Fr","Sa","So"].map(d=>`<div class="sub">${d}</div>`).join("");
   let cells="<div></div>".repeat(pad);
   for(let d=1;d<=count;d++){ const s=iso(new Date(y,mo,d)), r=rDone(s); cells+=`<button class="calcell" data-act="r-pick" data-v="${s}" ${s>todayIso()?"disabled":""}><div class="cdot ${rState(s)} ${s===todayIso()?"today":""}">${d}</div><div class="cname">${r.c?r.c+"/"+r.n:""}</div></button>`; }
-  return `<h2 class="month-h">${first.toLocaleDateString(LOC,{month:"long",year:"numeric"})}</h2><div class="calgrid">${heads}${cells}</div>`;
+  return `<h2 class="month-h">${fmtD(first,{month:"long",year:"numeric"})}</h2><div class="calgrid">${heads}${cells}</div>`;
 }
 function renderRoutineDash(){
   const m=ui.rcal||"day", now=new Date(), rt=state.coach.routine||[], edit=!!ui.rEdit;
@@ -900,7 +900,7 @@ function renderRoutineDash(){
         const first=new Date(y,mo,1), pad=(first.getDay()+6)%7, count=new Date(y,mo+1,0).getDate();
         let cells=Array.from({length:pad},()=>`<i class="sq empty"></i>`).join("");
         for(let d=1;d<=count;d++) cells+=`<i class="sq ${rState(iso(new Date(y,mo,d)))}"></i>`;
-        return `<div><div class="sub mb-1">${first.toLocaleDateString(LOC,{month:"short"})}</div><div class="mini">${cells}</div></div>`;
+        return `<div><div class="sub mb-1">${fmtD(first,{month:"short"})}</div><div class="mini">${cells}</div></div>`;
       }).join("")}</div>`; }
   }
   return `<div class="calhead"><button class="navd" data-act="dash-close" aria-label="Zurück">‹</button>

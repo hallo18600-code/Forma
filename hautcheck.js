@@ -12,6 +12,9 @@ function skinItems(s){
   const out=[]; d.meals.forEach(m=>{ if(!m||!(m.portion>0)) return; const p=foods().find(x=>x.id===m.id); if(p&&!p.hidden&&p.type!=="sup"&&p.type!=="care") out.push({p,g:m.portion}); });
   return out.length?out:null;
 }
+// Lebensmittel nach id (wie foods().find: bei doppelter id gilt die erste)
+let SK_FM=null;
+function skFoodMap(){ const m=new Map(); for(const x of foods()) if(!m.has(x.id)) m.set(x.id,x); return m; }
 function skinDays(){ return Object.keys(state.days).filter(s=>skinVal(s)!=null).sort(); }
 function skinAvg(list){ return list.length?list.reduce((a,b)=>a+b,0)/list.length:null; }
 
@@ -33,7 +36,8 @@ const SK_BLOCK=3;           // Zufallsvergleich in 3-Tages-Blöcken (Haut und Ge
 function skinDayInfo(s){
   const d=state.days[s]; if(!d||!Array.isArray(d.meals)) return null;
   let kcal=0, unk=0, sugar=0, n=0, fast=false, milk=0;
-  d.meals.forEach(m=>{ if(!m||!(m.portion>0)) return; const p=foods().find(x=>x.id===m.id); if(!p||p.type==="sup"||p.type==="care") return;
+  const FM=SK_FM||skFoodMap();
+  d.meals.forEach(m=>{ if(!m||!(m.portion>0)) return; const p=FM.get(m.id); if(!p||p.type==="sup"||p.type==="care") return;
     const k=Math.max(0,(p.kcal||0)*m.portion/100); kcal+=k; n++;
     const c=(!p.hidden&&skinCat(p))||{};
     if(c.id==="fastfood") fast=true;
@@ -99,7 +103,8 @@ function skinInsights(){
   const fp=state.profile.goal+"|"+state.profile.waterTarget+"|"+state.customs.length+"|"+all.map(s=>{ const d=state.days[s], y=state.days[addDays(s,-1)]||{};
     return s+":"+d.skin+":"+(d.sleep??"")+":"+(y.water||0)+":"+(y.meals||[]).map(m=>m&&m.id+"*"+m.portion).join(","); }).join(";");
   if(SK_MEMO.fp===fp) return SK_MEMO.val;
-  const rows=all.map(s=>({s, y:skinVal(s), prev:skinDayInfo(addDays(s,-1)), sleep:(()=>{ const v=(state.days[s]||{}).sleep; return v==null?null:+v; })()}));
+  SK_FM=skFoodMap();   // für skinDayInfo: Lebensmittel einmal nachschlagbar machen
+  let rows; try{ rows=all.map(s=>({s, y:skinVal(s), prev:skinDayInfo(addDays(s,-1)), sleep:(()=>{ const v=(state.days[s]||{}).sleep; return v==null?null:+v; })()})); } finally { SK_FM=null; }
   const ys=rows.map(r=>r.y); if(Math.max(...ys)-Math.min(...ys)<2){ SK_MEMO.fp=fp; SK_MEMO.key=null; SK_MEMO.val=[]; SK_MEMO.info={flat:true}; return []; }   // Haut immer (fast) gleich bewertet → nichts zu erkennen
   const F=skinFeatures(rows), X=F.map(f=>rows.map(r=>f.x(r)));
   const key=JSON.stringify([ys,X,F.map(f=>f.sub)]); if(SK_MEMO.key===key){ SK_MEMO.fp=fp; return SK_MEMO.val; }
@@ -115,8 +120,19 @@ function skinInsights(){
     const o=skinOLS(R.map(k=>[1,...set.map(f=>X[idx(f)][k])]),R.map(k=>y[k])); return o&&{o,R};
   };
   const tOf=(m,k)=>m.o.beta[k]/(m.o.se[k]||1e9);
-  // Stärkstes einzelnes Muster (in der erlaubten Richtung) – für den Zufallsvergleich
-  const maxStat=y=>{ let mx=0; for(const f of F){ const m=fit([f],y); if(m){ const t=tOf(m,1)*f.dir; if(t>mx) mx=t; } } return mx; };
+  // Stärkstes einzelnes Muster (in der erlaubten Richtung) – für den Zufallsvergleich.
+  // Gleiche Rechnung wie fit([f],y) (Gerade mit Achsenabschnitt), aber direkt ausgerechnet: Welche Tage zählen, hängt nur
+  // von den Gewohnheiten ab, nicht von den gemischten Hautwerten – das wird einmal vorbereitet statt 400-mal.
+  const single=F.map(f=>{ const xi=X[idx(f)], Rk=[]; for(let k=0;k<rows.length;k++) if(xi[k]!=null) Rk.push(k);
+    const n=Rk.length; if(n<Math.max(SK_MIN,6)||n-2<3) return null;
+    const xs=Rk.map(k=>xi[k]), ones=xs.filter(v=>v===1).length; if(ones<SK_GRP||n-ones<SK_GRP) return null;
+    let Sx=0,Sxx=0; for(const v of xs){ Sx+=v; Sxx+=v*v; } const Sxxc=Sxx-Sx*Sx/n; if(!(Sxxc>1e-9)) return null;
+    return {dir:f.dir,Rk,xs,n,Sx,Sxxc}; }).filter(Boolean);
+  const maxStat=y=>{ let mx=0;
+    for(const q of single){ const {Rk,xs,n}=q; let Sy=0,Sxy=0; for(let j=0;j<n;j++){ const v=y[Rk[j]]; Sy+=v; Sxy+=xs[j]*v; }
+      const b1=(Sxy-q.Sx*Sy/n)/q.Sxxc, b0=(Sy-b1*q.Sx)/n; let rss=0; for(let j=0;j<n;j++){ const e=y[Rk[j]]-b0-b1*xs[j]; rss+=e*e; }
+      const se=Math.sqrt(Math.max(rss/(n-2),0.25)/q.Sxxc), t=b1/(se||1e9)*q.dir; if(t>mx) mx=t; }
+    return mx; };
   // Permutationstest: Hautwerte 400× mischen. Nur was stärker ist als 97,5 % der gemischten Fälle, zählt
   // (streng, damit reiner Zufall möglichst selten als Auffälligkeit erscheint).
   const rnd=skinRng(key.length*7919+ys.reduce((a,v,i)=>a+v*(i+1)*31,0)), null_=[];

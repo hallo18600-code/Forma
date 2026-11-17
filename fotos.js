@@ -120,7 +120,7 @@ function phKg(date){
   let kg=null; (state.weights||[]).forEach(w=>{ if(w&&w.date<=date&&Number.isFinite(+w.kg)&&w.kg>0&&(kg===null||w.date>=kg.date)) kg={date:w.date,kg:+w.kg}; });
   return kg?kg.kg:null;
 }
-function phDate(s){ return parseIso(s).toLocaleDateString(LOC,{day:"numeric",month:"short",year:s.slice(0,4)===todayIso().slice(0,4)?undefined:"numeric"}); }
+function phDate(s){ return fmtD(parseIso(s),{day:"numeric",month:"short",year:s.slice(0,4)===todayIso().slice(0,4)?undefined:"numeric"}); }
 function phSub(p){ const kg=phKg(p.date); return `<span class="notr">${esc(phDate(p.date))}${kg!=null?" · "+de(kg,1)+" kg":""}</span>`; }
 // Vergleich: links immer das allererste, rechts immer das neueste Foto
 function phCompare(act){
@@ -176,7 +176,7 @@ function photoSheet(id){
   const p=(PH||[]).find(x=>x.id===id);
   if(!p) return `<h2>Foto</h2><p class="sub">Nicht gefunden.</p><div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
   const kg=phKg(p.date), ask=ui.phDel===p.id, re=ui.phRedate===p.id;
-  return `<h2 class="notr">${esc(parseIso(p.date).toLocaleDateString(LOC,{day:"numeric",month:"long",year:"numeric"}))}</h2>${kg!=null?`<p class="sub notr">${de(kg,1)} kg</p>`:""}
+  return `<h2 class="notr">${esc(fmtD(parseIso(p.date),{day:"numeric",month:"long",year:"numeric"}))}</h2>${kg!=null?`<p class="sub notr">${de(kg,1)} kg</p>`:""}
     <div class="pf-full"><img src="${p.url}" alt=""></div>
     <div class="gap"></div>
     ${re?`<div class="field"><label for="ph-redate">Neues Datum</label><input id="ph-redate" type="date" value="${p.date}" min="2000-01-01" max="${todayIso()}"></div><button class="pill primary w-full" data-act="ph-redate-save" data-id="${esc(p.id)}">Datum speichern</button>`

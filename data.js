@@ -1,6 +1,8 @@
 // Life Maxxing – Grunddaten: Ziele, Lebensmittel, Pflege, Supplements, Übungen, Aufgaben
 // NORM wird schon beim Laden dieser Datei gebraucht (Liste der Standard-Lebensmittel)
-function NORM(t){ return String(t||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss").replace(/ae/g,"a").replace(/oe/g,"o").replace(/ue/g,"u"); }
+// Gleiches Ergebnis wie früher (Akzente weg, ß→ss, ae/oe/ue→a/o/u), aber reine ASCII-Texte überspringen die teuren Schritte
+const NORM_NA=/[^\x00-\x7f]/;
+function NORM(t){ let s=String(t||"").toLowerCase(); if(NORM_NA.test(s)) s=s.normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/ß/g,"ss"); return s.indexOf("e")<0?s:s.replace(/([aou])e/g,"$1"); }
 const KEY = "forma-app-v1";
 const GOALS = [
   { id:"muscle", name:"Muskeln aufbauen" },

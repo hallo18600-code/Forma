@@ -429,7 +429,15 @@ function rTopic(t){
   return t;
 }
 // Art erkennen + Nährwerte aufbereiten (auch für die Median-Tabelle genutzt)
+// Ergebnis hängt nur vom Produkt ab (Name, Marke, Nährwerte) → merken, damit Suche und Listen nicht stocken.
+// Das Ergebnis wird nirgends verändert, nur gelesen.
+const R_CLS=new Map();
 function rClassify(item){
+  const k=[item.name,item.brand,item.kcal,item.protein,item.carbs,item.fat,item.sugar,item.fiber,item.salt,item.nova,item.processed?1:0].map(v=>v==null?"":String(v)).join("\u0001");
+  let r=R_CLS.get(k); if(r) return r;
+  r=rClassify0(item); if(R_CLS.size>20000) R_CLS.clear(); R_CLS.set(k,r); return r;
+}
+function rClassify0(item){
   const pr=+item.protein||0, cb=+item.carbs||0, fa=+item.fat||0, fi=+item.fiber||0, sa=+item.salt||0;
   let su=+item.sugar||0;
   // Kalorien gegen Makros prüfen (Tippfehler in der Datenbank, z. B. Hackfleisch mit 47 kcal)
@@ -520,6 +528,9 @@ function rSupKind(item,h,cat){
 }
 // Emoji für Supplements aus der Datenbank (sonst sieht die Liste leer aus)
 const R_SUP_EMO={crea:"💪",whey:"🥛",col:"✨",d3:"☀️",o3:"🐟",mg:"🌙",b12:"🌱",gen:"💊"};
+// Passendes Bild zur erkannten Art (statt überall einer Kiste)
+const R_CAT_EMO={alcohol:"🍺",softdrink:"🥤",vegjuice:"🥕",nectar:"🧃",juice:"🧃",plantmilk:"🥛",ersatz:"🌱",proteinbar:"🍫",whey:"🥛",darkchoc:"🍫",ricecake:"🍘",sugar:"🍬",sweets:"🍬",cereal:"🥣",chips:"🍟",fastfood:"🍔",readymeal:"🍱",mixedmeal:"🍲",sauce:"🫙",margarine:"🧈",seedoil:"🫗",coconut:"🥥",goodfat:"🫒",peanut:"🥜",butter:"🧈",processedmeat:"🥓",broth:"🍲",organ:"🥩",fattyfish:"🐟",leanfish:"🐟",poultry:"🍗",redmeat:"🥩",soy:"🌱",protdairy:"🥛",kefir:"🥛",dairy:"🥛",cheese:"🧀",egg:"🥚",avocado:"🥑",nuts:"🌰",legume:"🫘",fermentedveg:"🥬",sweetpotato:"🍠",potato:"🥔",oats:"🌾",rice:"🍚",pseudograin:"🌾",wholewheat:"🍞",refined:"🥖",driedfruit:"🍇",berries:"🫐",banana:"🍌",vitc:"🍊",fruit:"🍎",skinveg:"🥕",veg:"🥦",honey:"🍯",coffeemilk:"☕",coffee:"☕",tea:"🍵",spice:"🧂",water:"💧"};
+function catEmoji(item){ try{ const c=rClassify(item).cat; return c&&R_CAT_EMO[c.id]||null; }catch(e){ return null; } }
 function supEmoji(item){ const k=rSupKind(item," "+NORM(item.name||"")+" ",null); return k?R_SUP_EMO[k]:null; }
 function rSupFood(item,kind,g,h){
   const r=supScore(kind,g), good=[...r.good], bad=[...r.bad]; let sc=r.score;
@@ -594,7 +605,20 @@ function rMissing(item){
   if(no(item.salt)) m.push("Salz");
   return m;
 }
+// Bewertung merken: hängt nur vom Produkt, vom Ziel und vom Profil/Fragebogen ab. Gleiche Eingaben → gleiche Bewertung,
+// ohne alles neu zu rechnen (Tages-Score, Hautanalyse und Listen bewerten dieselben Lebensmittel sehr oft).
+// Ausnahme: Produkte, die wie Supplements bewertet werden – die hängen auch vom heutigen Tag ab (z. B. Schlaf, Jahreszeit).
+const R_SC=new Map(); let R_SUPHIT=false;
 function scoreFood(item,goal){
+  let key=null;
+  try{ key=JSON.stringify(item)+"\u0001"+(goal||"")+"\u0001"+JSON.stringify(state.profile)+"\u0001"+JSON.stringify(state.coach.answers); }catch(e){}
+  if(key){ const h=R_SC.get(key); if(h) return structuredClone(h); }
+  R_SUPHIT=false;
+  const out=scoreFoodNow(item,goal);
+  if(key&&!R_SUPHIT){ try{ const c=structuredClone(out); if(R_SC.size>4000) R_SC.clear(); R_SC.set(key,c); }catch(e){} }
+  return out;
+}
+function scoreFoodNow(item,goal){
   const impl=rImplausible(item);
   if(impl.length) return {score:null,noScore:true,missing:[],implaus:impl,good:[],bad:[],notes:[],perso:[],reasons:[]};
   const miss=rMissing(item);
@@ -634,7 +658,7 @@ function scoreFood0(item,goal){
   const novaUnk=item.src==="off"&&!nova&&!item.processed, NOPROC=/(naturbelassen|unverarbeitet)/i;
   const PROC="Stark verarbeitet mit Zusätzen";
   const supK=typeof supScore==="function"?rSupKind(item,h,cat):null;
-  if(supK) return rSupFood(item,supK,g,h);
+  if(supK){ R_SUPHIT=true; return rSupFood(item,supK,g,h); }
   const {kc,pr,cb,fa,su,fi,sa}=nut;
   const id=cat?cat.id:"", pros=[], cons=[];
   const good=(t,w)=>{ if(t&&!(novaUnk&&NOPROC.test(t))) pros.push({t,w}); }, bad=(t,w)=>{ if(t) cons.push({t,w}); };

@@ -60,7 +60,9 @@ async function offLookup(code){
   // Milliliter oder Gramm laut Packungsangabe („500 ml“, „250 g“), nicht aus dem Namen geraten
   const qu=String(j.product.quantity||"")+" "+String(j.product.product_quantity_unit||"");
   const liquid=/\d\s*(ml|cl|dl|l|ltr|liter|litre)\b|^\s*ml\s*$/i.test(qu)||/\bml\b/i.test(j.product.product_quantity_unit||"")?true:/\d\s*(g|gr|kg|gramm)\b/i.test(qu)||/^g$/i.test(j.product.product_quantity_unit||"")?false:undefined;
-  return {id:"off-"+code,type:"custom",src:"off",name,brand:brand||"Open Food Facts",emoji:"📦",kcal:Math.round(kcal),protein:p,carbs:c,fat:f,sugar:su==null?undefined:Math.min(su,c),fiber:fib,salt:opt("salt_100g"),sat:sat==null?undefined:Math.min(sat,f),processed:(+j.product.nova_group||0)>=4,nova:+j.product.nova_group||undefined,warn,liquid,bc:code};
+  const it={id:"off-"+code,type:"custom",src:"off",name,brand:brand||"Open Food Facts",emoji:"📦",kcal:Math.round(kcal),protein:p,carbs:c,fat:f,sugar:su==null?undefined:Math.min(su,c),fiber:fib,salt:opt("salt_100g"),sat:sat==null?undefined:Math.min(sat,f),processed:(+j.product.nova_group||0)>=4,nova:+j.product.nova_group||undefined,warn,liquid,bc:code};
+  it.emoji=(typeof supEmoji==="function"&&(supEmoji(it)||catEmoji(it)))||"📦";
+  return it;
 }
 async function bcLookup(code){
   code=String(code||"").replace(/\D/g,"");

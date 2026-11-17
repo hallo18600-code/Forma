@@ -6,14 +6,20 @@ function iso(d){
   return x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0")+"-"+String(x.getDate()).padStart(2,"0");
 }
 function parseIso(s){ const [y,m,d]=s.split("-").map(Number); return new Date(y,m-1,d); }
-function addDays(s,n){ const d=parseIso(s); d.setDate(d.getDate()+n); return iso(d); }
+// Ergebnis merken: wird für Kalender, Serien und Analysen sehr oft mit denselben Daten gerufen
+const AD_CACHE=new Map();
+function addDays(s,n){ const k=s+"|"+n; let r=AD_CACHE.get(k); if(r===undefined){ const d=parseIso(s); d.setDate(d.getDate()+n); r=iso(d); if(AD_CACHE.size>50000) AD_CACHE.clear(); AD_CACHE.set(k,r); } return r; }
 function todayIso(){ return iso(new Date()); }
 function weekday(s){ return ["So","Mo","Di","Mi","Do","Fr","Sa"][parseIso(s).getDay()]; }
 function weekStart(s){ const d=parseIso(s); const off=(d.getDay()+6)%7; d.setDate(d.getDate()-off); return iso(d); }
+// Datums- und Zahlenformate einmal anlegen und wiederverwenden (neu anlegen ist auf Handys spürbar langsam)
+const FMT_CACHE=new Map();
+function fmtD(d,o){ const k="d"+JSON.stringify(o); let f=FMT_CACHE.get(k); if(!f){ f=new Intl.DateTimeFormat(LOC,o); FMT_CACHE.set(k,f); } return f.format(d); }
 function labelDate(s){
-  if(s===todayIso()) return "Heute";
-  if(s===addDays(todayIso(),-1)) return "Gestern";
-  return parseIso(s).toLocaleDateString(LOC,{weekday:"short", day:"numeric", month:"short"});
+  const t=todayIso();
+  if(s===t) return "Heute";
+  if(s===addDays(t,-1)) return "Gestern";
+  return fmtD(parseIso(s),{weekday:"short", day:"numeric", month:"short"});
 }
 function uid(){ return Math.random().toString(36).slice(2,9); }
 function blankDay(){ return { meals:[], water:0, checks:{}, taken:{}, routine:{} }; }
@@ -76,8 +82,7 @@ function normalize(s){
     return s;
 }
 function save(){
-  const copy = JSON.parse(JSON.stringify(state));
-  try { localStorage.setItem(KEY, JSON.stringify(copy)); } catch(e){}
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
   try { remSoon(); } catch(e){}   // Store-App: Erinnerungen neu einplanen (erinnerungen.js)
 }
 function day(s){ s=s||state.date; if(!state.days[s]) state.days[s]=blankDay(); return state.days[s]; }
@@ -337,7 +342,7 @@ function syncAuto(s){
   d.checks.sport = state.workouts.some(w=>w.date===s) || d.checks.sport ? 1 : 0;
 }
 
-function de(v,d){ d=d||0; return Number(v||0).toLocaleString(LOC,{minimumFractionDigits:d,maximumFractionDigits:d}); }
+function de(v,d){ d=d||0; const k="n"+d; let f=FMT_CACHE.get(k); if(!f){ f=new Intl.NumberFormat(LOC,{minimumFractionDigits:d,maximumFractionDigits:d}); FMT_CACHE.set(k,f); } return f.format(Number(v||0)); }
 // Zahl für Eingabefelder: Komma in allen Sprachen außer Englisch (12,5)
 function numIn(v){ const t=String(v==null?"":v); return LANG==="en"?t:t.replace(".",","); }
 function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
@@ -630,6 +635,7 @@ function seedDemo(){
   }
   ["Push","Pull","Beine","Push","Pull"].forEach((name,i)=>state.workouts.push({ id:uid(), date:addDays(t,-1-i*2), name:name, min:40, volume:2000+i*120, sets:9, exercises:[] }));
   state.profile.weight=lastWeight(); state.profile.waterTarget=waterGoal();
+  state.profile.target=obDefaultTarget();   // Ziel passend zu „Muskeln aufbauen“ (nicht unter dem aktuellen Gewicht)
   save();
 }
 
