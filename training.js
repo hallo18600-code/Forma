@@ -20,14 +20,16 @@ function lastSet(id){
   return "–";
 }
 // Startwerte für eine neu hinzugefügte Übung: die abgehakten Sätze vom letzten Mal,
-// sonst n Sätze mit 20 kg × 6 (wenn es noch keinen Verlauf gibt)
+// sonst n Sätze mit 20 kg × 6 (wenn es noch keinen Verlauf gibt).
+// Körpergewicht-Übungen starten ohne Zusatzgewicht (0 kg), Plank mit 30 Sekunden (wie im Zuhause-Plan).
 function startSets(id, n){
   for(const w of [...state.workouts].reverse()){
     const hit=(w.exercises||[]).find(e=>e.id===id);
     const done=hit ? (hit.sets||[]).filter(s=>s.done) : [];
     if(done.length) return done.map(s=>({kg:s.kg, reps:s.reps}));
   }
-  return Array.from({length:n||1},()=>({kg:20, reps:6}));
+  const x=EX[id], bw=x&&x.eq==="Körpergewicht";
+  return Array.from({length:n||1},()=>({kg:bw?0:20, reps:x&&x.pattern==="plank"?30:6}));
 }
 function clock(t0){
   const s=Math.max(0, Math.floor((Date.now()-t0)/1000));
@@ -44,10 +46,10 @@ function prevSet(id, index){
   return "–";
 }
 // Plan-Vorschlag beim ersten Öffnen: aus Coach-Antworten (Muskeln) oder der Trainingshäufigkeit im Fragebogen
+// Gleiche Regel wie im Coach (muskelPlanId): Push/Pull/Legs nur, wenn schon länger Krafttraining gemacht wird.
 function suggestPlanId(){
   const a=(state.coach.answers||{}).aussehen||{}, p=state.profile;
-  if(a.gym||a.tage) return muskelPlanId(a,["Krafttraining","Beides"].includes(p.trainType));
-  return p.trainFreq==="5× oder öfter"?"ppl":p.trainFreq==="3–4× pro Woche"?"tl":"gk";
+  return muskelPlanId(a,["Krafttraining","Beides"].includes(p.trainType));
 }
 // Plan-Auswahl als 4 Kacheln: Name, wie oft, Wochen-Rhythmus als Punkte. ⭐ = passt zu deinen Angaben.
 const PLAN_ICON={gk:"🔁", tl:"💪", ppl:"🏋️", home:"🏠"};
@@ -222,8 +224,10 @@ function syncSport(date){ if(state.days[date]) state.days[date].checks.sport = s
 function workoutOn(date){
   return state.workouts.filter(w=>w.date===date);
 }
+// Serie in Wochen: Die laufende Woche bricht sie noch nicht ab, solange sie nicht vorbei ist.
 function weekStreak(){
   let n=0, cursor=weekStart(todayIso());
+  if(!state.workouts.some(w=>w.date>=cursor && w.date<addDays(cursor,7))) cursor=addDays(cursor,-7);
   while(state.workouts.some(w=>w.date>=cursor && w.date<addDays(cursor,7))){
     n++; cursor=addDays(cursor,-7); if(n>80) break;
   }

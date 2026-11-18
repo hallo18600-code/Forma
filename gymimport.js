@@ -16,22 +16,22 @@ const GYM_ALIAS = {
   "decline bench press":["bp_dec","bp_dec_db"], "close grip bench press":["bp_close"], "bench press close grip":["bp_close"],
   "chest press":["chest_press"], "incline chest press":["chest_press"], "chest fly":["fly_db","fly_cable","pecdeck"],
   "dumbbell fly":["fly_db"], "cable crossover":["fly_cable"], "cable fly":["fly_cable"], "pec deck":["pecdeck"], "butterfly":["pecdeck"],
-  "push up":["pushup"], "chest dip":["dip","dip_assist"], "triceps dip":["dip","dip_machine"], "dip":["dip","dip_assist"],
-  "bench dip":["bench_dip"], "pullover":["pullover"],
-  "bent over row":["row","row_db"], "dumbbell row":["row_db"], "t bar row":["row_tbar"], "seated cable row":["row_cable"],
+  "push up":["pushup"], "chest dip":["dip","dip_assist"], "triceps dip":["dip","dip_machine","dip_assist"], "dip":["dip","dip_assist"],
+  "bench dip":["bench_dip"], "seated dip":["dip_machine"], "pullover":["pullover"],
+  "bent over row":["row","row_db"], "dumbbell row":["row_db"], "t bar row":["row_tbar"], "seated cable row":["row_cable"], "cable row":["row_cable"],
   "seated row":["row_cable","row_machine"], "iso lateral row":["row_machine"], "machine row":["row_machine"],
   "lat pulldown":["lat","lat_machine"], "close grip lat pulldown":["lat_close"], "lat pulldown close grip":["lat_close"],
-  "straight arm":["straight_pd"], "pull up":["pull","pull_assist"], "chin up":["chin"],
+  "straight arm":["straight_pd"], "straight arm lat pulldown":["straight_pd"], "straight arm pulldown":["straight_pd"], "pull up":["pull","pull_assist"], "chin up":["chin"],
   "deadlift":["dl","dl_db"], "romanian deadlift":["rdl","rdl_db"], "sumo deadlift":["dl_sumo"],
   "back extension":["back_ext","back_ext_machine"], "hyperextension":["back_ext","back_ext_machine"], "good morning":["good_morning"], "shrug":["shrug","shrug_db"],
   "overhead press":["ohp","ohp_db","ohp_smith","ohp_machine"], "shoulder press":["ohp_db","ohp_machine","ohp_smith","ohp"], "military press":["ohp"],
   "arnold press":["arnold"], "lateral raise":["latraise","latraise_cable","latraise_machine"], "front raise":["front_raise","front_raise_cable"],
-  "reverse fly":["rear_fly","rear_fly_machine"], "rear delt fly":["rear_fly","rear_fly_machine"], "face pull":["face"], "upright row":["upright"],
+  "reverse fly":["rear_fly","rear_fly_machine","rear_fly_cable"], "rear delt fly":["rear_fly","rear_fly_machine","rear_fly_cable"], "face pull":["face"], "upright row":["upright"],
   "bicep curl":["curl","curl_db","curl_ez","curl_cable"], "biceps curl":["curl","curl_db","curl_ez","curl_cable"], "barbell curl":["curl"], "ez bar curl":["curl_ez"],
   "hammer curl":["hammer","hammer_cable"], "preacher curl":["preacher","preacher_db","preacher_machine"], "concentration curl":["conc"], "reverse curl":["reverse_curl"],
   "triceps pushdown":["tri"], "tricep pushdown":["tri"], "triceps rope pushdown":["tri_rope"], "rope pushdown":["tri_rope"],
   "overhead triceps extension":["tri_oh","tri_oh_cable"], "triceps extension":["tri_oh","tri_oh_cable"], "skullcrusher":["skull","skull_db"], "skull crusher":["skull","skull_db"],
-  "lying triceps extension":["skull","skull_db"], "triceps kickback":["kickback"], "tricep kickback":["kickback"],
+  "lying triceps extension":["skull","skull_db"], "triceps kickback":["kickback","kickback_cable"], "tricep kickback":["kickback","kickback_cable"],
   "squat":["sq","sq_smith","sq_bw"], "front squat":["sq_front"], "goblet squat":["sq_goblet","sq_goblet_kb"], "hack squat":["sq_hack"], "leg press":["legpress"],
   "lunge":["lunge","lunge_bb","lunge_bw"], "walking lunge":["walk_lunge"], "bulgarian split squat":["bulgarian"], "step up":["stepup"],
   "leg extension":["leg_ext"], "lying leg curl":["leg_curl"], "seated leg curl":["leg_curl_seat"], "leg curl":["leg_curl","leg_curl_seat"],
@@ -53,13 +53,13 @@ Object.assign(GYM_ALIAS, {
   "sumo kreuzheben":["dl_sumo"], "rückenstrecker":["back_ext","back_ext_machine"], "rückenstreckung":["back_ext","back_ext_machine"], "schulterheben":["shrug","shrug_db"],
   "schulterdrücken":["ohp_db","ohp","ohp_smith","ohp_machine"], "schulterpresse":["ohp_machine"], "überkopfdrücken":["ohp","ohp_db"], "militärpresse":["ohp"],
   "seitheben":["latraise","latraise_cable","latraise_machine"], "seitliches heben":["latraise","latraise_cable","latraise_machine"], "frontheben":["front_raise","front_raise_cable"],
-  "vorgebeugtes seitheben":["rear_fly","rear_fly_machine"], "aufrechtes rudern":["upright"],
+  "vorgebeugtes seitheben":["rear_fly","rear_fly_machine","rear_fly_cable"], "aufrechtes rudern":["upright"],
   "bizeps curl":["curl","curl_db","curl_ez","curl_cable"], "bizepscurl":["curl","curl_db","curl_ez","curl_cable"], "langhantelcurl":["curl"], "kurzhantelcurl":["curl_db"],
   "hammercurl":["hammer","hammer_cable"], "scott curl":["preacher","preacher_db","preacher_machine"], "scottcurl":["preacher","preacher_db","preacher_machine"],
-  "bizepsmaschine":["preacher_machine"], "konzentrationscurl":["conc"],
+  "bizepsmaschine":["preacher_machine"], "bizeps maschine":["preacher_machine"], "konzentrationscurl":["conc"],
   "trizeps pushdown":["tri","tri_rope"], "trizepsdrücken":["tri","tri_rope"], "trizeps drücken":["tri","tri_rope"], "pushdown":["tri","tri_rope"],
   "trizeps über kopf":["tri_oh","tri_oh_cable"], "überkopf trizepsdrücken":["tri_oh","tri_oh_cable"], "überkopf trizepsstrecken":["tri_oh","tri_oh_cable"], "überkopf trizeps":["tri_oh","tri_oh_cable"], "trizepsstrecken über kopf":["tri_oh","tri_oh_cable"], "trizepsdrücken über kopf":["tri_oh","tri_oh_cable"],
-  "trizepsstrecken":["tri_oh","tri_oh_cable","skull"], "french press":["skull","skull_db"], "stirndrücken":["skull","skull_db"], "kickback":["kickback"], "dip maschine":["dip_machine"],
+  "trizepsstrecken":["tri_oh","tri_oh_cable","skull"], "french press":["skull","skull_db"], "stirndrücken":["skull","skull_db"], "kickback":["kickback","kickback_cable"], "dip maschine":["dip_machine"],
   "kniebeuge":["sq","sq_smith","sq_bw"], "frontkniebeuge":["sq_front"], "goblet":["sq_goblet","sq_goblet_kb"], "hackenschmidt":["sq_hack"], "hack kniebeuge":["sq_hack"],
   "beinpresse":["legpress"], "ausfallschritt":["lunge","lunge_bb","lunge_bw"], "ausfallschritte gehend":["walk_lunge"], "gehende ausfallschritte":["walk_lunge"],
   "bulgarische kniebeuge":["bulgarian"], "aufsteiger":["stepup"], "beinstrecker":["leg_ext"], "beinstreckung":["leg_ext"],
@@ -106,7 +106,12 @@ function gymMatch(title){
   const same=Object.values(EX).filter(x=>gymNorm(x.base)===base).map(x=>x.id);
   if(same.length&&(!eq||same.some(id=>EX[id].eq===eq))) return gymPick(same, full, eq);
   // 2. Bekannte Namen (Englisch/Deutsch), längster Treffer zuerst
-  for(const key of GYM_KEYS) if(gymWord(key).test(full)) return gymPick(GYM_ALIAS[key], full, eq);
+  // Steht Maschine/Kabel dabei, aber diese Übung gibt es hier nur frei (z. B. „Pendulum Squat (Machine)“):
+  // lieber eigene Übung als falsche Rekorde bei der Langhantel-Variante
+  for(const key of GYM_KEYS) if(gymWord(key).test(full)){
+    if(eq&&/Maschine|Kabel/.test(eq)&&!GYM_ALIAS[key].some(id=>EX[id]&&EX[id].eq===eq)) return null;
+    return gymPick(GYM_ALIAS[key], full, eq);
+  }
   // 3. Ähnlichster Name (Tippfehler, andere Schreibweise)
   const best=gymSuggest(title,1)[0];
   return best&&best.score>=0.62 ? best.id : null;
@@ -160,16 +165,20 @@ function gymCsv(text){
 
 // Datum lesen: "26 Mar 2024, 18:05", "2024-03-26 18:05:00" oder ähnlich → {date:"2024-03-26", t:Millisekunden}
 const GYM_MON={jan:1,feb:2,mar:3,mär:3,apr:4,may:5,mai:5,jun:6,jul:7,aug:8,sep:9,oct:10,okt:10,nov:11,dec:12,dez:12};
-function gymDate(s){
+function gymDate(s, dmy){
   s=String(s||"").trim(); let y,mo,d,h=0,mi=0, m;
   if((m=s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/))) [y,mo,d,h,mi]=[m[1],m[2],m[3],m[4]||0,m[5]||0].map(Number);
   else if((m=s.match(/^(\d{1,2})\.?\s+([a-zäA-Z]{3})[a-z.]*\s+(\d{4}),?\s*(?:(\d{1,2}):(\d{2}))?/)) && GYM_MON[m[2].toLowerCase()]){ d=+m[1]; mo=GYM_MON[m[2].toLowerCase()]; y=+m[3]; h=+(m[4]||0); mi=+(m[5]||0); }
   else if((m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4}),?\s*(?:(\d{1,2}):(\d{2}))?/))) [d,mo,y,h,mi]=[m[1],m[2],m[3],m[4]||0,m[5]||0].map(Number);
+  // Schrägstrich-Datum: dmy=true → 26/03/2024 (Tag zuerst), dmy=false → US-Format 03/26/2024.
+  // Ohne Angabe: Tag zuerst nur, wenn die erste Zahl über 12 ist (gymParse legt es für die ganze Datei fest)
+  else if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(?:(\d{1,2}):(\d{2}))?/))){ const a=+m[1], b=+m[2]; [d,mo]=(dmy===undefined?a>12:dmy)?[a,b]:[b,a]; y=+m[3]; h=+(m[4]||0); mi=+(m[5]||0); }
   else { const t=Date.parse(s); if(isNaN(t)) return null; const x=new Date(t); y=x.getFullYear(); mo=x.getMonth()+1; d=x.getDate(); h=x.getHours(); mi=x.getMinutes(); }
-  if(!(y>1990&&y<2100&&mo>=1&&mo<=12&&d>=1&&d<=31)) return null;
+  if(!(y>1990&&y<2100&&mo>=1&&mo<=12&&d>=1&&d<=new Date(y,mo,0).getDate())) return null;   // kein 31.02.
   const p=n=>String(n).padStart(2,"0");
   return { date:`${y}-${p(mo)}-${p(d)}`, t:new Date(y,mo-1,d,h,mi).getTime() };
 }
+const GYM_LB = 0.45359237;   // 1 lb in kg (exakt)
 const gymNum = s => { const n=parseFloat(String(s||"").replace(",",".")); return isFinite(n)?n:0; };
 const gymClean = (s,n) => String(s||"").replace(/[<>]/g,"").trim().slice(0,n||60);
 
@@ -182,22 +191,22 @@ function gymParse(text){
     app="hevy";
     const lbs=k.includes("weight_lbs")&&!k.includes("weight_kg");
     get=r=>({ key:r.title+"|"+r.start_time, name:r.title, start:r.start_time, end:r.end_time, ex:r.exercise_title,
-      kg:lbs?gymNum(r.weight_lbs)*0.4536:gymNum(r.weight_kg), reps:gymNum(r.reps), sec:gymNum(r.duration_seconds), warm:/warm/i.test(r.set_type) });
+      kg:lbs?gymNum(r.weight_lbs)*GYM_LB:gymNum(r.weight_kg), reps:gymNum(r.reps), sec:gymNum(r.duration_seconds), warm:/warm/i.test(r.set_type) });
   } else if(k.includes("exercise name")&&k.includes("date")){
     app="strong";
     get=r=>{ const dur=String(r.duration||""), hh=+(dur.match(/(\d+)\s*h/)||[0,0])[1], mm=+(dur.match(/(\d+)\s*m/)||[0,0])[1];
       return { key:r.date+"|"+r["workout name"], name:r["workout name"], start:r.date, min:hh*60+mm, ex:r["exercise name"],
-        kg:gymNum(r.weight)*(/lb/i.test(r["weight unit"]||"")?0.4536:1), reps:gymNum(r.reps), sec:gymNum(r.seconds), warm:/^w/i.test(r["set order"]||""), skip:/rest/i.test(r["set order"]||"") }; };
+        kg:gymNum(r.weight)*(/lb/i.test(r["weight unit"]||"")?GYM_LB:1), reps:gymNum(r.reps), sec:gymNum(r.seconds), warm:/^w/i.test(r["set order"]||""), skip:/rest/i.test(r["set order"]||"") }; };
   } else if(k.includes("exercise")&&k.includes("iswarmup")){
     app="fitbod";   // eine Zeile pro Satz, ohne Trainingsname: ein Training pro Tag
     const wk=k.find(h=>/^weight/.test(h))||"weight(kg)", lbs=/lb/.test(wk);
     get=r=>({ key:String(r.date).slice(0,10), name:"Training", start:r.date, ex:r.exercise,
-      kg:gymNum(r[wk])*(lbs?0.4536:1), reps:gymNum(r.reps), sec:gymNum(r["duration(s)"]), warm:/true|1/i.test(r.iswarmup) });
+      kg:gymNum(r[wk])*(lbs?GYM_LB:1), reps:gymNum(r.reps), sec:gymNum(r["duration(s)"]), warm:/true|1/i.test(r.iswarmup) });
   } else if(k.includes("exercise")&&k.includes("category")&&k.includes("date")){
     app="fitnotes";
     const wk=k.find(h=>/^weight/.test(h))||"weight (kgs)", lbs=/lb/.test(wk);
     get=r=>{ const t=String(r.time||"").split(":").map(Number), sec=t.length===3?t[0]*3600+t[1]*60+t[2]:t.length===2?t[0]*60+t[1]:0;
-      return { key:r.date, name:"Training", start:r.date, ex:r.exercise, kg:gymNum(r[wk])*(lbs?0.4536:1), reps:gymNum(r.reps), sec, warm:false }; };
+      return { key:r.date, name:"Training", start:r.date, ex:r.exercise, kg:gymNum(r[wk])*(lbs?GYM_LB:1), reps:gymNum(r.reps), sec, warm:false }; };
   } else {
     // Andere App: Spalten am Namen erkennen (Englisch oder Deutsch)
     const col=(re,not)=>k.find(h=>re.test(h)&&!(not&&not.test(h)));
@@ -209,19 +218,24 @@ function gymParse(text){
     const lbsCol=/lb/.test(cW||"");
     get=r=>{ const lbs=lbsCol||/lb/i.test(r[cU]||"");
       return { key:String(r[cD]).slice(0,10)+"|"+(cN?r[cN]:""), name:cN?r[cN]:"Training", start:r[cD], ex:r[cE],
-        kg:gymNum(r[cW])*(lbs?0.4536:1), reps:gymNum(r[cR]), sec:cT?gymNum(r[cT]):0, warm:cY?/warm|aufwärm|^w$|true/i.test(r[cY]||""):false, n:cS?Math.min(20,Math.max(1,Math.round(gymNum(r[cS])))):1 }; };
+        kg:gymNum(r[cW])*(lbs?GYM_LB:1), reps:gymNum(r[cR]), sec:cT?gymNum(r[cT]):0, warm:cY?/warm|aufwärm|^w$|true/i.test(r[cY]||""):false, n:cS?Math.min(20,Math.max(1,Math.round(gymNum(r[cS])))):1 }; };
   }
 
+  // Schrägstrich-Daten einheitlich für die ganze Datei lesen (sonst 12/03 = 3. Dez., aber 13/03 = 13. März)
+  let dmy;
+  { let first=false, second=false;
+    rows.forEach(r=>{ const x=get(r); [x.start,x.end].forEach(v=>{ const m=String(v||"").trim().match(/^(\d{1,2})\/(\d{1,2})\/\d{4}/); if(m){ if(+m[1]>12) first=true; if(+m[2]>12) second=true; } }); });
+    dmy = first&&!second ? true : second&&!first ? false : first&&second ? undefined : false; }
   const wos=new Map(), names=new Map();
   rows.forEach(r=>{
     const x=get(r); if(x.skip||x.warm||!x.ex) return;
     if(!(x.reps>0||x.kg>0||x.sec>0)) return;
-    const d=gymDate(x.start); if(!d) return;
+    const d=gymDate(x.start, dmy); if(!d) return;
     let w=wos.get(x.key);
-    if(!w){ const e=x.end&&gymDate(x.end); w={ imp:app+":"+x.key, date:d.date, name:gymClean(x.name)||"Training", min:Math.min(300,x.min||(e?Math.max(1,Math.round((e.t-d.t)/60000)):45)), ex:new Map() }; wos.set(x.key,w); }
+    if(!w){ const e=x.end&&gymDate(x.end, dmy); w={ imp:app+":"+x.key, date:d.date, name:gymClean(x.name)||"Training", min:Math.min(300,x.min||(e?Math.max(1,Math.round((e.t-d.t)/60000)):45)), ex:new Map() }; wos.set(x.key,w); }
     const title=gymClean(x.ex,80);
     if(!w.ex.has(title)) w.ex.set(title,[]);
-    for(let i=0;i<(x.n||1);i++) w.ex.get(title).push({ kg:Math.round(x.kg*10)/10, reps:Math.round(x.reps||x.sec)||0, done:true });
+    for(let i=0;i<(x.n||1);i++) w.ex.get(title).push({ kg:Math.max(0,Math.min(1000,Math.round(x.kg*100)/100)), reps:Math.round(x.reps||x.sec)||0, done:true });   // wie bei der Eingabe: 0–1000 kg, 2 Nachkommastellen
     names.set(title,1);
   });
   return { app, workouts:[...wos.values()], names:[...names.keys()] };
