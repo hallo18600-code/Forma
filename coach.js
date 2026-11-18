@@ -353,7 +353,7 @@ function hautAdvice(a){
   if(Ps.some(p=>p.spf==="getönter LSF")) Ps.forEach(p=>{ p.items=p.items.filter(i=>i.k!=="LSF 50"); });
   // Rötung bis zum Hautarzt: keine reizenden Wirkstoffe aus dem zweiten Problem
   const IRR=/BHA|Milchsäure|Retinol|Vitamin C/;
-  if(mild) Ps.forEach(p=>{ p.items=p.items.filter(i=>!IRR.test(i.k||"")); p.am=p.am.filter(x=>!IRR.test(x)); p.pm=p.pm.filter(x=>!IRR.test(x)); p.photo=false; });
+  if(mild) Ps.forEach(p=>{ p.items=p.items.filter(i=>!IRR.test(i.k||"")); p.am=p.am.filter(x=>!IRR.test(x)); p.pm=p.pm.filter(x=>!IRR.test(x)); p.photo=false; if(/Retinol/.test(p.note)) p.note=""; });
   const pick=(f,def)=>{ const p=Ps.find(x=>x[f]); return p?p[f]:def; };
   const wash=pick("wash",dry||sens?"Waschmilch":"Waschgel");
   const cream=pick("cream",dry?"Ceramid-Creme":oily?"Gel-Fluid":sens?"Panthenol-Creme":"Creme");
