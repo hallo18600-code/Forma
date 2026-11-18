@@ -297,13 +297,15 @@ function hautProblem(st,a,c){
   } else if(st==="Rötung"){
     const rot=a.rot||"Brennt / spannt schnell";
     if(rot==="Wangen & Nase, oft mit Pickelchen"){
-      P.spf="Mineral-LSF"; P.wash="Waschmilch"; P.cream="Panthenol-Creme";
+      // mild: bis zum Hautarzt keine reizenden Wirkstoffe (BHA, Milchsäure, Retinol, Vitamin C) aus einem zweiten Problem
+      P.mild=true; P.spf="Mineral-LSF"; P.wash="Waschmilch"; P.cream="Panthenol-Creme";
       P.items=[tip(null,"Zum Hautarzt","Dauerhafte Rötung mit Pickelchen an Wangen und Nase sollte ärztlich abgeklärt werden.",{must:1}),
         tip(null,"Hitze, Alkohol, Scharfes meiden","Das sind häufige Auslöser für Rötungen."), lsf("Sonne ist der häufigste Auslöser.")];
       P.note="Bis zum Termin nur milde Produkte ohne Duft.";
     } else if(rot==="Schuppig an Nase / Brauen"){
       P.cream="Creme ohne Öle";
-      P.items=[tip("Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche drauf","Mit Zink oder Piroctone Olamine, 3 Minuten einwirken lassen, dann abwaschen."),
+      // Zinkpyrithion ist in Kosmetik in der EU seit März 2022 verboten → nur erlaubte Wirkstoffe nennen
+      P.items=[tip("Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche als Maske","Mit Piroctone Olamine oder Climbazol, 3 Minuten einwirken lassen, dann abwaschen."),
         tip(null,"Leichte Creme, keine Öle","Fett kann den Hefepilz auf der Haut fördern."), tip(null,"Kopfhaut mitbehandeln","Häufig hat beides dieselbe Ursache.")];
       P.spot.push("Schuppen-Maske 2×/Wo."); P.note="Breitet es sich aus: Hautarzt.";
     } else {
@@ -346,7 +348,12 @@ function hautAdvice(a){
   const typ=a.bild||"Normal", w=state.profile.sex==="w";
   const sens=typ==="Sensibel"||a.empf==="Ja", dry=typ==="Trocken", oily=typ==="Fettig", mixed=typ==="Gemischt", slow=sens||dry;
   const list=hautList(a), Ps=list.map(st=>hautProblem(st,a,{slow,sens,w}));
-  const calm=Ps.find(p=>p.calm);
+  const calm=Ps.find(p=>p.calm), mild=Ps.some(p=>p.mild);
+  // Getönter LSF ersetzt den normalen LSF-Tipp (sonst steht LSF doppelt da)
+  if(Ps.some(p=>p.spf==="getönter LSF")) Ps.forEach(p=>{ p.items=p.items.filter(i=>i.k!=="LSF 50"); });
+  // Rötung bis zum Hautarzt: keine reizenden Wirkstoffe aus dem zweiten Problem
+  const IRR=/BHA|Milchsäure|Retinol|Vitamin C/;
+  if(mild) Ps.forEach(p=>{ p.items=p.items.filter(i=>!IRR.test(i.k||"")); p.am=p.am.filter(x=>!IRR.test(x)); p.pm=p.pm.filter(x=>!IRR.test(x)); p.photo=false; });
   const pick=(f,def)=>{ const p=Ps.find(x=>x[f]); return p?p[f]:def; };
   const wash=pick("wash",dry||sens?"Waschmilch":"Waschgel");
   const cream=pick("cream",dry?"Ceramid-Creme":oily?"Gel-Fluid":sens?"Panthenol-Creme":"Creme");
@@ -363,6 +370,8 @@ function hautAdvice(a){
   }
   const am=calm?[]:[...new Set(Ps.flatMap(p=>p.am))], pm=calm?[]:[...new Set(Ps.flatMap(p=>p.pm))], spot=calm?[]:[...new Set(Ps.flatMap(p=>p.spot))];
   // Retinol nie am selben Abend wie Säuren
+  // Zwei Säuren (BHA + Milchsäure) nicht am selben Abend
+  if(pm.includes("BHA")&&pm.includes("Milchsäure")){ pm.splice(pm.indexOf("BHA"),1,"BHA / Milchsäure im Wechsel"); pm.splice(pm.indexOf("Milchsäure"),1); }
   const acid=pm.find(x=>/BHA|Milchsäure/.test(x));
   if(pm.includes("Retinol")&&acid){ pm.splice(pm.indexOf("Retinol"),1,`Retinol / ${acid} im Wechsel`); pm.splice(pm.indexOf(acid),1); notes.unshift("Retinol und Säure nie am selben Abend."); }
   // Kein täglicher LSF → LSF-Tipp hat Vorrang vor einem weniger wichtigen Tipp
@@ -372,7 +381,8 @@ function hautAdvice(a){
     let i=-1; items.forEach((x,j)=>{ if(!x.k&&!x.must) i=j; });
     if(items.length<3) items.push(t); else if(i>=0) items[i]=t; else items[items.length-1]=t;
   }
-  const pmCream=pick("pmCream",cream);
+  // Gereizte Haut: abends dieselbe beruhigende Creme (Urea kann auf gereizter Haut brennen)
+  const pmCream=calm?cream:pick("pmCream",cream);
   const morning=[dry||sens?"Wasser":wash, ...am, oily?null:cream, spf].filter(Boolean);
   const evening=[wash, ...pm, pmCream, ...spot].filter(Boolean);
   const hasLsfKey=items.some(i=>/LSF/.test(i.k||""));
@@ -403,7 +413,7 @@ function haareAdvice(a){
         tip("Kopfhaut-Serum","Kopfhaut-Serum mit Urea/Panthenol","Spendet Feuchtigkeit, kann Jucken lindern."),
         tip(null,"Lauwarm waschen, kühl föhnen","Hitze trocknet die Kopfhaut aus.")];
     } else {
-      tips=[tip("Anti-Schuppen-Shampoo","Anti-Schuppen-Shampoo mit Zink, 2–3×/Woche","Wird es nach 4 Wochen nicht besser: Hautarzt."),
+      tips=[tip("Anti-Schuppen-Shampoo","Anti-Schuppen-Shampoo mit Piroctone Olamine, 2–3×/Woche","Wird es nach 4 Wochen nicht besser: Hautarzt."),
         tip(null,"3–5 Min einwirken lassen","Der Wirkstoff braucht Zeit, um zu wirken."),
         tip(null,"Nach 4 Wochen: 1×/Woche weiter","So kommen die Schuppen seltener zurück.")];
       note="Bei dicken, roten Stellen bitte zum Hautarzt.";
@@ -417,10 +427,10 @@ function haareAdvice(a){
         tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,"Haare brauchen genug Eiweiß.")];
       note="Je früher du gehst, desto mehr Haar lässt sich meist erhalten.";
     } else if(af==="Kahle runde Stellen"){
-      tips=[tip(null,"Zeitnah zum Hautarzt","Gut behandelbar, aber nicht mit Shampoo.",{must:1}),
+      tips=[tip(null,"Zeitnah zum Hautarzt","Shampoo hilft hier nicht. Die Ursache klärt der Hautarzt.",{must:1}),
         tip("Mildes Shampoo","Bis dahin mild waschen","Bitte nichts auf eigene Faust behandeln.",{product:"shampoo"})];
     } else {
-      tips=[tip(null,"Blutbild: Ferritin, Vit. D, Schilddrüse","Das sind die häufigsten Ursachen."),
+      tips=[tip(null,"Blutbild: Ferritin, Vit. D, Schilddrüse","Damit lassen sich häufige Ursachen abklären."),
         tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,`Am besten über ${proteinFoodTxt(dietCtx())}. Haare zeigen Veränderungen erst nach 2–3 Monaten.`),
         tip(null,"Geduld: oft 3–6 Monate","Haare wachsen langsam nach, wenn die Ursache behoben ist.")];
     }
@@ -435,13 +445,13 @@ function haareAdvice(a){
   return {lead:`${a.typ||"Haar"} · ${st==="Fallen viel aus"&&a.ausfall?a.ausfall:st}`, routine, items, note};
 }
 // Schnitt-Tipp nach Gesichtsform, Geschlecht und Haartyp. Vergleicht mit dem jetzigen Schnitt (allgemeine Stilregeln).
-// Ziel-Bereiche als Index in HAAR_SEITEN / HAAR_OBEN / HAAR_LAENGE: [min, max]
+// Ziel-Bereiche als Index in HAAR_SEITEN / HAAR_OBEN / HAAR_LAENGE: [min, max] – müssen zum Text passen (z. B. „oben 5–8 cm“ = nur „5–10 cm“)
 const SCHNITT_M={
-  "Oval":      {t:"Seiten kurz, oben 5–8 cm",                      s:[0,2], o:[1,3]},
-  "Rund":      {t:"Seiten kurz (Fade), oben 5–10 cm mit Volumen", s:[0,1], o:[2,3]},
+  "Oval":      {t:"Seiten kurz, oben 5–8 cm",                      s:[0,1], o:[2,2]},
+  "Rund":      {t:"Seiten kurz (Fade), oben 5–10 cm mit Volumen", s:[0,1], o:[2,2]},
   "Eckig":     {t:"Seiten kurz bis mittel, oben 3–7 cm locker",   s:[1,2], o:[1,2]},
   "Länglich":  {t:"Seiten nicht zu kurz, oben flach 3–6 cm",      s:[2,3], o:[1,2]},
-  "Herzförmig":{t:"Seiten etwas länger, oben 5–8 cm, nicht zu voll", s:[2,3], o:[1,2]}
+  "Herzförmig":{t:"Seiten etwas länger, oben 5–8 cm, nicht zu voll", s:[2,3], o:[2,2]}
 };
 const SCHNITT_W={
   "Oval":      {t:"Fast jede Länge passt",                        l:[0,3]},
@@ -614,12 +624,13 @@ function gesundheitAdvice(a){
   const dc=dietCtx();
   if(a.energie==="Ständig müde") g.push([tip(null,"Blutbild: Ferritin, B12, Vit. D, Schilddrüse","Häufige Ursachen für dauerhafte Müdigkeit.",{must:1}),
     dc.veg?tip("Eisen",dc.noGluten?"Linsen, Quinoa, Kürbiskerne mit Paprika oder Zitrone":"Linsen, Hafer, Kürbiskerne mit Paprika oder Zitrone","Eisen aus Pflanzen wird schlechter aufgenommen. Vitamin C in derselben Mahlzeit hilft.",{e:"🫘"})
-      :tip("Eisen & B12",dc.noRed?"Eier, Fisch und Geflügel jeden Tag":"Rotes Fleisch 1–2×, Leber gelegentlich",dc.noRed?"Liefern gut verfügbares Eisen und B12, beides fehlt oft bei Müdigkeit.":"Eisen aus Fleisch nimmt der Körper deutlich besser auf als aus Pflanzen. Leber ist sehr reich an Vitamin A, darum nur gelegentlich.",{e:"🥩"}),
+      :tip("Eisen & B12",dc.noRed?"Eier, Fisch und Geflügel jeden Tag":"Rotes Fleisch 1–2× pro Woche, Leber gelegentlich",dc.noRed?"Liefern gut verfügbares Eisen und B12, beides fehlt oft bei Müdigkeit.":"Eisen aus Fleisch nimmt der Körper deutlich besser auf als aus Pflanzen. Leber ist sehr reich an Vitamin A, darum nur gelegentlich.",{e:"🥩"}),
     tip("Tageslicht am Morgen","Morgens 10 Min raus","Tageslicht macht wach.")]);
   if(a.energie==="Tief nach dem Essen") g.push([tip("Erst Gemüse & Protein","Erst Gemüse & Protein, dann Beilage","Der Blutzucker steigt langsamer, das Tief danach ist kleiner."),
     tip("10 Min gehen","10 Min gehen nach dem Essen","Bewegung senkt den Blutzucker nach dem Essen.")]);
   if(a.bauch==="Oft"||a.bauch==="Manchmal"){
-    g.push([intol.includes("Laktose")?tip("Laktosefrei","Laktosefrei essen, Hartkäse geht","Hartkäse hat kaum Laktose."):tip("Langsam essen","Langsam essen, gut kauen","So schluckst du weniger Luft."),
+    // Hartkäse nur, wenn Milchprodukte überhaupt infrage kommen (nicht vegan, nicht „Milchprodukte meiden“)
+    g.push([intol.includes("Laktose")&&a.stil!=="Vegan"&&!(a.meiden||[]).includes("Milchprodukte")?tip("Laktosefrei","Laktosefrei essen, Hartkäse geht","Hartkäse hat kaum Laktose."):tip("Langsam essen","Langsam essen, gut kauen","So schluckst du weniger Luft."),
       tip(null,"Testweise ohne Kohlensäure, Kaugummi, Süßstoff","Das sind häufige Auslöser für Blähungen.")]);
     if(a.bauch==="Oft") note="Mit Schmerzen, Gewichtsverlust oder Blut im Stuhl: Arzt.";
   }
@@ -630,12 +641,15 @@ function gesundheitAdvice(a){
   const tp=targets().protein;
   if(cd.protein&&cd.protein.v<tp*0.8&&!(dc.primal||(a.meiden||[]).includes("Fertigprodukte")))
     g.push([tip("Protein",`${tp} g Protein am Tag`,`Dein Schnitt: ${cd.protein.v} g an ${cd.protein.n} eingetragenen Tagen. Am einfachsten über ${proteinFoodTxt(dc)}.`,{e:"🍗"})]);
-  if(a.trink==="Täglich") g.push([tip("Sprudel statt Softdrink","Softdrink gegen Sprudel tauschen","0,5 l Cola enthalten rund 53 g Zucker.")]);
+  // Bei Blähungen kein Sprudel empfehlen (dort steht „testweise ohne Kohlensäure“)
+  const bloat=a.bauch==="Oft"||a.bauch==="Manchmal";
+  if(a.trink==="Täglich") g.push([bloat?tip("Wasser statt Softdrink","Softdrink gegen stilles Wasser tauschen","0,5 l Cola enthalten rund 53 g Zucker."):tip("Sprudel statt Softdrink","Softdrink gegen Sprudel tauschen","0,5 l Cola enthalten rund 53 g Zucker.")]);
   if(a.alk==="Mehrmals pro Woche") g.push([tip("Mo–Do alkoholfrei","Montag bis Donnerstag alkoholfrei","Gut für Schlaf, Leber und Regeneration.")]);
   if(intol.includes("Gluten")) g.push([tip(null,"Vor glutenfrei: Zöliakie-Test","Ohne Gluten ist der Test sonst nicht aussagekräftig.",{must:1})]);
   if(a.stil==="Vegetarisch"){
     const noMilk=intol.includes("Laktose")||(a.meiden||[]).includes("Milchprodukte");
-    g.push([tip("Eisen + Vitamin C",intol.includes("Gluten")?"Linsen & Quinoa mit Paprika/Zitrone":"Linsen & Hafer mit Paprika/Zitrone","Vitamin C verbessert die Aufnahme von Eisen."),
+    // Bei „Ständig müde“ steht der Eisen-Tipp schon oben
+    g.push([a.energie==="Ständig müde"?null:tip("Eisen + Vitamin C",intol.includes("Gluten")?"Linsen & Quinoa mit Paprika/Zitrone":"Linsen & Hafer mit Paprika/Zitrone","Vitamin C verbessert die Aufnahme von Eisen."),
       tip("B12 im Blick",noMilk?"Täglich Eier":"Täglich Milch, Ei oder Käse","Sonst B12 als Supplement ergänzen.",{sup:"b12"})]);
   }
   const d=dietCtx();
@@ -687,7 +701,7 @@ function foodTips(id,a){
       out.push(tip("4-Wochen-Test","4 Wochen wenig "+what,`Bei manchen Menschen hängen Unreinheiten mit ${d.noSugar&&!d.noMilk?"Milch":d.noMilk?"stark zuckerhaltigem Essen":"stark zuckerhaltigem Essen und Milch"} zusammen. Der Test zeigt, ob das bei dir so ist.`,{e:"🍬"}));
     }
     if(st.includes("Unreinheiten")||st.includes("Glänzt / große Poren"))
-      out.push(tip("Zink aus dem Essen","Zinkreich essen: "+foodList([["Rindfleisch",!d.noRed],["Austern",!d.veg],["Eier",!d.vegan],["Kürbiskerne",true],["Linsen",d.veg]],3),"Zink ist wichtig für die Hautheilung.",{e:"🥩"}));
+      out.push(tip("Zink aus dem Essen","Zinkreich essen: "+foodList([["Rindfleisch",!d.noRed],["Austern",!d.veg],["Eier",!d.vegan],["Kürbiskerne",true],["Linsen",d.veg]],3),"Zink trägt zur Erhaltung normaler Haut bei.",{e:"🥩"}));
     if(st.some(x=>["Trockenheit","Wirkt stumpf","Rötung"].includes(x)))
       out.push(omegaTip(d,"Omega-3-Fette sind ein Baustein der Hautbarriere."));
     if(st.some(x=>["Erste Fältchen","Pigmentflecken","Wirkt stumpf"].includes(x)))
@@ -710,7 +724,9 @@ function foodTips(id,a){
   }
   if(id==="aussehen"){
     const z=a.ziel||[];
-    if(z.includes("Weniger Bauchfett")||z.includes("Gesicht definierter")){
+    // Schon schlank (niedrigster KFA) oder Untergewicht: keine Abnehm-Tipps (passt sonst nicht zu „Nicht weiter abnehmen“)
+    const p=state.profile, slim=(+p.weight||70)/Math.pow(p.height/100,2)<18.5||kfaLevel(a)===0;
+    if(!slim&&(z.includes("Weniger Bauchfett")||z.includes("Gesicht definierter"))){
       if(!z.includes("Mehr Muskeln")) out.push(tip("Protein zuerst","Zu jeder Mahlzeit: "+proteinFoodTxt(d),"Eiweiß sättigt am stärksten und schützt beim Abnehmen die Muskeln.",{e:"🍳"}));
       out.push(tip("Echtes Essen",d.noProc?"Selbst kochen, aus wenigen Zutaten":"Hochverarbeitetes durch echte Lebensmittel ersetzen","In einer Studie aßen Teilnehmer mit stark verarbeitetem Essen rund 500 kcal mehr pro Tag, ohne es zu merken.",{e:"🥩"}));
     }
