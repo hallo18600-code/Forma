@@ -30,7 +30,9 @@ const ALT_MAP={
     :/(doner|kebab|durum|gyros|wrap)/.test(h)?["Hähnchenbrust","Putenbrust","Gulasch"]
     :["Gulasch","Chili con Carne","Hähnchenbrust"],
   // Brühe, Würzpulver und „Fix für …“ sind Zutaten, keine Mahlzeit: dafür keine Alternative
-  readymeal:h=>/(bruhe|bouillon|brodo|caldo|=kub|fond|pulver|wurfel|wurze|gewurz| fix |fix fur|basis fur|base|paste|sauce|sosse|soße|creme|krem|oliven|olive|aceitun|terrine|pastete|bruschetta|avocado)/.test(h.replace(/ kub /," =kub "))?[]
+  readymeal:h=>/(bruhe|bouillon|brodo|caldo|=kub|fond|pulver|wurfel|wurze|gewurz| fix |fix fur|basis fur|base|paste|sauce|sosse|soße|oliven|olive|aceitun|pastete|bruschetta|avocado)/.test(h.replace(/ kub /," =kub "))
+    // Aufstrich-Cremes und Pasteten-Terrinen: keine Alternative (Cremesuppe, Fisch in Creme, „5 Minuten Terrine“ schon)
+    ||/(creme|krem)/.test(h)&&!/(suppe|soup|salat|filet| in )/.test(h)||/terrine/.test(h)&&!/minut/.test(h)?[]
     :/(pure|puree|stampf|kartoffel|knodel|klosse|spatzle|kroketten|gratin)/.test(h)&&!/(braten|gulasch|fleisch|schnitzel|hahnchen|rind|schwein|geschnetzel)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Kartoffelknödel"]
     :/(suppe|soup|zuppa|soupe|eintopf)/.test(h)?["Gemüsesuppe","Hühnersuppe","Linseneintopf"]
     :/(hering|matjes|lachs|salmon|saumon|fisch|fish|thunfisch|tuna|forelle|makrele|garnele|shrimp)/.test(h)?["Lachsfilet","Hering","Forelle","Kabeljau"]
@@ -39,7 +41,7 @@ const ALT_MAP={
     :/(pizza|flammkuchen)/.test(h)?["Gulasch","Chili con Carne","Hähnchenbrust"]
     :["Gulasch","Chili con Carne","Hühnersuppe","Gemüsesuppe","Linseneintopf"],
   // „Parma“ steht auch auf Tomatensoßen, „Cheese Flips“ sind Knabberzeug: dafür keine Fleisch-Alternative
-  processedmeat:h=>/(passata|pomodor|tomat|sugo|sauce|flips|chips)/.test(h)?[]:/kase/.test(h)&&!/(wurst|schinken|salami|lyoner|fleisch)/.test(h)?["Hüttenkäse","Magerquark","Mozzarella"]:["Putenbrust","Hähnchenbrust","Rindersteak","Ei"],
+  processedmeat:h=>/(passata|pomodor|tomat|sugo|sauce|flips|chips)/.test(h)?[]:/kase/.test(h)&&!/(wurst|schinken|salami|lyoner|fleisch|leberkas|kabanos|cabanossi|knacker|wiener|speck)/.test(h)?["Hüttenkäse","Magerquark","Mozzarella"]:["Putenbrust","Hähnchenbrust","Rindersteak","Ei"],
   // Veganer Käse → Käse, veganer Joghurt → Joghurt, sonst Fleisch/Ei/Hülsenfrüchte
   // Vegane Mayo/Soße oder Zwiebelringe sind kein Fleischersatz: keine Alternative
   ersatz:h=>/(mayo|sauce|sosse|dressing|zwiebelring)/.test(h)?[]
