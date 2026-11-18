@@ -16,7 +16,7 @@ const GYM_ALIAS = {
   "decline bench press":["bp_dec","bp_dec_db"], "close grip bench press":["bp_close"], "bench press close grip":["bp_close"],
   "chest press":["chest_press"], "incline chest press":["chest_press"], "chest fly":["fly_db","fly_cable","pecdeck"],
   "dumbbell fly":["fly_db"], "cable crossover":["fly_cable"], "cable fly":["fly_cable"], "pec deck":["pecdeck"], "butterfly":["pecdeck"],
-  "push up":["pushup"], "chest dip":["dip","dip_assist"], "triceps dip":["dip","dip_machine"], "dip":["dip","dip_assist"],
+  "push up":["pushup"], "chest dip":["dip","dip_assist"], "triceps dip":["dip","dip_machine","dip_assist"], "dip":["dip","dip_assist"],
   "bench dip":["bench_dip"], "seated dip":["dip_machine"], "pullover":["pullover"],
   "bent over row":["row","row_db"], "dumbbell row":["row_db"], "t bar row":["row_tbar"], "seated cable row":["row_cable"], "cable row":["row_cable"],
   "seated row":["row_cable","row_machine"], "iso lateral row":["row_machine"], "machine row":["row_machine"],
@@ -165,13 +165,14 @@ function gymCsv(text){
 
 // Datum lesen: "26 Mar 2024, 18:05", "2024-03-26 18:05:00" oder ähnlich → {date:"2024-03-26", t:Millisekunden}
 const GYM_MON={jan:1,feb:2,mar:3,mär:3,apr:4,may:5,mai:5,jun:6,jul:7,aug:8,sep:9,oct:10,okt:10,nov:11,dec:12,dez:12};
-function gymDate(s){
+function gymDate(s, dmy){
   s=String(s||"").trim(); let y,mo,d,h=0,mi=0, m;
   if((m=s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{1,2}):(\d{2}))?/))) [y,mo,d,h,mi]=[m[1],m[2],m[3],m[4]||0,m[5]||0].map(Number);
   else if((m=s.match(/^(\d{1,2})\.?\s+([a-zäA-Z]{3})[a-z.]*\s+(\d{4}),?\s*(?:(\d{1,2}):(\d{2}))?/)) && GYM_MON[m[2].toLowerCase()]){ d=+m[1]; mo=GYM_MON[m[2].toLowerCase()]; y=+m[3]; h=+(m[4]||0); mi=+(m[5]||0); }
   else if((m=s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4}),?\s*(?:(\d{1,2}):(\d{2}))?/))) [d,mo,y,h,mi]=[m[1],m[2],m[3],m[4]||0,m[5]||0].map(Number);
-  // 26/03/2024 (Tag zuerst, wenn die erste Zahl über 12 ist), sonst US-Format 03/26/2024
-  else if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(?:(\d{1,2}):(\d{2}))?/))){ const a=+m[1], b=+m[2]; [d,mo]=a>12?[a,b]:[b,a]; y=+m[3]; h=+(m[4]||0); mi=+(m[5]||0); }
+  // Schrägstrich-Datum: dmy=true → 26/03/2024 (Tag zuerst), dmy=false → US-Format 03/26/2024.
+  // Ohne Angabe: Tag zuerst nur, wenn die erste Zahl über 12 ist (gymParse legt es für die ganze Datei fest)
+  else if((m=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4}),?\s*(?:(\d{1,2}):(\d{2}))?/))){ const a=+m[1], b=+m[2]; [d,mo]=(dmy===undefined?a>12:dmy)?[a,b]:[b,a]; y=+m[3]; h=+(m[4]||0); mi=+(m[5]||0); }
   else { const t=Date.parse(s); if(isNaN(t)) return null; const x=new Date(t); y=x.getFullYear(); mo=x.getMonth()+1; d=x.getDate(); h=x.getHours(); mi=x.getMinutes(); }
   if(!(y>1990&&y<2100&&mo>=1&&mo<=12&&d>=1&&d<=new Date(y,mo,0).getDate())) return null;   // kein 31.02.
   const p=n=>String(n).padStart(2,"0");
@@ -220,13 +221,18 @@ function gymParse(text){
         kg:gymNum(r[cW])*(lbs?GYM_LB:1), reps:gymNum(r[cR]), sec:cT?gymNum(r[cT]):0, warm:cY?/warm|aufwärm|^w$|true/i.test(r[cY]||""):false, n:cS?Math.min(20,Math.max(1,Math.round(gymNum(r[cS])))):1 }; };
   }
 
+  // Schrägstrich-Daten einheitlich für die ganze Datei lesen (sonst 12/03 = 3. Dez., aber 13/03 = 13. März)
+  let dmy;
+  { let first=false, second=false;
+    rows.forEach(r=>{ const x=get(r); [x.start,x.end].forEach(v=>{ const m=String(v||"").trim().match(/^(\d{1,2})\/(\d{1,2})\/\d{4}/); if(m){ if(+m[1]>12) first=true; if(+m[2]>12) second=true; } }); });
+    dmy = first&&!second ? true : second&&!first ? false : first&&second ? undefined : false; }
   const wos=new Map(), names=new Map();
   rows.forEach(r=>{
     const x=get(r); if(x.skip||x.warm||!x.ex) return;
     if(!(x.reps>0||x.kg>0||x.sec>0)) return;
-    const d=gymDate(x.start); if(!d) return;
+    const d=gymDate(x.start, dmy); if(!d) return;
     let w=wos.get(x.key);
-    if(!w){ const e=x.end&&gymDate(x.end); w={ imp:app+":"+x.key, date:d.date, name:gymClean(x.name)||"Training", min:Math.min(300,x.min||(e?Math.max(1,Math.round((e.t-d.t)/60000)):45)), ex:new Map() }; wos.set(x.key,w); }
+    if(!w){ const e=x.end&&gymDate(x.end, dmy); w={ imp:app+":"+x.key, date:d.date, name:gymClean(x.name)||"Training", min:Math.min(300,x.min||(e?Math.max(1,Math.round((e.t-d.t)/60000)):45)), ex:new Map() }; wos.set(x.key,w); }
     const title=gymClean(x.ex,80);
     if(!w.ex.has(title)) w.ex.set(title,[]);
     for(let i=0;i<(x.n||1);i++) w.ex.get(title).push({ kg:Math.max(0,Math.min(1000,Math.round(x.kg*100)/100)), reps:Math.round(x.reps||x.sec)||0, done:true });   // wie bei der Eingabe: 0–1000 kg, 2 Nachkommastellen
