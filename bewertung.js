@@ -22,7 +22,7 @@ const R_CATS=[
    b:[44,30,64,62],g:["Schnelle Carbs & Kalium nach dem Training","","Vitamine & Antioxidantien aus Obst","Schnelle Energie & Vitamine"],x:["Kaum Protein","Flüssige Kalorien sättigen kaum","Fruchtzucker – in Maßen: ein Glas statt einer Flasche","Ohne Ballaststoffe geht der Zucker schnell ins Blut"]},
   {id:"plantmilk",f:(h,raw,c)=>rHit(h,h.trim().split(/[^a-z0-9%&]+/),c.k)||/(hafer|mandel|reis|cashew|soja|erbsen|dinkel|oat|almond|hanf|haselnuss|hazelnut|nocciola|almendra|zobi)[ -]?(drink|milch|milk)/.test(h)||/(bevanda|napitak|leche de|lait d.?amande|boisson)/.test(h),k:["hafermilch","haferdrink","hafer drink","oat drink","mandelmilch","mandeldrink","mandel drink","reisdrink","reismilch","cashewdrink","kokosdrink","erbsendrink","dinkeldrink"],
    b:[22,32,26,28],g:["","Wenig Kalorien","",""],x:["Fast kein Protein|Ersatzdrink, nicht naturbelassen","Ersatzdrink, nicht naturbelassen|Oft Zucker aus Getreide","Ersatzdrink mit Zusätzen & Öl","Kaum echte Nährstoffe|Ersatzdrink, nicht naturbelassen"]},
-  {id:"ersatz",f:h=>(/(wilmersburger|vegan|veggie|vegetar|pflanzlich|plant.?based|fleischfrei|fleischlos|ohne fleisch|(chicken|meat|beef|fish)less|my veggie|aus erbsen|aus soja|aus weizen|aus sonnenblumen)/.test(h)||/lupine/.test(h)&&/(joghurt|jogurt|yoghurt|yogurt|drink|quark|kase|creme)/.test(h)||/(sonnenblumen|erbsen|lupinen|weizen|jackfruit)[ -]?(hack|burger|wurst|schnitzel|nugget|gyros|filet)/.test(h))&&/(burger|wurst|schnitzel|hack|nugget|aufschnitt|salami|frikadell|bulette|chicken|steak|schinken|geschnetzelt|mortadella|filet|gyros|doner|bites|fischstabchen|thunfisch|lachs|fisch|garnel|lyoner|leberwurst|cevapcici|balls|mince)/.test(h)||/(vegan|pflanzlich|plant.?based)/.test(h)&&/(kase|cheese|joghurt|jogurt|quark|skyr|sahne|butter|mayo|cuisine|alternative|creme)/.test(h)||/(seitan|beyond meat|quorn|like meat|vegetarian butcher|sojaschnetzel|soja schnetzel|garden gourmet|veganz|planted|rugenwalder vegetar)/.test(h),
+  {id:"ersatz",f:h=>(/(wilmersburger|vegan|veggie|vegetar|pflanzlich|plant.?based|fleischfrei|fleischlos|ohne fleisch|(chicken|meat|beef|fish)less|my veggie|aus erbsen|aus soja|aus weizen|aus sonnenblumen|inspired by)/.test(h)||/lupine/.test(h)&&/(joghurt|jogurt|yoghurt|yogurt|drink|quark|kase|creme)/.test(h)||/(sonnenblumen|erbsen|lupinen|weizen|jackfruit)[ -]?(hack|burger|wurst|schnitzel|nugget|gyros|filet)/.test(h))&&/(burger|wurst|schnitzel|hack|nugget|aufschnitt|salami|frikadell|bulette|chicken|steak|schinken|geschnetzelt|mortadella|filet|gyros|doner|kebab|bites|fischstabchen|thunfisch|lachs|salmon|fisch|garnel|lyoner|leberwurst|pastete|cevapcici|balls|mince)/.test(h)||/(vegan|pflanzlich|plant.?based)/.test(h)&&/(kase|cheese|joghurt|jogurt|quark|skyr|sahne|butter|mayo|cuisine|alternative|creme)/.test(h)||/(seitan|beyond meat|quorn|like meat|vegetarian butcher|sojaschnetzel|soja schnetzel|garden gourmet|veganz|planted|rugenwalder vegetar)/.test(h),
    b:[22,24,12,18],g:["","","",""],x:["Ersatzprodukt aus Isolaten & Zusätzen","Ersatzprodukt, nicht naturbelassen|Oft mehr Kalorien als gedacht","Stark verarbeitet, oft Soja & Pflanzenöl","Ersatzprodukt ohne echte Nährstoffe"]},
   {id:"proteinbar",f:h=>/(protein|eiweiss)/.test(h)&&/(riegel|\bbar\b|bars|keks|cookie|pudding|crisp|chips|waffel|pancake|\beis\b|creme|mousse|brownie|snack|schoko|spread|cereal|musli|pops|balls|bites)/.test(h)&&!/(drink|shake|pulver|powder)/.test(h),
    b:[52,38,28,34],g:["Viel Protein, praktisch für unterwegs","Proteinreich","",""],x:["Stark verarbeitet, oft Süßstoffe","Kalorienreicher als er wirkt|Stark verarbeitet","Milchprotein & Zusätze – ungünstig für die Haut","Kein Ersatz für echtes Essen"]},
@@ -31,16 +31,16 @@ const R_CATS=[
   {id:"darkchoc",f:(h,raw)=>/(schokolade|schoko|chocolate|chocolat|kakao|cacao|cocoa|fondente|noir)/.test(h)&&(/(^|\D)(6[5-9]|[7-9]\d|100) ?%/.test(raw)||/(zartbitter|edelbitter|bitterschokolade|rohkakao|kakaonibs|kakao nibs|backkakao|kakaopulver|cacao nibs|raw cacao|cacao en poudre|cocoa powder|cacao in polvere|cacao puro|kakao pur|reiner kakao|non sucre|unsweetened|ungesusst|sans sucre)/.test(h))&&!/(milch|keks|riegel|pudding|\beis\b|muffin|kuchen|creme|drink|trink|instant|musli|cookie|mousse|nuss|praline)/.test(h),
    b:[50,40,62,64],g:["Viel Kakao, weniger Zucker als Milchschoko","Weniger Zucker, kleine Menge reicht","Kakao liefert Antioxidantien","Kakao und Fett liefern gleichmäßige Energie|Etwas natürliches Koffein"],x:["Wenig Protein für die Kalorien","~Sehr kalorienreich","Etwas Zucker – in Maßen","Nur in kleinen Mengen"]},
   {id:"ricecake",k:["rice cake","galettes de riz","galette de riz","tortitas de arroz","reiswaffel","maiswaffel","linsenwaffel","linsen waffel","mais waffel","reis waffel","kichererbsenwaffel","erbsenwaffel","reiscracker","puffreis","dinkelwaffel","reis waffel","mais waffel"],
-   b:[34,36,38,40],g:["Leichte Carbs vor dem Training","Wenig Kalorien pro Stück","Glutenfrei","Schnell verfügbare Carbs"],x:["Kaum Protein & Nährstoffe","Gepufft: lässt den Blutzucker schnell steigen","Stark verarbeitet (gepufft)","Schnelle Carbs ohne Ballaststoffe"]},
+   b:[34,36,38,40],g:["Leichte Carbs vor dem Training","Wenig Kalorien pro Stück","Glutenfrei",""],x:["Kaum Protein & Nährstoffe","Gepufft: lässt den Blutzucker schnell steigen","Stark verarbeitet (gepufft)","Schnelle Carbs ohne Ballaststoffe"]},
   {id:"sugar",k:["confiture","confitura","=doce","=jam","conserve","fruit spread","sucre","cassonade","azucar","zucchero","=syrup","=sirop","grenadine","=zucker","rohrzucker","puderzucker","rubenzucker","haushaltszucker","kokosblutenzucker","vanillezucker","gelierzucker","kandis","sirup","agavendicksaft","birnendicksaft","marmelade","konfiture","fruchtaufstrich","gelee","=dulce","zuckerrubensirup","glukose","fruktose","dextrose","traubenzucker"],n:["ahornsirup","erable","maple","sirop de agave","weniger zucker","wenig zucker","ohne zucker","zuckerreduziert","zuckerfrei","ohne zuckerzusatz","sans sucre","sin azucar","senza zucchero","sugar free","no sugar","zero sugar","no added sugar","maiz","mais dulce","non sucre","unsweetened","non zuccherato","sin azucares","kakao","cacao","cocoa"],
    b:[10,8,6,12],g:["","","",""],x:["Purer Zucker ohne Nährstoffe","Purer Zucker, macht nicht satt","Zucker kann Unreinheiten fördern","Lässt den Blutzucker stark schwanken"]},
-  {id:"sweets",k:["bienenstich","vollmilch schokolade","milch schokolade","weisse schokolade","biscuit","biscoff","speculoos","madeleine","=sable","sables","tartelette","=cake","bueno","ferrero","rocher","toffifee","mon cheri","=mars","maltesers","toblerone","celebrations","tic tac","mentos","knoppers","jaffa","prinzenrolle","magnum","=glace","glaces","gelato","helado","crema di nocciol","hazelnut spread","pate a tartiner","bionella","noisetta","custard","creme brulee","creme dessert","galette","=boudoirs","gocciole","baiocchi","abbracci","pan di stelle","=lion","schaumwaffel","kipferl","cinnamon roll","rollitos de canela","croissant","brioche","schokolade","schoko","chocolate","nutella","nougat","gummi","haribo","bonbon","lakritz","marshmallow","toffee","karamell","caramel","praline","marzipan","keks","cookie","biskuit","zwieback","platzchen","lebkuchen","stollen","kuchen","torte","muffin","donut","doughnut","brownie","croissant","plunder","strudel","krapfen","=berliner","waffel","pfannkuchen","crepe","pancake","=eis","eiscreme","speiseeis","eiskonfekt","fruchteis","wassereis","milcheis","stieleis","softeis","sahneeis","eis am stiel","kuvertur","pralinen","sorbet","pudding","dessert","tiramisu","mousse","milchreis","griesbrei","grießbrei","quarkballchen","quarkkeulchen","riegel","snickers","twix","bounty","kitkat","kit kat","duplo","hanuta","milka","ritter sport","kinder","m&m","smarties","oreo","leibniz","prinzen rolle","kekse","fruchtschnitte","mochi","baklava","schaumkuss","dickmann","vanilleeis","schokoeis","erdbeereis","fruchtgummi","weingummi","gummibar","goldbar","lolly","=drops","pastillen","schaumzucker","nussknacker"],n:["sussholz","sukartoffel","susskartoffel","sußkartoffel","eisberg","eiswurfel","kuchenkrauter"],
+  {id:"sweets",k:["bienenstich","vollmilch schokolade","milch schokolade","weisse schokolade","biscuit","biscoff","speculoos","madeleine","=sable","sables","tartelette","=cake","bueno","ferrero","rocher","toffifee","mon cheri","=mars","maltesers","toblerone","celebrations","tic tac","mentos","knoppers","jaffa","prinzenrolle","magnum","=glace","glaces","gelato","helado","crema di nocciol","hazelnut spread","pate a tartiner","bionella","noisetta","custard","creme brulee","creme dessert","galette","=boudoirs","gocciole","baiocchi","abbracci","pan di stelle","=lion","schaumwaffel","kipferl","cinnamon roll","rollitos de canela","croissant","brioche","schokolade","schoko","chocolate","nutella","nougat","gummi","haribo","bonbon","lakritz","marshmallow","toffee","karamell","caramel","praline","marzipan","keks","cookie","biskuit","zwieback","platzchen","lebkuchen","stollen","kuchen","torte","muffin","donut","doughnut","brownie","croissant","plunder","strudel","krapfen","=berliner","waffel","pfannkuchen","crepe","pancake","=eis","eiscreme","speiseeis","eiskonfekt","fruchteis","wassereis","milcheis","stieleis","softeis","sahneeis","eis am stiel","kuvertur","pralinen","sorbet","pudding","dessert","tiramisu","mousse","milchreis","griesbrei","grießbrei","quarkballchen","quarkkeulchen","riegel","snickers","twix","bounty","kitkat","kit kat","duplo","hanuta","milka","ritter sport","kinder","m&m","smarties","oreo","leibniz","prinzen rolle","kekse","fruchtschnitte","mochi","baklava","schaumkuss","dickmann","vanilleeis","schokoeis","erdbeereis","fruchtgummi","weingummi","gummibar","goldbar","lolly","=drops","pastillen","schaumzucker","nussknacker"],n:["flammkuchen","zwiebelkuchen","jambon","schinken","sussholz","sukartoffel","susskartoffel","sußkartoffel","eisberg","eiswurfel","kuchenkrauter"],
    b:[12,8,8,12],g:["","","",""],x:["Viel Zucker, kaum Protein","Viele Kalorien, macht nicht satt","Zucker kann Unreinheiten fördern","Zucker macht danach oft müde"]},
   {id:"cereal",k:["corn flakes","=flakes","bran flakes","weetabix","tresor","=trix","cereales","cereals","=cereal","all bran","fitness","cornflakes","frosties","smacks","=pops","loops","crunchy","knuspermusli","knusper","granola","cerealien","fruhstucksflocken","choco","cini minis","nesquik","special k","chocapic","=crisp"],n:["erdnussbutter","peanut butter","nussmus","mandelmus","erdnussmus","cashewmus"],
    b:[20,14,12,18],g:["","","",""],x:["Gezuckerte Flocken, wenig Protein","Viel Zucker, macht nicht lange satt","Zucker & Weißmehl – ungünstig für die Haut","Schnelle Energie, schneller Absturz"]},
-  {id:"chips",k:["pufuleti","saltletts","pretzel","=sticks","tyrrell","potato wedges","chips","flips","salzstangen","salzbrezel","=cracker","cracker","popcorn","nachos","tortilla chips","knabber","erdnussflips","crisps","pringles","chipsfrisch","snack mix","partymix","=tuc","bretzel"],
+  {id:"chips",k:["pufuleti","saltletts","pretzel","=sticks","tyrrell","potato wedges","chips","flips","salzstangen","salzbrezel","=cracker","cracker","popcorn","nachos","tortilla chips","knabber","erdnussflips","crisps","pringles","chipsfrisch","snack mix","partymix","=tuc","bretzel"],n:["mozzarella","kase","cheese sticks"],
    b:[12,8,10,12],g:["","","",""],x:["Leere Kalorien ohne Protein","Sehr kalorienreich und macht kaum satt","Frittiert, viel Salz & Pflanzenöl","Fett & Salz machen träge"]},
-  {id:"fastfood",k:["pizza","doner","kebab","durum","burger","pommes","fritten","currywurst","nuggets","chicken wings","hot dog","hotdog","kroketten","rosti","kartoffelpuffer","reibekuchen","falafel","frittiert","backfisch","fischstabchen","=nuggets","fast food","=mcdonald","big mac","whopper","flammkuchen","calzone","=tacos","burrito","quesadilla","fried"],n:["hofburger","wilmersburger","pizzasauce","pizza sauce","pizzatomaten","durum wheat","durum weizen","semola di grano duro","grano duro","ble dur","hartweizen"],
+  {id:"fastfood",k:["pizza","doner","kebab","durum","burger","pommes","fritten","currywurst","nuggets","chicken wings","hot dog","hotdog","kroketten","rosti","kartoffelpuffer","reibekuchen","falafel","frittiert","backfisch","fischstabchen","=nuggets","fast food","=mcdonald","big mac","whopper","flammkuchen","calzone","=tacos","burrito","quesadilla","fried"],n:["hofburger","wilmersburger","limburger","salzburger","regensburger","altenburger","coburger","freiburger","langenburger","luneburger","mecklenburger","neuburger","toggenburger","harzburger","oldenburger","strassburger","flensburger","bitburger","hachenburger","pizzasauce","pizza sauce","pizzatomaten","durum wheat","durum weizen","semola di grano duro","grano duro","ble dur","hartweizen"],
    b:[28,16,12,20],g:["","","",""],x:["Weißmehl und Frittierfett, wenig Nährstoffe","Hohe Kaloriendichte, schnell wieder hungrig","Frittiertes & Fertiges – ungünstig für die Haut","Schwer im Magen, macht träge"]},
   {id:"readymeal",k:["bouillon","=kub","=brodo","caldo","ramen","ramyun","nouilles instant","cassoulet","mousline","puree delice","velute","cream of","fertiggericht","fertig","=instant","instant","terrine","nudelsnack","5 minuten","mikrowelle","tiefkuhlgericht","lasagne","maultasche","cordon bleu","paniert","panade","=schnitzel","wiener schnitzel","kartoffelsalat","nudelsalat","fleischsalat","eiersalat","wurstsalat","thunfischsalat","geflugelsalat","krautsalat","coleslaw","bruhwurfel","suppenwurfel","gekornte","fix fur","=fix","tutensuppe","gemusebruhe","gemuse bruhe","=bruhe","klare bruhe","bruhpulver","noodle cup","cup noodle","minestrone","tortelli","cannelloni","asia nudeln","yum yum","cup noodles","ravioli","tortellini","tortelloni","cappelletti","agnolotti","girasoli","mezzelune","pelmeni","pierogi","dumpling","gyoza","wan tan","wantan","fruhlingsrolle","kasespatzle","schupfnudeln","schlemmerfilet","schlemmer filet","=schlemmer","frikadelle","bulette","fleischpflanzerl","cevapcici","=gyros"],n:["lasagneplatten","kaffee","coffee","espresso","cappuccino","kakao","haferflocken","oats","tee"],
    b:[32,26,18,26],g:["","","",""],x:["Fertigprodukt mit Zusätzen","Versteckte Kalorien in Soße & Panade","Viel Salz & Zusätze","Fertigprodukt, macht schnell müde"]},
@@ -54,15 +54,15 @@ const R_CATS=[
    b:[20,16,10,18],g:["","","",""],x:["Raffiniertes Samenöl, nicht naturbelassen","~Sehr kalorienreich|Raffiniertes Samenöl","Viel Omega-6, wenig Omega-3|Raffiniertes Samenöl","Raffiniertes Samenöl, nicht naturbelassen"]},
   {id:"coconut",k:["=coco","noix de coco","lait de coco","vita coco","kokos","coconut"],n:["kokosfett gehartet"],w:1,
    b:[52,52,94,84],g:["Natürliches Fett aus der Kokosnuss","MCT-Fette sättigen gut","Kokosfett ist gut für die Haut","MCT-Fette liefern schnell Energie"],x:["Kaum Protein","~Sehr kalorienreich – sparsam","",""]},
-  {id:"goodfat",k:["lebertran","cod liver oil","avocado ol","oliven ol","lein ol","walnuss ol","kurbiskern ol","hanf ol","huile d'olive","huile d olive","aceite de oliva","extra vergine","vierge extra","huile de noix","olivenol","olive oil","olivenoel","=ghee","butterschmalz","avocadool","leinol","walnussol","hanfol","schmalz","=talg","rindertalg","mct ol","mct-ol","kurbiskernol","=olio","olive extra","kakaobutter","mct","=c8"],w:1,
+  {id:"goodfat",k:["lebertran","cod liver oil","avocado ol","oliven ol","lein ol","walnuss ol","kurbiskern ol","hanf ol","huile d'olive","huile d olive","aceite de oliva","extra vergine","vierge extra","huile de noix","olivenol","olive oil","olivenoel","=ghee","butterschmalz","avocadool","leinol","walnussol","hanfol","schmalz","=talg","rindertalg","mct ol","mct-ol","kurbiskernol","=olio","olive extra","kakaobutter","mct","=c8","extra virgin","virgen extra","virgem extra","extra vierge","huile olive","olijfolie","olijf olie","olijfo","azeite","aceite de oliva","oliveol","oliv olja","maslinovo","маслиново","оливков","huile d avocat","huile d'avocat","huile d’avocat","avocado oil","walnootolie","leinsaatol","leinsaat ol","lijnzaadolie","schwarzkummelol","cumin noir","klarowane"],n:["kokos","coconut","=coco"],w:1,
    b:[48,50,84,74],g:["Natürliches Fett zum Kochen","Natürliches Fett – sparsam gut","Gute Fette für geschmeidige Haut","Fett liefert lange Energie"],x:["Kein Protein","~Sehr kalorienreich – sparsam","",""]},
   {id:"peanut",k:["cacahuete","cacahuetes","mani ","erdnuss","peanut"],w:1,
    b:[60,44,50,64],g:["Viel Protein für eine Nuss","Sättigt gut – kleine Menge","","Fett und Protein liefern gleichmäßige Energie"],x:["Hülsenfrucht, nicht primal","~Sehr kalorienreich|Hülsenfrucht, nicht primal","Viel Omega-6|Hülsenfrucht, nicht primal","Hülsenfrucht, nicht primal"]},
   {id:"butter",k:["beurre","=burro","mantequilla","maslo 82","butter"],n:["buttermilch","butterkase","kakaobutter","sheabutter","nussbutter","mandelbutter","cashewbutter","peanut","erdnuss","cacahuete","arachide","almond","hazelnut","haselnuss","cashew","nut butter","pistachio","pistazie","macadamia","tahin","sesam","walnut","pecan","sunflower seed"],w:1,d:1,
    b:[46,46,62,66],g:["Naturbelassenes Fett","Natürliches Fett, macht satt","Natürliches Fett mit Vitamin A","Natürliche Fettquelle für lange Energie"],x:["Kein Protein","~Sehr kalorienreich – dünn streichen","Milchfett – in Maßen",""]},
-  {id:"processedmeat",k:["snacki","kabanos","minisalami","geflugelwurst","putenwurst","hahnchenwurst","bratwurstchen","saftschinken","wurst","salami","schinken","=speck","speckwurfel","bacon","leberkase","fleischkase","=wiener","wurstchen","frankfurter","mortadella","lyoner","aufschnitt","chorizo","cabanossi","pastrami","corned","sulze","teewurst","mettwurst","landjager","kassler","kasseler","pfefferbeisser","=bierschinken","leberpastete","pastete","=mett","hot dog","peperoni salami","bresaola","prosciutto","serrano","=parma","coppa","nduja","=bratwurst","weisswurst","krakauer","bockwurst","=bifi","jerky","beef jerky","dorrfleisch","knacker","=pastrama","rillettes","=ham","saucisse","cipollata","sunca","schinkenbraten","terrine","leberkas"],n:["wurstsalat","nussknacker","nussbeisser"],
+  {id:"processedmeat",k:["snacki","kabanos","minisalami","geflugelwurst","putenwurst","hahnchenwurst","bratwurstchen","saftschinken","wurst","salami","schinken","=speck","speckwurfel","bacon","leberkase","fleischkase","=wiener","wurstchen","frankfurter","mortadella","lyoner","aufschnitt","chorizo","cabanossi","pastrami","corned","sulze","teewurst","mettwurst","landjager","kassler","kasseler","pfefferbeisser","=bierschinken","leberpastete","pastete","=mett","hot dog","peperoni salami","bresaola","prosciutto","serrano","=parma","coppa","nduja","=bratwurst","weisswurst","krakauer","bockwurst","=bifi","jerky","beef jerky","dorrfleisch","knacker","=pastrama","rillettes","=ham","saucisse","cipollata","sunca","schinkenbraten","terrine","leberkas"],n:["wurstsalat","nussknacker","nussbeisser","oro di parma","kaseaufschnitt","kase aufschnitt","kase-aufschnitt"],
    b:[40,32,22,28],g:["+Liefert Protein","","",""],x:["Verarbeitet: Salz, Nitrit & Zusätze","Viel Fett & Salz|Verarbeitet","Salz, Nitrit & Zusätze – ungünstig für die Haut","Schwer & salzig, macht träge"]},
-  {id:"broth",k:["knochenbruhe","bone broth","rinderbruhe","huhnerbruhe","geflugelbruhe","rinderfond","kalbsfond","huhnerfond","fischfond","geflugelfond","wildfond","=fond"],n:["gemuse"],w:1,
+  {id:"broth",k:["knochenbruhe","bone broth","rinderbruhe","huhnerbruhe","geflugelbruhe","rinderfond","kalbsfond","huhnerfond","fischfond","geflugelfond","wildfond","bratenfond","=fond"],n:["gemuse"],w:1,
    b:[62,88,95,72],g:["Kollagen & Aminosäuren","Wärmt & sättigt fast ohne Kalorien","Kollagen aus Knochen, gut für die Haut","Mineralien & Elektrolyte"],x:["Wenig Protein pro Portion","","",""]},
   {id:"organ",k:["leber","=herz","rinderherz","huhnerherz","geflugelherz","=niere","nieren","innereien","=bries","kalbsbries","markknochen","=mark","rindermark"],n:["leberwurst","leberkase","leberkas","leberpastete","=pate","pastete","ohne innereien","ohne hals","lebertran"],w:1,
    b:[92,88,95,94],g:["Sehr nährstoffreich, mit viel Protein","Viele Nährstoffe, wenig Kalorien","Sehr viel Vitamin A","Sehr viel B12 & Eisen"],x:["","","",""]},
@@ -72,7 +72,7 @@ const R_CATS=[
    b:[94,94,82,76],g:["Sehr viel Protein, kaum Fett","Viel Protein, sehr wenig Kalorien","Protein, Jod & Zink","Leichtes Protein, liegt nicht schwer"],x:["","","Wenig Omega-3 – fetter Fisch ist besser","Kaum Carbs für Energie"]},
   {id:"poultry",n:["nugget","chicken wings","crispy","paniert","cordon","breaded","coated","=pane","=panes","knusper","planted","like chicken","vegan","vegetar","veggie"],k:["poulet","volaille","pollo","dinde","tacchino","hahnchen","huhn","hendl","=pute","puten","truthahn","chicken","geflugel","=ente","entenbrust","=gans","gansebrust","wachtel","perlhuhn","maishahnchen","poulet"],w:1,
    b:[95,94,74,76],g:["Hochwertiges Protein bei wenig Kalorien","Viel Protein, wenig Kalorien","Protein für Kollagen & Haut","Leichtes Protein"],x:["","","Weniger Hautnährstoffe als Fisch oder Ei","Allein kaum Energie aus Carbs"]},
-  {id:"redmeat",k:["boeuf","bœuf","manzo","ternera","=veau","agneau","porc","rind","steak","=beef","lamm","kalb","=wild","wildschwein","hirsch","=reh","rehrucken","bison","entrecote","hufte","roastbeef","tatar","=hack","hackfleisch","gehacktes","rinderhack","schwein","kotelett","braten","=filet","=lende","=schulter","ziegenfleisch","zicklein","kaninchen","pferd","ochse","=rib","ribeye","rumpsteak","t-bone","tafelspitz","beinscheibe","schaufel","nacken"],n:["bratensosse","bratensauce","vegan","veggie","vegetar","plant","beyond","sonnenblumen","wonder","schlemmer","porridge","aus erbsen","lachs"],w:1,
+  {id:"redmeat",k:["boeuf","bœuf","manzo","ternera","=veau","agneau","porc","rind","steak","=beef","lamm","kalb","wildschwein","hirsch","=reh","rehrucken","bison","entrecote","hufte","roastbeef","tatar","=hack","hackfleisch","gehacktes","rinderhack","schwein","kotelett","braten","=filet","=lende","=schulter","ziegenfleisch","zicklein","kaninchen","pferd","ochse","=rib","ribeye","rumpsteak","t-bone","tafelspitz","beinscheibe","schaufel","nacken"],n:["bratensosse","bratensauce","bratenfond","gebraten","kassler","kasseler","vegan","veggie","vegetar","plant","beyond","sonnenblumen","wonder","schlemmer","porridge","aus erbsen","lachs"],w:1,
    b:[92,80,82,86],g:["Protein, Eisen & Kreatin","Viel Protein, macht lange satt","Zink & Eisen für die Haut","Eisen & B12 für Energie"],x:["","%Fettere Stücke: mehr Kalorien","",""]},
   {id:"soy",k:["tofu","tempeh","=soja","soja","=soy","edamame","=miso","sojamilch","sojadrink","sojajoghurt","yuba","natto"],n:["sojasauce","sojasosse","sojasaus","soja saus","sauce soja","salsa di soia","salsa de soja","soy sauce","shoyu","tamari"],
    b:[42,42,24,36],g:["Pflanzliches Protein","Protein bei moderaten Kalorien","",""],x:["Soja, nicht naturbelassen","Soja, nicht naturbelassen","Verarbeitetes Soja – lieber Fisch, Ei, Fleisch","Soja, nicht naturbelassen"]},
@@ -153,11 +153,11 @@ const R_MICRO=[
   {k:["rote bete","rote beete","rote rube"],s:3,e:4,m:2,ts:"Antioxidantien für die Haut",te:"Nitrat für bessere Durchblutung",tm:"Nitrat für mehr Ausdauer"},
   {k:["rucola","feldsalat","brunnenkresse","=kresse","postelein"],s:3,e:1,ts:"Vitamin K & Folat"},
   {k:["gurke","eisberg","kopfsalat","staudensellerie"],s:-5,e:-2,bs:"Viel Wasser, wenig Vitamine"},
-  {k:["lachs","makrele","hering","matjes","sardine","sardelle","anchovis","forelle","saibling","sprotte"],s:4,e:3,ts:"Omega-3 & Vitamin D für die Haut",te:"Omega-3 & B12"},
+  {k:["lachs","=salmon","saumon","makrele","hering","matjes","sardine","sardelle","anchovis","forelle","saibling","sprotte"],s:4,e:3,ts:"Omega-3 & Vitamin D für die Haut",te:"Omega-3 & B12"},
   {k:["auster"],s:10,e:4,ts:"Viel Zink für reine Haut",te:"Zink & B12"},
   {k:["leber"],s:6,e:7,m:2,ts:"Sehr viel Vitamin A",te:"Sehr viel Eisen & B12"},
   {k:["eigelb"],s:4,ts:"Biotin & Vitamin A"},
-  {k:["rind","steak","lamm","hirsch","=wild","bison","rehrucken","ochse"],s:3,e:4,m:3,ts:"Zink & Eisen für die Haut",te:"Eisen & B12 für Energie",tm:"Kreatin, Eisen & Zink"},
+  {k:["rind","steak","lamm","hirsch","wildschwein","bison","rehrucken","ochse"],s:3,e:4,m:3,ts:"Zink & Eisen für die Haut",te:"Eisen & B12 für Energie",tm:"Kreatin, Eisen & Zink"},
   {k:["kabeljau","seelachs","pangasius","tilapia","schellfisch"],s:-3,bs:"Kaum Omega-3"},
   {k:["paranuss"],s:7,ts:"Selen für die Haut"},
   {k:["walnuss"],s:5,e:2,ts:"Omega-3 aus Pflanzen"},
@@ -257,14 +257,14 @@ const R_FLAVOR=new Set(["fruit","berries","vitc","banana","coconut","spice","veg
 // Marken, die (fast) nur eine Art herstellen. Greift nur, wenn der Name nichts Eindeutiges sagt.
 const R_BRANDS={
   sweets:["haribo","katjes","trolli","nimm2","storck","milka","lindt","lindor","lindt&sprungli","ferrero","kinder","mars","snickers","twix","m&m's","merci","toffifee","ritter sport","oreo","mentos","wick","ricola","em-eukal","fisherman's friend","magnum","ben & jerry's","haagen-dazs","cremissimo","langnese","loacker","manner","bahlsen","leibniz","de beukelaer","griesson","favorina","feodora","zotter","sarotti","hachez","after eight","skittles","maoam","hitschler","fini","daim","toblerone","knoppers","nutella","marabou","alpia","choceur","moser roth","schogetten","yogurette","duplo","hanuta","balisto","milky way","kitkat","lion","bounty","raffaello","mon cheri","rocher","giotto","red band","wikana","coppenrath","brandt","corny"],
-  softdrink:["coca-cola","coca cola","pepsi","fanta","sprite","mirinda","mezzo mix","schweppes","red bull","monster","booster","rockstar","lipton","fuze tea","capri-sun","capri sun","punica","vio","bionade","fritz-kola","fritz","afri","durstloscher","sinalco","club-mate","river","flying power","effect","bullit","oettinger","orangina","vitamin well"],
+  softdrink:["coca-cola","coca cola","pepsi","fanta","sprite","mirinda","mezzo mix","schweppes","red bull","monster","booster","rockstar","lipton","fuze tea","capri-sun","capri sun","punica","vio","bionade","fritz-kola","fritz","afri","durstloscher","sinalco","club-mate","river","flying power","effect","bullit","oettinger","orangina","vitamin well","bluna","freeway","almdudler"],
   alcohol:["krombacher","bitburger","warsteiner","veltins","radeberger","jever","beck's","becks","paulaner","erdinger","franziskaner","augustiner","hacker-pschorr","spaten","lowenbrau","konig ludwig","monchshof","gosser","heineken","corona","perlenbacher","schofferhofer","clausthaler","grimbergen","leffe","hasseroder","kostritzer","ottakringer","stiegl","astra","tsingtao","desperados","bacardi","jagermeister","smirnoff","absolut","aperol","martini","baileys"],
   juice:["tropicana","innocent","true fruits","granini","hohes c","valensina","rauch","happy day","albi","beckers bester","amecke","dittmeyer","pfanner","voelkel","rabenhorst","eckes"],
   water:["hella","volvic","evian","gerolsteiner","vittel","saskia","adelholzener","apollinaris","bad brambacher","rhenser","selters","san pellegrino","perrier","fiji"],
   chips:["funny-frisch","pringles","lay's","lays","chio","lorenz","kelly's","zweifel","takis","doritos","tuc","pom-bar","crunchips","chipsfrisch","gardschips","kettle"],
   cereal:["kellogg's","kelloggs","mymuesli","barnhouse"],
   sauce:["lee kum kee","kikkoman","heinz","hela","develey","kuhne"],
-  ersatz:["beyond meat","beyond burger","planted","planted.","like meat","garden gourmet","the vegetarian butcher","vegetarian butcher","quorn","endori","greenforce","billie green","mein veggie","vemondo","violife","simply v","veganz","wheaty","rugenwalder vegetarisch","taifun","my vay","food for future","vantastic","green legend","valsoia"],
+  ersatz:["beyond meat","beyond burger","planted","planted.","like meat","garden gourmet","the vegetarian butcher","vegetarian butcher","quorn","endori","greenforce","billie green","mein veggie","vemondo","violife","simply v","veganz","wheaty","rugenwalder vegetarisch","taifun","my vay","food for future","vantastic","green legend","valsoia","juicy marbles","revo","revo foods"],
   margarine:["latta","rama","becel","sanella","deli reform","belolive"],
   plantmilk:["alpro","oatly","oat-ly!","provamel","rude health","isola bio","natumi"]
 };
@@ -279,6 +279,8 @@ function brandCat(item){
   return id||null;
 }
 const R_BYID={}; R_CATS.forEach(c=>R_BYID[c.id]=c);
+// Ortsnamen auf „-burger“ (Limburger Käse, Regensburger Wurst) sind kein Burger
+const R_PLACEBURGER=/(limburger|salzburger|regensburger|altenburger|coburger|freiburger|langenburger|luneburger|mecklenburger|neuburger|toggenburger|harzburger|oldenburger|strassburger|flensburger|bitburger|hachenburger)/g;
 // Passt die erkannte Art zu den Nährwerten? Sonst ist es eher ein Gericht/Snack (z. B. "Rindfleisch-Ravioli" mit 4 g Protein)
 const R_DRIED=/(getrocknet|trocken|dried|\bdry\b|\bsoft|secch|seche|deshidrat|chips|scheiben|ringe|wurfel)/;
 const R_DRINKW=/(limo|getrank|drink|h2o|schorle|wasser(?!melone)|\bwater\b|spritz|soda|radler|eistee|ice tea|\btea\b|\btee\b|sirup|nektar|nectar|saft|juice|smoothie|\bshot\b|geschmack|\btouch\b)/;
@@ -294,6 +296,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="tea"&&n.kc>60) return n.pr>=40?R_BYID.whey:(n.su<5&&n.fa<6&&/(matcha|grun|schwarz|kraut|tee\b|tea\b)/.test(h)&&!/(geback|kranz|keks|feuillet|denoyaut|fouett|zucker|butter|buter|wurst)/.test(h))?cat:"RETRY";
   if(id==="organ"&&n.cb>10) return "RETRY";                        // "Herz"-Nudeln
   if(id==="alcohol"&&n.pr>=5) return "RETRY";
+  if(id==="alcohol"&&n.kc>=360) return n.fa>=40&&n.su<15?R_BYID.sauce:R_BYID.sweets;   // Likör-Pralinen, Rum-Kugeln; Whisky-Cocktailsauce
   if(id==="sauce"&&n.pr>=12) return "RETRY";
   if(id==="nuts"&&n.kc<120&&n.fa<6) return R_BYID.plantmilk;          // „Mandel natur“-Drink (Nüsse haben 550–700 kcal)
   if(id==="processedmeat"&&n.su>=30) return R_BYID.sweets;
@@ -305,7 +308,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="softdrink"&&n.kc>150) return n.su>=20?R_BYID.sweets:"RETRY";   // „Sour Cola“-Fruchtgummi – kein Getränk
   if(id==="plantmilk"&&n.kc>150) return "RETRY";                     // „Hazelnut Milk Chocolate“ ist Schokolade, kein Drink
   if(id==="fastfood"&&(/pomme/.test(h)&&n.fa<3||n.kc<80)) return "RETRY";   // „compote de pommes“, Burger-Gurken, Pizzasoße       // „compote de pommes“ = Äpfel, keine Pommes
-  if(id==="leanfish"&&n.fa>=8&&/(lachs|salmon|saumon|makrele|hering|forelle|sardin)/.test(h)) return R_BYID.fattyfish;
+  if(id==="leanfish"&&n.fa>=8&&/(lachs|salmon|saumon|makrele|hering|forelle|sardin)/.test(h)&&!/seelachs/.test(h)) return R_BYID.fattyfish;   // Seelachs ist magerer Fisch
   if(id==="coffee"&&n.pr>=40) return R_BYID.whey;                     // Proteinpulver „Coffee“
   if(id==="coffee"&&n.su>=2&&n.su<=20&&n.pr>=1&&!/(pulver|instant|powder|bohne|gemahlen)/.test(h)) return R_BYID.coffeemilk;   // Eiskaffee mit Milch & Zucker
   if(id==="cereal"&&(/(tafel|tablette|riegel)/.test(h)||/(schokolade|chocolate|chocolat|cioccolat|chocolade)/.test(h)&&!/(flakes|flocken|musli|muesli|muzli|granola|crunchy|knusper|pops|loops|cereal|crisp|kissen|chocapic|tresor|tresors|frosties|smacks)/.test(h)))
@@ -315,7 +318,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="coffee"&&(n.su>20||/(brot|keks|praline|schoko)/.test(h))) return "RETRY";
   if(id==="spice"&&!/(hefeflocken|levure|backpulver|senf|moutarde|mustard)/.test(h)&&!(/(essig|aceto|balsam|vinaigre|vinegar)/.test(h)&&n.fa<1&&n.su<25)&&(n.pr>13||n.fa>16||(n.su>8&&n.kc>60))
      &&!(n.kc>200&&n.su<15&&(n.fa<20&&n.pr<=13&&n.cb<70||n.fa<45&&n.pr<=25&&/(muskat|kummel|cumin|nelken|kardamom|koriander|anis|fenchel|pfeffer|paprika|curry)/.test(h))&&/(gewurz|\b(pfeffer|pulver|gemahlen|zimt|kurkuma|curcuma|curry|paprika|muskat|kummel|chili|oregano|thymian|rosmarin|majoran|basilikum|petersilie|dill|anis|nelken|kardamom|ingwer)\b)/.test(h)&&!/(cracker|knack|brot|chips|snack|riegel|nudel|spiral|pasta|penne|fusilli|salat|rusa)/.test(h))) return "RETRY"; // Shake, Kräuterquark, Vanilleeis
-  if(id==="spice"&&/(senf|moutarde|mustard)/.test(h)&&n.su>10) return R_BYID.sauce;   // süßer Senf, Honig-Senf
+  if(id==="spice"&&/(senf|moutarde|mustard)/.test(h)&&(n.su>10||n.fa>15||/(sauce|sosse|dressing|mayo|creme)/.test(h))) return R_BYID.sauce;   // süßer Senf, Honig-Senf
   // Obst & Gemüse mit Getränke-Wörtern und wenig Kalorien: Limo, Schorle, aromatisiertes Wasser
   if(["fruit","berries","vitc","banana","veg","skinveg"].includes(id)&&n.kc<70&&R_DRINKW.test(h)) return "RETRY";
   if(id==="banana"&&n.kc<60) return "RETRY";                         // Bananen-Milchdrink: echte Banane hat ca. 90 kcal
@@ -325,7 +328,8 @@ function rPlausible(cat,n,heavy,h){
   if(id==="fermentedveg"&&n.kc>150&&n.cb>30) return R_BYID.readymeal;      // Instant-Nudeln "Kimchi"
   if(id==="coconut"&&(n.su>25||n.su>15&&n.cb>30)) return n.su<=25&&/(mix|nuss|cashew|mandel|\bnut)/.test(h)?"RETRY":R_BYID.sweets;  // Kokos-Gebäck; Nuss-Mix: als Nuss prüfen
   if(id==="coconut"&&n.kc<70&&n.su>6) return R_BYID.softdrink;    // Getränk mit Kokos (Kokoswasser hat weniger Zucker)
-  if(id==="chips"&&n.fa<=6&&n.kc>200&&/(apfel|banane|mango|ananas|frucht|beere|obst|birne)/.test(h)) return R_BYID.driedfruit; // Apfelchips
+  if(id==="chips"&&n.fa<=6&&/(apfel|banane|mango|ananas|frucht|beere|obst|birne)/.test(h)) return n.kc>200?R_BYID.driedfruit:"RETRY"; // Apfelchips
+  if(id==="chips"&&n.kc<100) return "RETRY";                         // Gurken-Sticks, Milchdrink „Popcorn“
   if(id==="dairy"&&n.pr>=15&&n.fa>=15&&n.cb<5) return R_BYID.cheese;   // "Heumilch-Bergkäse", "Comté au lait cru"
   if(["dairy","protdairy"].includes(id)&&n.kc>300&&n.pr>=25&&n.fa<15&&n.su<30) return /(riegel|\bbar\b|snack|crisp)/.test(h)?R_BYID.proteinbar:R_BYID.whey; // Diät-/Protein-Shakepulver, Proteinriegel
   if(["dairy","protdairy","kefir"].includes(id)&&n.kc>300&&n.su>25) return R_BYID.sweets; // Vollmilch-Kuvertüre, Milchschoko
@@ -342,6 +346,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="cheese"&&n.pr<8&&n.su>12) return R_BYID.sweets;          // Käsekuchen-Eis, "Cheesecake"-Pralinen
   if(id==="cheese"&&n.pr<8&&n.kc<150) return dish;                  // Salat mit Mozzarella
   if(id==="cheese"&&n.pr<8) return n.kc>350&&n.fa>15&&n.cb>10?R_BYID.chips:n.cb>10&&n.fa<25?dish:R_BYID.dairy; // Käse-Snack; "Pasta 5-Käse" ist ein Gericht
+  if(id==="cheese"&&n.cb>15&&/(sticks|panier|panade|crispy|breaded|nugget|knusper)/.test(h)) return R_BYID.fastfood;   // panierte Mozzarella-Sticks
   if(id==="cheese"&&n.cb>15) return n.cb>35?R_BYID.refined:dish; // Käsebrötchen, Käse-Snack
   if(id==="egg"&&n.cb>15) return dish; // Pfannkuchen-Streifen, Eierspätzle
   if(id==="sugar"&&n.pr>=5&&/(flakes|flocken|gepufft|pops|crisp|musli|kissen|ringe)/.test(h)) return R_BYID.cereal;
@@ -362,7 +367,8 @@ function rPlausible(cat,n,heavy,h){
   if(["veg","skinveg"].includes(id)&&/(relish|relisj|suss-sauer|suss sauer|sweet sour|ketchup|chutney)/.test(h)) return R_BYID.sauce; // Relish, Süß-sauer-Soße
   if(id==="driedfruit"&&n.su<12) return R_BYID.veg; // getrocknete Oliven/Tomaten: kein Zuckerobst // Oliven sind von Natur aus fettreich
   if(["veg","skinveg","fruit","berries","vitc","banana"].includes(id)&&n.kc>150){
-    if(/(meerrettich|\bkren\b|wasabi)/.test(h)) return R_BYID.sauce;            // Tafel-Meerrettich (mit Sahne/Öl)
+    if(/(meerrettich|\bkren\b|wasabi)/.test(h)) return R_BYID.sauce;
+    if((id==="veg"||id==="skinveg")&&/(edelsuss|rosenscharf|gemahlen|pulver|powder|gewurz)/.test(h)&&n.fa<20) return R_BYID.spice;   // Paprikapulver            // Tafel-Meerrettich (mit Sahne/Öl)
     if(n.fa>15&&n.su>=20) return R_BYID.sweets;                        // Schokolade mit Frucht, Studentenfutter
     if(n.fa>15&&n.pr>=15&&n.su<10) return /(kern|seed|saat|samen|nuss|nut|graines|pepita)/.test(h)?R_BYID.nuts:"RETRY";   // Kürbiskerne; „Zwiebelfleisch“ ist Fleisch
     if(n.fa>15) return n.cb>=35?R_BYID.chips:R_BYID.sauce;           // Gemüsechips bzw. Meerrettich-Creme, Aufstrich
@@ -370,7 +376,7 @@ function rPlausible(cat,n,heavy,h){
     // Ballaststoffe fehlen in der Datenbank: Trockenobst trotzdem erkennen (viele kcal, kaum Fett/Protein, keine Süßware im Namen)
     const dried=R_DRIED.test(h)||(n.fi>=4&&n.fa<5&&n.pr<6)||(n.fiU&&n.kc>=280&&n.fa<=6&&n.pr<5&&!/(gumm|bonbon|konfitur|marmelade|gelee|aufstrich|sirup|kandiert|riegel|drops|lolli)/.test(h)), fruity=id!=="veg"&&id!=="skinveg";
     if(fruity&&dried) return R_BYID.driedfruit;
-    if(fruity&&n.su>40) return n.kc<300?R_BYID.sugar:R_BYID.sweets;   // Konfitüre bzw. Fruchtgummi, kein Trockenobst
+    if(fruity&&n.su>30) return n.kc<300?R_BYID.sugar:R_BYID.sweets;   // Konfitüre bzw. Fruchtgummi, kein Trockenobst
     if(n.su>40||/kandiert/.test(h)) return R_BYID.sweets;              // kandierter Ingwer
     if(fruity&&n.fa<5&&n.cb>40) return R_BYID.driedfruit;
     return dish;
@@ -381,6 +387,7 @@ function rPlausible(cat,n,heavy,h){
   // Fisch/Fleisch „in Öl“ ohne Präposition (z. B. „Sardines Huile d'Olive“): das Öl ist nur Aufguss
   if(["goodfat","seedoil"].includes(id)&&n.fa<60) return n.pr>=10?"RETRY":R_BYID.sauce;
   if(id==="whey"&&n.pr<20) return R_BYID.proteinbar;
+  if(id==="water"&&n.su>=1&&!/(kokos|coconut|\bcoco\b)/.test(h)) return R_BYID.softdrink;   // Wasser mit Zucker/Saft („Touch“, „Apfel“)
   if(id==="water"&&n.kc>15) return n.su>2?R_BYID.softdrink:n.kc>30?"RETRY":cat;   // „Kartoffeln in Wasser“ ist kein Wasser
   return cat;
 }
@@ -469,7 +476,7 @@ function rClassify0(item){
   for(let t=0;t<4;t++){
     if(cat&&cat.id==="mixedmeal"&&heavy) cat=R_BYID.readymeal;
     // Gerichte mit Fleisch/Fisch (z. B. "Bauerntopf mit Hackfleisch", "Tagliatelle Wildlachs") als Gericht werten
-    if(cat&&R_ANIMAL.includes(cat.id)&&!["broth","organ","cheese"].includes(cat.id)&&/(sauce|sosse|topf|salatbox|schlemmerfilet|a la |bordelaise|gratin|lasagne|tagliatelle|nudel|pasta|spaghetti|pizza|wrap|sandwich|burger|risotto|fertiggericht|mahlzeit|menu|suppe|eintopf)/.test(h)) cat=R_BYID[heavy?"readymeal":"mixedmeal"];
+    if(cat&&R_ANIMAL.includes(cat.id)&&!["broth","organ","cheese"].includes(cat.id)&&/(sauce|sosse|topf|salatbox|schlemmerfilet|a la |bordelaise|gratin|lasagne|tagliatelle|nudel|pasta|spaghetti|pizza|wrap|sandwich|burger|risotto|fertiggericht|mahlzeit|menu|suppe|eintopf)/.test(h.replace(R_PLACEBURGER,""))) cat=R_BYID[heavy?"readymeal":"mixedmeal"];
     const pc=rPlausible(cat,nut,heavy,h);
     // Getränk nur, wenn der Name auch nach Getränk klingt (sonst würde z. B. eine Banane mit zu niedrigen Kalorien zur Limo)
     if(pc==="RETRY"){ if(["fruit","berries","vitc","banana","veg","skinveg"].includes(cat.id)&&nut.kc<70&&R_DRINKW.test(h)) drinkLike=true; skip.add(cat.id); cat=foodCat(item,skip); continue; }
@@ -477,7 +484,10 @@ function rClassify0(item){
   }
   if(!cat&&drinkLike) cat=nut.su>=2?R_BYID.softdrink:R_BYID.water;   // Limo/Schorle/aromatisiertes Wasser mit Obst im Namen
   // Alkoholfreies Bier, Radler 0,0 %: kein Alkohol, aber auch kein gesundes Getränk
-  if(/(alkoholfrei|0[,.]0 ?%|alcohol.?free|sans alcool|analcolic|sin alcohol|non.?alcoholic)/.test(h)&&((cat&&cat.id==="alcohol")||bc==="alcohol"||/(bier|beer|radler|weizen|\bpils|helles|sekt|wein|\bgin\b)/.test(h))) cat=R_BYID.softdrink;
+  if(/(alkohol.?fre|alcohol.?free|\b0[,.]0( ?%|\b)|ohne alkohol|sans alcool|analcolic|sin alcohol|non.?alcoholic|clausthaler)/.test(h+(item.brand?" "+NORM(item.brand):""))&&((cat&&cat.id==="alcohol")||bc==="alcohol"||/(bier|beer|radler|weizen|\bpils|helles|sekt|wein|\bgin\b)/.test(h))) cat=R_BYID.softdrink;
+  // Gewürzsalz & Würzmischungen: „Pommes Gewürzsalz“ ist kein Obst, „Hackfleisch Gewürzsalz“ kein Gericht.
+  // Erkennung über den Namen (ab 5 g Salz), damit mehr Salz das Produkt nicht in eine bessere Art schiebt
+  if(cat&&sa>=5&&!["spice","sauce","readymeal","broth","processedmeat","cheese","fattyfish","leanfish","nuts","peanut","sweets","soy","chips"].includes(cat.id)&&/(gewurzsalz|wurzsalz|krautersalz|gewurzmischung|wurzmischung|gewurzzubereitung|seasoning|\brub\b|wurzer\b|\bgewurz\b|\bsalz\b|meersalz|steaksalz|pommessalz|frittensalz|\bpfeffer\b|pfeffermuhle)/.test(h)) cat=R_BYID.spice;
   // Nicht erkannt: grob über die Nährwerte einordnen (reiner Zucker, Öl, Chips, Gebäck)
   if(!cat){
     const {kc,pr,cb,fa,su}=nut;
@@ -499,6 +509,8 @@ function rClassify0(item){
   // (Schutzatmosphäre, Etikett). Ohne viel Salz, Zucker oder Würz-Hinweis im Namen ist es naturbelassen.
   if(heavy&&cat&&["poultry","redmeat","leanfish","fattyfish","egg","organ"].includes(cat.id)&&sa2<1.2&&su<3
      &&!/(marin|panier|gewurz|wurz|grill|bbq|barbecue|knusper|crispy|sauce|sosse|krauter|knoblauch|paprika|curry|teriyaki|honig|chili|gyros|kebab|doner|nugget|cordon|bacon|zubereit|gegart|sous vide)/.test(h)) heavy=false;
+  // Reines Mineralwasser (ohne Kalorien, Zucker und Geschmack) ist nicht „stark verarbeitet“, auch wenn die Datenbank es so einstuft
+  if(heavy&&cat&&cat.id==="water"&&kc<=1&&su<0.5&&!/(geschmack|aroma|flavou?r|touch|zitron|limett|lemon|orange|apfel|frucht|fruit|beere|berry|minze|gurke|ingwer|holunder|pfirsich|mango|kirsch|vitamin|tonic)/.test(h)) heavy=false;
   if(heavy&&cat&&["protdairy","dairy","kefir","cheese"].includes(cat.id)&&su<6&&sa2<(cat.id==="cheese"?4.5:2)
      &&!/(frucht|erdbeer|himbeer|kirsch|pfirsich|mango|vanill|schoko|choco|karamell|caramel|nuss|stracciatella|light|zero|leicht|schmelz|zubereitung|scheiblett|streich|creme|dessert|pudding|drink|shake|protein|aroma|geschmack)/.test(h)) heavy=false;
   return {cat,nut,heavy,nova,h,words};
@@ -535,6 +547,8 @@ function supEmoji(item){ const k=rSupKind(item," "+NORM(item.name||"")+" ",null)
 function rSupFood(item,kind,g,h){
   const r=supScore(kind,g), good=[...r.good], bad=[...r.bad]; let sc=r.score;
   const su=+item.sugar||0;
+  // Pflanzliches Proteinpulver enthält kein Milcheiweiß: Molke-Hinweis passt nicht
+  if(kind==="whey"&&/(vegan|pflanzlich|erbse|pea |soja|reisprotein|plant)/.test(h)){ for(let i=bad.length-1;i>=0;i--) if(/milcheiweiß|molke/i.test(bad[i])) bad.splice(i,1); if(g==="skin") bad.unshift("Isoliertes Pulver mit Zusätzen"); }
   if(su>=20){ sc-=12; bad.unshift("Als Gummi/Pulver mit viel Zucker"); }
   else if(/(brausetabl|zero|sussstoff|sucralose|aspartam)/.test(h)){ sc-=4; bad.push("Oft mit Süßstoffen"); }
   return { score:Math.max(40,Math.min(99,Math.round(sc))), good:good.slice(0,3), bad:bad.slice(0,3), reasons:[r.why], notes:r.notes||[] };
@@ -555,7 +569,7 @@ const R_NATSUGAR=new Set([...R_FRUITY,"veg","skinveg","dairy","kefir","protdairy
 const R_IMPL_TXT={zero:"Alle Nährwerte stehen auf 0",kcal:"Kalorien passen nicht zu Eiweiß, Kohlenhydraten und Fett",amount:"Mengen sind unmöglich (z. B. mehr Zucker als Kohlenhydrate)",water:"Wasser hat keine Kalorien",salt:"Salz ist ungewöhnlich hoch für diese Art Lebensmittel",portion:"Kalorien sind viel zu niedrig – vermutlich pro Portion statt pro 100 g angegeben",dup:"Dieses Produkt steht mit anderen Werten noch einmal in der Datenbank"};
 const R_ZERO_OK=/(special t|schale|\bstill\b|\bmedium\b|naturell|spritzig|perlig|flavdrop|drops|\b0 ?%|\btang\b|wasser|water|\beau\b|acqua|agua|mineral|quelle|brunnen|sprudel|pellegrino|perrier|tee|\btea\b|\bthe\b|infusion|tisane|kaffee|coffee|\bcafe\b|espresso|zero|light|diet|null zucker|sussstoff|sweetener|edulcorant|stevia|sukrin|salz|salt|\bsel\b|\bsale\b|\btuz\b|essig|vinegar|vinaigre|aceto|gewurz|aroma|arome|extrakt|extract|essenz|sirup|syrup|sirop|konzentrat|concentre|hefe|levure|backpulver|natron|gelatine|agar|pfeffer|pepper|zimt|krauter|herbes|soda|kaugummi|gum|kohlensaure|eis wurfel|ice cube)/;
 const R_POLYOL=/(kaugummi|chewing|\bgum\b|mint|bonbon|drops|pastill|lutsch|mentos|ricola|wrigley|airwaves|orbit|\bextra\b|\bv6\b|tic tac|eukal|fisherman|dentyne|hollywood|stimorol|bez secera|zuckerfrei|zucker frei|sugar ?free|sans sucre|senza zucchero|sin azucar|sukkerfri|suikervrij|sockerfri|ohne zucker|no sugar|no added sugar|polyol|xylit|erythrit|maltit|isomalt|sorbit|stevia|allulose|ballaststoff|fiber|fibre|\blight\b|\bzero\b|protein|eiweiss)/;
-const R_ALC=/(\bbier\b|beer|biere|birra|cerveza|\bwein\b|wine|\bvin\b|vino|likor|liqueur|schnaps|vodka|wodka|whisk|\brum\b|\bgin\b|sekt|prosecco|champagner|cider|cidre|alkohol|alcohol|spritz|aperol|amaretto|cognac|brandy|tequila|soju|burgunder|riesling|rosso|\brose\b|bianco|\bblanc\b|rouge|merlot|cabernet|chardonnay|sauvignon|pinot|\bcava\b|freixenet|tempranillo|rioja|chianti|primitivo|lambrusco|dornfelder|silvaner|trollinger|montepulciano|sangiovese|syrah|shiraz|malbec|zinfandel|vinho|spumante|\bbrut\b|secco|glühwein|gluhwein)/;
+const R_ALC=/(\bbier\b|\bbeer|biere|birra|cerveza|\bwein\b|wine|\bvin\b|vino|likor|liqueur|schnaps|vodka|wodka|whisk|\brum\b|\bgin\b|sekt|prosecco|champagner|cider|cidre|alkohol|alcohol|spritz|aperol|amaretto|cognac|brandy|tequila|soju|burgunder|riesling|rosso|\brose\b|bianco|\bblanc\b|rouge|merlot|cabernet|chardonnay|sauvignon|pinot|\bcava\b|freixenet|tempranillo|rioja|chianti|primitivo|lambrusco|dornfelder|silvaner|trollinger|montepulciano|sangiovese|syrah|shiraz|malbec|zinfandel|vinho|spumante|\bbrut\b|secco|glühwein|gluhwein)/;
 // Salz-Obergrenze je Art (g pro 100 g): darüber ist es fast immer ein Fehler (oft Natrium in mg als g oder Komma verrutscht)
 const R_SALT_MAX={cheese:7,protdairy:3,dairy:2.5,veg:4,skinveg:4,legume:4,fruit:1.5,berries:1.5,banana:1.5,vitc:1.5,driedfruit:2,poultry:5,leanmeat:5,redmeat:5,leanfish:6,fattyfish:8,egg:3,oats:2,wholewheat:4,refined:5,ricecake:4,potato:4,rice:4,nuts:6,coconut:3,cereal:3.5,sweets:4,darkchoc:2,juice:1,plantmilk:1.5,whey:4,honey:1,sugar:2};
 const R_SALT_OK=/(aroma|lauge|kandisin|sussstoff|sweetener|lakritz|salmiak|licorice|liquorice|\bdrop\b|marinade|peperoni|antipasti|eingelegt|bratensaft|\bjus\b|creme|aufstrich|spread|salz|salt|salted|gesalzen|sale |sel |pokel|feta|halloumi|roquefort|gorgonzola|parmesan|parmigiano|pecorino|grana|kapern|oliven|olive|sardell|anchov|hering|matjes|stockfisch|bacalao|baccala|kaviar|caviar|rogen|surimi|lake|brine|miso|kimchi|sauerkraut|gurke|pickle|instant|bruhe|bouillon|suppe|soup|pulver|powder|seasoning|gewurz|wurz|rub|chips|cracker|brezel|bretzel|pretzel|salzstange|laugen|jerky|beef jerky|biltong|trocken|dried|getrocknet|serrano|parma|prosciutto|bresaola|bundner|schinken|ham|speck|bacon|salami|chorizo|nuss mix|edamame|algen|seaweed|nori|kombu|wakame|furikake|tapenade|pesto|paste|dip|sauce|sosse)/;
@@ -917,7 +931,7 @@ function rFill(pros,cons,score,c){
   if(drink){
     if(kc<8&&su<1&&["water","tea","coffee"].includes(id)) p("Ohne Kalorien & Zucker");
     if(kc<8&&su<1&&id==="water") p("Deckt den Flüssigkeitsbedarf");
-    if(su>=4) n("Zucker in flüssiger Form ("+rG(su)+" g pro 100 ml)");
+    if(su>=4&&kc<100) n("Zucker in flüssiger Form ("+rG(su)+" g pro 100 ml)");
     if(id==="softdrink"&&kc<10&&su<1) n("Süßstoffe und Zusätze");
     if(id==="coffee"&&g==="energy") n("Koffein wirkt nur kurz, bei viel davon folgt ein Tief");
     if(kc<8&&!["water","tea"].includes(id)) n("Keine nennenswerten Nährstoffe");
@@ -953,7 +967,7 @@ function rFill(pros,cons,score,c){
     if(g==="muscle"&&pr>=10&&fs>0.5&&fa*9>pr*4) n("Mehr Kalorien aus Fett als aus Protein");
     if(["skin","energy"].includes(g)&&c.highGI) n("Hoher glykämischer Index: Blutzucker steigt schnell");
     if(g==="energy"&&cb<8&&kc<150&&!R_GOODFAT.includes(id)) n("Wenig Kohlenhydrate – liefert kaum schnelle Energie");
-    else if(g==="energy"&&cb<5&&kc>=150) n("Kaum Kohlenhydrate: Energie nur aus Fett & Protein");
+    else if(g==="energy"&&cb<5&&kc>=150&&!["goodfat","butter","coconut"].includes(id)) n("Kaum Kohlenhydrate: Energie nur aus Fett & Protein");
     if(g==="lose"&&id==="dairy"&&kc<90&&/(milch|drink|\bmilk)/.test(c.h)) n("Getrunkene Kalorien sättigen weniger");
     if(su>=5&&su<12&&!fruity&&!["dairy","kefir","protdairy"].includes(id)) n("Etwas Zucker ("+rG(su)+" g)");
     if(nova===3&&!heavy&&!["mixedmeal"].includes(id)) n("Verarbeitetes Produkt");
@@ -1012,7 +1026,9 @@ function rTextCheck(pros,cons,n){
     if(/(ohne kalorien|null kalorien|kalorienfrei|fast ohne kalorien)/.test(t)&&n.kc>(n.id==="spice"?200:20)) return true;
     if(/sehr viel protein/.test(t)&&n.pr<15) return true;
     if(/(viel protein|proteinreich|liefert protein|mehr protein als)/.test(t)&&n.pr<8) return true;
+    if(/protein/.test(t)&&!/etwas protein/.test(t)&&(n.pr<3||n.pr<8&&n.kc>0&&n.pr*4/n.kc<0.12)) return true;
     if(/kaum fett/.test(t)&&n.fa>5) return true;
+    if(/moderaten kalorien/.test(t)&&n.kc>200) return true;
     if(/wenig zucker/.test(t)&&n.su>10) return true;
     if(/ballaststoff/.test(t)&&fib&&+n.fiber<1.5) return true;
     if(/glutenfrei/.test(t)&&glut) return true;
