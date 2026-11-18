@@ -57,6 +57,7 @@ const EX_LIST = [
   ["front_raise","Frontheben","Schultern","Kurzhantel","front_raise","schultern","brust"],
   ["front_raise_cable","Frontheben","Schultern","Kabel","front_raise","schultern","brust"],
   ["rear_fly","Reverse Flys","Schultern","Kurzhantel","rear_fly","schultern,ruecken","nacken"],
+  ["rear_fly_cable","Reverse Flys","Schultern","Kabel","rear_fly","schultern,ruecken","nacken"],
   ["rear_fly_machine","Reverse Butterfly","Schultern","Maschine","rev_fly_seat","schultern,ruecken","nacken"],
   ["face","Face Pull","Schultern","Kabel","face_pull","schultern,ruecken","nacken"],
   ["upright","Aufrechtes Rudern","Schultern","Langhantel","upright","schultern,nacken","bizeps"],
@@ -79,6 +80,7 @@ const EX_LIST = [
   ["skull","Skullcrusher","Arme","SZ-Stange","skull","trizeps",""],
   ["skull_db","Skullcrusher","Arme","Kurzhantel","skull","trizeps",""],
   ["kickback","Trizeps-Kickback","Arme","Kurzhantel","kickback","trizeps",""],
+  ["kickback_cable","Trizeps-Kickback","Arme","Kabel","kickback","trizeps",""],
   ["bench_dip","Bankdips","Arme","Körpergewicht","bench_dip","trizeps","brust,schultern"],
   ["bp_close","Enges Bankdrücken","Arme","Langhantel","bench","trizeps","brust,schultern"],
   ["dip_machine","Dip-Maschine","Arme","Maschine","dip","trizeps","brust,schultern"],
@@ -111,7 +113,7 @@ const EX_LIST = [
 
   ["hip","Hip Thrust","Gesäß","Langhantel","hip_thrust","gesaess","beinbeuger,quads"],
   ["hip_smith","Hip Thrust","Gesäß","Smith-Maschine","hip_thrust","gesaess","beinbeuger,quads"],
-  ["hip_machine","Hip Thrust","Gesäß","Maschine","hip_thrust","gesaess","beinbeuger"],
+  ["hip_machine","Hip Thrust","Gesäß","Maschine","hip_thrust","gesaess","beinbeuger,quads"],
   ["bridge","Glute Bridge","Gesäß","Körpergewicht","bridge","gesaess","beinbeuger"],
   ["bridge_bb","Glute Bridge","Gesäß","Langhantel","bridge","gesaess","beinbeuger"],
   ["glute_kick","Glute Kickback","Gesäß","Kabel","glute_kick","gesaess","beinbeuger"],
@@ -130,13 +132,15 @@ const EX_LIST = [
 
   ["jacks","Hampelmann","Ganzkörper","Körpergewicht","jacks","waden,schultern","quads,gesaess"]
 ];
-// Anzeigename: Gerät in Klammern, wenn es denselben Namen mehrfach gibt oder ein Gerät gebraucht wird
+// Anzeigename: Gerät in Klammern, wenn es denselben Namen mehrfach gibt oder ein Gerät gebraucht wird.
+// Steht das Gerät schon im Namen (z. B. „Dip-Maschine“, „Kabel-Crunch“), nicht doppelt anhängen.
 (function(){
   const count={};
   EX_LIST.forEach(r=>count[r[1]]=(count[r[1]]||0)+1);
   Object.keys(EX).forEach(k=>delete EX[k]);
   EX_LIST.forEach(([id,name,group,eq,pattern,prim,sec])=>{
-    const full = (eq==="Körpergewicht" && count[name]===1) ? name : name+" ("+eq+")";
+    const inName = count[name]===1 && name.toLowerCase().includes(eq.toLowerCase());
+    const full = ((eq==="Körpergewicht" && count[name]===1) || inName) ? name : name+" ("+eq+")";
     EX[id]={ id, name:full, base:name, group, eq, pattern, primary:prim?prim.split(","):[], secondary:sec?sec.split(","):[] };
   });
 })();
