@@ -542,7 +542,7 @@ function muskelPlanId(a,lifts){
 function coachPlan(id){
   if(id==="tl") return {id:"tl", name:"Torso / Limbs", days:[
     planDay("tla","Torso",[["bp_inc_smith",30],["chest_press",30,1],["pecdeck",25,1],["lat_machine",35],["row_machine",30],["ohp_machine",20],["latraise_cable",5],["rear_fly_machine",15,1],["cable_crunch",15]]),
-    planDay("lia","Limbs",[["legpress",60],["leg_ext",25],["leg_curl",20],["leg_curl_seat",20],["calf",30],["adductor",25],["preacher_machine",15],["hammer",8],["tri_rope",15],["tri_oh_cable",10]])]};
+    planDay("lia","Limbs",[["legpress",60],["hip_machine",40],["leg_ext",25],["leg_curl",20],["leg_curl_seat",20],["calf",30],["adductor",25],["preacher_machine",15],["hammer",8],["tri_rope",15],["tri_oh_cable",10]])]};
   // Zuhause: Plank in Sekunden (30), alles andere 6 Wdh.
   if(id==="home") return {id:"home", name:"Zuhause Ganzkörper", days:[
     planDay("hoa","Zuhause A",[["pushup",0],["bench_dip",0],["sq_bw",0],["bulgarian",0],["bridge",0],["back_ext",0],["plank",0,2,30]]),

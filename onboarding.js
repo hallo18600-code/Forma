@@ -230,8 +230,8 @@ function persoTags(){
 }
 function fullBodyPlan(){
   return { id:"gk", name:"Ganzkörper", days:[
-    planDay("gka","Ganzkörper A",[["bp_inc_smith",30],["pecdeck",25],["lat_machine",35],["row_machine",30],["legpress",60],["leg_curl",20],["latraise_cable",5],["tri_rope",15]]),
-    planDay("gkb","Ganzkörper B",[["chest_press",30],["ohp_machine",20],["lat_close",35],["row_cable",30],["leg_ext",25],["leg_curl_seat",20],["preacher_machine",15],["cable_crunch",15]])
+    planDay("gka","Ganzkörper A",[["bp_inc_smith",30],["pecdeck",25],["lat_machine",35],["row_machine",30],["legpress",60],["leg_ext",25],["leg_curl",20],["leg_curl_seat",20],["latraise_cable",5],["tri_rope",15]]),
+    planDay("gkb","Ganzkörper B",[["chest_press",30],["pecdeck",25],["ohp_machine",20],["lat_close",35],["row_cable",30],["legpress",60],["leg_ext",25],["leg_curl_seat",20],["leg_curl",20],["preacher_machine",15],["cable_crunch",15]])
   ]};
 }
 function obDefaultPlans(){ return JSON.stringify(state.routines)===JSON.stringify(defaultRoutines()); }
