@@ -367,7 +367,7 @@ const ROUTINES = [
   { id:"empty", name:"Leer", detail:"Übungen selbst wählen", exercises:[] }
 ];
 const EX = {}; // wird in uebungen.js mit allen Übungen gefüllt
-// Plan-Vorlagen: max. 2 Sätze pro Übung, 4–5 Sätze pro Muskel und Training, Startwert immer 6 Wdh.
+// Plan-Vorlagen: max. 2 Sätze pro Übung, 4–5 Sätze pro Muskel und Training (Gesäß: Beinpresse + Hip Thrust), Startwert immer 6 Wdh.
 // Kurzform: [Übungs-ID, Start-kg, Anzahl Sätze (Standard 2), Wdh (Standard 6)]
 function planDay(id, name, list){
   return {id, name, exercises:list.map(([e,kg,n=2,reps=6])=>({id:e, sets:Array.from({length:n},()=>({kg, reps}))}))};
@@ -377,7 +377,7 @@ function defaultRoutines(){
     { id:"ppl", name:"Push Pull Legs", days:[
       planDay("push","Push",[["bp_inc_smith",30],["chest_press",30,1],["pecdeck",25,1],["ohp_machine",20],["latraise_cable",5],["tri_rope",15],["tri_oh_cable",10]]),
       planDay("pull","Pull",[["lat_machine",35],["row_machine",30],["rear_fly_machine",15],["preacher_machine",15],["hammer",8],["cable_crunch",15]]),
-      planDay("legs","Beine",[["legpress",60],["leg_ext",25],["leg_curl",20],["leg_curl_seat",20],["calf",30],["adductor",25]])
+      planDay("legs","Beine",[["legpress",60],["hip_machine",40],["leg_ext",25],["leg_curl",20],["leg_curl_seat",20],["calf",30],["adductor",25]])
     ]}
   ];
 }

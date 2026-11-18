@@ -15,40 +15,50 @@ const ALT_MAP={
   alcohol:["Wasser","Tee"],
   coffeemilk:["Kaffee","Tee"],
   plantmilk:["Milch 1,5 %","Vollmilch"],
-  sweets:h=>/(schoko|chocolate|chocolat|cioccolat|cokolad|czekolad|zartbitter|praline|riegel|bar\b)/.test(h)?["Zartbitterschokolade","Datteln","Walnüsse","Blaubeeren"]:["Blaubeeren","Erdbeeren","Datteln","Apfel","Zartbitterschokolade"],
+  // Falsch einsortierte Nicht-Süßigkeiten (Tortellini, Aromapaste, Hustenbonbons): lieber keine Alternative
+  sweets:h=>/(tortell|ravioli|nudel|pasta|paste|aroma|extrakt|extract|husten|cough|flammkuchen|pizza|jambon|schinken)/.test(h)?[]:/(schoko|chocolate|chocolat|cioccolat|cokolad|czekolad|zartbitter|praline|riegel|bar\b)/.test(h)?["Zartbitterschokolade","Datteln","Walnüsse","Blaubeeren"]:["Blaubeeren","Erdbeeren","Datteln","Apfel","Zartbitterschokolade"],
   sugar:h=>/(marmelade|konfiture|fruchtaufstrich|confiture|jam|gelee)/.test(h)?["Blaubeeren","Erdbeeren","Himbeeren","Honig"]:["Honig","Datteln"],
   cereal:["Haferflocken","Porridge"],
-  proteinbar:["Skyr Natur","Magerquark","Griechischer Joghurt","Mandeln"],
+  // Protein-Pudding, -Quark oder -Drink: Milchprodukte statt Nüsse
+  proteinbar:h=>/(quark|pudding|mousse|joghurt|yog|skyr|creme|dessert|milk|milch|drink|shake)/.test(h)?["Skyr Natur","Magerquark","Griechischer Joghurt"]:["Skyr Natur","Magerquark","Griechischer Joghurt","Mandeln"],
   chips:["Mandeln","Walnüsse","Cashewkerne","Karotte"],
   ricecake:["Mandeln","Walnüsse","Karotte"],
-  fastfood:h=>/(pommes|fritten|kroketten|rosti|kartoffelpuffer|reibekuchen|wedges)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Bratkartoffeln"]
+  fastfood:h=>/(mehl|farine|flour)/.test(h)?[]:/(pommes|fritten|kroketten|rosti|kartoffelpuffer|reibekuchen|wedges)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Bratkartoffeln"]
     :/(nugget|chicken|wings|hahnchen|huhn|schnitzel|cordon)/.test(h)?["Hähnchenbrust","Putenbrust"]
-    :/(fisch|backfisch)/.test(h)?["Lachsfilet","Kabeljau","Forelle"]
+    :/(fisch|fish|hering|herring)/.test(h)?["Lachsfilet","Kabeljau","Forelle"]
     :/(burger|steak)/.test(h)?["Rindersteak","Hähnchenbrust","Gulasch"]
     :/(doner|kebab|durum|gyros|wrap)/.test(h)?["Hähnchenbrust","Putenbrust","Gulasch"]
     :["Gulasch","Chili con Carne","Hähnchenbrust"],
   // Brühe, Würzpulver und „Fix für …“ sind Zutaten, keine Mahlzeit: dafür keine Alternative
-  readymeal:h=>/(bruhe|bouillon|brodo|caldo|=kub|fond|pulver|wurfel|wurze|gewurz| fix |fix fur|basis fur|base|paste|sauce|sosse|soße)/.test(h.replace(/ kub /," =kub "))?[]
-    :/(pure|puree|stampf|kartoffel|knodel|klosse|spatzle|kroketten|gratin)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Kartoffelknödel"]
+  readymeal:h=>/(bruhe|bouillon|brodo|caldo|=kub|fond|pulver|wurfel|wurze|gewurz| fix |fix fur|basis fur|base|paste|sauce|sosse|soße|creme|krem|oliven|olive|aceitun|terrine|pastete|bruschetta|avocado)/.test(h.replace(/ kub /," =kub "))?[]
+    :/(pure|puree|stampf|kartoffel|knodel|klosse|spatzle|kroketten|gratin)/.test(h)&&!/(braten|gulasch|fleisch|schnitzel|hahnchen|rind|schwein|geschnetzel)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Kartoffelknödel"]
     :/(suppe|soup|zuppa|soupe|eintopf)/.test(h)?["Gemüsesuppe","Hühnersuppe","Linseneintopf"]
-    :/(hering|matjes|lachs|fisch|thunfisch|forelle|makrele|garnele|shrimp)/.test(h)?["Lachsfilet","Hering","Forelle","Kabeljau"]
+    :/(hering|matjes|lachs|salmon|saumon|fisch|fish|thunfisch|tuna|forelle|makrele|garnele|shrimp)/.test(h)?["Lachsfilet","Hering","Forelle","Kabeljau"]
     :/(schnitzel|cordon|nugget|hahnchen|chicken|pute)/.test(h)?["Hähnchenbrust","Putenbrust","Curry"]
-    :/(kuchen|torte|stich|strudel|dessert|pudding|creme brulee|tiramisu)/.test(h)?[]
+    :/(kuchen|torte|stich|strudel|dessert|pudding|creme brulee|tiramisu|ghurt|joghurt|ohrchen|schweinsohr)/.test(h)?[]
+    :/(pizza|flammkuchen)/.test(h)?["Gulasch","Chili con Carne","Hähnchenbrust"]
     :["Gulasch","Chili con Carne","Hühnersuppe","Gemüsesuppe","Linseneintopf"],
-  processedmeat:["Putenbrust","Hähnchenbrust","Rindersteak","Ei"],
+  // „Parma“ steht auch auf Tomatensoßen, „Cheese Flips“ sind Knabberzeug: dafür keine Fleisch-Alternative
+  processedmeat:h=>/(passata|pomodor|tomat|sugo|sauce|flips|chips)/.test(h)?[]:/kase/.test(h)&&!/(wurst|schinken|salami|lyoner|fleisch)/.test(h)?["Hüttenkäse","Magerquark","Mozzarella"]:["Putenbrust","Hähnchenbrust","Rindersteak","Ei"],
   // Veganer Käse → Käse, veganer Joghurt → Joghurt, sonst Fleisch/Ei/Hülsenfrüchte
-  ersatz:h=>/(kase|cheese|mozzarella|gouda|feta|parmesan|reibe|frischkase|camembert|cheddar)/.test(h)?["Mozzarella","Hüttenkäse","Feta"]
+  // Vegane Mayo/Soße oder Zwiebelringe sind kein Fleischersatz: keine Alternative
+  ersatz:h=>/(mayo|sauce|sosse|dressing|zwiebelring)/.test(h)?[]
+    :/(frischcreme|streichcreme|aufstrich)/.test(h)?["Hüttenkäse","Magerquark"]
+    :/(kase|cheese|mozzarella|gouda|feta|parmesan|reibe|frischkase|camembert|cheddar)/.test(h)?["Mozzarella","Hüttenkäse","Feta"]
     :/(joghurt|yog|quark|skyr|dessert)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]
     :/(aufschnitt|schinken|salami|wurst|mortadella)/.test(h)?["Putenbrust","Kochschinken","Ei"]
     :["Hähnchenbrust","Rindersteak","Ei","Lachsfilet","Linsen gekocht","Kichererbsen"],
-  soy:["Ei","Hähnchenbrust","Lachsfilet","Linsen gekocht","Kichererbsen"],
+  // Miso/Sojasoße sind Würzmittel; Soja-Joghurt → Joghurt
+  soy:h=>/(miso|sauce|sosse)/.test(h)?[]:/(gurt|joghurt|yog|dessert|pudding)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]:["Ei","Hähnchenbrust","Lachsfilet","Linsen gekocht","Kichererbsen"],
   refined:h=>/(nudel|pasta|spaghetti|penne|fusilli|maccheroni|tortiglioni|farfalle|lasagne|tagliatelle|gnocchi|couscous)/.test(h)?["Kartoffeln gekocht","Reis gekocht","Quinoa gekocht","Süßkartoffel"]
-    :/(brot|brotchen|toast|semmel|baguette|wrap|tortilla|bagel|pain|ciabatta|weckle)/.test(h)?["Vollkornbrot","Roggenbrot","Vollkornbrötchen"]:[],
+    :/(brot|brotchen|toast|semmel|baguette|wrap|tortilla|bagel|pain|ciabatta|weckle)/.test(h)&&!/(aufstrich|creme)/.test(h)?["Vollkornbrot","Roggenbrot","Vollkornbrötchen"]:[],
   wholewheat:h=>/(nudel|pasta|spaghetti|penne|fusilli)/.test(h)?["Kartoffeln gekocht","Reis gekocht","Quinoa gekocht","Süßkartoffel"]:[],
   margarine:["Butter","Olivenöl"],
   seedoil:["Olivenöl","Butter"],
   sauce:h=>/(mayo|majo|remoulade|aioli|dressing|vinaigrette|salatsauce|salatcreme)/.test(h)?["Olivenöl","Senf"]
     :/(dip|aufstrich|spread|creme|hummus|tapenade|guacamole)/.test(h)?[]
+    // Süße und asiatische Soßen sowie Gerichte in Soße: Tomatensoße oder Senf passen nicht
+    :/(cranberry|preiselbeer|kirsch|kirseb|cherry|frucht|fruit|pomegranate|granatapfel|vanille|vanilla|schoko|choco|karamell|caramel|sweet|soja|soy|teriyaki|hoi ?sin|oyster|austern|fisch|fish|chicken|hahnchen|jackfruit|zwiebel|chutney|mango|stir fry|wok)/.test(h)?[]
     :/(pesto|sugo|pastasauce|pasta sauce|bolognese|arrabbiata|napoli|tomate|tomato)/.test(h)?["Tomatensauce"]
     :["Tomatensauce","Senf"],
   peanut:["Mandeln","Walnüsse","Cashewkerne"],
