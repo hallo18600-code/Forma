@@ -990,7 +990,10 @@ document.getElementById("app").addEventListener("click", e=>{
     if(!ui.plan){ ui.modal=null; render(); return; }
     if(!ui.plan.days.length) ui.plan.days.push({id:uid(), name:"Tag 1", exercises:[]});
     const pd=ui.plan.days[ui.planDay]||ui.plan.days[0];
-    pd.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 2)});
+    // Planvorlage: immer 2 Sätze à 6 Wdh., Gewicht vom letzten Training. Plank zählt Sekunden (Wert bleibt), Körpergewicht startet bei 0 kg.
+    const id=el.dataset.id, hold=id==="plank", hist=(state.workouts||[]).some(w=>(w.exercises||[]).some(e=>e.id===id&&(e.sets||[]).some(s=>s.done)));
+    const last=startSets(id, 2), bw=!hist&&(EX[id]||{}).eq==="Körpergewicht";
+    pd.exercises.push({id, sets:[0,1].map(i=>{ const s=last[i]||last[last.length-1]; return {kg:bw?0:s.kg, reps:hold?(hist?s.reps:30):6}; })});
     ui.modal=null;
   }
   else if(act==="plan-del-ex"){ ui.plan.days[+el.dataset.d].exercises.splice(+el.dataset.e,1); }
