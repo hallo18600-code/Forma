@@ -101,9 +101,9 @@ function unitsFor(it){
   else if(has(/chips|crisps|pringles|flips|salzstangen|cracker|nachos|snack|knabber|brezeln /)) u=[["hand",20,"hand",1],["schale",50,"schale"],["tuete",150,"tuete"]];
   // 2. Soßen, Dips, Senf
   else if(has(/pesto/)) u=[["tl",6],["el",15,"el",1],["portion",50,"schaelchen"]];
-  else if(kc<150&&has(/tomatensauce|tomatensosse|sauce tomate|tomato sauce|sauce basilic|passata|pastasauce|pastasosse|sugo|napoli|arrabbiata|bolognese sosse|bolognesesosse|bolognese sauce|hackfleischsosse|bratensosse|bratensauce|rahmsosse|gravy/)) u=[["el",15],["portion",125,"schaelchen",1]];
-  else if(kc<300&&has(/soja ?sauce|soja ?sosse|sojasauce|worcester|tabasco|sriracha|fischsauce|teriyaki|essig|balsamico|vinegar|tomatenmark|tubenmark|zitronensaft|limettensaft|tomatenkonzentrat|concentre de tomate|paste |pasts /)||kc>=60&&kc<300&&has(/tomatenpuree/)) u=[["tl",6,"tl",1],["el",16]];
-  else if(!(has(/ (in|mit|with|an|auf) /)&&has(/burger|lachs|fisch|filet|hahnchen|huhn|pute|fleisch|pfanne|nudel|pasta|kartoffel|gulasch|schnitzel|wurst|hering|makrele|thunfisch/))&&has(/ketchup|mayo|remoulade|senf|moutarde|mustard|dressing|aioli|barbecue|bbq|salsa|tzatziki| dip |sosse|sauce|hummus|guacamole|ajvar/)) u=[["tl",6],["el",15,"el",1],["schaelchen",50,"schaelchen"]];
+  else if(kc<150&&has(/tomatensauce|tomatensosse|sauce tomate|tomato sauce|sauce basilic|passata|passierte (bio )?tomate|tomate.{0,12}passier|pastasauce|pastasosse|sugo|napoli|arrabbiata|bolognese sosse|bolognesesosse|bolognese sauce|hackfleischsosse|bratensosse|bratensauce|rahmsosse|gravy/)) u=[["el",15],["portion",125,"schaelchen",1]];
+  else if(kc<300&&has(/soja ?sauce|soja ?sosse|sojasauce|worcester|tabasco|sriracha|fischsauce|teriyaki|essig|balsamico|vinegar|tomatenmark|tubenmark|zitronensaft|limettensaft|tomatenkonzentrat|concentre de tomate/)||kc<300&&has(/paste |pasts /)&&!has(/oliv|gefullt/)||kc>=60&&kc<300&&has(/tomatenpuree/)) u=[["tl",6,"tl",1],["el",16]];
+  else if(!(!has(/burger ?(sauce|sosse|senf|dressing)|^ (senf|ketchup|mayo|sauce|sosse|dressing|dip) /)&&has(/ (in|mit|with|an|auf) /)&&has(/burger|lachs|fisch|filet|hahnchen|huhn|pute|fleisch|pfanne|nudel|pasta|kartoffel|gulasch|schnitzel|wurst|hering|makrele|thunfisch/))&&has(/ketchup|mayo|remoulade|senf|moutarde|mustard|dressing|aioli|barbecue|bbq|salsa|tzatziki| dip |sosse|sauce|hummus|guacamole|ajvar/)) u=[["tl",6],["el",15,"el",1],["schaelchen",50,"schaelchen"]];
   // 3. Honig, Aufstriche, Butter
   else if(kc>=250&&kc<400&&has(/(honig|honey|miel|sirup|sirop|agavendicksaft|melasse) /)&&!has(/pops|loops|flakes|musli|crunch|joghurt|senf|nuss/)) u=[["tl",7,"tl",1],["el",20]];
   else if(has(/marmelade|konfiture|confiture|philadelphia|fruchtaufstrich|gelee |nutella|nuss ?nougat|schoko ?creme|nougatcreme|aufstrich|erdnussbutter|erdnusscreme|peanut butter|mandelmus|nussmus|cashewmus|tahin|frischkase|streichkase|teewurst|mettwurst|schmelzkase|apfelkraut|rubenkraut/)) u=[["tl",7,"tl",1],["el",18]];
@@ -111,7 +111,9 @@ function unitsFor(it){
   // 4. Suppen, Pizza, Gerichte
   else if(has(/suppe|bruhe|bouillon|consomme|gazpacho| soup | soupe /)) u=kc>150||kc>40&&has(/bruhe|bouillon|fond /)?[["tl",5,"tl",1],["el",12]]:[["tasse",250,"tasse"],["teller",pw>=250?pw:300,"suppe",1],["schuessel",450,"suppe"]];
   else if(has(/pizza|flammkuchen/)){ const w=pw||350; u=[["stueck",R(w/8),"pizza_st"],["pizza",w,"pizza",1]]; }
-  else if(!has(/beyond|patty|patties|veggie|vegan| buns| bun |wraps|bagels|tortillas/)&&has(/doner|kebab|durum|burger|wrap|burrito|sandwich|hot ?dog|bagel|panini|quesadilla|falafeltasche/)) u=[["stueck",pw||250,"steak",1]];
+  // Brot-Packungen (Burger-Buns, Bagels, Tortilla-Wraps): ein Stück Brot, kein ganzer Burger
+  else if(has(/ buns| bun |bagels|wraps|tortillas/)&&!has(/chicken|hahnchen|huhn|pute|rind|beef|falafel|caesar|thunfisch|tuna|lachs|schinken|kase|cheese|nacho|gemuse|salat|sauce|seasoning|gewurz/)) u=[["stueck",pw||60,"scheibe",1]];
+  else if(!has(/beyond|patty|patties|veggie|vegan/)&&has(/doner|kebab|durum|burger|wrap|burrito|sandwich|hot ?dog|bagel|panini|quesadilla|falafeltasche/)) u=[["stueck",pw||250,"steak",1]];
   else if(has(/currywurst/)) u=[["portion",pw||250,"portion",1]];
   else if(has(/kartoffelsalat|nudelsalat|reissalat|krautsalat|coleslaw|tabouleh|couscoussalat/)) u=[["el",25],["beilage",150,"schale",1],["teller",300,"teller"]];
   // Knödel & Co. zählt man (2 Knödel), deshalb Stück statt Teller
@@ -145,7 +147,7 @@ function unitsFor(it){
   else if(has(/sahne|cream |kaffeesahne|kondensmilch|schlagobers|kaffeeobers/)) u=[["tl",5],["el",15,"el",1],["becher",200,"becher"]];
   else if(has(/feta|halloumi|hirtenkase|schafskase/)) u=[["portion",50,"kaese",1],["packung",200,"packung"]];
   else if(has(/camembert|brie/)) u=[["stueck",30,"kaese",1],["packung",125,"packung"]];
-  else if(has(/kase|gouda|emmentaler|edamer|cheddar|bergkase|tilsiter|butterkase|leerdammer|maasdamer|raclette|gorgonzola|manchego|appenzeller|gruyere|comte|havarti|provolone|limburger|harzer|romadur|schnittkase|hartkase|cheese|fromage/)) u=[["scheibe",sw||25,"kaese",1],["stueck",50,"kaese"],["hand",30,"hand"]];
+  else if(has(/kase|gouda|emmentaler|edamer|cheddar|bergkase|tilsiter|butterkase|leerdammer|maasdamer|raclette|gorgonzola|manchego|appenzeller|gruyere|comte|havarti|provolone|limburger|harzer kase|harzer roller|romadur|schnittkase|hartkase|cheese|fromage/)&&!has(/ bier |beer|rosti|wurstchen|knacker/)) u=[["scheibe",sw||25,"kaese",1],["stueck",50,"kaese"],["hand",30,"hand"]];
   else if(has(/hack|gehacktes|mett |tatar/)&&!has(/frikadelle|bulette|pflanzerl|fleischkuchle/)) u=[["el",20],["portion",125,"steak",1],["packung",400,"packung"]];
   else if(has(/garnele|shrimp|scampi|krabbe|gambas|muschel/)) u=[["stueck",12,"stueck"],["portion",125,"portion",1]];
   else if(has(/thunfisch|tuna|sardine|makrele in|hering in|fisch in/)&&kc<300) u=[["el",20],["dose",140,"dose",1]];
@@ -154,7 +156,7 @@ function unitsFor(it){
   else if(has(/hahnchen|huhn|chicken|pute|truthahn|rind|kalb|schwein|lamm|steak|schnitzel|filet|braten|kotelett|keule|schenkel|lachs|salmon|fisch|forelle|kabeljau|seelachs|hering|makrele|dorade|zander|tilapia|pangasius| ente | gans|hirsch| reh|leber|gyros|pulled|geflugel|fleisch/)&&!has(/fruchtfleisch|saft |getrank|mirinda/)) u=[["handflaeche",100,"steak"],["stueck",pw||150,"steak",1]];
   // 7. Getränke (Milliliter statt Gramm)
   else if(has(/whisky|whiskey|wodka|vodka| rum |gin |likor|schnaps| korn |tequila|obstler|grappa|ouzo|jagermeister/)){ ml=true; u=[["shot",20,"shot",1],["glas",40,"glas"]]; }
-  else if((it.liquid!==false||has(isDrinkRe))&&(it.liquid===true||kc<=120)&&has(drinkRe)&&(has(isDrinkRe)||!has(noDrinkRe))){
+  else if((it.liquid!==false||has(isDrinkRe)&&!has(/ (in|im) |eigene[mn]? saft/))&&(it.liquid===true||kc<=120)&&has(drinkRe)&&(has(isDrinkRe)||!has(noDrinkRe))){
     ml=true;
     if(hasN(/espresso/)) u=[["tasse",30,"tasse",1]];
     else if(has(/kaffee|coffee|cappuccino|latte|macchiato|flat white| tee |tea |kakao|trinkschokolade/)&&!has(/eistee|ice ?tea|eis tee/)) u=[["tasse",pw||200,"tasse",1],["becher",300,"becher"]];

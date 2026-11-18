@@ -3,7 +3,8 @@
 Salz (g/100 g) = Natrium (mg/100 g) × 2,5 / 1000 (EU-Definition, VO (EU) Nr. 1169/2011, Anhang I Nr. 11).
 Quellen: USDA FoodData Central – SR Legacy (= Standard Reference 28, gleiche NDB-Nummern) bzw. FNDDS (Survey-Daten, Food Code; hier Ausgabe FNDDS 2.0).
 Gewählt wurde jeweils der Eintrag, der zu Art und Nährwerten in data.js passt (roh/gegart, Sorte). Werte gelten für US-Lebensmittel;
-deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abweichen.
+deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abweichen. Verarbeitete Produkte, deren USDA-Wert um mehr als 25 %
+vom Median deutscher Packungsangaben (mind. 15 Produkte) abwich, haben stattdessen diesen Median (Spalte Quelle).
 
 | ID | Lebensmittel | Natrium mg | Salz g | Quelle | Hinweis |
 |---|---|---|---|---|---|
@@ -18,7 +19,7 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | riegel | Proteinriegel | 436 | 1.09 | USDA SR Legacy (SR28) NDB 25067: Formulated Bar, SOUTH BEACH protein bar |  |
 | g-brotchen | Brötchen | 494 | 1.235 | USDA SR Legacy (SR28) NDB 18350: Rolls, hamburger or hotdog, plain | Weizenbrötchen (US hamburger roll) |
 | g-mischbrot | Mischbrot | 381 | 0.953 | USDA SR Legacy (SR28) NDB 28397: Bread, multi-grain (includes whole-grain) |  |
-| g-roggenbrot | Roggenbrot | 603 | 1.508 | USDA SR Legacy (SR28) NDB 18060: Bread, rye |  |
+| g-roggenbrot | Roggenbrot | – | 1 | Median 63 Produkte aus Open Food Facts DE (Roggen(vollkorn)brot, Pumpernickel; Median 201 kcal) | ersetzt USDA-Wert 1.508 g (USDA SR Legacy (SR28) NDB 18060: Bread, rye): weicht > 25 % von deutschen Packungsangaben ab |
 | g-toastbrot | Toastbrot | 490 | 1.225 | USDA SR Legacy (SR28) NDB 18069: Bread, white, commercially prepared (includes soft bread crumbs) |  |
 | g-vollkorntoast | Vollkorntoast | 455 | 1.137 | USDA SR Legacy (SR28) NDB 18075: Bread, whole-wheat, commercially prepared |  |
 | g-brezel | Brezel | 545 | 1.363 | USDA SR Legacy (SR28) NDB 43109: Pretzels, soft |  |
@@ -26,7 +27,7 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-croissant | Croissant | 467 | 1.167 | USDA SR Legacy (SR28) NDB 18239: Croissants, butter |  |
 | g-knackebrot | Knäckebrot | 410 | 1.025 | USDA SR Legacy (SR28) NDB 18216: Crackers, crispbread, rye |  |
 | g-reiswaffel | Reiswaffel | 26 | 0.065 | USDA SR Legacy (SR28) NDB 19816: Snacks, rice cakes, brown rice, plain, unsalted |  |
-| g-cornflakes | Cornflakes | 729 | 1.823 | USDA SR Legacy (SR28) NDB 08020: Cereals ready-to-eat, KELLOGG, KELLOGG'S Corn Flakes |  |
+| g-cornflakes | Cornflakes | – | 0.9 | Median 55 Produkte aus Open Food Facts DE (Name nur „Cornflakes“/„Corn Flakes“; Median 378 kcal) | ersetzt USDA-Wert 1.823 g (USDA SR Legacy (SR28) NDB 08020: Cereals ready-to-eat, KELLOGG, KELLOGG'S Corn Flakes): weicht > 25 % von deutschen Packungsangaben ab |
 | g-vollkornnudeln-gekocht | Vollkornnudeln gekocht | 4 | 0.01 | USDA SR Legacy (SR28) NDB 20125: Pasta, whole-wheat, cooked |  |
 | g-bratkartoffeln | Bratkartoffeln | 309 | 0.772 | USDA FNDDS Food Code 71403000: White potato, home fries |  |
 | g-kartoffelpuree | Kartoffelpüree | 317 | 0.792 | USDA SR Legacy (SR28) NDB 11934: Potatoes, mashed, home-prepared, whole milk and butter added |  |
@@ -34,7 +35,7 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-quinoa-gekocht | Quinoa gekocht | 7 | 0.018 | USDA SR Legacy (SR28) NDB 20137: Quinoa, cooked |  |
 | g-pfannkuchen | Pfannkuchen | 439 | 1.097 | USDA SR Legacy (SR28) NDB 18293: Pancakes, plain, prepared from recipe |  |
 | g-pizza-margherita | Pizza Margherita | 537 | 1.343 | USDA FNDDS Food Code 58106210: Pizza, cheese, NS as to type of crust |  |
-| g-pizza-salami | Pizza Salami | 685 | 1.712 | USDA SR Legacy (SR28) NDB 21302: Fast Food, Pizza Chain, 14" pizza, pepperoni topping, regular crust |  |
+| g-pizza-salami | Pizza Salami | – | 1.3 | Median 40 Produkte aus Open Food Facts DE (Pizza Salami (TK/Kühlregal); Median 236.5 kcal) | ersetzt USDA-Wert 1.712 g (USDA SR Legacy (SR28) NDB 21302: Fast Food, Pizza Chain, 14" pizza, pepperoni topping, regular crust): weicht > 25 % von deutschen Packungsangaben ab |
 | g-bratwurst | Bratwurst | 846 | 2.115 | USDA SR Legacy (SR28) NDB 07013: Bratwurst, pork, cooked |  |
 | g-wiener-wurstchen | Wiener Würstchen | 992 | 2.48 | USDA SR Legacy (SR28) NDB 07022: Frankfurter, beef, unheated |  |
 | g-schnitzel | Schnitzel | 601 | 1.502 | USDA FNDDS Food Code 22101300: Pork chop, breaded or floured, fried, NS as to fat eaten |  |
@@ -44,7 +45,7 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-hackfleisch | Hackfleisch | 66 | 0.165 | USDA SR Legacy (SR28) NDB 23567: Beef, ground, 85% lean meat / 15% fat, raw |  |
 | g-schweinefleisch | Schweinefleisch | 87 | 0.217 | USDA SR Legacy (SR28) NDB 10094: Pork, fresh, loin, center loin (chops), boneless, separable lean only, raw |  |
 | g-speck | Speck | 662 | 1.655 | USDA SR Legacy (SR28) NDB 10123: Pork, cured, bacon, unprepared |  |
-| g-kochschinken | Kochschinken | 1279 | 3.197 | USDA SR Legacy (SR28) NDB 07028: Ham, sliced, packaged (96% fat free, water added) |  |
+| g-kochschinken | Kochschinken | – | 2.1 | Median 89 Produkte aus Open Food Facts DE (Name enthält „Kochschinken“; Median 109 kcal) | ersetzt USDA-Wert 3.197 g (USDA SR Legacy (SR28) NDB 07028: Ham, sliced, packaged (96% fat free, water added)): weicht > 25 % von deutschen Packungsangaben ab |
 | g-leberwurst | Leberwurst | 860 | 2.15 | USDA SR Legacy (SR28) NDB 07041: Liver sausage, liverwurst, pork |  |
 | g-fleischwurst | Fleischwurst | 960 | 2.4 | USDA SR Legacy (SR28) NDB 07008: Bologna, beef and pork |  |
 | g-lasagne | Lasagne | 361 | 0.902 | USDA FNDDS Food Code 58130011: Lasagna with meat |  |
@@ -54,12 +55,12 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-gemusesuppe | Gemüsesuppe | 253 | 0.632 | USDA SR Legacy (SR28) NDB 06472: Soup, vegetable with beef broth, canned, prepared with equal volume water |  |
 | g-tomatensuppe | Tomatensuppe | 186 | 0.465 | USDA SR Legacy (SR28) NDB 06559: Soup, tomato, canned, prepared with equal volume water, commercial |  |
 | g-huhnersuppe | Hühnersuppe | 335 | 0.838 | USDA SR Legacy (SR28) NDB 06419: Soup, chicken noodle, canned, prepared with equal volume water |  |
-| g-kartoffelsalat | Kartoffelsalat | 328 | 0.82 | USDA SR Legacy (SR28) NDB 21140: Side dishes, potato salad |  |
+| g-kartoffelsalat | Kartoffelsalat | – | 1.3 | Median 101 Produkte aus Open Food Facts DE (Kartoffelsalat; Median 145 kcal) | ersetzt USDA-Wert 0.82 g (USDA SR Legacy (SR28) NDB 21140: Side dishes, potato salad): weicht > 25 % von deutschen Packungsangaben ab |
 | g-nudelsalat | Nudelsalat | 522 | 1.305 | USDA FNDDS Food Code 58148110: Macaroni or pasta salad |  |
 | g-falafel | Falafel | 294 | 0.735 | USDA SR Legacy (SR28) NDB 16138: Falafel, home-prepared |  |
 | g-hummus | Hummus | 379 | 0.948 | USDA SR Legacy (SR28) NDB 16158: Hummus, commercial |  |
 | g-forelle | Forelle | 51 | 0.128 | USDA SR Legacy (SR28) NDB 15240: Fish, trout, rainbow, farmed, raw |  |
-| g-fischstabchen | Fischstäbchen | 402 | 1.005 | USDA SR Legacy (SR28) NDB 15027: Fish, fish sticks, frozen, prepared |  |
+| g-fischstabchen | Fischstäbchen | – | 0.8 | Median 52 Produkte aus Open Food Facts DE (Fischstäbchen; Median 190 kcal) | ersetzt USDA-Wert 1.005 g (USDA SR Legacy (SR28) NDB 15027: Fish, fish sticks, frozen, prepared): weicht > 25 % von deutschen Packungsangaben ab |
 | g-garnelen | Garnelen | 119 | 0.297 | USDA SR Legacy (SR28) NDB 15270: Crustaceans, shrimp, raw (not previously frozen) |  |
 | g-kabeljau | Kabeljau | 54 | 0.135 | USDA SR Legacy (SR28) NDB 15015: Fish, cod, Atlantic, raw |  |
 | g-hering | Hering | 74 | 0.185 | USDA SR Legacy (SR28) NDB 15043: Fish, herring, Pacific, raw |  |
@@ -73,11 +74,11 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-griechischer-joghurt | Griechischer Joghurt | 35 | 0.087 | USDA SR Legacy (SR28) NDB 01293: Yogurt, Greek, plain, whole milk |  |
 | g-huttenkase | Hüttenkäse | 308 | 0.77 | USDA SR Legacy (SR28) NDB 01015: Cheese, cottage, lowfat, 2% milkfat |  |
 | g-frischkase | Frischkäse | 314 | 0.785 | USDA SR Legacy (SR28) NDB 01017: Cheese, cream |  |
-| g-mozzarella | Mozzarella | 627 | 1.567 | USDA SR Legacy (SR28) NDB 01026: Cheese, mozzarella, whole milk |  |
-| g-emmentaler | Emmentaler | 187 | 0.468 | USDA SR Legacy (SR28) NDB 01040: Cheese, swiss |  |
-| g-parmesan | Parmesan | 1376 | 3.44 | USDA SR Legacy (SR28) NDB 01033: Cheese, parmesan, hard |  |
+| g-mozzarella | Mozzarella | – | 0.5 | Median 170 Produkte aus Open Food Facts DE (Mozzarella, 220–290 kcal (ohne Light, Pizza-Käse, Gerichte); Median 247 kcal) | ersetzt USDA-Wert 1.567 g (USDA SR Legacy (SR28) NDB 01026: Cheese, mozzarella, whole milk): weicht > 25 % von deutschen Packungsangaben ab |
+| g-emmentaler | Emmentaler | – | 0.8 | Median 135 Produkte aus Open Food Facts DE (Emmentaler (ohne gerieben/Light/Mix); Median 373 kcal) | ersetzt USDA-Wert 0.468 g (USDA SR Legacy (SR28) NDB 01040: Cheese, swiss): weicht > 25 % von deutschen Packungsangaben ab |
+| g-parmesan | Parmesan | – | 1.5 | Median 186 Produkte aus Open Food Facts DE (Parmigiano Reggiano / Grana Padano / Parmesan; Median 398 kcal) | ersetzt USDA-Wert 3.44 g (USDA SR Legacy (SR28) NDB 01033: Cheese, parmesan, hard): weicht > 25 % von deutschen Packungsangaben ab |
 | g-feta | Feta | 917 | 2.292 | USDA SR Legacy (SR28) NDB 01019: Cheese, feta |  |
-| g-camembert | Camembert | 842 | 2.105 | USDA SR Legacy (SR28) NDB 01007: Cheese, camembert |  |
+| g-camembert | Camembert | – | 1.6 | Median 114 Produkte aus Open Food Facts DE (Camembert; Median 280 kcal) | ersetzt USDA-Wert 2.105 g (USDA SR Legacy (SR28) NDB 01007: Cheese, camembert): weicht > 25 % von deutschen Packungsangaben ab |
 | g-sahne | Sahne | 27 | 0.068 | USDA SR Legacy (SR28) NDB 01053: Cream, fluid, heavy whipping |  |
 | g-birne | Birne | 1 | 0.003 | USDA SR Legacy (SR28) NDB 09252: Pears, raw |  |
 | g-orange | Orange | 0 | 0 | USDA SR Legacy (SR28) NDB 09200: Oranges, raw, all commercial varieties |  |
@@ -111,8 +112,8 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-susskartoffel | Süßkartoffel | 55 | 0.138 | USDA SR Legacy (SR28) NDB 11507: Sweet potato, raw, unprepared |  |
 | g-kurbis | Kürbis | 1 | 0.003 | USDA SR Legacy (SR28) NDB 11422: Pumpkin, raw |  |
 | g-rote-bete | Rote Bete | 78 | 0.195 | USDA SR Legacy (SR28) NDB 11080: Beets, raw |  |
-| g-saurkraut | Sauerkraut | 661 | 1.653 | USDA SR Legacy (SR28) NDB 11439: Sauerkraut, canned, solids and liquids |  |
-| g-oliven | Oliven | 735 | 1.837 | USDA SR Legacy (SR28) NDB 09193: Olives, ripe, canned (small-extra large) |  |
+| g-saurkraut | Sauerkraut | – | 1.1 | Median 62 Produkte aus Open Food Facts DE (Sauerkraut; Median 27 kcal) | ersetzt USDA-Wert 1.653 g (USDA SR Legacy (SR28) NDB 11439: Sauerkraut, canned, solids and liquids): weicht > 25 % von deutschen Packungsangaben ab |
+| g-oliven | Oliven | – | 3 | Median 129 Produkte aus Open Food Facts DE (Oliven (grün/schwarz, ohne Füllung/Öl), 90–160 kcal; Median 139 kcal) | ersetzt USDA-Wert 1.837 g (USDA SR Legacy (SR28) NDB 09193: Olives, ripe, canned (small-extra large)): weicht > 25 % von deutschen Packungsangaben ab |
 | g-walnusse | Walnüsse | 2 | 0.005 | USDA SR Legacy (SR28) NDB 12155: Nuts, walnuts, english |  |
 | g-haselnusse | Haselnüsse | 0 | 0 | USDA SR Legacy (SR28) NDB 12120: Nuts, hazelnuts or filberts |  |
 | g-cashewkerne | Cashewkerne | 12 | 0.03 | USDA SR Legacy (SR28) NDB 12087: Nuts, cashew nuts, raw |  |
@@ -146,12 +147,12 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-wein | Wein | 5 | 0.013 | USDA SR Legacy (SR28) NDB 14084: Alcoholic beverage, wine, table, all |  |
 | g-smoothie | Smoothie | 2 | 0.005 | USDA FNDDS Food Code 64134000: Fruit smoothie drink, made with fruit or fruit juice only (no dairy products) |  |
 | g-olivenol | Olivenöl | 2 | 0.005 | USDA SR Legacy (SR28) NDB 04053: Oil, olive, salad or cooking |  |
-| g-mayonnaise | Mayonnaise | 635 | 1.587 | USDA SR Legacy (SR28) NDB 04025: Salad dressing, mayonnaise, regular |  |
+| g-mayonnaise | Mayonnaise | – | 1 | Median 137 Produkte aus Open Food Facts DE (Mayonnaise ab 600 kcal (ohne Light/Würz-Mayo); Median 706 kcal) | ersetzt USDA-Wert 1.587 g (USDA SR Legacy (SR28) NDB 04025: Salad dressing, mayonnaise, regular): weicht > 25 % von deutschen Packungsangaben ab |
 | g-ketchup | Ketchup | 907 | 2.268 | USDA SR Legacy (SR28) NDB 11935: Catsup |  |
 | g-senf | Senf | 1104 | 2.76 | USDA SR Legacy (SR28) NDB 02046: Mustard, prepared, yellow |  |
 | g-sojasauce | Sojasauce | 5493 | 13.732 | USDA SR Legacy (SR28) NDB 16123: Soy sauce made from soy and wheat (shoyu) |  |
 | g-tomatensauce | Tomatensauce | 437 | 1.093 | USDA SR Legacy (SR28) NDB 06931: Sauce, pasta, spaghetti/marinara, ready-to-serve |  |
-| g-pesto | Pesto | 603 | 1.508 | USDA SR Legacy (SR28) NDB 06626: Sauce, pesto, ready-to-serve, refrigerated |  |
+| g-pesto | Pesto | – | 2.3 | Median 181 Produkte aus Open Food Facts DE (grünes Pesto / Pesto alla Genovese; Median 424 kcal) | ersetzt USDA-Wert 1.508 g (USDA SR Legacy (SR28) NDB 06626: Sauce, pesto, ready-to-serve, refrigerated): weicht > 25 % von deutschen Packungsangaben ab |
 | g-salatdressing | Salatdressing | 993 | 2.482 | USDA SR Legacy (SR28) NDB 04114: Salad dressing, italian dressing, commercial, regular |  |
 | g-proteinpulver | Proteinpulver | 156 | 0.39 | USDA SR Legacy (SR28) NDB 14066: Beverages, Protein powder whey based |  |
 | g-butter | Butter | 11 | 0.028 | USDA SR Legacy (SR28) NDB 01145: Butter, without salt |  |
@@ -166,7 +167,7 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-sushi | Sushi | 596 | 1.49 | USDA FNDDS Food Code 58151100: Sushi, NFS |  |
 | g-curry | Curry | 484 | 1.21 | USDA FNDDS Food Code 27146150: Chicken curry |  |
 | g-kartoffelpuffer | Kartoffelpuffer | 407 | 1.018 | USDA FNDDS Food Code 71701000: Potato pancake |  |
-| g-frikadelle | Frikadelle | 414 | 1.035 | USDA FNDDS Food Code 27214100: Meat loaf made with beef |  |
+| g-frikadelle | Frikadelle | – | 1.7 | Median 72 Produkte aus Open Food Facts DE (Frikadellen/Buletten (Fleisch); Median 241 kcal) | ersetzt USDA-Wert 1.035 g (USDA FNDDS Food Code 27214100: Meat loaf made with beef): weicht > 25 % von deutschen Packungsangaben ab |
 | g-omelett | Omelett | 374 | 0.935 | USDA FNDDS Food Code 32105000: Egg omelet or scrambled egg, fat added in cooking |  |
 | g-kartoffelsuppe | Kartoffelsuppe | 230 | 0.575 | USDA SR Legacy (SR28) NDB 06253: Soup, cream of potato, canned, prepared with equal volume milk |  |
 | g-bratensosse | Bratensoße | 560 | 1.4 | USDA SR Legacy (SR28) NDB 06116: Gravy, beef, canned, ready-to-serve |  |
@@ -209,9 +210,33 @@ deutsche Produkte (v. a. Brot, Wurst, Schinken) können je nach Hersteller abwei
 | g-limonade | Limonade | 2 | 0.005 | USDA FNDDS Food Code 92511010: Lemonade |  |
 | g-schnaps | Schnaps | 1 | 0.003 | USDA SR Legacy (SR28) NDB 14037: Alcoholic beverage, distilled, all (gin, rum, vodka, whiskey) 80 proof |  |
 
-## Ohne Wert (kein passender USDA-Eintrag)
+## Ergänzt aus deutschen Packungsangaben (kein passender USDA-Eintrag)
 
-Griechischer Salat (salat), Müsli (g-musli), Porridge (g-porridge), Döner (g-doner), Currywurst (g-currywurst), Leberkäse (g-leberkase), Gulasch (g-gulasch), Linseneintopf (g-linseneintopf), Seitan (g-seitan), Margarine (g-margarine), Apfelschorle (g-apfelschorle), Poke Bowl (g-poke-bowl), Risotto (g-risotto), Nudelauflauf (g-nudelauflauf), Käsespätzle (g-kasespatzle), Spätzle (g-spatzle), Gnocchi (g-gnocchi), Maultaschen (g-maultaschen), Ravioli (g-ravioli), Kartoffelknödel (g-kartoffelknodel), Kroketten (g-kroketten), Cevapcici (g-cevapcici), Gyros (g-gyros), Backfisch (g-backfisch), Erbsensuppe (g-erbsensuppe), Ramen (g-ramen), Obst (gemischt) (g-obst-gemischt), Gemüse (gemischt) (g-gemuse-gemischt), Beeren (gemischt) (g-beeren-gemischt), Rotkohl (g-rotkohl), Feldsalat (g-feldsalat), Crème fraîche (g-creme-fraiche), Milchreis (g-milchreis), Kaiserschmarrn (g-kaiserschmarrn), Grießbrei (g-griessbrei), Overnight Oats (g-overnight-oats), Sekt (g-sekt), Radler (g-radler), Aperol Spritz (g-aperol-spritz)
+Median der Salzangaben aller passenden Produkte in foods.json (Open Food Facts, in Deutschland verkauft); nur bei mind. 15 Produkten
+und wenn die Nährwerte in data.js grob zum Median der Produkte passen.
+
+| ID | Lebensmittel | Salz g | Quelle |
+|---|---|---|---|
+| g-leberkase | Leberkäse | 2 | Median 86 Produkte aus Open Food Facts DE (Leberkäse/Fleischkäse; Median 266 kcal) |
+| g-maultaschen | Maultaschen | 1.4 | Median 48 Produkte aus Open Food Facts DE (Maultaschen; Median 188 kcal) |
+| g-gnocchi | Gnocchi | 1.1 | Median 105 Produkte aus Open Food Facts DE (Gnocchi (pur); Median 150 kcal) |
+| g-spatzle | Spätzle | 1 | Median 48 Produkte aus Open Food Facts DE (frische Spätzle (120–220 kcal, ohne Käse-/Leberspätzle); Median 161 kcal) |
+| g-kartoffelknodel | Kartoffelknödel | 0.8 | Median 17 Produkte aus Open Food Facts DE (Kartoffelknödel/-klöße (verzehrfertig); Median 102 kcal) |
+| g-kroketten | Kroketten | 1 | Median 32 Produkte aus Open Food Facts DE (Kroketten; Median 181 kcal) |
+| g-cevapcici | Cevapcici | 1.5 | Median 29 Produkte aus Open Food Facts DE (Cevapcici (Fleisch); Median 221 kcal) |
+| g-rotkohl | Rotkohl | 1.1 | Median 74 Produkte aus Open Food Facts DE (Rotkohl/Blaukraut (Glas/TK); Median 59 kcal) |
+| g-creme-fraiche | Crème fraîche | 0.1 | Median 52 Produkte aus Open Food Facts DE (Crème fraîche natur; Median 293 kcal) |
+| g-margarine | Margarine | 0.2 | Median 90 Produkte aus Open Food Facts DE (Margarine ab 600 kcal (Vollfett); Median 720 kcal) |
+| g-milchreis | Milchreis | 0.2 | Median 113 Produkte aus Open Food Facts DE (Milchreis verzehrfertig; Median 110 kcal) |
+| g-griessbrei | Grießbrei | 0.1 | Median 65 Produkte aus Open Food Facts DE (Grießbrei verzehrfertig; Median 108 kcal) |
+| g-erbsensuppe | Erbsensuppe | 1 | Median 52 Produkte aus Open Food Facts DE (Erbsensuppe/-eintopf verzehrfertig; Median 81.5 kcal) |
+| g-linseneintopf | Linseneintopf | 0.9 | Median 45 Produkte aus Open Food Facts DE (Linseneintopf/-suppe verzehrfertig; Median 67 kcal) |
+| g-musli | Müsli | 0.1 | Median 157 Produkte aus Open Food Facts DE (Müsli/Knuspermüsli; Median 402 kcal) |
+| g-apfelschorle | Apfelschorle | 0 | Median 79 Produkte aus Open Food Facts DE (Apfelschorle; Median 26 kcal) |
+
+## Ohne Wert (kein passender USDA-Eintrag, keine belastbaren deutschen Daten)
+
+Griechischer Salat (salat), Porridge (g-porridge), Döner (g-doner), Currywurst (g-currywurst), Gulasch (g-gulasch), Seitan (g-seitan), Poke Bowl (g-poke-bowl), Risotto (g-risotto), Nudelauflauf (g-nudelauflauf), Käsespätzle (g-kasespatzle), Ravioli (g-ravioli), Gyros (g-gyros), Backfisch (g-backfisch), Ramen (g-ramen), Obst (gemischt) (g-obst-gemischt), Gemüse (gemischt) (g-gemuse-gemischt), Beeren (gemischt) (g-beeren-gemischt), Feldsalat (g-feldsalat), Kaiserschmarrn (g-kaiserschmarrn), Overnight Oats (g-overnight-oats), Sekt (g-sekt), Radler (g-radler), Aperol Spritz (g-aperol-spritz)
 
 ## Bereits vorhandene Werte (nicht geändert)
 Brot, Fertigpizza, Magerquark, Naturjoghurt 3,5 %, Gouda, Thunfisch, Tofu, Linsen, Kartoffeln, Nudeln, Apfel, Blaubeeren, Brokkoli,
