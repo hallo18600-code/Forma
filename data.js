@@ -412,7 +412,7 @@ function normalizeRoutines(list,sex){
   if(!list || !list.length) return defaultRoutines();
   if(list[0].days){
     // Alter Zuhause-Plan (vor Nov 2026), nie verändert → neuer Zuhause-Plan passend zum Geschlecht
-    if(typeof coachPlan==="function") list=list.map(r=>JSON.stringify(r)===OLD_PLAN_SIG.home?coachPlan("home",sex):r);
+    if(typeof coachPlan==="function") list=list.map(r=>JSON.stringify(r)===OLD_PLAN_SIG.home?coachPlan("home",sex==null?"":sex):r);
     const j=JSON.stringify(list);
     if(j===OLD_PLAN_SIG.ppl||j===OLD_PLAN_SIG.ppl2) return defaultRoutines();
     if((j===OLD_PLAN_SIG.gk||j===OLD_PLAN_SIG.gk2) && typeof fullBodyPlan==="function") return [fullBodyPlan()];

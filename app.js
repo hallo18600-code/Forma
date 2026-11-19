@@ -892,8 +892,10 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="coach-plan"){
     const pl=coachPlan(el.dataset.v), R=JSON.stringify(state.routines);
     // Unveränderte Start-Pläne ersetzen, damit nichts doppelt herumliegt; eigene Pläne bleiben
-    const untouched=R===JSON.stringify(defaultRoutines())||R===JSON.stringify([fullBodyPlan()])||R===JSON.stringify([homePlan(state.profile.sex)]);   // unveränderter Start-Plan wird ersetzt
-    if(untouched) state.routines=[pl]; else if(!state.routines.some(r=>r.id===pl.id)) state.routines=[pl].concat(state.routines);
+    const isHome=r=>["m","w",""].some(x=>JSON.stringify(r)===JSON.stringify(homePlan(x)));   // unveränderter Zuhause-Plan (egal welches Geschlecht)
+    const untouched=R===JSON.stringify(defaultRoutines())||R===JSON.stringify([fullBodyPlan()])||(state.routines.length===1&&isHome(state.routines[0]));
+    if(untouched) state.routines=[pl];
+    else { const i=state.routines.findIndex(r=>r.id===pl.id); if(i<0) state.routines=[pl].concat(state.routines); else if(isHome(state.routines[i])) state.routines[i]=pl; }
     state.planPicked=pl.id; ui.planPrev=null; ui.modal=null; state.tab="sport"; save(); toast(pl.name+" übernommen");
   }
   else if(act==="plan-prev"){ ui.planPrev=el.dataset.v; }

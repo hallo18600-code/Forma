@@ -130,7 +130,7 @@ ESSEN = r"""async ()=>{
   ["Schlemmer.?filet","", (s,c)=>!["leanfish","fattyfish","veg","skinveg"].includes(c), "Schlemmerfilet nicht wie reiner Fisch"],
   ["^Coca[- ]?Cola Zero","", (s,c,it)=>(+it.kcal||0)>=10||s[1]>=45&&s[1]<=65, "Cola Zero beim Abnehmen 45–65 (besser als Cola, schlechter als Wasser)"],
   ["Konjac|Shirataki","", (s,c)=>!["refined","wholewheat"].includes(c), "Konjak-Nudeln sind kein Weißmehl"],
-  ["Limonade","", (s,c,it)=>Math.max(...s)<=((+it.sugar||0)<1&&(+it.kcal||0)<10?60:30), "Limonade höchstens 30 (Zero höchstens 60)"],
+  ["Limonade","", (s,c,it)=>{ const su=+it.sugar||0; return Math.max(...s)<=(su<2.5?60:su<5?40:30); }, "Limonade höchstens 30 ab 5 g Zucker, 40 unter 5 g, 60 zuckerarm/Zero"],
   ["^(Bio[ -])?Agaven ?dicksaft$","", (s,c,it)=>(+it.sugar||0)<40||Math.max(...s)<=20, "Agavendicksaft höchstens 20"],
   ["Kr[äa]uterquark","", (s,c)=>c!=="spice", "Kräuterquark ist kein Gewürz"],
   ["^Pringles|^Chipsfrisch","", (s,c)=>Math.max(...s)<=25, "Chips höchstens 25"],

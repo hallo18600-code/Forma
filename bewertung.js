@@ -489,6 +489,7 @@ function rClassify0(item){
     if(b==="ersatz"&&nut.su>=20&&nut.kc>=250) x=R_BYID.sweets;        // vegane Schokolade, Nuss-Nougat-Creme
     // Mineralwasser einer Getränkemarke (z. B. „Vio Medium“): ohne Kalorien, Zucker und Aroma ist es Wasser
     if(b==="softdrink"&&nut.kc<1&&nut.su<0.5&&+item.nova===1&&!/(zero|light|cola|orange|lemon|zitron|ice|tea|tee|flavou?r|geschmack|aroma|limo|energy|mate|frucht|fruit|apfel|kirsch|beere|berry|mango|pfirsich)/.test(h)) x=R_BYID.water;
+    if(b==="water"&&nut.kc>15) x=R_BYID.softdrink;   // Wassermarke, aber mit Kalorien (z. B. ACE-Getränk): kein Wasser
     return x; };
   if(bc){
     const fl=cat&&(R_FLAVOR.has(cat.id)||["coffee","driedfruit","tea","sauce","mixedmeal","readymeal"].includes(cat.id));
