@@ -365,7 +365,7 @@ EINTRAEGE = r"""()=>{ F={}; let n=0; const T0=todayIso(), pool=BASE_FOODS.filter
  let shown=0;
  for(let it=0;it<120;it++){ n++;
   newState(); state.obDone=true; state.coach.answers=fill(); state.coach.answers.haut={bild:"Normal",stoert:["Unreinheiten"],art:"Entzündete Pickel",sonne:"Täglich",empf:"Nein"};
-  const days=ri(10,45), eff=it%3===0?0:-ri(2,3), cola=BASE_FOODS.find(f=>f.name==="Cola"), base=["Haferflocken","Hähnchenbrust","Reis gekocht"].map(x=>BASE_FOODS.find(f=>f.name===x));
+  const days=ri(10,45), eff=it%3===0?0:-ri(2,3), cola=BASE_FOODS.find(f=>f.name==="Cola"), base=["Haferflocken","Hähnchenbrust (roh)","Reis gekocht"].map(x=>BASE_FOODS.find(f=>f.name===x));
   for(let i=days;i>=0;i--){ const s=addDays(T0,-i), d=day(s), sweet=Math.random()<.35; d._sw=sweet;
    d.meals=base.map(p=>({uid:uid(),id:p.id,slot:"lunch",portion:300})); if(sweet) d.meals.push({uid:uid(),id:cola.id,slot:"snack",portion:1000});
    d.sleep=rnd([6,6.5,7,7.5,8]); d.water=ri(3,10); const y=state.days[addDays(s,-1)];

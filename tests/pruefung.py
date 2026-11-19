@@ -136,7 +136,7 @@ ESSEN = r"""async ()=>{
   ["^Pringles|^Chipsfrisch","", (s,c)=>Math.max(...s)<=25, "Chips höchstens 25"],
   ["^Butterkeks","", (s,c)=>c!=="butter", "Butterkeks ist keine Butter"],
   ["Paniert|Panade|Backfisch","", (s,c)=>!["poultry","leanfish","fattyfish","redmeat"].includes(c), "Paniertes ist kein reines Fleisch/Fisch"],
-  ["^H[äa]hnchenbrust$","", (s,c)=>s[0]>=85, "Hähnchenbrust: Muskeln ≥85"],
+  ["^H[äa]hnchenbrust( \\(roh\\))?$","", (s,c)=>s[0]>=85, "Hähnchenbrust: Muskeln ≥85"],
   ["^Brokkoli$","", (s,c)=>s[1]>=85, "Brokkoli: Abnehmen ≥85"],
   ["^Ei$","", (s,c)=>s[0]>=85, "Ei: Muskeln ≥85"],
  ];
@@ -202,14 +202,14 @@ FUERDICH = r"""async ()=>{
  const CASES=[
   [{haare:{stoert:"Fallen viel aus"}},{},"Ei","skin",1,/Haare/],
   [{gesundheit:{wasser:"Unter 1 Liter"}},{},"Wasser","energy",1,/Trinkmenge/],
-  [{},{fish:"wenig"},"Lachsfilet","lose",1,/Omega-3/],
+  [{},{fish:"wenig"},"Lachsfilet (roh)","lose",1,/Omega-3/],
   [{schlaf:{ein:"Dauert"}},{},"Bier","energy",-1,/Tiefschlaf/],
   [{gesundheit:{intol:["Laktose"]}},{},"Skyr Natur","muscle",-1,/Laktose/],
   [{gesundheit:{intol:["Gluten"]}},{},"Vollkornbrot","energy",-1,/Gluten/],
   [{gesundheit:{gemuese:"Selten"}},{},"Brokkoli","muscle",1,/Gemüse/],
   [{aussehen:{ziel:["Weniger Bauchfett"]}},{},"Cola","energy",-1,/Bauchfett/],
-  [{gesundheit:{stil:"Vegetarisch"}},{},"Hähnchenbrust","muscle",0,null],
-  [{gesundheit:{meiden:["Rotes Fleisch"]}},{},"Rindersteak","muscle",0,null],
+  [{gesundheit:{stil:"Vegetarisch"}},{},"Hähnchenbrust (roh)","muscle",0,null],
+  [{gesundheit:{meiden:["Rotes Fleisch"]}},{},"Rindersteak (roh)","muscle",0,null],
  ];
  for(const [ans,prof,nm,g,dir,re] of CASES){
   const a=run({},{},nm,g), b=run(ans,prof,nm,g); if(!a||!b) continue; const d=`${nm} (${g}) ${JSON.stringify(ans)}`;
