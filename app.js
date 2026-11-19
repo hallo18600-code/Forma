@@ -69,7 +69,7 @@ function load(){
 function normalize(s){
     s.profile = Object.assign(fresh().profile, s.profile||{});
     s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
-    s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.coach.skipped=s.coach.skipped||[]; s.routines = normalizeRoutines(s.routines); s.measures = s.measures||[];
+    s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.coach.skipped=s.coach.skipped||[]; s.routines = normalizeRoutines(s.routines,(s.profile||{}).sex); s.measures = s.measures||[];
     s.date = s.date || todayIso(); s.ob = s.ob||{}; migrateCoach(s);
     s.favs=Array.isArray(s.favs)?[...new Set(s.favs.filter(x=>typeof x==="string"&&x))]:[];
     if(s.adapt!=null&&(typeof s.adapt!=="object"||s.adapt.ratio==null||s.adapt.ratio===""||!Number.isFinite(+s.adapt.ratio))) delete s.adapt;
