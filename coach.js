@@ -539,23 +539,34 @@ function muskelPlanId(a,lifts){
   if(t==="5–6 Tage") return gym==="Gym, schon länger"?"ppl":"tl";
   return "gk";
 }
-function coachPlan(id){
+function coachPlan(id,sex){
   if(id==="tl") return {id:"tl", name:"Torso / Limbs", days:[
     planDay("tla","Torso",[["bp_inc_smith",30],["chest_press",30,1],["pecdeck",25,1],["lat_machine",35],["row_machine",30],["ohp_machine",20],["latraise_cable",5],["rear_fly_machine",15,1],["cable_crunch",15]]),
     planDay("lia","Limbs",[["legpress",60],["hip_machine",40],["leg_ext",25],["leg_curl",20],["leg_curl_seat",20],["calf",30],["adductor",25],["preacher_machine",15],["hammer",8],["tri_rope",15],["tri_oh_cable",10]])]};
-  // Zuhause: Plank in Sekunden (30), alles andere 6 Wdh.
-  if(id==="home") return {id:"home", name:"Zuhause Ganzkörper", days:[
-    planDay("hoa","Zuhause A",[["pushup",0],["bench_dip",0],["sq_bw",0],["bulgarian",0],["bridge",0],["back_ext",0],["plank",0,2,30]]),
-    planDay("hob","Zuhause B",[["pushup",0],["bench_dip",0],["lunge_bw",0],["stepup",0],["bridge",0],["back_ext",0],["plank",0,2,30]])]};
+  // Zuhause (Körpergewicht + Klimmzugstange + Stühle): Ganzkörper A/B, 3×/Woche, Aufbau wie die „Recommended Routine“
+  // von r/bodyweightfitness (Zug, Druck, Beine, Rumpf). Fokus je Geschlecht: Mann Oberkörper, Frau Beine/Gesäß/Bauch.
+  // Max. 2 Sätze pro Übung, Fokus-Muskeln 4–5 Sätze pro Training. Plank in Sekunden (30), alles andere 6 Wdh.
+  if(id==="home") return homePlan(sex===undefined?(typeof state!=="undefined"&&state.profile||{}).sex:sex);
   if(id==="ppl") return defaultRoutines()[0];
   return fullBodyPlan();
+}
+function homePlan(sex){
+  const P={
+    m:[[["pushup",0],["dip",0],["bench_dip",0],["pull",0],["chin",0],["sq_bw",0],["bulgarian",0],["plank",0,2,30]],
+       [["pushup",0],["dip",0],["bench_dip",0],["chin",0],["pull",0],["lunge_bw",0],["stepup",0],["back_ext",0],["leg_raise",0]]],
+    w:[[["sq_bw",0],["bulgarian",0],["bridge",0,1],["calf_bw",0],["pushup",0],["pull",0],["plank",0,2,30],["crunch",0]],
+       [["lunge_bw",0],["stepup",0],["bridge",0,1],["back_ext",0],["pushup",0],["chin",0],["plank",0,2,30],["leg_raise",0]]],
+    x:[[["pushup",0],["dip",0],["pull",0],["chin",0],["sq_bw",0],["bulgarian",0],["bridge",0,1],["plank",0,2,30]],
+       [["pushup",0],["dip",0],["chin",0],["pull",0],["lunge_bw",0],["stepup",0],["back_ext",0],["leg_raise",0]]]
+  }[sex==="m"||sex==="w"?sex:"x"];
+  return {id:"home", name:"Zuhause Ganzkörper", days:[planDay("hoa","Zuhause A",P[0]), planDay("hob","Zuhause B",P[1])]};
 }
 // Plan-Infos für Coach und Training-Tab: Name, Häufigkeit, Wochenverteilung (Index = Mo..So)
 const PLAN_INFO={
   gk:{name:"Ganzkörper A/B", freq:"2–3×/Woche", why:"Jeder Muskel 2–3× pro Woche.", week:["A","","B","","A","",""]},
   tl:{name:"Torso / Limbs", freq:"4×/Woche", why:"Jeder Muskel 2× pro Woche.", week:["Torso","Limbs","","Torso","Limbs","",""]},
   ppl:{name:"Push / Pull / Legs", freq:"5–6×/Woche", why:"Jeder Muskel 2× pro Woche.", week:["Push","Pull","Beine","Push","Pull","Beine",""]},
-  home:{name:"Zuhause Ganzkörper", freq:"3×/Woche", why:"Ohne Geräte, nur Körpergewicht.", week:["A","","B","","A","",""]}
+  home:{name:"Zuhause Ganzkörper", freq:"3×/Woche", why:"Körpergewicht, dazu Klimmzugstange und Stühle.", week:["A","","B","","A","",""]}
 };
 // Muskelaufbau als EIN kompakter Kasten statt 5 einzelner Tipps (gleiche Infos, eine Zeile pro Punkt)
 function muskelTips(a,lvl,g,fatGoal,prot,lifts){

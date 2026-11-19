@@ -63,7 +63,7 @@ function planSuggest(){
     <div class="pcards">${Object.keys(PLAN_INFO).map(id=>{ const P=PLAN_INFO[id];
       return `<button class="pcard ${id===pid?"on":""}" data-act="plan-prev" data-v="${id}">
         ${id===rec?`<span class="prec">⭐ Passt zu dir</span>`:""}
-        <span class="pc-ico">${PLAN_ICON[id]}</span><b>${PLAN_SHORT[id]}</b><span class="sub">${id==="home"?"Ohne Geräte":P.freq}</span>${dots(P.week)}</button>`; }).join("")}</div>
+        <span class="pc-ico">${PLAN_ICON[id]}</span><b>${PLAN_SHORT[id]}</b><span class="sub">${id==="home"?"Klimmzugstange":P.freq}</span>${dots(P.week)}</button>`; }).join("")}</div>
     <button class="pill primary mt-3" data-act="coach-plan" data-v="${pid}">Plan übernehmen</button>
   </div>`;
 }
