@@ -54,3 +54,5 @@ Object.assign(I18N.es,{"Anti-Schuppen-Shampoo {0}×/Woche als Maske": "Champú a
 
 // Nov 2026: Zuckerstufen bei Wasser mit Geschmack & Limo
 Object.assign(I18N.es,{"Wenig Zucker ({0} g)": "Poco azúcar ({0} g)", "Weniger Zucker als normale Limo": "Menos azúcar que un refresco normal"});
+// Rohgewicht-Namen (Nov 2026)
+Object.assign(I18N.es,{"Hähnchenbrust (roh)":"Pechuga de pollo (cruda)","Lachsfilet (roh)":"Filete de salmón (crudo)","Rinderhack (roh)":"Carne picada de vacuno (cruda)","Hähnchenschenkel (roh)":"Muslo de pollo (crudo)","Putenbrust (roh)":"Pechuga de pavo (cruda)","Rindersteak (roh)":"Filete de ternera (crudo)","Hackfleisch (roh)":"Carne picada (cruda)","Schweinefleisch (roh)":"Cerdo (crudo)","Forelle (roh)":"Trucha (cruda)","Kabeljau (roh)":"Bacalao (crudo)","Hering (roh)":"Arenque (crudo)","Hähnchenbrust (roh) hinzufügen":"Añadir pechuga de pollo (cruda)","Lachsfilet (roh) hinzufügen":"Añadir filete de salmón (crudo)"});

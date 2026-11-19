@@ -54,3 +54,5 @@ Object.assign(I18N.it,{"Anti-Schuppen-Shampoo {0}×/Woche als Maske": "Shampoo a
 
 // Nov 2026: Zuckerstufen bei Wasser mit Geschmack & Limo
 Object.assign(I18N.it,{"Wenig Zucker ({0} g)": "Poco zucchero ({0} g)", "Weniger Zucker als normale Limo": "Meno zucchero di una bibita normale"});
+// Rohgewicht-Namen (Nov 2026)
+Object.assign(I18N.it,{"Hähnchenbrust (roh)":"Petto di pollo (crudo)","Lachsfilet (roh)":"Filetto di salmone (crudo)","Rinderhack (roh)":"Macinato di manzo (crudo)","Hähnchenschenkel (roh)":"Coscia di pollo (cruda)","Putenbrust (roh)":"Petto di tacchino (crudo)","Rindersteak (roh)":"Bistecca di manzo (cruda)","Hackfleisch (roh)":"Carne macinata (cruda)","Schweinefleisch (roh)":"Maiale (crudo)","Forelle (roh)":"Trota (cruda)","Kabeljau (roh)":"Merluzzo (crudo)","Hering (roh)":"Aringa (cruda)","Hähnchenbrust (roh) hinzufügen":"Aggiungi petto di pollo (crudo)","Lachsfilet (roh) hinzufügen":"Aggiungi filetto di salmone (crudo)"});

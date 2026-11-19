@@ -12,9 +12,9 @@ vom Median deutscher Packungsangaben (mind. 15 Produkte) abwich, haben stattdess
 | hafer | Haferflocken | 6 | 0.015 | USDA SR Legacy (SR28) NDB 08120: Cereals, oats, regular and quick, not fortified, dry |  |
 | banane | Banane | 1 | 0.003 | USDA SR Legacy (SR28) NDB 09040: Bananas, raw |  |
 | ei | Ei | 142 | 0.355 | USDA SR Legacy (SR28) NDB 01123: Egg, whole, raw, fresh |  |
-| huhn | Hähnchenbrust | 45 | 0.113 | USDA SR Legacy (SR28) NDB 05062: Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw |  |
+| huhn | Hähnchenbrust (roh) | 45 | 0.113 | USDA SR Legacy (SR28) NDB 05062: Chicken, broiler or fryers, breast, skinless, boneless, meat only, raw |  |
 | reis | Reis gekocht | 1 | 0.003 | USDA SR Legacy (SR28) NDB 20445: Rice, white, long-grain, regular, unenriched, cooked without salt | ohne Salz gekocht |
-| lachs | Lachsfilet | 59 | 0.147 | USDA SR Legacy (SR28) NDB 15236: Fish, salmon, Atlantic, farmed, raw |  |
+| lachs | Lachsfilet (roh) | 59 | 0.147 | USDA SR Legacy (SR28) NDB 15236: Fish, salmon, Atlantic, farmed, raw |  |
 | cola | Cola | 3 | 0.007 | USDA SR Legacy (SR28) NDB 14148: Beverages, carbonated, cola, regular |  |
 | riegel | Proteinriegel | 436 | 1.09 | USDA SR Legacy (SR28) NDB 25067: Formulated Bar, SOUTH BEACH protein bar |  |
 | g-brotchen | Brötchen | 494 | 1.235 | USDA SR Legacy (SR28) NDB 18350: Rolls, hamburger or hotdog, plain | Weizenbrötchen (US hamburger roll) |
@@ -39,11 +39,11 @@ vom Median deutscher Packungsangaben (mind. 15 Produkte) abwich, haben stattdess
 | g-bratwurst | Bratwurst | 846 | 2.115 | USDA SR Legacy (SR28) NDB 07013: Bratwurst, pork, cooked |  |
 | g-wiener-wurstchen | Wiener Würstchen | 992 | 2.48 | USDA SR Legacy (SR28) NDB 07022: Frankfurter, beef, unheated |  |
 | g-schnitzel | Schnitzel | 601 | 1.502 | USDA FNDDS Food Code 22101300: Pork chop, breaded or floured, fried, NS as to fat eaten |  |
-| g-hahnchenschenkel | Hähnchenschenkel | 84 | 0.21 | USDA SR Legacy (SR28) NDB 05075: Chicken, broilers or fryers, leg, meat and skin, raw |  |
-| g-putenbrust | Putenbrust | 74 | 0.185 | USDA SR Legacy (SR28) NDB 05710: Turkey, retail parts, breast, meat only, raw |  |
-| g-rindersteak | Rindersteak | 51 | 0.128 | USDA SR Legacy (SR28) NDB 13931: Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8" fat, choice, raw |  |
-| g-hackfleisch | Hackfleisch | 66 | 0.165 | USDA SR Legacy (SR28) NDB 23567: Beef, ground, 85% lean meat / 15% fat, raw |  |
-| g-schweinefleisch | Schweinefleisch | 87 | 0.217 | USDA SR Legacy (SR28) NDB 10094: Pork, fresh, loin, center loin (chops), boneless, separable lean only, raw |  |
+| g-hahnchenschenkel | Hähnchenschenkel (roh) | 84 | 0.21 | USDA SR Legacy (SR28) NDB 05075: Chicken, broilers or fryers, leg, meat and skin, raw |  |
+| g-putenbrust | Putenbrust (roh) | 74 | 0.185 | USDA SR Legacy (SR28) NDB 05710: Turkey, retail parts, breast, meat only, raw |  |
+| g-rindersteak | Rindersteak (roh) | 51 | 0.128 | USDA SR Legacy (SR28) NDB 13931: Beef, top sirloin, steak, separable lean and fat, trimmed to 1/8" fat, choice, raw |  |
+| g-hackfleisch | Hackfleisch (roh) | 66 | 0.165 | USDA SR Legacy (SR28) NDB 23567: Beef, ground, 85% lean meat / 15% fat, raw |  |
+| g-schweinefleisch | Schweinefleisch (roh) | 87 | 0.217 | USDA SR Legacy (SR28) NDB 10094: Pork, fresh, loin, center loin (chops), boneless, separable lean only, raw |  |
 | g-speck | Speck | 662 | 1.655 | USDA SR Legacy (SR28) NDB 10123: Pork, cured, bacon, unprepared |  |
 | g-kochschinken | Kochschinken | – | 2.1 | Median 89 Produkte aus Open Food Facts DE (Name enthält „Kochschinken“; Median 109 kcal) | ersetzt USDA-Wert 3.197 g (USDA SR Legacy (SR28) NDB 07028: Ham, sliced, packaged (96% fat free, water added)): weicht > 25 % von deutschen Packungsangaben ab |
 | g-leberwurst | Leberwurst | 860 | 2.15 | USDA SR Legacy (SR28) NDB 07041: Liver sausage, liverwurst, pork |  |
@@ -59,11 +59,11 @@ vom Median deutscher Packungsangaben (mind. 15 Produkte) abwich, haben stattdess
 | g-nudelsalat | Nudelsalat | 522 | 1.305 | USDA FNDDS Food Code 58148110: Macaroni or pasta salad |  |
 | g-falafel | Falafel | 294 | 0.735 | USDA SR Legacy (SR28) NDB 16138: Falafel, home-prepared |  |
 | g-hummus | Hummus | 379 | 0.948 | USDA SR Legacy (SR28) NDB 16158: Hummus, commercial |  |
-| g-forelle | Forelle | 51 | 0.128 | USDA SR Legacy (SR28) NDB 15240: Fish, trout, rainbow, farmed, raw |  |
+| g-forelle | Forelle (roh) | 51 | 0.128 | USDA SR Legacy (SR28) NDB 15240: Fish, trout, rainbow, farmed, raw |  |
 | g-fischstabchen | Fischstäbchen | – | 0.8 | Median 52 Produkte aus Open Food Facts DE (Fischstäbchen; Median 190 kcal) | ersetzt USDA-Wert 1.005 g (USDA SR Legacy (SR28) NDB 15027: Fish, fish sticks, frozen, prepared): weicht > 25 % von deutschen Packungsangaben ab |
 | g-garnelen | Garnelen | 119 | 0.297 | USDA SR Legacy (SR28) NDB 15270: Crustaceans, shrimp, raw (not previously frozen) |  |
-| g-kabeljau | Kabeljau | 54 | 0.135 | USDA SR Legacy (SR28) NDB 15015: Fish, cod, Atlantic, raw |  |
-| g-hering | Hering | 74 | 0.185 | USDA SR Legacy (SR28) NDB 15043: Fish, herring, Pacific, raw |  |
+| g-kabeljau | Kabeljau (roh) | 54 | 0.135 | USDA SR Legacy (SR28) NDB 15015: Fish, cod, Atlantic, raw |  |
+| g-hering | Hering (roh) | 74 | 0.185 | USDA SR Legacy (SR28) NDB 15043: Fish, herring, Pacific, raw |  |
 | g-spiegelei | Spiegelei | 207 | 0.517 | USDA SR Legacy (SR28) NDB 01128: Egg, whole, cooked, fried |  |
 | g-ruhrei | Rührei | 145 | 0.362 | USDA SR Legacy (SR28) NDB 01132: Egg, whole, cooked, scrambled |  |
 | g-vollmilch | Vollmilch | 43 | 0.107 | USDA SR Legacy (SR28) NDB 01077: Milk, whole, 3.25% milkfat, with added vitamin D |  |
@@ -234,9 +234,41 @@ und wenn die Nährwerte in data.js grob zum Median der Produkte passen.
 | g-musli | Müsli | 0.1 | Median 157 Produkte aus Open Food Facts DE (Müsli/Knuspermüsli; Median 402 kcal) |
 | g-apfelschorle | Apfelschorle | 0 | Median 79 Produkte aus Open Food Facts DE (Apfelschorle; Median 26 kcal) |
 
-## Ohne Wert (kein passender USDA-Eintrag, keine belastbaren deutschen Daten)
+## Nachtrag Nov 2026: typische Durchschnittswerte für Gerichte, Mischungen und Getränke
 
-Griechischer Salat (salat), Porridge (g-porridge), Döner (g-doner), Currywurst (g-currywurst), Gulasch (g-gulasch), Seitan (g-seitan), Poke Bowl (g-poke-bowl), Risotto (g-risotto), Nudelauflauf (g-nudelauflauf), Käsespätzle (g-kasespatzle), Ravioli (g-ravioli), Gyros (g-gyros), Backfisch (g-backfisch), Ramen (g-ramen), Obst (gemischt) (g-obst-gemischt), Gemüse (gemischt) (g-gemuse-gemischt), Beeren (gemischt) (g-beeren-gemischt), Feldsalat (g-feldsalat), Kaiserschmarrn (g-kaiserschmarrn), Overnight Oats (g-overnight-oats), Sekt (g-sekt), Radler (g-radler), Aperol Spritz (g-aperol-spritz)
+Diese Einträge hatten bisher keinen Salzwert (galten als 0 g). Simon hat hier typische Durchschnittswerte erlaubt.
+Quellen: Matvaretabellen (offizielle norwegische Nährwerttabelle der Lebensmittelbehörde, matvaretabellen.no),
+USDA SR Legacy, und der Median deutscher Packungsangaben in foods.json (Open Food Facts; Filter nach Name und Kalorien
+passend zum Eintrag, Duplikate/Ausreißer wie Würzmischungen, Soßen, rohes Fleisch oder Babykost ausgeschlossen).
+Werte gelten für typische Rezepturen; selbst gekochte Gerichte können je nach Salzmenge deutlich abweichen.
+
+| ID | Lebensmittel | Salz g | Quelle | Hinweis |
+|---|---|---|---|---|
+| salat | Griechischer Salat | 0.733 | Matvaretabellen „Greek salad, with feta cheese and olives“: Natrium 293 mg | 68 kcal dort, 128 kcal hier (mehr Öl); Salz kommt v. a. aus Feta/Oliven |
+| g-doner | Döner | 0.97 | Matvaretabellen „Pita with kebab, salad and dressing“: Natrium 388 mg (179 kcal, 10 g Eiweiß) | passt zu 215 kcal/12 g Eiweiß |
+| g-overnight-oats | Overnight Oats | 0.303 | Matvaretabellen „Oat porridge, overnight oats“ (Haferflocken + Milch): Natrium 121 mg | |
+| g-porridge | Porridge | 0.1 | Median 40 Produkte foods.json (Porridge/Haferbrei verzehrfertig, 50–150 kcal; Median 111 kcal) | ungesalzen zubereitet; mit Salz (z. B. Matvaretabellen „Oat porridge, with milk“) bis 0,8 g |
+| g-gulasch | Gulasch | 1.2 | Median 33 Produkte foods.json (Gulasch als Gericht, ohne Suppe/Topf mit Beilage/rohes Fleisch; Median 98 kcal) | |
+| g-gyros | Gyros | 1.3 | Median 26 Produkte foods.json (gewürztes Gyros-Fleisch Schwein/Hähnchen, ohne vegane Produkte, Soßen, Würzmischungen; Median 147 kcal, 18 g Eiweiß) | |
+| g-currywurst | Currywurst | 2.1 | Median 11 Produkte foods.json (Currywurst mit Soße, Fleisch; Median 223 kcal) | |
+| g-risotto | Risotto | 0.8 | Median 20 Produkte foods.json (Risotto-Fertiggerichte verzehrfertig, ohne Risottoreis/Babykost; Median 129 kcal) | |
+| g-nudelauflauf | Nudelauflauf | 0.8 | Median 54 Produkte foods.json (Aufläufe/Gratins, Median 120 kcal) | |
+| g-kasespatzle | Käsespätzle | 0.7 | Median 7 Produkte foods.json (Käsespätzle, 153–230 kcal; Bürger „Allgäuer Art“ mit 230 kcal: 0,7 g) | nur 7 Produkte (Spanne 0,7–1,2 g) |
+| g-ravioli | Ravioli | 1 | Median 76 Produkte foods.json (Ravioli/Tortellini/Tortelloni/Cappelletti, 140–210 kcal; Median 192 kcal, 8 g Eiweiß) | |
+| g-backfisch | Backfisch | 1 | Median 26 Produkte foods.json (Backfisch/Schlemmerfilet, ohne vegane Produkte und Fischstäbchen; Median 181 kcal) | |
+| g-ramen | Ramen | 0.9 | Median 58 Produkte foods.json (Ramen/Instant-Nudelsuppe zubereitet, 50–130 kcal; Median 81 kcal) | Restaurant-Ramen oft salziger |
+| g-poke-bowl | Poke Bowl | 0.8 | Median 66 herzhafte Fertig-Bowls foods.json (80–200 kcal; Median 123 kcal) | Alias „Bowl/Buddha Bowl“; nur Poke-Bowls: Median 1,0 g (7 Produkte) |
+| g-seitan | Seitan | 0.95 | Median 8 Produkte foods.json (Seitan natur, ohne Würstchen/Aufschnitt/Mariniertes; Median 126 kcal, 24 g Eiweiß) | nur 8 Produkte (Spanne 0–1,5 g) |
+| g-kaiserschmarrn | Kaiserschmarrn | 0.6 | Median 5 verschiedene Produkte foods.json (Kaiserschmarrn verzehrfertig, 202–236 kcal: 0,3/0,4/0,6/0,8/0,8 g) | nur 5 Produkte; Hausrezept mit einer Prise Salz eher 0,3 g |
+| g-feldsalat | Feldsalat | 0.01 | USDA SR Legacy (SR28) NDB 11190: Cornsalad, raw: Natrium 4 mg (21 kcal, 2 g Eiweiß, 0,4 g Fett) | Nährwerte identisch mit data.js |
+| g-gemuse-gemischt | Gemüse (gemischt) | 0.083 | Matvaretabellen, TK-Gemüsemischungen ungesalzen: Median Natrium 33 mg (5 Mischungen: 12–69 mg) | |
+| g-obst-gemischt | Obst (gemischt) | 0.003 | Median der Obstsorten in data.js (USDA-Werte, 14 Sorten) | Matvaretabellen: Obst roh 0–1 mg Natrium |
+| g-beeren-gemischt | Beeren (gemischt) | 0.003 | Median der Beeren in data.js (Blau-, Erd-, Him-, Brombeeren; USDA) | Matvaretabellen: Beeren roh 0–3 mg Natrium |
+| g-sekt | Sekt | 0.023 | Matvaretabellen „Wine, white, rosé, sparkling, unspecified“: Natrium 9 mg | |
+| g-radler | Radler | 0.01 | Mischung 1:1 aus Pils (Matvaretabellen „Beer, 4,7 vol-% alcohol, Pilsner“: Natrium 6 mg) und Limonade (Matvaretabellen 2 mg): 4 mg | |
+| g-aperol-spritz | Aperol Spritz | 0.022 | Mischung 3 : 2 : 1 aus Sekt (9 mg), Likör/Bitter (Matvaretabellen „Liqueur, sweet, 21 vol-%“: 11 mg) und Mineralwasser (data.js 0,01 g Salz = 4 mg): ca. 9 mg Natrium | |
+
+Damit hat jedes eingebaute Lebensmittel einen Salzwert.
 
 ## Bereits vorhandene Werte (nicht geändert)
 Brot, Fertigpizza, Magerquark, Naturjoghurt 3,5 %, Gouda, Thunfisch, Tofu, Linsen, Kartoffeln, Nudeln, Apfel, Blaubeeren, Brokkoli,

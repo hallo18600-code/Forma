@@ -95,7 +95,7 @@ Hähnchenschenkel;Hühnerkeule;200;18;0;14;0;0;150;;
 Putenbrust;Pute|Truthahn;110;24;0;1.5;0;0;150;;
 Rindersteak;Steak|Rinderfilet|Rindfleisch;150;22;0;7;0;0;200;;
 Hackfleisch;Hack|Rinderhack gemischt|Gehacktes;230;18;0;17;0;0;;;
-Schweinefleisch;Schweinebraten|Schweinefilet;180;21;0;11;0;0;150;;
+Schweinefleisch;Schweinefilet;180;21;0;11;0;0;150;;
 Speck;Bacon|Frühstücksspeck;420;14;0.5;40;0.5;0;8;8;1
 Kochschinken;Schinken;110;19;1;3.5;1;0;15;15;
 Salami;;400;20;1;35;1;0;6;6;1
@@ -119,9 +119,9 @@ Seitan;;140;25;5;2;0;1;;;
 Lachs;Lachsfilet;200;20;0;13;0;0;150;;
 Forelle;;120;20;0;4;0;0;200;;
 Fischstäbchen;;190;13;17;8;1;1;28;;1
-Garnelen;Shrimps|Krabben;100;21;0;1.5;0;0;;;
+Garnelen;Shrimps;100;21;0;1.5;0;0;;;
 Kabeljau;Seelachs|Fischfilet;80;18;0;0.7;0;0;150;;
-Hering;Matjes|Bismarckhering;200;17;0;14;0;0;;;
+Hering;;200;17;0;14;0;0;;;
 Ei;Eier|Frühstücksei|Hühnerei|Ei gekocht;155;13;1;11;1;0;60;;
 Spiegelei;Spiegeleier;200;13;1;16;1;0;70;;
 Rührei;Rühreier;180;11;1;14;1;0;120;;
@@ -333,10 +333,21 @@ Schnaps;Wodka|Korn|Obstler|Whisky|Gin|Rum;230;0;0;0;0;0;;;`;
   });
   window.GENERIC_STATS={added,merged,skipped};
 })();
+// Nährwerte dieser Fleisch- und Fischsorten gelten für das rohe Stück (wie im BLS „roh“): Der Name sagt das jetzt dazu.
+// Gespeichert wird per ID (Mahlzeiten, Favoriten, Vorlagen), daher bleibt alles erhalten. Der alte Name bleibt als Suchwort.
+(function(){
+  const RAW=["huhn","lachs","rind","g-hahnchenschenkel","g-putenbrust","g-rindersteak","g-hackfleisch","g-schweinefleisch","g-forelle","g-kabeljau","g-hering"];
+  BASE_FOODS.forEach(f=>{ if(RAW.includes(f.id)){ f.al=[f.name,...(f.al||[]).filter(a=>a!==f.name)]; f.name+=" (roh)"; } });
+})();
 // Salz (g pro 100 g) der Standard-Lebensmittel ohne eigenen Wert. Quelle: USDA FoodData Central (SR Legacy bzw. FNDDS),
 // Salz = Natrium (mg) × 2,5 / 1000. Verarbeitete Produkte mit deutlich anderer deutscher Rezeptur: Median der
 // Packungsangaben deutscher Produkte (Open Food Facts, mind. 15 Produkte). Eintrag je Lebensmittel und fehlende Werte: tools/salz-quellen.md
 const BASE_SALT={"skyr":0.09,"hafer":0.015,"banane":0.003,"ei":0.355,"huhn":0.113,"reis":0.003,"lachs":0.147,"cola":0.007,"riegel":1.09,"g-brotchen":1.235,"g-mischbrot":0.953,"g-roggenbrot":1,"g-toastbrot":1.225,"g-vollkorntoast":1.137,"g-brezel":1.363,"g-laugenbrotchen":1.363,"g-croissant":1.167,"g-knackebrot":1.025,"g-reiswaffel":0.065,"g-cornflakes":0.9,"g-vollkornnudeln-gekocht":0.01,"g-bratkartoffeln":0.772,"g-kartoffelpuree":0.792,"g-couscous-gekocht":0.013,"g-quinoa-gekocht":0.018,"g-pfannkuchen":1.097,"g-pizza-margherita":1.343,"g-pizza-salami":1.3,"g-bratwurst":2.115,"g-wiener-wurstchen":2.48,"g-schnitzel":1.502,"g-hahnchenschenkel":0.21,"g-putenbrust":0.185,"g-rindersteak":0.128,"g-hackfleisch":0.165,"g-schweinefleisch":0.217,"g-speck":1.655,"g-kochschinken":2.1,"g-leberwurst":2.15,"g-fleischwurst":2.4,"g-lasagne":0.902,"g-spaghetti-bolognese":0.575,"g-spaghetti-carbonara":0.537,"g-chili-con-carne":1.123,"g-gemusesuppe":0.632,"g-tomatensuppe":0.465,"g-huhnersuppe":0.838,"g-kartoffelsalat":1.3,"g-nudelsalat":1.305,"g-falafel":0.735,"g-hummus":0.948,"g-forelle":0.128,"g-fischstabchen":0.8,"g-garnelen":0.297,"g-kabeljau":0.135,"g-hering":0.185,"g-spiegelei":0.517,"g-ruhrei":0.362,"g-vollmilch":0.107,"g-milch-1-5":0.11,"g-sojadrink":0.128,"g-mandeldrink":0.158,"g-naturjoghurt-1-5":0.175,"g-griechischer-joghurt":0.087,"g-huttenkase":0.77,"g-frischkase":0.785,"g-mozzarella":0.5,"g-emmentaler":0.8,"g-parmesan":1.5,"g-feta":2.292,"g-camembert":1.6,"g-sahne":0.068,"g-birne":0.003,"g-orange":0,"g-mandarine":0.005,"g-weintrauben":0.005,"g-erdbeeren":0.003,"g-himbeeren":0.003,"g-kiwi":0.007,"g-ananas":0.003,"g-mango":0.003,"g-wassermelone":0.003,"g-pfirsich":0,"g-kirschen":0,"g-datteln":0.005,"g-rosinen":0.028,"g-tomate":0.013,"g-gurke":0.005,"g-paprika":0.01,"g-karotte":0.172,"g-blumenkohl":0.075,"g-zucchini":0.02,"g-aubergine":0.005,"g-spinat":0.198,"g-salat":0.025,"g-zwiebel":0.01,"g-champignons":0.013,"g-mais":0.512,"g-erbsen":0.18,"g-kidneybohnen":0.578,"g-kichererbsen":0.615,"g-susskartoffel":0.138,"g-kurbis":0.003,"g-rote-bete":0.195,"g-saurkraut":1.1,"g-oliven":3,"g-walnusse":0.005,"g-haselnusse":0,"g-cashewkerne":0.03,"g-erdnusse":0.045,"g-pistazien":0.003,"g-sonnenblumenkerne":0.022,"g-chiasamen":0.04,"g-leinsamen":0.075,"g-zartbitterschokolade":0.05,"g-nutella":0.102,"g-gummibarchen":0.11,"g-kekse":0.705,"g-kuchen":0.943,"g-eis":0.2,"g-musliriegel":0.735,"g-honig":0.01,"g-marmelade":0.08,"g-zucker":0.003,"g-pudding":0.355,"g-donut":1.137,"g-popcorn":1.698,"g-wasser":0.01,"g-kaffee":0.005,"g-cappuccino":0.052,"g-latte-macchiato":0.077,"g-tee":0.007,"g-cola-zero":0.02,"g-apfelsaft":0.01,"g-orangensaft":0.005,"g-bier":0.01,"g-wein":0.013,"g-smoothie":0.005,"g-olivenol":0.005,"g-mayonnaise":1,"g-ketchup":2.268,"g-senf":2.76,"g-sojasauce":13.732,"g-tomatensauce":1.093,"g-pesto":2.3,"g-salatdressing":2.482,"g-proteinpulver":0.39,"g-butter":0.028,"g-vollkornbrotchen":1.302,"g-burger":1.218,"g-cheeseburger":1.278,"g-chicken-nuggets":1.4,"g-sandwich":1.438,"g-wrap":0.83,"g-burrito":1.425,"g-tacos":0.993,"g-sushi":1.49,"g-curry":1.21,"g-kartoffelpuffer":1.018,"g-frikadelle":1.7,"g-omelett":0.935,"g-kartoffelsuppe":0.575,"g-bratensosse":1.4,"g-brombeeren":0.003,"g-zitrone":0.005,"g-grapefruit":0,"g-pflaumen":0,"g-aprikose":0.003,"g-granatapfel":0.007,"g-feigen":0.003,"g-apfelmus":0.005,"g-spargel":0.005,"g-grune-bohnen":0.015,"g-rosenkohl":0.062,"g-lauch":0.05,"g-kohlrabi":0.05,"g-radieschen":0.098,"g-rucola":0.068,"g-knoblauch":0.043,"g-bulgur-gekocht":0.013,"g-kokosol":0,"g-leinol":0,"g-schmand":0.077,"g-saure-sahne":0.223,"g-kaffeesahne":0.152,"g-fruchtjoghurt":0.145,"g-bolognese-sosse":0.552,"g-nussmischung":0.01,"g-studentenfutter":0.025,"g-waffel":1.8,"g-muffin":1.157,"g-brownie":0.37,"g-kasekuchen":0.945,"g-schokoriegel":0.417,"g-salzstangen":3.393,"g-espresso":0.035,"g-kakao":0.095,"g-milchshake":0.17,"g-eistee":0.007,"g-limonade":0.005,"g-schnaps":0.003,"g-leberkase":2,"g-maultaschen":1.4,"g-gnocchi":1.1,"g-spatzle":1,"g-kartoffelknodel":0.8,"g-kroketten":1,"g-cevapcici":1.5,"g-rotkohl":1.1,"g-creme-fraiche":0.1,"g-margarine":0.2,"g-milchreis":0.2,"g-griessbrei":0.1,"g-erbsensuppe":1,"g-linseneintopf":0.9,"g-musli":0.1,"g-apfelschorle":0};
+// Nachtrag Nov 2026: typische Durchschnittswerte für Gerichte und Mischungen (Quelle je Eintrag: tools/salz-quellen.md)
+Object.assign(BASE_SALT,{"salat":0.733,"g-doner":0.97,"g-overnight-oats":0.303,"g-porridge":0.1,"g-gulasch":1.2,"g-gyros":1.3,"g-currywurst":2.1,
+  "g-risotto":0.8,"g-nudelauflauf":0.8,"g-kasespatzle":0.7,"g-ravioli":1,"g-backfisch":1,"g-ramen":0.9,"g-poke-bowl":0.8,"g-seitan":0.95,
+  "g-kaiserschmarrn":0.6,"g-feldsalat":0.01,"g-gemuse-gemischt":0.083,"g-obst-gemischt":0.003,"g-beeren-gemischt":0.003,
+  "g-sekt":0.023,"g-radler":0.01,"g-aperol-spritz":0.022});
 BASE_FOODS.forEach(f=>{ if(f.salt==null&&BASE_SALT[f.id]!=null) f.salt=BASE_SALT[f.id]; });
 // Partnerlinks/Bezugsquellen erst einschalten, wenn es echte Partner gibt.
 const PARTNERS_ENABLED = false;

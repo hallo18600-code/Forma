@@ -54,3 +54,5 @@ Object.assign(I18N.fr,{"Anti-Schuppen-Shampoo {0}×/Woche als Maske": "Shampooin
 
 // Nov 2026: Zuckerstufen bei Wasser mit Geschmack & Limo
 Object.assign(I18N.fr,{"Wenig Zucker ({0} g)": "Peu de sucre ({0} g)", "Weniger Zucker als normale Limo": "Moins de sucre qu'un soda classique"});
+// Rohgewicht-Namen (Nov 2026)
+Object.assign(I18N.fr,{"Hähnchenbrust (roh)":"Blanc de poulet (cru)","Lachsfilet (roh)":"Filet de saumon (cru)","Rinderhack (roh)":"Bœuf haché (cru)","Hähnchenschenkel (roh)":"Cuisse de poulet (crue)","Putenbrust (roh)":"Blanc de dinde (cru)","Rindersteak (roh)":"Steak de bœuf (cru)","Hackfleisch (roh)":"Viande hachée (crue)","Schweinefleisch (roh)":"Porc (cru)","Forelle (roh)":"Truite (crue)","Kabeljau (roh)":"Cabillaud (cru)","Hering (roh)":"Hareng (cru)","Hähnchenbrust (roh) hinzufügen":"Ajouter blanc de poulet (cru)","Lachsfilet (roh) hinzufügen":"Ajouter filet de saumon (cru)"});

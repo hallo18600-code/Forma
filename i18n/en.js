@@ -54,3 +54,5 @@ Object.assign(I18N.en,{"Anti-Schuppen-Shampoo {0}×/Woche als Maske": "Anti-dand
 
 // Nov 2026: Zuckerstufen bei Wasser mit Geschmack & Limo
 Object.assign(I18N.en,{"Wenig Zucker ({0} g)": "Low sugar ({0} g)", "Weniger Zucker als normale Limo": "Less sugar than regular soft drinks"});
+// Rohgewicht-Namen (Nov 2026)
+Object.assign(I18N.en,{"Hähnchenbrust (roh)":"Chicken breast (raw)","Lachsfilet (roh)":"Salmon fillet (raw)","Rinderhack (roh)":"Minced beef (raw)","Hähnchenschenkel (roh)":"Chicken thigh (raw)","Putenbrust (roh)":"Turkey breast (raw)","Rindersteak (roh)":"Beef steak (raw)","Hackfleisch (roh)":"Minced meat (raw)","Schweinefleisch (roh)":"Pork (raw)","Forelle (roh)":"Trout (raw)","Kabeljau (roh)":"Cod (raw)","Hering (roh)":"Herring (raw)","Hähnchenbrust (roh) hinzufügen":"Add chicken breast (raw)","Lachsfilet (roh) hinzufügen":"Add salmon fillet (raw)"});

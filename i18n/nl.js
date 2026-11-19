@@ -54,3 +54,5 @@ Object.assign(I18N.nl,{"Anti-Schuppen-Shampoo {0}×/Woche als Maske": "Antirooss
 
 // Nov 2026: Zuckerstufen bei Wasser mit Geschmack & Limo
 Object.assign(I18N.nl,{"Wenig Zucker ({0} g)": "Weinig suiker ({0} g)", "Weniger Zucker als normale Limo": "Minder suiker dan gewone frisdrank"});
+// Rohgewicht-Namen (Nov 2026)
+Object.assign(I18N.nl,{"Hähnchenbrust (roh)":"Kipfilet (rauw)","Lachsfilet (roh)":"Zalmfilet (rauw)","Rinderhack (roh)":"Rundergehakt (rauw)","Hähnchenschenkel (roh)":"Kippendij (rauw)","Putenbrust (roh)":"Kalkoenfilet (rauw)","Rindersteak (roh)":"Biefstuk (rauw)","Hackfleisch (roh)":"Gehakt (rauw)","Schweinefleisch (roh)":"Varkensvlees (rauw)","Forelle (roh)":"Forel (rauw)","Kabeljau (roh)":"Kabeljauw (rauw)","Hering (roh)":"Haring (rauw)","Hähnchenbrust (roh) hinzufügen":"Kipfilet (rauw) toevoegen","Lachsfilet (roh) hinzufügen":"Zalmfilet (rauw) toevoegen"});

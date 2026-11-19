@@ -24,34 +24,34 @@ const ALT_MAP={
   chips:["Mandeln","Walnüsse","Cashewkerne","Karotte"],
   ricecake:["Mandeln","Walnüsse","Karotte"],
   fastfood:h=>/(mehl|farine|flour)/.test(h)?[]:/(pommes|fritten|kroketten|rosti|kartoffelpuffer|reibekuchen|wedges)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Bratkartoffeln"]
-    :/(nugget|chicken|wings|hahnchen|huhn|schnitzel|cordon)/.test(h)?["Hähnchenbrust","Putenbrust"]
-    :/(fisch|fish|hering|herring)/.test(h)?["Lachsfilet","Kabeljau","Forelle"]
-    :/(burger|steak)/.test(h)?["Rindersteak","Hähnchenbrust","Gulasch"]
-    :/(doner|kebab|durum|gyros|wrap)/.test(h)?["Hähnchenbrust","Putenbrust","Gulasch"]
-    :["Gulasch","Chili con Carne","Hähnchenbrust"],
+    :/(nugget|chicken|wings|hahnchen|huhn|schnitzel|cordon)/.test(h)?["Hähnchenbrust (roh)","Putenbrust (roh)"]
+    :/(fisch|fish|hering|herring)/.test(h)?["Lachsfilet (roh)","Kabeljau (roh)","Forelle (roh)"]
+    :/(burger|steak)/.test(h)?["Rindersteak (roh)","Hähnchenbrust (roh)","Gulasch"]
+    :/(doner|kebab|durum|gyros|wrap)/.test(h)?["Hähnchenbrust (roh)","Putenbrust (roh)","Gulasch"]
+    :["Gulasch","Chili con Carne","Hähnchenbrust (roh)"],
   // Brühe, Würzpulver und „Fix für …“ sind Zutaten, keine Mahlzeit: dafür keine Alternative
   readymeal:h=>/(bruhe|bouillon|brodo|caldo|=kub|fond|pulver|wurfel|wurze|gewurz| fix |fix fur|basis fur|base|paste|sauce|sosse|soße|oliven|olive|aceitun|pastete|bruschetta|avocado)/.test(h.replace(/ kub /," =kub "))
     // Aufstrich-Cremes und Pasteten-Terrinen: keine Alternative (Cremesuppe, Fisch in Creme, „5 Minuten Terrine“ schon)
     ||/(creme|krem)/.test(h)&&!/(suppe|soup|salat|filet| in )/.test(h)||/terrine/.test(h)&&!/minut/.test(h)?[]
     :/(pure|puree|stampf|kartoffel|knodel|klosse|spatzle|kroketten|gratin)/.test(h)&&!/(braten|gulasch|fleisch|schnitzel|hahnchen|rind|schwein|geschnetzel)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Kartoffelknödel"]
     :/(suppe|soup|zuppa|soupe|eintopf)/.test(h)?["Gemüsesuppe","Hühnersuppe","Linseneintopf"]
-    :/(hering|matjes|lachs|salmon|saumon|fisch|fish|thunfisch|tuna|forelle|makrele|garnele|shrimp)/.test(h)?["Lachsfilet","Hering","Forelle","Kabeljau"]
-    :/(schnitzel|cordon|nugget|hahnchen|chicken|pute)/.test(h)?["Hähnchenbrust","Putenbrust","Curry"]
+    :/(hering|matjes|lachs|salmon|saumon|fisch|fish|thunfisch|tuna|forelle|makrele|garnele|shrimp)/.test(h)?["Lachsfilet (roh)","Hering (roh)","Forelle (roh)","Kabeljau (roh)"]
+    :/(schnitzel|cordon|nugget|hahnchen|chicken|pute)/.test(h)?["Hähnchenbrust (roh)","Putenbrust (roh)","Curry"]
     :/(kuchen|torte|stich|strudel|dessert|pudding|creme brulee|tiramisu|ghurt|joghurt|ohrchen|schweinsohr)/.test(h)?[]
-    :/(pizza|flammkuchen)/.test(h)?["Gulasch","Chili con Carne","Hähnchenbrust"]
+    :/(pizza|flammkuchen)/.test(h)?["Gulasch","Chili con Carne","Hähnchenbrust (roh)"]
     :["Gulasch","Chili con Carne","Hühnersuppe","Gemüsesuppe","Linseneintopf"],
   // „Parma“ steht auch auf Tomatensoßen, „Cheese Flips“ sind Knabberzeug: dafür keine Fleisch-Alternative
-  processedmeat:h=>/(passata|pomodor|tomat|sugo|sauce|flips|chips)/.test(h)?[]:/kase/.test(h)&&!/(wurst|schinken|salami|lyoner|fleisch|leberkas|kabanos|cabanossi|knacker|wiener|speck)/.test(h)?["Hüttenkäse","Magerquark","Mozzarella"]:["Putenbrust","Hähnchenbrust","Rindersteak","Ei"],
+  processedmeat:h=>/(passata|pomodor|tomat|sugo|sauce|flips|chips)/.test(h)?[]:/kase/.test(h)&&!/(wurst|schinken|salami|lyoner|fleisch|leberkas|kabanos|cabanossi|knacker|wiener|speck)/.test(h)?["Hüttenkäse","Magerquark","Mozzarella"]:["Putenbrust (roh)","Hähnchenbrust (roh)","Rindersteak (roh)","Ei"],
   // Veganer Käse → Käse, veganer Joghurt → Joghurt, sonst Fleisch/Ei/Hülsenfrüchte
   // Vegane Mayo/Soße oder Zwiebelringe sind kein Fleischersatz: keine Alternative
   ersatz:h=>/(mayo|sauce|sosse|dressing|zwiebelring)/.test(h)?[]
     :/(frischcreme|streichcreme|aufstrich)/.test(h)?["Hüttenkäse","Magerquark"]
     :/(kase|cheese|mozzarella|gouda|feta|parmesan|reibe|frischkase|camembert|cheddar)/.test(h)?["Mozzarella","Hüttenkäse","Feta"]
     :/(joghurt|yog|quark|skyr|dessert)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]
-    :/(aufschnitt|schinken|salami|wurst|mortadella)/.test(h)?["Putenbrust","Kochschinken","Ei"]
-    :["Hähnchenbrust","Rindersteak","Ei","Lachsfilet","Linsen gekocht","Kichererbsen"],
+    :/(aufschnitt|schinken|salami|wurst|mortadella)/.test(h)?["Putenbrust (roh)","Kochschinken","Ei"]
+    :["Hähnchenbrust (roh)","Rindersteak (roh)","Ei","Lachsfilet (roh)","Linsen gekocht","Kichererbsen"],
   // Miso/Sojasoße sind Würzmittel; Soja-Joghurt → Joghurt
-  soy:h=>/(miso|sauce|sosse)/.test(h)?[]:/(gurt|joghurt|yog|dessert|pudding)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]:["Ei","Hähnchenbrust","Lachsfilet","Linsen gekocht","Kichererbsen"],
+  soy:h=>/(miso|sauce|sosse)/.test(h)?[]:/(gurt|joghurt|yog|dessert|pudding)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]:["Ei","Hähnchenbrust (roh)","Lachsfilet (roh)","Linsen gekocht","Kichererbsen"],
   refined:h=>/(nudel|pasta|spaghetti|penne|fusilli|maccheroni|tortiglioni|farfalle|lasagne|tagliatelle|gnocchi|couscous)/.test(h)?["Kartoffeln gekocht","Reis gekocht","Quinoa gekocht","Süßkartoffel"]
     :/(brot|brotchen|toast|semmel|baguette|wrap|tortilla|bagel|pain|ciabatta|weckle)/.test(h)&&!/(aufstrich|creme)/.test(h)?["Vollkornbrot","Roggenbrot","Vollkornbrötchen"]:[],
   wholewheat:h=>/(nudel|pasta|spaghetti|penne|fusilli)/.test(h)?["Kartoffeln gekocht","Reis gekocht","Quinoa gekocht","Süßkartoffel"]:[],
