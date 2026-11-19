@@ -260,7 +260,7 @@ const R_BRANDS={
   softdrink:["coca-cola","coca cola","pepsi","fanta","sprite","mirinda","mezzo mix","schweppes","red bull","monster","booster","rockstar","lipton","fuze tea","capri-sun","capri sun","punica","vio","bionade","fritz-kola","fritz","afri","durstloscher","sinalco","club-mate","river","flying power","effect","bullit","oettinger","orangina","vitamin well","bluna","freeway","almdudler"],
   alcohol:["krombacher","bitburger","warsteiner","veltins","radeberger","jever","beck's","becks","paulaner","erdinger","franziskaner","augustiner","hacker-pschorr","spaten","lowenbrau","konig ludwig","monchshof","gosser","heineken","corona","perlenbacher","schofferhofer","clausthaler","grimbergen","leffe","hasseroder","kostritzer","ottakringer","stiegl","astra","tsingtao","desperados","bacardi","jagermeister","smirnoff","absolut","aperol","martini","baileys"],
   juice:["tropicana","innocent","true fruits","granini","hohes c","valensina","rauch","happy day","albi","beckers bester","amecke","dittmeyer","pfanner","voelkel","rabenhorst","eckes"],
-  water:["hella","volvic","evian","gerolsteiner","vittel","saskia","adelholzener","apollinaris","bad brambacher","rhenser","selters","san pellegrino","perrier","fiji"],
+  water:["hella","volvic","evian","gerolsteiner","vilsa","rhonsprudel","teinacher","ensinger","vittel","saskia","adelholzener","apollinaris","bad brambacher","rhenser","selters","san pellegrino","perrier","fiji"],
   chips:["funny-frisch","pringles","lay's","lays","chio","lorenz","kelly's","zweifel","takis","doritos","tuc","pom-bar","crunchips","chipsfrisch","gardschips","kettle"],
   cereal:["kellogg's","kelloggs","mymuesli","barnhouse"],
   sauce:["lee kum kee","kikkoman","heinz","hela","develey","kuhne"],
@@ -480,7 +480,7 @@ function rClassify0(item){
   if(calc>30&&(kc<calc*0.6||kc>calc*1.6)) kc=Math.round(calc);
   const nova=+item.nova||0; let heavy=nova>=4||(!nova&&item.processed);
   const h=" "+NORM(item.name||"")+" ", words=rWords(h), nut={kc,pr,cb,fa,su,fi,sa,fiU:item.fiber==null||item.fiber===""};
-  let cat=foodCat(item);
+  let cat=foodCat(item); const cat0=cat?cat.id:"";
   const bc=brandCat(item), skip=new Set(); let drinkLike=false;
   // Marke hilft, wenn der Name nichts sagt oder nur eine Geschmacksrichtung nennt ("Original Taste" von Coca-Cola, "Pfirsiche" von Haribo)
   const brandUse=b=>{ let x=R_BYID[b];
@@ -545,7 +545,9 @@ function rClassify0(item){
   if(heavy&&cat&&cat.id==="water"&&kc<=1&&su<0.5&&!/(geschmack|aroma|flavou?r|touch|zitron|limett|lemon|orange|apfel|frucht|fruit|beere|berry|minze|gurke|ingwer|holunder|pfirsich|mango|kirsch|vitamin|tonic)/.test(h)) heavy=false;
   if(heavy&&cat&&["protdairy","dairy","kefir","cheese"].includes(cat.id)&&su<6&&sa2<(cat.id==="cheese"?4.5:2)
      &&!/(frucht|erdbeer|himbeer|kirsch|pfirsich|mango|vanill|schoko|choco|karamell|caramel|nuss|stracciatella|light|zero|leicht|schmelz|zubereitung|scheiblett|streich|creme|dessert|pudding|drink|shake|protein|aroma|geschmack)/.test(h)) heavy=false;
-  return {cat,nut,heavy,nova,h,words};
+  // Wasser-Art: Wasser mit Geschmack oder etwas Saft (nicht Limo, Eistee, Cola) – für die Zucker-Abstufung bei Getränken
+  const aq=!!cat&&["water","softdrink"].includes(cat.id)&&(cat0==="water"||bc==="water"||drinkLike||/(wasser(?!melone)|\bwater\b|\beau\b|acqua|agua|mineral)/.test(h))&&!R_LIMO.test(h);
+  return {cat,nut,heavy,nova,h,words,aq};
 }
 let R_MICRO_HIT=null;
 // Diät aus dem Fragebogen (alte Antworten werden umgedeutet)
@@ -590,6 +592,15 @@ function rSupFood(item,kind,g,h){
 // Gegenprobe: dasselbe Produkt mit weniger Zucker (feste Stufen bis 0 g). Ist eine Variante schlechter bewertet, gilt ihr Wert.
 // Bei Lebensmitteln, deren Zucker natürlich dazugehört (Obst, Honig, Milch …), zählt nur ein Wechsel in eine ganz andere Art.
 const R_SUGAR_STEPS=[0,5,10,14,20,30,45,65];
+// Zuckergetränke (Wasser mit Geschmack, Limo, Eistee): Obergrenze je Ziel nach Zucker pro 100 ml, stetig fallend.
+// Stützpunkte: bis 0,5 g gilt als „zuckerfrei“, bis 2,5 g als „zuckerarm“ (EU-Verordnung 1924/2006),
+// 5 und 8 g sind die Stufen der britischen Zuckersteuer, ab ca. 11 g normale Limo.
+// 0,5 l mit 5 g/100 ml = 25 g Zucker – so viel, wie die WHO höchstens pro Tag an freiem Zucker empfiehlt (ideal unter 5 % der Energie).
+const R_DRINK_SU=[[0.5,[100,100,100,100]],[1,[62,66,62,62]],[2.5,[44,48,42,44]],[5,[26,30,24,26]],[8,[14,15,11,14]],[11,[10,8,6,10]]];
+function rDrinkSu(su,gi){ const T=R_DRINK_SU; if(su<=T[0][0]) return T[0][1][gi];
+  for(let i=1;i<T.length;i++) if(su<=T[i][0]){ const a=T[i-1], b=T[i], k=(su-a[0])/(b[0]-a[0]); return a[1][gi]+k*(b[1][gi]-a[1][gi]); }
+  return T[T.length-1][1][gi]; }
+const R_LIMO=/(cola|limo|lemonade|eistee|ice ?tea|\btea\b|\btee\b|energy|tonic|bitter|ginger|\bmate\b|brause|spezi|sprite|fanta|7 ?up|schweppes|\bsoda\b|isoton|sportgetrank)/;
 const R_NATSUGAR=new Set([...R_FRUITY,"veg","skinveg","dairy","kefir","protdairy","sugar","sweetpotato"]);
 // Fehlen bei einem Datenbank-Produkt Zucker oder Salz, gibt es keinen Score (statt zu schätzen).
 // Ausnahme: kaum Kohlenhydrate (≤ 0,5 g) – dann ist auch der Zucker sicher ≤ 0,5 g.
@@ -678,11 +689,14 @@ function scoreFoodNow(item,goal){
 function scoreFood1(item,goal){
   if(item.src==="off"&&(item.sugar==null||item.sugar==="")) item=Object.assign({},item,{sugar:+item.carbs||0});
   const su=+item.sugar;
-  if(!(su>=6)||item.type==="sup") return scoreFood0(item,goal);
+  if(!(su>=0.5)||item.type==="sup") return scoreFood0(item,goal);
   const c0=rClassify(item).cat, nat0=!!(c0&&R_NATSUGAR.has(c0.id));
+  // Wasser & Limo: schon ab 0,5 g mit dem gleichen Getränk ohne Zucker vergleichen (mehr Zucker nie besser, auch wenn die Art wechselt)
+  const drk=!!c0&&["water","softdrink"].includes(c0.id);
+  if(su<6&&!drk) return scoreFood0(item,goal);
   const cb=+item.carbs||0, kc=+item.kcal||0; let low=Infinity;
   // Feste Stufen (für alle Produkte gleich, dicht dort, wo die Erkennung kippt)
-  for(const s2 of R_SUGAR_STEPS){ if(s2>su-2) break;
+  for(const s2 of R_SUGAR_STEPS){ if(s2>su-2&&!(drk&&s2===0)) break;
     const d=su-s2, v=Object.assign({},item,{sugar:s2,carbs:Math.max(0,cb-d),kcal:Math.max(0,Math.round(kc-4*d))});
     // Natürlich süß (Obst, Milch …): nur zählen, wenn weniger Zucker eine ganz andere Art ergibt (z. B. Limo statt Obst)
     if(nat0){ const c=rClassify(v).cat; if(!c||R_NATSUGAR.has(c.id)) continue; }
@@ -787,7 +801,17 @@ function scoreFood0(item,goal){
   if(id==="softdrink"&&su<1){ const zero=kc<10; score+=[8,zero?47:18,8,6][gi]; cons.length=0;
     if(g==="lose"&&zero){ good("Kaum Kalorien – bremst das Abnehmen nicht",13); good("Besser als die Variante mit Zucker",12); bad("Wasser ist noch besser: ohne Süßstoffe & Zusätze",12); }
     else bad("Süßstoffe und Zusätze, keine Nährstoffe",12); }
-  if(g==="lose"&&kc>0&&kc<=100&&su<10&&!["alcohol","softdrink","seedoil","goodfat","margarine","butter","juice","nectar"].includes(id)&&!/(\bol\b|rapsol|olivenol|\boil\b|huile|\bolio\b|\baceite)/.test(h)&&score<45){ score=45+(100-kc)/10; if(!pros.length) good("Wenig Kalorien ("+kc+" kcal)",10); }
+  // Zucker in Wasser & Limo stufenweise: je mehr Zucker pro 100 ml, desto tiefer (Stützpunkte siehe R_DRINK_SU).
+  // Wasser mit Geschmack: unter purem Wasser, aber über Limo. Limo & Eistee: nie besser als die Zero-Variante.
+  // Nur wenn die Kalorien fast nur aus dem Zucker kommen (nicht bei Drinks mit Milch, Öl oder Pflanzendrink)
+  const sweetDrink=(id==="water"||id==="softdrink")&&su>=0.5&&!(id==="softdrink"&&su<1)&&kc-4*su<10;
+  if(sweetDrink){
+    if(su<5){ pros.length=0; cons.length=0;   // ab 5 g bleiben die Limo-Texte („Etwas Zucker“, „Flüssige Kalorien …“)
+      if(su<2.5){ good("Wenig Zucker ("+rG(su)+" g)",12); bad("Wasser pur ist noch besser",11); }
+      else { good("Weniger Zucker als normale Limo",10); bad("Etwas Zucker ("+rG(su)+" g)",12); }
+    } else if(su<8) bad("Etwas Zucker ("+rG(su)+" g)",13);
+  }
+  if(g==="lose"&&kc>0&&kc<=100&&su<10&&!["alcohol","softdrink","water","seedoil","goodfat","margarine","butter","juice","nectar"].includes(id)&&!/(\bol\b|rapsol|olivenol|\boil\b|huile|\bolio\b|\baceite)/.test(h)&&score<45){ score=45+(100-kc)/10; if(!pros.length) good("Wenig Kalorien ("+kc+" kcal)",10); }
   // Leichte Suppen, Soßen und Fertiggerichte: beim Abnehmen zählen vor allem die Kalorien
   if(["sauce","readymeal","mixedmeal"].includes(id)&&g==="lose"&&kc<=100&&kc>0){ good("Wenig Kalorien ("+kc+" kcal)",12); bad(su>=5?"Auf zugesetzten Zucker achten":sa>1.5?"":"Fertigprodukt: oft viel Salz & Zusätze",9); }
   if(["juice","nectar"].includes(id)&&g==="lose"&&kc<=25){ score+=15; good("Mit Wasser verdünnt: wenig Kalorien",12); bad("Wasser pur ist noch besser",9); }
@@ -828,6 +852,11 @@ function scoreFood0(item,goal){
     if(su<5) good("Weniger Zucker als die normale Variante",8); bad("Ohne Süßstoffe wäre es noch besser",9); }
   if(!["seedoil","margarine"].includes(id)&&/(sonnenblumenol|rapsol|palmol|pflanzenol)/.test(h)){ score-=5; bad("Mit raffiniertem Pflanzenöl",8); }
   rateQuality(item,id,h,(v,t,w)=>{ score+=v; (v>0?good:bad)(t,w); });
+  // Zuckerstufe für Wasser & Limo zuletzt, damit sie auch mit Abzügen (z. B. stark verarbeitet) gilt
+  if(sweetDrink){ const t=rDrinkSu(su,gi);
+    if(id==="water") score=Math.min(score,t);
+    else if(C.aq) score=Math.max(score,t);
+    else score=Math.max(score,Math.min(t,cat.b[gi]+[8,47,8,6][gi]-Math.min(3,2*su))); }   // knapp unter Zero
   score=rSoft(score);
   // 6) Persönliches aus dem Fragebogen – alles landet sichtbar unter „Für dich“ (mit Grund, woher es kommt)
   const ctx={item,g,id,cat,heavy,nova,h,kc,pr,cb,fa,su,fi,sa,drink,okFood,junk,fruity,ps,highGI,novaUnk};
