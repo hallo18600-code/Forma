@@ -892,7 +892,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="coach-plan"){
     const pl=coachPlan(el.dataset.v), R=JSON.stringify(state.routines);
     // Unveränderte Start-Pläne ersetzen, damit nichts doppelt herumliegt; eigene Pläne bleiben
-    const untouched=R===JSON.stringify(defaultRoutines())||R===JSON.stringify([fullBodyPlan()]);
+    const untouched=R===JSON.stringify(defaultRoutines())||R===JSON.stringify([fullBodyPlan()])||R===JSON.stringify([homePlan(state.profile.sex)]);   // unveränderter Start-Plan wird ersetzt
     if(untouched) state.routines=[pl]; else if(!state.routines.some(r=>r.id===pl.id)) state.routines=[pl].concat(state.routines);
     state.planPicked=pl.id; ui.planPrev=null; ui.modal=null; state.tab="sport"; save(); toast(pl.name+" übernommen");
   }
