@@ -53,10 +53,10 @@ h1 { font-family: var(--f-display); font-size: 22px; letter-spacing: .06em; marg
 .sub { font-size: 13px; color: var(--muted); }
 .strip { display: flex; gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
 .slide { flex: none; width: clamp(200px, 62vw, 300px); scroll-snap-align: start; margin: 0; position: relative; }
-.slide img { width: 100%; aspect-ratio: 3 / 4; height: auto; border-radius: 10px; display: block; background: var(--raise); border: 1px solid var(--line); object-fit: cover; }
+.slide img { width: 100%; aspect-ratio: var(--ar, 9 / 16); height: auto; border-radius: 10px; display: block; background: var(--raise); border: 1px solid var(--line); object-fit: cover; }
 .slide .num { position: absolute; left: 8px; top: 8px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,.65); color: #fff; padding: 2px 7px; border-radius: 6px; font-variant-numeric: tabular-nums; }
 .slide .dl { position: absolute; right: 8px; bottom: 8px; min-height: 30px; padding: 4px 10px; font-size: 12px; border-radius: 8px; background: rgba(0,0,0,.7); border-color: rgba(255,255,255,.2); }
-.busy { display: grid; place-items: center; aspect-ratio: 3 / 4; width: clamp(200px, 62vw, 300px); border-radius: 10px; border: 1px dashed var(--line); color: var(--muted); font-size: 13px; }
+.busy { display: grid; place-items: center; aspect-ratio: var(--ar, 9 / 16); width: clamp(200px, 62vw, 300px); border-radius: 10px; border: 1px dashed var(--line); color: var(--muted); font-size: 13px; }
 button, .btn { font: inherit; font-weight: 700; border-radius: 12px; border: 1px solid var(--line); background: var(--raise); color: var(--fg); padding: 12px 16px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 46px; text-decoration: none; }
 button:focus-visible, .btn:focus-within, select:focus-visible, summary:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 button:disabled { opacity: .5; cursor: default; }
@@ -126,17 +126,17 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
 /* Galerie: nur das erste Bild jedes Entwurfs, Tippen öffnet alle Slides */
 .feed { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 @media (min-width: 640px) { .feed { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-.tile { position: relative; border: 0; padding: 0; background: var(--raise); border-radius: 12px; overflow: hidden; cursor: pointer; aspect-ratio: 3 / 4; display: block; width: 100%; min-height: 0; }
+.tile { position: relative; border: 0; padding: 0; background: var(--raise); border-radius: 12px; overflow: hidden; cursor: pointer; aspect-ratio: var(--ar, 9 / 16); display: block; width: 100%; min-height: 0; }
 .tile img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .tile .lab { position: absolute; left: 6px; top: 6px; font-size: 11px; font-weight: 700; background: rgba(0,0,0,.68); color: #fff; padding: 2px 7px; border-radius: 6px; max-width: calc(100% - 12px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tile .ok { position: absolute; right: 6px; bottom: 6px; font-size: 11px; font-weight: 800; background: var(--accent); color: var(--accent-ink); padding: 2px 7px; border-radius: 6px; }
 .tile.wait { display: grid; place-items: center; color: var(--muted); font-size: 12px; border: 1px dashed var(--line); background: none; cursor: default; }
 
 .cover { position: relative; margin: 0 auto; width: min(100%, 360px); cursor: pointer; border: 0; padding: 0; background: none; display: block; border-radius: 14px; }
-.cover img { width: 100%; aspect-ratio: 3 / 4; border-radius: 14px; display: block; border: 1px solid var(--line); background: var(--raise); object-fit: cover; }
+.cover img { width: 100%; aspect-ratio: var(--ar, 9 / 16); border-radius: 14px; display: block; border: 1px solid var(--line); background: var(--raise); object-fit: cover; }
 .cover .tap { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); white-space: nowrap; font-size: 13px; font-weight: 700; background: rgba(0,0,0,.72); color: #fff; padding: 6px 12px; border-radius: 999px; }
 .cover .num { position: absolute; left: 10px; top: 10px; font-size: 12px; font-weight: 700; background: rgba(0,0,0,.65); color: #fff; padding: 2px 8px; border-radius: 6px; }
-.coverbusy { margin: 0 auto; width: min(100%, 360px); aspect-ratio: 3 / 4; display: grid; place-items: center; border-radius: 14px; border: 1px dashed var(--line); color: var(--muted); font-size: 14px; }
+.coverbusy { margin: 0 auto; width: min(100%, 360px); aspect-ratio: var(--ar, 9 / 16); display: grid; place-items: center; border-radius: 14px; border: 1px dashed var(--line); color: var(--muted); font-size: 14px; }
 .legal p, .legal li { font-size: 13px; color: var(--muted); margin: 0; }
 .legal b { color: var(--fg); }
 .legal ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
@@ -216,7 +216,8 @@ select.big { font: inherit; font-size: 15px; color: var(--fg); background: var(-
     <div class="body">
       <div class="opt"><span>Slides pro Post</span><div class="seg" id="sCount"><button type="button" data-v="1">1</button><button type="button" data-v="2">2</button><button type="button" data-v="3">3</button><button type="button" data-v="4">4</button></div></div>
       <div class="opt"><span>Sprache auf den Slides</span><div class="seg" id="sLang"><button type="button" data-v="en">English</button><button type="button" data-v="de">Deutsch</button></div></div>
-      <div class="opt"><span>Auflösung</span><div class="seg" id="sRes"><button type="button" data-v="hd">HD 1080 × 1440</button><button type="button" data-v="4k">4K 2160 × 2880</button></div></div>
+      <div class="opt"><span>Format</span><div class="seg" id="sFmt"><button type="button" data-v="916">9:16 Vollbild</button><button type="button" data-v="34">3:4 (alt)</button></div></div>
+      <div class="opt"><span>Auflösung</span><div class="seg" id="sRes"><button type="button" data-v="hd">HD</button><button type="button" data-v="4k">4K</button></div></div>
       <div class="opt"><span>Schrift auf den Slides</span><div class="seg" id="sFont"><button type="button" data-v="tiktok">TikTok Sans</button><button type="button" data-v="figtree">Figtree (alt)</button></div></div>
       <label class="check"><input type="checkbox" id="sGray"> Figuren schwarz-weiß</label>
       <label class="check"><input type="checkbox" id="sOwnFigs"> Eigene Figuren ohne festes Format überall verwenden</label>
@@ -1016,9 +1017,12 @@ const pexels = f => `https://www.pexels.com/search/${encodeURIComponent(f.en)}/?
 
 /* ---------- Zustand ---------- */
 let W = 1080, H = 1440;
-const DEFAULTS = { series: 'random', count: '4', lang: 'en', res: '4k', gray: false, font: 'tiktok' };
+const DEFAULTS = { series: 'random', count: '4', lang: 'en', res: '4k', fmt: '916', gray: false, font: 'tiktok' };
 const S = Object.assign({}, DEFAULTS, load('hm2-settings', {}));
 if (load('hm2-settings-v', 0) < 2) { Object.assign(S, { count: '4', res: '4k', gray: false }); save('hm2-settings', S); save('hm2-settings-v', 2); }
+if (load('hm2-settings-v', 0) < 3) { S.fmt = '916'; save('hm2-settings', S); save('hm2-settings-v', 3); }   // TikTok-Vollbild ohne schwarze Ränder
+const slideSize = () => { const w = S.res === '4k' ? 2160 : 1080; return { W: w, H: Math.round(w * (S.fmt === '34' ? 4 / 3 : 16 / 9)) }; };
+const syncAr = () => document.documentElement.style.setProperty('--ar', S.fmt === '34' ? '3 / 4' : '9 / 16');
 let recent = load('hm2-recent', { series: [], hooks: [], q: [] });
 let photos = [], library = [], figures = [];
 let busy = false;
@@ -2118,9 +2122,18 @@ function planPost(series, n, lang) {
   }
   const niche = (SERIES[series].niche || slides[0].niche) || ['#realfood', '#wholefoods'];
   const broad = lang === 'de' ? ['#ernährung', '#gesundessen'] : ['#nutrition', '#healthtips'];
-  // immer #fyp + #viral, danach passend zum Video (TikTok erlaubt max. 5)
-  const tags = ['#fyp', '#viral', ...niche, '#lifemaxxing', ...broad].filter((t, i, a) => a.indexOf(t) === i).slice(0, 5);
-  const desc = `Follow for better Health/Looks 🤝\n\n${tags.join(' ')}`;
+  // Keine #fyp/#viral (bringen nichts, sagen TikTok nicht, wem es das zeigen soll) – nur Themen-Hashtags (max. 5).
+  const tags = [...niche, '#lifemaxxing', ...broad].filter((t, i, a) => a.indexOf(t) === i).slice(0, 5);
+  // Beschreibung = Hook des ersten Slides (Stichwörter für die TikTok-Suche) + Frage für Kommentare + Speichern-Hinweis
+  let hook = (specs[0] && (specs[0].t && specs[0].t.top || specs[0].hook) || '').replace(/[„“”"]/g, '').replace(/\s*\n\s*/g, ' ').trim();
+  const TOPIC = { routine: { en: 'What to eat and when (meal timing)', de: 'Was du wann essen solltest' },
+    mog: { en: 'Eat like this, not like this', de: 'So essen – nicht so' }, freq: { en: 'How often I eat these foods', de: 'Wie oft ich das esse' } };
+  if (TOPIC[series] && hook.split(' ').length < 4) hook = TOPIC[series][lang];   // zu kurzer Hook → Thema als Suchtext
+  const ask = pick(lang === 'de'
+    ? ['Was davon isst du jeden Tag? 👇', 'Was fehlt auf der Liste? 👇', 'Stimmst du zu? Ja oder nein 👇', 'Was würdest du ändern? 👇']
+    : ['Which one do you eat every day? 👇', 'What did I miss? 👇', 'Agree or disagree? 👇', 'Which one surprised you? 👇']);
+  const keep = lang === 'de' ? 'Speicher dir das für später 📌' : 'Save this for later 📌';
+  const desc = `${hook ? hook.charAt(0).toUpperCase() + hook.slice(1) + '\n\n' : ''}${ask}\n${keep}\n\n${tags.join(' ')}`;
   // fürs nächste Mal merken, was gerade dran war (mehr Abwechslung)
   recent.series = [series, ...recent.series.filter(x => x !== series)].slice(0, 4);
   recent.use = recent.use || {}; const now = Date.now() + Math.random();
@@ -2185,7 +2198,7 @@ function newDraft() {
   const n = +S.count, series = pickSeries(n);
   const P = planPost(series, n, S.lang);
   return { id: Math.random().toString(36).slice(2, 9), series, lang: S.lang, desc: P.desc, slides: P.slides, fig: P.fig,
-    W: S.res === '4k' ? 2160 : 1080, H: S.res === '4k' ? 2880 : 1440, gray: S.gray, blobs: [], urls: [], files: null, saved: false };
+    ...slideSize(), gray: S.gray, blobs: [], urls: [], files: null, saved: false };
 }
 function addDrafts(k) { for (let i = 0; i < k; i++) feed.push(newDraft()); saveFeed(); renderFeed(); pump(); }
 function newFeed() {
@@ -2257,6 +2270,7 @@ function saveFeed() {
 function restoreFeed() {
   const p = load(FEED_KEY, null);
   if (!p || !p.drafts || !p.drafts.length || Date.now() - p.t > 12 * 3600e3) return false;
+  if (p.drafts.some(d => d.H !== slideSize().H || d.W !== slideSize().W)) return false;   // anderes Format → neu erstellen
   try {
     const byId = id => figures.find(f => f.id === id) || null;
     feed = p.drafts.map(d => ({ ...d, blobs: [], urls: [], files: null,
@@ -2523,10 +2537,10 @@ function bindSettings() {
   syncTypes();
   const seg = (id, key) => {
     const el = $(id), sync = () => el.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S[key])));
-    el.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S[key] = b.dataset.v; sync(); persist(); newFeed(); });
+    el.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; S[key] = b.dataset.v; sync(); syncAr(); persist(); newFeed(); });
     sync();
   };
-  seg('#sCount', 'count'); seg('#sLang', 'lang'); seg('#sRes', 'res'); seg('#sFont', 'font');
+  seg('#sCount', 'count'); seg('#sLang', 'lang'); seg('#sRes', 'res'); seg('#sFmt', 'fmt'); seg('#sFont', 'font');
   const chk = (id, key) => { const el = $(id); el.checked = !!S[key]; el.addEventListener('change', () => { S[key] = el.checked; persist(); newFeed(); }); };
   chk('#sGray', 'gray');
   if (S.ownFigs === undefined) S.ownFigs = true;
@@ -2548,7 +2562,7 @@ function bindSettings() {
 }
 
 // Version: bei jeder Änderung hochzählen. Ist online eine neuere Version, lädt das Studio sie automatisch (Browser-Speicher umgehen).
-const BUILD = '2026-11-01 f';
+const BUILD = '2026-11-24 a';
 async function checkUpdate() {
   try {
     const t = await (await fetch(location.pathname + '?nc=' + Date.now(), { cache: 'no-store' })).text();
@@ -2561,7 +2575,7 @@ async function init() {
   // Home-Bildschirm-App wird oft nur aus dem Hintergrund geholt, nicht neu gestartet: dann auch prüfen
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkUpdate(); });
   setInterval(checkUpdate, 5 * 60 * 1000);
-  bindSettings();
+  syncAr(); bindSettings();
   await Promise.all([
     ...BUILTIN_FIGS.map(f => addFigure({ ...f, builtin: true })),
     document.fonts ? Promise.all(['800 40px Figtree', '700 40px Figtree', '700 40px Cinzel', '800 40px "TikTok Sans"', '700 40px "TikTok Sans"', '400 40px "DM Serif Display"'].map(f => document.fonts.load(f).catch(() => {}))) : null,
