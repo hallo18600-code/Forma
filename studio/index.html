@@ -1070,11 +1070,18 @@ function drawDemo(ctx, food, x, y, w, h) {
   ctx.restore();
 }
 function applyGrade(ctx, grade) {
-  if (grade === 'none') return;
+  // Farblook je Post (macht jeden Post etwas eigener, bleibt aber dezent)
+  if (!grade || grade === 'none') return;
   ctx.save();
-  ctx.globalCompositeOperation = 'soft-light';
-  ctx.fillStyle = grade === 'warm' ? 'rgba(255,150,60,0.22)' : 'rgba(70,130,255,0.18)';
-  ctx.fillRect(0, 0, W, H);
+  if (grade === 'moody') {   // leicht dunklere Ränder
+    const g = ctx.createRadialGradient(W / 2, H / 2, Math.min(W, H) * .35, W / 2, H / 2, Math.hypot(W, H) / 2);
+    g.addColorStop(0, 'rgba(0,0,0,0)'); g.addColorStop(1, 'rgba(0,0,0,.28)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  } else {
+    ctx.globalCompositeOperation = 'soft-light';
+    ctx.fillStyle = { warm: 'rgba(255,150,60,0.22)', cool: 'rgba(70,130,255,0.18)', golden: 'rgba(255,200,90,0.2)', crisp: 'rgba(255,255,255,0.14)' }[grade] || 'rgba(0,0,0,0)';
+    ctx.fillRect(0, 0, W, H);
+  }
   ctx.restore();
 }
 function drawFlag(ctx, code, x, y, w, h) {
@@ -1810,8 +1817,13 @@ function chooseCuts(ids, used, k) {
   const useT = recent.use || {};
   const foods = [];
   const twin = id => foods.some(o => TWINS.some(g => g.includes(o) && g.includes(id)));
-  // zuletzt wenig benutzte Lebensmittel zuerst, aber mit Zufall
-  const order = shuffle(ids.filter(hasCut)).sort((a, b) => (used.has('food:' + a) ? 1 : 0) - (used.has('food:' + b) ? 1 : 0));
+  // Reihenfolge: zuerst Essen, von dem es in diesem Post noch ein unbenutztes Bild gibt, dann Essen, das in diesem
+  // Post noch nicht vorkam, dann das, was zuletzt am längsten nicht dran war (mit etwas Zufall) → kein Bild doppelt
+  // im selben Post und über mehrere Posts mehr Abwechslung
+  const cand = ids.filter(hasCut), age = id => Math.max(0, ...CUTS[id].map(c => useT[c.f] || 0));
+  const rank = new Map([...cand].sort((a, b) => age(a) - age(b)).map((id, i) => [id, i / Math.max(1, cand.length)]));
+  const key = new Map(cand.map(id => [id, (CUTS[id].some(c => !used.has(c.f)) ? 0 : 100) + (used.has('food:' + id) ? 10 : 0) + rank.get(id) * 3 + rnd() * 1.5]));
+  const order = shuffle(cand).sort((a, b) => key.get(a) - key.get(b));
   for (const id of order) if (foods.length < k && !twin(id)) foods.push(id);
   for (const id of order) if (foods.length < k && !foods.includes(id)) foods.push(id);
   return foods.map(id => {
@@ -1839,7 +1851,7 @@ function chooseOne(pred, used) {
 }
 function makeStyle() {
   return {
-    grade: pick(['none', 'none', 'none', 'warm', 'cool']),
+    grade: pick(['none', 'none', 'none', 'warm', 'cool', 'golden', 'moody', 'crisp']),
     zoom: Array.from({ length: 4 }, () => ({ z: range(1, 1.18), fx: range(.3, .7), fy: range(.3, .7) })),
     figScale: range(.54, .58),
     figDx: 0,
@@ -2109,7 +2121,7 @@ function planPost(series, n, lang) {
     : sp.swapOf != null ? swapItems(slides[sp.swapOf].items, used) : chooseItems(sp, used);
   specs.forEach(sp => slides.push({
     kind: 'grid', lang, variant: sp.variant, layout: sp.layout || 'grid', hook: sp.hook, hook2: sp.hook2, mood: sp.mood, flag: sp.flag, big: sp.big, labels: sp.labels, flags: sp.flags, t: sp.t,
-    style: { ...makeStyle(), figScale: base.figScale, flip: base.flip, figDrop: base.figDrop },
+    style: { ...makeStyle(), figScale: base.figScale, flip: base.flip, figDrop: base.figDrop, grade: base.grade },   // ein Farblook pro Post
     items: itemsFor(sp),
     figure: sp.mood === 'duel' ? fig.strong : sp.mood === 'none' ? null : fig[sp.mood] || null,
     figure2: sp.mood === 'duel' ? fig.sad : null,
