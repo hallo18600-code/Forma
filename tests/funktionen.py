@@ -150,7 +150,7 @@ BEDARF = r"""()=>{ F={}; let n=0; const T0=todayIso();
   // Mit Faktor gelten alle Sicherheitsregeln weiter
   state.adapt={ratio:prev}; const t=targets(), p=state.profile, bmiv=p.weight/((p.height/100)**2);
   if(![t.kcal,t.protein,t.carbs,t.fat].every(x=>Number.isFinite(x)&&x>=0)) fail("Ungültiger Richtwert mit Faktor",d);
-  if(t.kcal<(p.sex==="m"?1500:1200)) fail("Unter Mindest-Kalorien mit Faktor",d);
+  if(t.kcal<Math.min(p.sex==="m"?1500:1200, Math.round(tdeeFormula(p)*adaptRatio()/10)*10)-10) fail("Unter Mindest-Kalorien mit Faktor",d);
   if(p.goal==="lose"&&bmiv<18.5){ const g=p.goal; p.goal="energy"; const k=targets().kcal; p.goal=g; if(t.kcal<k) fail("Defizit bei Untergewicht mit Faktor",d); }
   // Ausschalten → reine Formel
   p.adaptive=false; const off=targets().kcal; state.adapt=null; p.adaptive=true; const fo=targets().kcal; if(off!==fo) fail("Ausgeschaltet nicht reine Formel",d);

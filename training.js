@@ -1,3 +1,8 @@
+// Satz als Text: „60 kg×8“ bzw. bei Zeit-Sätzen (z. B. Plank, Laufen aus einer anderen App) „60 s“ / „30 min“
+function setTxt(s){
+  if(s.sec>0&&!(s.reps>0)){ const t=s.sec>=120?Math.round(s.sec/60)+" min":Math.round(s.sec)+" s"; return (+s.kg>0?kgTxt(+s.kg)+" kg · ":"")+t; }
+  return kgTxt(+s.kg||0)+"×"+s.reps;
+}
 // Life Maxxing – Training: Übungen, Pläne, Live-Training, Kalender, Statistik
 
 // Wählbare Pausenzeiten in Sekunden (Auswahl liegt in state.profile.restSec)
@@ -14,7 +19,7 @@ function lastSet(id){
     const hit = (w.exercises||[]).find(e=>e.id===id);
     if(hit && hit.sets && hit.sets.length){
       const s = [...hit.sets].reverse().find(x=>x.done) || hit.sets[hit.sets.length-1];
-      return kgTxt(+s.kg||0)+" kg × "+s.reps;
+      return s.sec&&!s.reps?setTxt(s):kgTxt(+s.kg||0)+" kg × "+s.reps;
     }
   }
   return "–";
@@ -41,7 +46,7 @@ function prevSet(id, index){
     if(!hit) continue;
     const done=(hit.sets||[]).filter(s=>s.done);
     const s=done[index]||done[done.length-1];
-    if(s) return kgTxt(+s.kg||0)+"×"+s.reps;
+    if(s) return setTxt(s);
   }
   return "–";
 }
@@ -126,7 +131,7 @@ function renderPlan(){
         <div class="row space"><input class="input-plain grow" data-act="day-name" data-d="${di}" value="${esc(d.name)}" aria-label="Name des Trainingstags"><button class="x" data-act="del-day" data-d="${di}" aria-label="Trainingstag löschen">✕</button></div>
         ${(d.exercises||[]).map((e,ei)=>`<div class="plan-ex">
           <div class="row space"><button class="ex-open" data-act="exi-open" data-id="${e.id}">${exThumb(e.id)}<b>${exName(e.id)}</b></button><button class="x" data-act="plan-del-ex" data-d="${di}" data-e="${ei}" aria-label="Übung entfernen">✕</button></div>
-          <div class="sub">${e.sets.map(s=>kgTxt(+s.kg||0)+"×"+s.reps).join(" · ")}</div>
+          <div class="sub">${e.sets.map(s=>setTxt(s)).join(" · ")}</div>
         </div>`).join("")}
         <button class="pill ghost w-full mt-2" data-act="open-day-ex" data-d="${di}">+ Übung</button>
       </div>`).join("")}
@@ -188,7 +193,7 @@ function woDetail(id){
   const w=state.workouts.find(x=>x.id===id);
   if(!w) return "<p>Nicht gefunden.</p>";
   return `<h2>${esc(w.name)}</h2><p class="sub">${labelDate(w.date)} · ${w.min} min · ${de(w.volume)} kg</p>
-    ${(w.exercises||[]).map(e=>`<div class="li"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>kgTxt(+s.kg||0)+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")}
+    ${(w.exercises||[]).map(e=>`<div class="li"><b>${exName(e.id)}</b><div class="sub">${(e.sets||[]).filter(s=>s.done).map(s=>setTxt(s)).join(" · ")||"keine Sätze"}</div></div>`).join("")}
     <div class="gap"></div><button class="pill primary" data-act="close">OK</button>
     <div class="gap"></div><div class="row"><button class="pill ghost grow" data-act="wo-edit" data-id="${w.id}">Bearbeiten</button><button class="pill ghost grow t-bad" data-act="wo-del-ask" data-id="${w.id}">Löschen</button></div>`;
 }
@@ -332,7 +337,7 @@ function exHist(id){
   state.workouts.forEach(w=>(w.exercises||[]).filter(e=>e.id===id).forEach(e=>{
     rows.push({date:w.date, name:w.name, sets:(e.sets||[]).filter(s=>s.done)});
   }));
-  return `<h2>${exName(id)}</h2>${rows.reverse().map(r=>`<div class="li"><b>${labelDate(r.date)}</b><div class="sub">${r.sets.map(s=>kgTxt(+s.kg||0)+"×"+s.reps).join(" · ")||"keine Sätze"}</div></div>`).join("")||"<p class=sub>Kein Verlauf.</p>"}<div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
+  return `<h2>${exName(id)}</h2>${rows.reverse().map(r=>`<div class="li"><b>${labelDate(r.date)}</b><div class="sub">${r.sets.map(s=>setTxt(s)).join(" · ")||"keine Sätze"}</div></div>`).join("")||"<p class=sub>Kein Verlauf.</p>"}<div class="gap"></div><button class="pill primary" data-act="close">OK</button>`;
 }
 function startTick(){
   stopTick();

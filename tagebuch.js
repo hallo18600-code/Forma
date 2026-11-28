@@ -1,6 +1,6 @@
 // Life Maxxing – Tagebuch: Heute-Ansicht, Mahlzeiten, Lebensmittel-Details
 function renderHeute(){
-  const t=targets(), tot=totals(), goalK=t.kcal, remain=Math.max(0, goalK-tot.kcal);
+  const t=targets(), tot=totals(), goalK=t.kcal, remain=Math.max(0, goalK-tot.kcal), over=Math.round(tot.kcal-goalK);
   const d=day();
   return `<div class="scroll pad">
     <div class="topbar center">
@@ -11,7 +11,7 @@ function renderHeute(){
     <div class="card">
       <div class="sum">
         <div class="side"><div class="num">${showKcal()?tot.kcal.toLocaleString(LOC):"–"}</div><div class="lbl">Gegessen</div></div>
-        <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?remain.toLocaleString(LOC):"–"}</b><span>${showKcal()?"kcal übrig":"Kalorien aus"}</span></div></div>
+        <div class="ring">${ringSvg(goalK?tot.kcal/goalK:0)}<div class="mid"><b>${showKcal()?(over>0?over:remain).toLocaleString(LOC):"–"}</b><span>${showKcal()?(over>0?"kcal drüber":"kcal übrig"):"Kalorien aus"}</span></div></div>
         <div class="side"><div class="num">${showKcal()?goalK.toLocaleString(LOC):"–"}</div><div class="lbl">Ziel</div></div>
       </div>
       <div class="macros">

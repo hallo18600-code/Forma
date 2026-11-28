@@ -62,7 +62,8 @@ function load(){
   try {
     const raw = localStorage.getItem(KEY);
     if(!raw) return fresh();
-    return normalize(JSON.parse(raw));
+    const s=normalize(JSON.parse(raw)); s.date=todayIso();   // App startet immer auf „Heute“ (sonst bleibt sie nach Mitternacht auf gestern)
+    return s;
   } catch(e){ return fresh(); }
 }
 // Ergänzt fehlende Felder. Wirft einen Fehler, wenn die Daten kaputt sind.
@@ -81,8 +82,10 @@ function normalize(s){
       ["checks","taken","routine"].forEach(x=>{ if(!d[x]||typeof d[x]!=="object"||Array.isArray(d[x])) d[x]={}; }); if(!Number.isFinite(+d.water)||d.water<0) d.water=0; else d.water=+d.water; });
     return s;
 }
+var saveWarned=false;   // var: save() läuft schon beim Start (vor ui)
 function save(){
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){}
+  try { localStorage.setItem(KEY, JSON.stringify(state)); saveWarned=false; }
+  catch(e){ if(!saveWarned){ saveWarned=true; setTimeout(()=>{ try{ toast("Speicher voll – bitte Daten sichern (Profil → Export)"); }catch(_){} },0); } }
   try { remSoon(); } catch(e){}   // Store-App: Erinnerungen neu einplanen (erinnerungen.js)
 }
 function day(s){ s=s||state.date; if(!state.days[s]) state.days[s]=blankDay(); return state.days[s]; }
@@ -100,7 +103,9 @@ function implBlock(it){
   openModal("product",it.id); toast("Bitte zuerst die Werte prüfen"); return true;
 }
 // Menge für einen Tagebuch-Eintrag: Gramm plus (falls gewählt) Einheit und Anzahl
+// 0 oder leer eingegeben → null (nicht still 100 g eintragen)
 function amtEntry(){
+  if(ui.portion!=null&&!(+ui.portion>0)){ toast("Bitte Menge eingeben"); return null; }
   const g=Math.max(1,Math.round(+ui.portion||100));
   return ui.unit&&ui.unit!=="g"?{portion:g,u:ui.unit,q:ui.qty||1}:{portion:g};
 }
@@ -133,7 +138,11 @@ function targets(){
   // Muskeln: kleines Plus (ca. 10 %, 200–300 kcal), damit möglichst wenig Fett dazukommt.
   // Ab BMI 30 kein Plus (Muskelaufbau klappt dann auch beim Halten) – außer der KFA ist laut Angabe niedrig (z. B. Bodybuilder).
   if(p.goal==="muscle"&&(bmiNow<30||lean)) kcal+=Math.min(300,Math.max(200,tdee*0.1));
-  kcal=Math.round(Math.max(p.sex==="m"?1500:1200, kcal)/10)*10;
+  // Mindestwert (Männer 1500, Frauen 1200) nur als Untergrenze fürs Defizit – nie über dem eigenen Bedarf,
+  // sonst würde aus „Abnehmen“ ein Plus (z. B. bei sehr kleinen, leichten oder älteren Personen).
+  const floor=p.sex==="m"?1500:1200;
+  if(kcal<floor) kcal=Math.max(kcal, Math.min(floor, tdee));
+  kcal=Math.round(kcal/10)*10;
   // Protein je kg – bei hohem BMI aufs Gewicht bei BMI 25 bezogen (sonst unrealistisch hoch).
   // Ist der KFA laut Angabe niedrig, zählt das echte Gewicht (viel Muskelmasse braucht mehr Protein).
   const ref=lean?w:Math.min(w,25*m*m), protein=Math.round(ref*protPerKg(p));
@@ -259,6 +268,7 @@ function safetyNote(){
   const p=state.profile, m=p.height/100, tb=p.target/(m*m), nb=(+p.weight||70)/(m*m); let msg="";
   if(p.goal==="lose"&&nb<18.5) msg="Dein BMI liegt im Untergewicht ("+de(nb,1)+"). Abnehmen wird nicht empfohlen. Die App rechnet deshalb ohne Defizit. Besprich dein Ziel bitte mit Ärzt:in.";
   else if(tb<18.5) msg="Dein Zielgewicht liegt im Untergewicht (BMI "+de(tb,1)+"). Besprich so ein Ziel bitte mit Ärzt:in.";
+  else if(p.goal==="lose" && tdeeFormula(p)*adaptRatio()<=(p.sex==="m"?1500:1200)+20) msg="Bei deinen Werten ist ein Kaloriendefizit nicht sinnvoll möglich. Die App rechnet deshalb mit Halten. Mehr Bewegung hilft trotzdem.";
   else if(p.goal==="lose" && targets().kcal<=(p.sex==="m"?1500:1200)) msg="Dein Richtwert liegt am Mindestwert. Nicht weiter darunter gehen.";
   return msg?`<div class="warn">${msg}</div>`:"";
 }
@@ -345,7 +355,9 @@ function syncAuto(s){
 function de(v,d){ d=d||0; const k="n"+d; let f=FMT_CACHE.get(k); if(!f){ f=new Intl.NumberFormat(LOC,{minimumFractionDigits:d,maximumFractionDigits:d}); FMT_CACHE.set(k,f); } return f.format(Number(v||0)); }
 // Zahl für Eingabefelder: Komma in allen Sprachen außer Englisch (12,5)
 function numIn(v){ const t=String(v==null?"":v); return LANG==="en"?t:t.replace(".",","); }
-function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;"); }
+function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/'/g,"&#39;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+// Bestätigungswort fürs Löschen: deutsch oder in der eingestellten Sprache (die Oberfläche zeigt das übersetzte Wort)
+function resetOk(v){ const x=String(v||"").trim().toUpperCase(); return x==="LÖSCHEN"||x===String(T("LÖSCHEN")).trim().toUpperCase(); }
 
 function glyph(name){
   const d = {
@@ -451,7 +463,7 @@ function dashSheet(id){ return ""; }
 // Impressum + Datenschutz stehen in recht.js (gleicher Text wie auf den Webseiten)
 // Sicherheitsabfrage vor "Alles löschen"
 function resetSheet(){
-  const ok=(ui.resetTxt||"").trim().toUpperCase()==="LÖSCHEN";
+  const ok=resetOk(ui.resetTxt);
   return `<h2>Wirklich alles löschen?</h2>
     <p class="sub">Alle Daten auf diesem Gerät werden <b>unwiderruflich</b> gelöscht: ${state.weights.length} Wiegepunkte, ${state.workouts.length} Trainings, ${Object.keys(state.days).length} Tage mit Einträgen, dein Profil und deine Pläne. Es gibt keinen Server und keine Kopie – das lässt sich nicht rückgängig machen.</p>
     <div class="gap"></div>
@@ -557,7 +569,7 @@ function renderModal(){
   if(type==="pref") inner=prefSheet(payload);
   if(type==="goal") inner=`<h2>Ziel</h2>${GOALS.map(g=>`<button class="choice ${state.profile.goal===g.id?"on":""}" data-act="set" data-k="goal" data-v="${g.id}"><b>${g.name}</b></button>`).join("")}<button class="pill primary" data-act="close">Fertig</button>`;
   if(type==="body") inner=`<h2>Körperdaten</h2>
-    ${[["age","Alter",state.profile.age,18,90,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,obMinTarget(),200,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,12,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
+    ${[["age","Alter",state.profile.age,18,90,1],["height","Größe cm",state.profile.height,140,220,1],["target","Zielgewicht",state.profile.target,obMinTarget(),200,0.5],["waterTarget","Wassergläser",state.profile.waterTarget,4,14,1]].map(([k,l,v,min,max,step])=>`<div class="field"><label>${l}</label><div class="stepper"><button class="plus" data-act="nudge" data-k="${k}" data-d="-${step}" data-min="${min}" data-max="${max}">−</button><b>${v}</b><button class="plus" data-act="nudge" data-k="${k}" data-d="${step}" data-min="${min}" data-max="${max}">+</button></div></div>`).join("")}
     <div class="field"><label>Training pro Woche</label></div>
     <div class="opts">${[["Gar nicht","Gar nicht"],["1–2× pro Woche","1–2×"],["3–4× pro Woche","3–4×"],["5× oder öfter","5× +"]].map(([v,l])=>`<button class="chip ${state.profile.trainFreq===v?"on":""}" data-act="set" data-k="trainFreq" data-v="${v}">${l}</button>`).join("")}</div>
     <div class="field"><label>Fisch</label></div>
@@ -608,7 +620,22 @@ function render(){ try{ ensureRoutine(); }catch(e){} try{ adaptCheck(); }catch(e
   });
   if(ui.exInfo) figKick();
   exAfterRender();
+  histSync();
 }
+// Zurück-Taste (Android/Browser): schließt zuerst das offene Fenster bzw. die Detailseite statt die App zu verlassen
+let histOpen=false, histIgnore=false;
+function histSync(){
+  try{
+    const want=!!(state.onboarded&&(ui.modal||ui.exInfo||ui.dash));
+    if(want&&!histOpen){ history.pushState({lm:1},""); histOpen=true; }
+    else if(!want&&histOpen){ histOpen=false; histIgnore=true; history.back(); }
+  }catch(e){}
+}
+window.addEventListener("popstate",()=>{
+  if(histIgnore){ histIgnore=false; return; }
+  if(!histOpen) return; histOpen=false;
+  if(ui.modal) closeModal(); else if(ui.exInfo){ ui.exInfo=null; render(); } else if(ui.dash){ ui.dash=null; render(); }
+});
 function seedDemo(){
   state = fresh();
   state.onboarded=true; state.step=0;
@@ -660,11 +687,16 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="ob-finish"){ obFinish(); }
   else if(act==="ob-close"){ state.obRedo=false; state.onboarded=true; state.step=null; save(); }
   else if(act==="ob-redo"){ state.ob=Object.assign({},state.ob,{sex:1,goal:1,activity:1,fish:1,sups:1,target:1,weight:1}); state.obRedo=true; state.onboarded=false; state.step=Math.max(1,obSteps().findIndex(x=>x.id==="name")); ui.modal=null; save(); }
-  else if(act==="set"){ p[el.dataset.k]=el.dataset.v; autoGoals(); save(); }
+  else if(act==="set"){ p[el.dataset.k]=el.dataset.v;
+    // Neues Ziel: passt das Wunschgewicht nicht mehr zur Richtung (z. B. Abnehmen, Ziel über dem Gewicht), neu vorschlagen
+    if(el.dataset.k==="goal"){ const w=+lastWeight(), t=+p.target; if((p.goal==="lose"&&t>=w)||(p.goal==="muscle"&&t<=w)||!["lose","muscle"].includes(p.goal)){ p.weight=w; p.target=obDefaultTarget(); } }
+    autoGoals(); save(); }
   else if(act==="pref"){ prefSet(el.dataset.id,el.dataset.v); }
   else if(act==="set-num"){ p[el.dataset.k]=parseFloat(el.dataset.v); save(); }
   else if(act==="set-bool"){ p.adult=true; save(); }
-  else if(act==="nudge"){ if(el.dataset.k==="waterTarget") p.waterManual=true; p[el.dataset.k]=Math.min(+el.dataset.max, Math.max(+el.dataset.min, +(p[el.dataset.k]+ +el.dataset.d).toFixed(1))); save(); }
+  else if(act==="nudge"){ if(el.dataset.k==="waterTarget") p.waterManual=true; p[el.dataset.k]=Math.min(+el.dataset.max, Math.max(+el.dataset.min, +(p[el.dataset.k]+ +el.dataset.d).toFixed(1)));
+    if(el.dataset.k==="height") p.target=Math.max(obMinTarget(),+p.target);   // größer → Zielgewicht nicht im Untergewicht lassen
+    save(); }
   else if(act==="tab"){ state.tab=el.dataset.v; ui.modal=null; save(); }
   else if(act==="shift"){ const next=addDays(state.date, +el.dataset.d); if(next<=todayIso()){ state.date=next; save(); } }
   else if(act==="today"){ state.date=todayIso(); save(); }
@@ -739,7 +771,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="scan-mode") ui.scanMode=el.dataset.v;
   else if(act==="meal-open"){ ui.addSlot=el.dataset.slot; ui.dash="meal"; ui.modal=null; }
   else if(act==="meal-edit"){ const m=day().meals.find(x=>x.uid===el.dataset.uid); if(m){ ui.modal={type:"product",payload:m.id}; ui.amtOpen=false; ui.editUid=m.uid; ui.amtFor=null; ui.altBack=null; ui.fillFor=null; } }
-  else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid); if(m){ const e=amtEntry(); delete m.u; delete m.q; Object.assign(m,e); } ui.editUid=null; ui.amtFor=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
+  else if(act==="save-meal"){ const m=day().meals.find(x=>x.uid===ui.editUid); if(m){ const e=amtEntry(); if(!e) return; delete m.u; delete m.q; Object.assign(m,e); } ui.editUid=null; ui.amtFor=null; ui.modal=null; syncAuto(state.date); save(); toast("Gespeichert"); }
   else if(act==="del-meal2"){ day().meals=day().meals.filter(x=>x.uid!==ui.editUid); ui.editUid=null; ui.modal=null; syncAuto(state.date); save(); toast("Gelöscht"); }
   else if(act==="ai-del"){ const it=(ui.aiRes||[])[+el.dataset.i]; if(it){ ui.aiOv=ui.aiOv||{}; ui.aiOv[it.key]={del:true}; ui.aiRes.splice(+el.dataset.i,1); } ui.aiOpen=null; if(!(ui.aiRes||[]).length) ui.aiRes=null; }
   else if(act==="steps-add"){ const i=document.getElementById("st-input"); if(i) i.value=(+i.value||0)+ +el.dataset.v; return; }
@@ -783,7 +815,8 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="log-food"){
     { const it=foods().find(x=>x.id===el.dataset.id); if(it&&typeof rImplausible==="function"&&rImplausible(it).length){ toast("Bitte zuerst die Werte prüfen"); return; } }
-    day().meals.push({ uid:uid(), id:el.dataset.id, slot:ui.addSlot, ...amtEntry() });
+    const e=amtEntry(); if(!e) return;
+    day().meals.push({ uid:uid(), id:el.dataset.id, slot:ui.addSlot, ...e });
     ui.amtFor=null;
     syncAuto(state.date); ui.modal=null; save(); toast("Im Tagebuch");
   }
@@ -1010,7 +1043,11 @@ document.getElementById("app").addEventListener("click", e=>{
     else if(ui.workout) ui.workout.exercises.push({id, sets:[{kg:20,reps:6,done:false}]});
     ui.modal=null; save();
   }
-  else if(act==="cancel-wo"){ ui.workout=null; stopTick(); }
+  else if(act==="cancel-wo"){
+    // Schon Sätze erledigt: erst nach zweitem Tippen verwerfen (sonst ist das Training mit einem Fehltipp weg)
+    const done=(ui.workout&&ui.workout.exercises||[]).some(x=>(x.sets||[]).some(st=>st.done));
+    if(done&&!ui.woCancelArm){ ui.woCancelArm=true; clearTimeout(ui.woCancelT); ui.woCancelT=setTimeout(()=>{ ui.woCancelArm=false; },3000); toast("Nochmal tippen, um das Training zu verwerfen"); return; }
+    ui.woCancelArm=false; ui.workout=null; stopTick(); }
   else if(act==="finish-wo"){
     const w=ui.workout;
     const sets=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);
@@ -1118,7 +1155,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="reset"){ ui.resetTxt=""; openModal("reset"); return; }
   else if(act==="backup"){ downloadBackup(); return; }
   else if(act==="reset-go"){
-    if((ui.resetTxt||"").trim().toUpperCase()!=="LÖSCHEN") return;
+    if(!resetOk(ui.resetTxt)) return;
     try{ localStorage.removeItem(KEY); localStorage.removeItem(REM_FIRED); }catch(e){} state=fresh(); ui.resetTxt=""; ui.modal=null; ui.workout=null; ui.plan=null; ui.dash=null; stopTick(); applyTheme(); toast("Alle Daten gelöscht");
     phClearAll().then(()=>render());   // Fortschrittsfotos (IndexedDB) auch löschen
   }
@@ -1129,10 +1166,12 @@ document.getElementById("app").addEventListener("input", e=>{
   if(el.dataset.act==="input"){ state.profile[el.dataset.k]=el.value; save(); }
   if(el.dataset.act==="ob-num"){
     const k=el.dataset.k, v=parseFloat(String(el.value).replace(",","."));
-    if(isFinite(v)){ state.profile[k]=v; obMark(k); if(k==="weight"&&!state.ob.target) state.profile.target=obDefaultTarget(); save(); }
+    if(isFinite(v)){ state.profile[k]=v; obMark(k); if(k==="weight"&&!state.ob.target&&!obNumBad("weight")) state.profile.target=obDefaultTarget(); save(); }
+    else if(String(el.value).trim()===""&&OB_RANGE_KEYS.includes(k)){ state.profile[k]=""; save(); }
     const h=document.getElementById("ob-hint"); if(h) h.innerHTML=obNumHint(k);
+    const nb=document.querySelector('[data-act="ob-next"]'); if(nb&&OB_RANGE_KEYS.includes(k)) nb.disabled=obNumBad(k);
   }
-  if(el.dataset.act==="reset-type"){ ui.resetTxt=el.value; const b=document.getElementById("reset-go"); if(b) b.disabled=el.value.trim().toUpperCase()!=="LÖSCHEN"; }
+  if(el.dataset.act==="reset-type"){ ui.resetTxt=el.value; const b=document.getElementById("reset-go"); if(b) b.disabled=!resetOk(el.value); }
   if(el.dataset.act==="query"){
     ui.query=el.value; ui.scanMax=30;
     const box=document.getElementById("scan-results"), tabs=document.getElementById("scan-tabs");
@@ -1170,10 +1209,22 @@ document.getElementById("app").addEventListener("input", e=>{
 });
 applyTheme();
 render();
+// Tageswechsel: Wer gerade „Heute“ ansieht, landet nach Mitternacht automatisch beim neuen Tag
+// (beim Zurückkehren in die App und jede Minute, solange sie offen ist)
+let shownToday=todayIso();
+function dayRoll(){
+  const t=todayIso(); if(t===shownToday) return;
+  if(state.date===shownToday){ if(ui.modal) return; state.date=t; render(); }   // offenes Fenster: später erneut versuchen
+  shownToday=t;
+}
+setInterval(dayRoll,60000);
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") dayRoll(); });
+// Speicher dauerhaft anfragen, damit der Browser die Daten nicht bei Platzmangel löscht
+try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist().catch(()=>{}); }catch(e){}
 try{ remSoon(); }catch(e){}
 
 
-if("serviceWorker" in navigator && location.protocol.startsWith("http")) window.addEventListener("load",()=>{ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} });
+if("serviceWorker" in navigator && webOk()) window.addEventListener("load",()=>{ try{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }catch(e){} });
 
 let swipeY=null;
 document.getElementById("app").addEventListener("touchstart",e=>{ swipeY=e.target.closest(".amt.open")?e.touches[0].clientY:null; },{passive:true});

@@ -28,7 +28,10 @@ RICHTWERTE = r"""()=>{
   for(const g of goals){ state.profile=Object.assign({},P0,base,{goal:g}); T[g]=targets(); n++; const t=T[g];
    if(![t.kcal,t.protein,t.carbs,t.fat].every(x=>Number.isFinite(x)&&x>=0)) fail("Ungültige Zahl",d+" "+g);
    if(Math.abs(t.protein*4+t.carbs*4+t.fat*9-t.kcal)/t.kcal>0.03) fail("Makros ergeben nicht die Kalorien",d+" "+g);
-   if(t.kcal<(sex==="m"?1500:1200)) fail("Unter der Kalorien-Mindestgrenze",d+" "+g+" "+t.kcal);
+   // Mindestgrenze gilt fürs Defizit; liegt der eigene Bedarf darunter, ist Halten (= Bedarf) richtig – nie ein Plus erzwingen
+   const tdee=tdeeFormula(state.profile)*adaptRatio();
+   if(t.kcal<Math.min(sex==="m"?1500:1200, Math.round(tdee/10)*10)-10) fail("Unter der Kalorien-Mindestgrenze",d+" "+g+" "+t.kcal);
+   if(g==="lose"&&t.kcal>Math.round(tdee/10)*10+10) fail("Abnehmen ergibt ein Plus",d+" "+t.kcal+" > "+Math.round(tdee));
   }
   const keep=T.energy.kcal;
   if(T.lose.kcal>keep) fail("Abnehmen ergibt mehr Kalorien als Halten",d);

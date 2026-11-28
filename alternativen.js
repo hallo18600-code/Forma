@@ -51,7 +51,7 @@ const ALT_MAP={
     :/(aufschnitt|schinken|salami|wurst|mortadella)/.test(h)?["Putenbrust (roh)","Kochschinken","Ei"]
     :["Hähnchenbrust (roh)","Rindersteak (roh)","Ei","Lachsfilet (roh)","Linsen gekocht","Kichererbsen"],
   // Miso/Sojasoße sind Würzmittel; Soja-Joghurt → Joghurt
-  soy:h=>/(miso|sauce|sosse)/.test(h)?[]:/(gurt|joghurt|yog|dessert|pudding)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]:["Ei","Hähnchenbrust (roh)","Lachsfilet (roh)","Linsen gekocht","Kichererbsen"],
+  soy:h=>/(miso|sauce|sosse)/.test(h)?[]:/(drink|milch|milk|\bboisson|bevanda|ohne zucker|barista)/.test(h)?["Vollmilch","Milch 1,5 %"]:/(gurt|joghurt|yog|dessert|pudding)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]:["Ei","Hähnchenbrust (roh)","Lachsfilet (roh)","Linsen gekocht","Kichererbsen"],
   refined:h=>/(nudel|pasta|spaghetti|penne|fusilli|maccheroni|tortiglioni|farfalle|lasagne|tagliatelle|gnocchi|couscous)/.test(h)?["Kartoffeln gekocht","Reis gekocht","Quinoa gekocht","Süßkartoffel"]
     :/(brot|brotchen|toast|semmel|baguette|wrap|tortilla|bagel|pain|ciabatta|weckle)/.test(h)&&!/(aufstrich|creme)/.test(h)?["Vollkornbrot","Roggenbrot","Vollkornbrötchen"]:[],
   wholewheat:h=>/(nudel|pasta|spaghetti|penne|fusilli)/.test(h)?["Kartoffeln gekocht","Reis gekocht","Quinoa gekocht","Süßkartoffel"]:[],
@@ -80,6 +80,7 @@ function altCat(f){ try{ const c=rClassify(f).cat; return c?c.id:null; }catch(e)
 function altIsDrink(f,cid){
   if(ALT_DRINKCAT.has(cid)) return true;
   const h=" "+NORM(f.name||"")+" ";
+  if(cid==="soy") return f.liquid===true||/(drink|milch|milk|\bboisson|bevanda|barista)/.test(h);   // Sojadrink: nur Getränke vorschlagen
   if(["dairy","kefir","sweets","whey"].includes(cid)) return f.liquid===true||/(milch|drink|shake|getrank|kakao|kefir|ayran|smoothie|latte)/.test(h)&&!/(schokolade|schoko riegel|pulver|reis|brotchen|brot|kase|quark|joghurt|creme|pudding)/.test(h);
   return false;
 }

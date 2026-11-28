@@ -143,16 +143,31 @@ function renderWelcome(){
     </div>
   </div>`;
 }
+// Eingabe außerhalb des erlaubten Bereichs (z. B. 17 Jahre, 1,65 statt 165 cm): nicht still ändern, sondern Hinweis + Weiter sperren
+const OB_RANGE_KEYS=["age","height","weight"];
+function obNumBad(k){
+  if(!OB_RANGE_KEYS.includes(k)) return false;
+  const st=obSteps().find(x=>x.id===k), v=+state.profile[k];
+  return !st||state.profile[k]===""||!isFinite(v)||v<st.min||v>st.max;
+}
 function obNumHint(k){
   const p=state.profile, m=p.height/100;
+  if(obNumBad(k)){
+    const st=obSteps().find(x=>x.id===k), v=+p[k];
+    if(k==="age"&&isFinite(v)&&v>0&&v<18) return `<div class="warn">Life Maxxing ist erst ab 18.</div>`;
+    if(k==="height") return `<div class="warn">Bitte in cm eingeben, z. B. 175 (${st.min}–${st.max} cm).</div>`;
+    return `<div class="warn">Bitte einen Wert zwischen ${st.min} und ${st.max} ${st.unit} eingeben.</div>`;
+  }
   if(k==="weight"){ const b=p.weight/(m*m); return `BMI <b>${de(b,1)}</b>`; }
   if(k==="target"){
     const b=p.target/(m*m), d=p.target-p.weight, min=obMinTarget();
     // Zu niedriges Ziel: klare Warnung statt still korrigieren
     if(+p.target<min) return `<div class="warn">⚠️ ${de(+p.target,+p.target%1?1:0)} kg ist zu wenig für deine Größe (BMI ${de(b,1)}). Das wäre Untergewicht und ungesund. Mindestens <b>${de(min,min%1?1:0)} kg</b>, die App stellt das beim Weiter ein.</div>`;
+    if(p.goal==="lose"&&p.weight/(m*m)<18.5) return `<div class="warn">Dein BMI liegt im Untergewicht (${de(p.weight/(m*m),1)}). Abnehmen wird nicht empfohlen. Die App rechnet deshalb ohne Defizit. Besprich dein Ziel bitte mit Ärzt:in.</div>`;
     if(p.goal==="lose"&&+p.target===min) return `BMI <b>${de(b,1)}</b> · Das ist das niedrigste gesunde Ziel für deine Größe.`;
     // Gesundes Tempo: abnehmen ca. 0,5 % pro Woche, zunehmen ca. 0,25 kg pro Woche (Muskeln brauchen Zeit)
-    const wk=Math.abs(d)>=0.5?Math.ceil(Math.abs(d)/(d<0?p.weight*0.005:0.25)):0;
+    // Abnehmen: Dauer aus dem echten Richtwert (goalWeeks). Ist kein Defizit möglich, keine Zeitangabe.
+    const wk=Math.abs(d)<0.5?0:d<0?(p.goal==="lose"?(goalWeeks()||0):0):Math.ceil(Math.abs(d)/(p.sex==="w"?0.15:0.25));
     return `BMI <b>${de(b,1)}</b>${wk?` · ${d<0?"−":"+"}${de(Math.abs(d),1)} kg · ca. ${wk>=8?Math.round(wk/4.3)+" Monate":wk+" Wochen"}`:""}`;
   }
   return "";
@@ -186,6 +201,7 @@ function renderOnboard(){
         <label class="ob-val"><input id="ob-in" data-act="ob-num" data-k="${st.k}" type="text" inputmode="decimal" autocomplete="off" aria-label="${st.q}" value="${String(v).replace(".",",")}"><span>${st.unit}</span></label>
         <button class="ob-nb" data-act="ob-nudge" data-d="${st.step}" aria-label="Mehr">+</button>
       </div><div class="ob-hint" id="ob-hint">${obNumHint(st.k)}</div>`;
+    can=!obNumBad(st.k);
   } else if(st.kind==="single"||st.kind==="multi"){
     const cur=st.get(), multi=st.kind==="multi";
     body=`${multi?`<div class="ob-multi">${st.pick?`Bis zu ${st.pick} auswählen`:"Mehrere möglich"}</div>`:""}<div class="ob-opts ${st.opts.length>5?"two":""}">${st.opts.map(o=>obOpt(o, multi?(cur||[]).includes(o.v):cur===o.v, multi)).join("")}</div>`;
@@ -272,7 +288,7 @@ function renderObPlan(){
     ${open.length?`<p class="sub obp-note">Später im Coach: ${open.join(", ")}</p>`:""}
     <div class="obp-2">
       <div class="card obp"><h3>🏋️ Training</h3><p>${plan}</p></div>
-      <div class="card obp"><h3>💊 ${stack.length?"Stack":"Vorschlag"}</h3><p>${sups.join(", ")}</p></div>
+      <div class="card obp"><h3>💊 ${stack.length?"Supplements":"Optional"}</h3><p>${sups.join(", ")}</p></div>
     </div>
     <p class="sub obp-note">Richtwerte, keine medizinische Beratung.</p>`;
 }
@@ -315,7 +331,7 @@ function obNext(){
   if(st.kind==="adult"&&!state.profile.adult) return;
   if(st.kind==="terms"&&!termsOk()) return;
   if(st.kind==="adult"&&state.demoNext){ seedDemo(); toast("Beispieldaten geladen"); return; }   // kam über "Mit Beispieldaten ansehen"
-  if(st.kind==="num") obClampNum(st.k);
+  if(st.kind==="num"){ if(obNumBad(st.k)) return; obClampNum(st.k); }
   if(st.req&&!hasVal(st.get())) return;
   obGo(1);
 }
@@ -333,12 +349,13 @@ function obSkip(){
 }
 function obBack(){
   const st=obSteps()[state.step];
-  if(st&&st.kind==="num") obClampNum(st.k);
+  if(st&&st.kind==="num"&&!obNumBad(st.k)) obClampNum(st.k);
   if(!state.step){ state.step=null; state.demoNext=false; } else obGo(-1);
   save();
 }
 function obFinish(){
   const p=state.profile; if(!p.adult) return;
+  if(OB_RANGE_KEYS.some(obNumBad)){ const i=obSteps().findIndex(x=>OB_RANGE_KEYS.includes(x.id)&&obNumBad(x.id)); if(i>=0){ state.step=i; save(); } return; }
   const first=!state.obDone;
   ["age","height","weight","target"].forEach(obClampNum);
   if(!state.ob.target) p.target=obDefaultTarget();

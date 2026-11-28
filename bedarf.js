@@ -31,11 +31,13 @@ function adDayKcal(d,map){
   if(!d||!Array.isArray(d.meals)) return 0;
   return d.meals.reduce((n,m)=>{ const p=m&&map.get(m.id); return n+(p&&m.portion>0?line(p,m.portion).kcal:0); },0);
 }
-// Steigung (kg pro Tag) einer Geraden durch die Wiegepunkte
+// Steigung (kg pro Tag) durch die Wiegepunkte – robust (Theil-Sen: Median aller Paar-Steigungen),
+// damit einzelne Ausreißer (z. B. viel Wasser nach salzigem Essen) den Bedarf nicht verziehen
 function adSlope(pts){
-  const n=pts.length, mx=pts.reduce((a,p)=>a+p.x,0)/n, my=pts.reduce((a,p)=>a+p.y,0)/n;
-  let num=0, den=0; pts.forEach(p=>{ num+=(p.x-mx)*(p.y-my); den+=(p.x-mx)**2; });
-  return den?num/den:0;
+  const s=[]; for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){ const dx=pts[j].x-pts[i].x; if(dx>=1) s.push((pts[j].y-pts[i].y)/dx); }
+  if(!s.length) return 0;
+  s.sort((a,b)=>a-b); const m=s.length>>1;
+  return s.length%2?s[m]:(s[m-1]+s[m])/2;
 }
 
 // Rechnet aus den letzten 4 Wochen (bis gestern, heute ist noch nicht fertig). Ändert nichts am Zustand.
@@ -54,12 +56,15 @@ function adaptAnalyze(today){
   if(kc.length<AD_MIN_DAYS||pts.length<AD_MIN_WEIGHS||span<AD_MIN_SPAN) return Object.assign(res,{ok:false});
   const intake=kc.reduce((a,b)=>a+b,0)/kc.length, slope=adSlope(pts), obs=intake-slope*KCAL_PER_KG;
   if(!Number.isFinite(obs)||obs<=0) return Object.assign(res,{ok:false});
-  return Object.assign(res,{ ok:true, intake:Math.round(intake), kgWeek:+(slope*7).toFixed(2), obs:Math.round(obs), raw:obs/formula });
+  // Über 20 % unter bzw. 25 % über der Formel ist selten echt – meist fehlen Einträge (oder es wurde doppelt eingetragen).
+  // Dann bleibt der Faktor, wie er ist, und die App zeigt einen Hinweis.
+  const raw=obs/formula, unsure=raw<0.8||raw>1.25;
+  return Object.assign(res,{ ok:true, unsure, intake:Math.round(intake), kgWeek:+(slope*7).toFixed(2), obs:Math.round(obs), raw });
 }
 
 // Neuer Faktor aus der Analyse: vorsichtig – je mehr Daten, desto mehr Vertrauen, pro Woche höchstens ±5 %
 function adaptNext(prev,an){
-  if(!an.ok) return prev;
+  if(!an.ok||an.unsure) return prev;
   const raw=Math.min(AD_HI,Math.max(AD_LO,an.raw));
   const conf=Math.min(1,an.days/21)*Math.min(1,an.weighs/10);
   const want=1+conf*(raw-1);
@@ -75,7 +80,7 @@ function adaptCheck(){
   const prev=adaptRatio(), an=adaptAnalyze(), ratio=adaptNext(prev,an);
   const k=r=>{ const t=state.adapt; state.adapt={ratio:r}; const v=targets().kcal; state.adapt=t; return v; };
   const before=k(prev), after=k(ratio);
-  state.adapt={ week:wk, ratio, ok:an.ok, days:an.days, weighs:an.weighs, span:an.span, obs:an.obs||null, kgWeek:an.ok?an.kgWeek:null, from:before, to:after, seen:Math.abs(after-before)<20 };
+  state.adapt={ week:wk, ratio, ok:an.ok, days:an.days, weighs:an.weighs, span:an.span, obs:an.obs||null, unsure:!!an.unsure, kgWeek:an.ok?an.kgWeek:null, from:before, to:after, seen:Math.abs(after-before)<20 };
   save(); return true;
 }
 
@@ -95,7 +100,7 @@ function detailsSheet(){
   const need=`<div class="adneed"><div><b>${Math.min(an.days,AD_MIN_DAYS)} / ${AD_MIN_DAYS}</b><span>Tage mit Essen</span></div><div><b>${Math.min(an.weighs,AD_MIN_WEIGHS)} / ${AD_MIN_WEIGHS}</b><span>Wiegungen</span></div></div>`;
   const body=st.k==="off"?`<p class="sub">Der Richtwert bleibt fest bei der Formel aus dem Fragebogen.</p>`
     : st.k==="learn"?`<p class="sub">Die App vergleicht, was du isst, mit deinem Gewichtsverlauf. So findet sie deinen echten Bedarf. Dafür braucht sie in den letzten 4 Wochen:</p>${need}<p class="sub">Trag möglichst alles ein, was du isst, und wieg dich morgens nüchtern.</p>`
-    : `<div class="adneed"><div><b>${de(st.obs||Math.round(st.base*adaptRatio()))}</b><span>kcal echter Verbrauch</span></div><div><b>${de(st.base)}</b><span>kcal laut Formel</span></div></div>${st.kgWeek!=null?`<p class="sub">Gewicht pro Woche zuletzt: ${adSigned(st.kgWeek,"kg",2)}</p>`:""}<p class="sub">Einmal pro Woche passt die App deinen Richtwert vorsichtig an (höchstens 5 % pro Woche).</p>`;
+    : `<div class="adneed"><div><b>${de(Math.round(st.base*adaptRatio()))}</b><span>kcal geschätzter Verbrauch</span></div><div><b>${de(st.base)}</b><span>kcal laut Formel</span></div></div>${st.kgWeek!=null?`<p class="sub">Gewicht pro Woche zuletzt: ${adSigned(st.kgWeek,"kg",2)}</p>`:""}${(state.adapt||{}).unsure?`<p class="sub">Die letzten Einträge passen nicht zum Gewichtsverlauf. Wahrscheinlich fehlt etwas. Der Richtwert bleibt deshalb gleich.</p>`:""}<p class="sub">Einmal pro Woche passt die App deinen Richtwert vorsichtig an (höchstens 5 % pro Woche).</p>`;
   return `<h2>Richtwert</h2>
     <p class="sub">${de(t.kcal)} kcal · ${t.protein} g Protein. Berechnet aus Körper, Alltag, Training pro Woche und Ziel. Kein ärztlicher Wert.</p>
     <div class="group mt-3"><button class="g-row" data-act="adapt-toggle"><div class="grow"><b>Bedarf lernt mit</b><div class="sub">${esc(st.short)}${st.delta!=null?" "+adSigned(st.delta,"kcal"):""}</div></div>${tog(p.adaptive!==false)}</button></div>

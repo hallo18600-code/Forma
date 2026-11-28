@@ -283,7 +283,7 @@ function hautProblem(st,a,c){
       P.pm.push("Azelainsäure");
     } else if(art==="Rote/braune Male"){
       P.items=[lsf("UV-Strahlung macht Flecken dunkler."), aze("10 %","Kann dunkle Flecken aufhellen."), nia("morgens","Kann neuen Flecken vorbeugen.")];
-      P.am.push("Niacinamid"); P.pm.push("Azelainsäure"); P.note="Dunkle Flecken verblassen meist in 3–6 Monaten.";
+      P.am.push("Niacinamid"); P.pm.push("Azelainsäure"); P.note="Dunkle Flecken können über mehrere Monate verblassen.";
     } else {
       P.items=[aze("10 %","Kann Unreinheiten sichtbar verringern."),
         tip("Zink punktuell","Zinkcreme nur auf entzündete Pickel","Flächig verstopft sie Poren.",{product:"zink"}),
@@ -306,8 +306,9 @@ function hautProblem(st,a,c){
       P.cream="Creme ohne Öle";
       // Zinkpyrithion ist in Kosmetik in der EU seit März 2022 verboten → nur erlaubte Wirkstoffe nennen
       P.items=[tip("Schuppen-Maske","Anti-Schuppen-Shampoo 2×/Woche als Maske","Mit Piroctone Olamine oder Climbazol, 3 Minuten einwirken lassen, dann abwaschen."),
-        tip(null,"Leichte Creme, keine Öle","Fett kann den Hefepilz auf der Haut fördern."), tip(null,"Kopfhaut mitbehandeln","Häufig hat beides dieselbe Ursache.")];
-      P.spot.push("Schuppen-Maske 2×/Wo."); P.note="Breitet es sich aus: Hautarzt.";
+        tip(null,"Leichte Creme, keine Öle","Reichhaltige, ölige Cremes können schuppige Stellen verstärken."), tip(null,"Kopfhaut mitbehandeln","Häufig hat beides dieselbe Ursache.")];
+      P.items.unshift(tip(null,"Ursache ärztlich klären","Schuppige, gerötete Stellen an Nase und Brauen können verschiedene Ursachen haben. Das klärt der Hautarzt.",{must:1}));
+      P.spot.push("Schuppen-Maske 2×/Wo."); P.note="Bessert es sich nicht oder breitet es sich aus: Hautarzt.";
     } else {
       P.calm=true; P.wash="Waschmilch"; P.cream="Ceramid-Creme"; P.spf="Mineral-LSF";
       P.items=[tip("Nur 3 Produkte","2 Wochen nur Reinigung, Creme, LSF","So kann sich die Hautbarriere erholen."),
@@ -430,7 +431,7 @@ function haareAdvice(a){
       tips=[tip(null,"Zeitnah zum Hautarzt","Shampoo hilft hier nicht. Die Ursache klärt der Hautarzt.",{must:1}),
         tip("Mildes Shampoo","Bis dahin mild waschen","Bitte nichts auf eigene Faust behandeln.",{product:"shampoo"})];
     } else {
-      tips=[tip(null,"Blutbild: Ferritin, Vit. D, Schilddrüse","Damit lassen sich häufige Ursachen abklären."),
+      tips=[tip(null,"Blutwerte ärztlich prüfen lassen","Z. B. Ferritin, Vitamin D und Schilddrüse. Damit lassen sich häufige Ursachen abklären."),
         tip("Protein",`${targets().protein} g Protein, keine Crash-Diät`,`Am besten über ${proteinFoodTxt(dietCtx())}. Haare zeigen Veränderungen erst nach 2–3 Monaten.`),
         tip(null,"Geduld: oft 3–6 Monate","Haare wachsen langsam nach, wenn die Ursache behoben ist.")];
     }
@@ -440,7 +441,10 @@ function haareAdvice(a){
   }
   if(heat) tips.push(tip("Hitzeschutz","Hitzeschutz, max. 180 °C","Höhere Temperaturen schädigen das Haar."));
   if(curly) tips.push(tip("Locken","Nur nass entwirren, T-Shirt statt Handtuch","So bleiben die Locken in Form."));
-  const cut=haarSchnitt(a), items=cut.concat(tips.slice(0,cut.length?2:3));
+  // Hitzeschutz bei häufigem Föhnen/Glätten nie wegschneiden (sonst fällt er bei Schnitt-Tipps oft raus)
+  const cut=haarSchnitt(a), n=cut.length?2:3, hz=tips.find(x=>x.title==="Hitzeschutz, max. 180 °C"||x.name==="Hitzeschutz");
+  let pick=tips.slice(0,n); if(hz&&!pick.includes(hz)) pick=pick.slice(0,n-1).concat(hz);
+  const items=cut.concat(pick);
   const routine=sumRoutine("Haare",items,"","Mildes Shampoo");
   return {lead:`${a.typ||"Haar"} · ${st==="Fallen viel aus"&&a.ausfall?a.ausfall:st}`, routine, items, note};
 }
@@ -473,7 +477,10 @@ function haarSchnitt(a){
     if(Z.ponyJa&&a.schnitt&&a.schnitt!=="Mit Pony") t.push("Ein Pony würde gut passen.");
     out.push(tip(null,"Schnitt: "+Z.t,t.filter(Boolean).join(" ")||"Passt schon, so halten."));
   } else {
-    const Z=SCHNITT_M[form], ds=haarCmp(a.seiten,HAAR_SEITEN,Z.s), dob=haarCmp(a.oben,HAAR_OBEN,Z.o);
+    // Locken: oben mind. 5 cm (sonst stehen sie ab), Seiten nicht kahl (Taper) – Bereich und Text vorher anpassen, damit nichts widerspricht
+    const lock=a.typ==="Lockig"||a.typ==="Kraus / Afro", B=SCHNITT_M[form];
+    const Z=lock?{t:B.t.replace(" (Fade)","")+(B.o[0]<2?" · bei Locken oben mind. 5 cm":"")+(B.s[0]<1?" · Seiten als Taper statt kahl":""), s:[Math.max(1,B.s[0]),Math.max(1,B.s[1])], o:[Math.max(2,B.o[0]),Math.max(2,B.o[1])]}:B;
+    const ds=haarCmp(a.seiten,HAAR_SEITEN,Z.s), dob=haarCmp(a.oben,HAAR_OBEN,Z.o);
     const S={"-1":"Seiten länger","1":"Seiten kürzer"}[ds], O={"-1":"oben länger","1":"oben kürzer"}[dob];
     const txt=S&&O?`Bei dir: ${S}, ${O}.`:S?`Bei dir: ${S}.`:O?`Bei dir: ${O[0].toUpperCase()+O.slice(1)}.`:"Passt schon, so halten.";
     out.push(tip(null,"Schnitt: "+Z.t,txt));
@@ -482,7 +489,7 @@ function haarSchnitt(a){
   const T={
     Glatt: w?["Volumenspray am Ansatz","Kopfüber föhnen, sonst liegt glattes Haar flach."]:["Matte Paste oder Clay","Gibt glattem Haar oben Halt und Volumen."],
     Wellig:["Meersalzspray, dann lufttrocknen","Betont die Wellen ohne Glanz."],
-    Lockig: w?["Stufen schneiden lassen","Ohne Stufen wirken Locken schnell dreieckig."]:["Locken oben mindestens 5 cm lassen","Zu kurz stehen sie ab. Seiten lieber Taper statt kahl."],
+    Lockig: w?["Stufen schneiden lassen","Ohne Stufen wirken Locken schnell dreieckig."]:["Locken-Creme ins nasse Haar","Definiert die Locken, ohne sie zu beschweren."],
     "Kraus / Afro": w?["Leave-in + Öl, dann Schutzfrisur","Krauses Haar ist von Natur aus trocken."]:["Taper an den Seiten, oben Leave-in","Hält Feuchtigkeit, Locken bleiben definiert."]
   }[a.typ];
   if(T) out.push(tip(null,"Styling: "+T[0],T[1]));
@@ -580,7 +587,7 @@ function muskelTips(a,lvl,g,fatGoal,prot,lifts){
     tip("Training nach Plan",`${P.name}, ${P.freq}`,P.why+(cd.train?` Bei dir zuletzt: ${de(cd.train.v,1)}× pro Woche.`:""),Object.assign({s:P.name,e:"🏋️",once:1},G,have?{act:"tab",v:"sport",label:"Zum Training"}:{act:"coach-plan",v:pid,label:"Plan übernehmen"})),
     tip("Progressive Overload","Progressive Overload",gym==="Zuhause"?"Jede Woche mehr Wiederholungen oder eine schwerere Variante.":beginner?"Erst saubere Technik, dann jede Woche eine Wiederholung mehr.":"Jede Woche +1 Wiederholung oder +2,5 kg.",Object.assign({e:"📈",once:1},G)),
     tip("Protein",`${prot} g Protein am Tag`,surplus?`Dazu ${de(kcalFor("muscle"))} kcal (+${kcalFor("muscle")-targets().kcal}): Muskeln statt Fett.`:(cd.protein?`Dein Schnitt: ${cd.protein.v} g an ${cd.protein.n} eingetragenen Tagen. `:"")+((+state.profile.weight||70)>25*Math.pow(state.profile.height/100,2)&&!leanStated()?"1,6–2,2 g pro kg gelten als ideal – bei höherem Gewicht bezogen auf das Normalgewicht.":"1,6–2,2 g pro kg Körpergewicht gelten als ideal.")+` Am einfachsten über ${proteinFoodTxt(dietCtx())}.`,Object.assign({s:`${prot} g Protein`,e:"🍗"},G,surplus?{act:"coach-goal",v:"muscle",label:"Kalorienziel anpassen"}:{})),
-    tip("Carbs vorm Training","Schnelle Carbs 30–60 Min vorher",vegan?"Reiswaffeln mit Marmelade oder eine Banane.":"Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
+    tip("Kohlenhydrate vorm Training","Schnelle Kohlenhydrate 30–60 Min. vorher",vegan?"Reiswaffeln mit Marmelade oder eine Banane.":"Reiswaffeln mit Honig oder eine Banane.",Object.assign({e:"🍌"},G)),
     tip("Kreatin","3–5 g Kreatin täglich","Erhöht die Leistung bei kurzem, intensivem Krafttraining. Fehlt Protein im Essen, hilft "+(noWhey?"pflanzliches Proteinpulver.":"Whey."),Object.assign({e:"💊",sup:"crea"},G,{act:"coach-sups",v:"",label:"Zum Stack"}))
   ];
 }
@@ -633,7 +640,7 @@ function gesundheitAdvice(a){
   if(a.stil==="Vegan") g.push([tip("B12","Vitamin B12 täglich","Steckt fast nur in tierischen Lebensmitteln. Wichtig für Blut und Nerven.",{product:"b12",sup:"b12"}),
     tip("Jodsalz","Mit Jodsalz kochen","Bei veganer Ernährung fehlt oft Jod.")]);
   const dc=dietCtx();
-  if(a.energie==="Ständig müde") g.push([tip(null,"Blutbild: Ferritin, B12, Vit. D, Schilddrüse","Häufige Ursachen für dauerhafte Müdigkeit.",{must:1}),
+  if(a.energie==="Ständig müde") g.push([tip(null,"Blutwerte ärztlich prüfen lassen","Z. B. Ferritin, B12, Vitamin D und Schilddrüse – häufige Ursachen für dauerhafte Müdigkeit.",{must:1}),
     dc.veg?tip("Eisen",dc.noGluten?"Linsen, Quinoa, Kürbiskerne mit Paprika oder Zitrone":"Linsen, Hafer, Kürbiskerne mit Paprika oder Zitrone","Eisen aus Pflanzen wird schlechter aufgenommen. Vitamin C in derselben Mahlzeit hilft.",{e:"🫘"})
       :tip("Eisen & B12",dc.noRed?"Eier, Fisch und Geflügel jeden Tag":"Rotes Fleisch 1–2× pro Woche, Leber gelegentlich",dc.noRed?"Liefern gut verfügbares Eisen und B12, beides fehlt oft bei Müdigkeit.":"Eisen aus Fleisch nimmt der Körper deutlich besser auf als aus Pflanzen. Leber ist sehr reich an Vitamin A, darum nur gelegentlich.",{e:"🥩"}),
     tip("Tageslicht am Morgen","Morgens 10 Min raus","Tageslicht macht wach.")]);

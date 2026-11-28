@@ -30,7 +30,7 @@
   /* Text */
   --ink:#17181a;              /* Haupttext */
   --ink-2:#5f6670;            /* Nebentext, Kontrast mind. 4,5 : 1 */
-  --ink-3:#8b929b;            /* nur Deko: Pfeile, Platzhalter */
+  --ink-3:#666d76;            /* Pfeile, Platzhalter, Nebentext (Kontrast ≥ 4,5:1) */
   --star:#d99a00;             /* Favoriten-Stern */
 
   /* Akzent (Grün) */
@@ -110,7 +110,7 @@
   --surface:#1b1c1f; --surface-sheet:#202124;
   --fill:rgba(150,158,170,.17); --fill-2:rgba(150,158,170,.09);
   --track:#2c2f34; --line:#2a2c31; --line-strong:#3c3f45;
-  --ink:#f2f3f5; --ink-2:#a3a9b1; --ink-3:#6c727a; --star:#f2b632;
+  --ink:#f2f3f5; --ink-2:#a3a9b1; --ink-3:#8a9099; --star:#f2b632;
   --accent:#2fc679; --accent-strong:#2fc679; --accent-text:#4bd38a; --on-accent:#06140c;
   --accent-soft:rgba(47,198,121,.16); --on-accent-soft:#6fe0a4;
   --accent-mid:#25814f; --accent-weak:#1d4a33;
@@ -446,6 +446,7 @@ p { margin:var(--s-2) 0; }
 .mgrid.three div:last-child { border-right:0; }
 .mrow { display:flex; align-items:center; gap:var(--s-3); width:100%; min-height:60px; text-align:left; border-bottom:1px solid var(--line); padding:var(--s-3) var(--s-1); }
 .mrow span { white-space:nowrap; }
+.mrow .grow, .mrow b, .fhead h2, .fhead { min-width:0; overflow-wrap:anywhere; }   /* lange Produktnamen ohne Leerzeichen umbrechen */
 .mrow i { font-style:normal; font-size:var(--fs-l); color:var(--ink-3); }
 
 /* ---------- 6b. Essen suchen und eintragen (Blatt) ---------- */

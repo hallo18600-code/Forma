@@ -28,7 +28,7 @@ async function startCam(){
   }catch(e){ stopCam(); ui.camMsg=e&&e.message==="nodet"?"Scanner konnte nicht geladen werden. Gib den Code unten ein.":"Kein Kamerazugriff. Gib den Code unten ein."; render(); }
 }
 async function offLookup(code){
-  const r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+code+".json?fields=product_name,brands,nutriments,nova_group");
+  const r=await fetch("https://world.openfoodfacts.org/api/v2/product/"+code+".json?fields=product_name,brands,nutriments,nova_group,quantity,product_quantity_unit");
   if(!r.ok) return null;
   const j=await r.json(); if(j.status!==1||!j.product) return null;
   const n=j.product.nutriments||{};
@@ -69,7 +69,7 @@ async function bcLookup(code){
   if(code.length<8){ toast("Code zu kurz"); return; }
   let f=foods().find(x=>x.bc===code);
   if(!f){ const d=dbGet(code); if(d){ ensureDb(d.id); f=foods().find(x=>x.id===d.id); } }
-  if(!f&&location.protocol.startsWith("http")){ toast("Suche Produkt…"); try{ const it=await offLookup(code); if(it){ state.customs.push(it); save(); f=it; } }catch(e){} }
+  if(!f&&webOk()){ toast("Suche Produkt…"); try{ const it=await offLookup(code); if(it){ state.customs.push(it); save(); f=it; } }catch(e){} }
   if(f){ ui.modal={type:"product",payload:f.id}; ui.amtFor=null; ui.altBack=null; ui.fillFor=null; render(); return; }
   ui.newBc=code; ui.newBack="barcode"; ui.fDraft=null; ui.scanView="newfood"; toast("Nicht gefunden, leg es kurz an"); render();
 }

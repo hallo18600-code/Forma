@@ -111,7 +111,7 @@ function stepsCard(){
   const left=goal-sel;
   return `<div class="section"><h2>Schritte</h2><span class="sub">${labelDate(state.date)}</span></div>
   <div class="card">
-    <div class="row gap-4">${ring}<div class="grow"><b class="t-xl">${fmt(sel)}</b><div class="sub">${sel>=goal?"Ziel erreicht ✓":"noch "+fmt(left)+" bis "+fmt(goal)}</div></div></div>
+    <div class="row gap-4">${ring}<div class="grow"><b class="t-xl">${fmt(sel)}</b><div class="sub">${sel>=goal?"Ziel erreicht ✓":"noch "+fmt(left)+" bis zum Ziel"}</div></div></div>
     <div class="mt-4">${svg}</div>
     <div class="kpi"><div><span>Ø 7 Tage</span><b>${avg?fmt(avg):"–"}</b></div><div><span>Bester Tag</span><b>${best?fmt(best):"–"}</b></div><div><span>Serie</span><b>${streak} ${streak===1?"Tag":"Tage"}</b></div></div>
     <button class="pill primary mt-3" data-act="open" data-type="steps">Schritte eintragen</button>
@@ -125,7 +125,7 @@ function sleepCard(){
   const avg=tp.length?(tp.reduce((a,q)=>a+q.v,0)/tp.length).toFixed(1).replace(".",","):"–";
   const svg=`<svg class="chart" viewBox="0 0 ${W} ${H}">
     <line x1="${P}" x2="${W-P}" y1="${Y(7)}" y2="${Y(7)}" stroke="${tc("line-strong")}" stroke-dasharray="4 4"/>
-    <text x="${W-P}" y="${Y(7)-4}" text-anchor="end" font-size="12" fill="${tc("ink-2")}">7 h</text>
+    <text x="${P}" y="${Y(7)-4}" text-anchor="start" font-size="12" fill="${tc("ink-2")}">7 h</text>
     ${tp.length>1?`<path d="${path}" fill="none" stroke="${tc("accent")}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`:""}
     ${tp.map(q=>`<circle cx="${X(q.i).toFixed(1)}" cy="${Y(q.v).toFixed(1)}" r="${q.s===state.date?4.5:3}" fill="${q.s===state.date?tc("accent"):tc("surface")}" stroke="${tc("accent")}" stroke-width="2"/>`).join("")}
     <text x="${P}" y="${H-2}" font-size="12" fill="${tc("ink-2")}">${weekday(pts[0].s)} ${parseIso(pts[0].s).getDate()}.</text>

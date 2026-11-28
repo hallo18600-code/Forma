@@ -96,9 +96,9 @@ function unitsFor(it){
   else if(has(/protein ?pulver|whey|eiweiss ?pulver|casein|kollagen|protein powder/)) u=[["mess",30,"mess",1],["tl",3],["el",8]];
   else if(has(/pulver|poudre|powder|gewurz| zimt |seasoning/)) u=[["tl",4,"tl",1],["el",10]];
   else if(kc>300&&has(/mehl /)) u=[["tl",3],["el",10,"el",1]];
-  else if(kc>=700&&has(/ ol |olivenol|rapsol|sonnenblumenol|kokosol|leinol|sesamol|walnussol|bratol|kurbiskernol|speiseol| oil |huile|ghee /)) u=[["tl",4],["el",10,"el",1]];
+  else if(kc>=700&&has(/ ol |olivenol|rapsol|sonnenblumenol|kokosol|leinol|sesamol|walnussol|bratol|kurbiskernol|speiseol| oil |huile|ghee | olio |aceite|azeite/)) u=[["tl",4],["el",10,"el",1]];
   else if(has(/^ (zucker|puderzucker|rohrzucker|brauner zucker|vanillezucker|kokosblutenzucker|erythrit|xylit|birkenzucker|sugar|sucre)/)) u=[["tl",4,"tl",1],["el",12]];
-  else if(has(/chips|crisps|pringles|flips|salzstangen|cracker|nachos|snack|knabber|brezeln /)) u=[["hand",20,"hand",1],["schale",50,"schale"],["tuete",150,"tuete"]];
+  else if(has(/chips|crisps|pringles|flips|salzstangen|cracker|nachos|knabber|brezeln /)||kc>300&&has(/snack/)) u=[["hand",20,"hand",1],["schale",50,"schale"],["tuete",150,"tuete"]];
   // 2. Soßen, Dips, Senf
   else if(has(/pesto/)) u=[["tl",6],["el",15,"el",1],["portion",50,"schaelchen"]];
   else if(kc<150&&has(/tomatensauce|tomatensosse|sauce tomate|tomato sauce|sauce basilic|passata|passierte (bio )?tomate|tomate.{0,12}passier|pastasauce|pastasosse|sugo|napoli|arrabbiata|bolognese sosse|bolognesesosse|bolognese sauce|hackfleischsosse|bratensosse|bratensauce|rahmsosse|gravy/)) u=[["el",15],["portion",125,"schaelchen",1]];
@@ -194,7 +194,10 @@ function unitsFor(it){
   else if(kc<150&&has(/melone|ananas|pineapple|melon/)) u=[["spalte",has(/wassermelone/)?250:150,"spalte",1],["schale",150,"schale"]];
   else if(kc<150&&has(/apfel|banane|birne|orange|mandarine|clementine|kiwi|pfirsich|nektarine|aprikose|pflaume|zwetschge|mango|grapefruit|zitrone|limette|feige|granatapfel|papaya|apple|banana|pear/)) u=[...pieces(pw||word(P_FRUIT)||120),["schale",150,"schale"]];
   // 12. Gemüse
-  else if(has(/knoblauch|garlic/)) u=[["zehe",4,"zehe",1]];
+  else if(has(/knoblauch|garlic/)&&!has(/granul|pulver|getrocknet|gemahlen|flocken|powder|paste|creme/)) u=[["zehe",4,"zehe",1]];
+  else if(has(/knoblauch|garlic/)) u=[["tl",3,"tl",1],["el",8]];
+  // Dosentomaten, Passata, Tomatenstücke: kein Stück, sondern Löffel/Schale
+  else if(has(/tomate|tomato|pomodor/)&&has(/stucke|stuckig|gehackt|passiert|passata|in tomatensaft|in saft|geschalt|pelati|polpa|dose|chopped|peeled/)) u=[["el",20],["schale",100,"schale",1],["teller",200,"teller"]];
   else if(has(/oliven|olive|azeitona/)) u=[["stueck",4,"stueckchen"],["hand",40,"hand",1]];
   else if(has(/avocado/)) u=[["el",15],["stueck",pw||150,"stueck",1]];
   else if(kc<150&&has(/tomate|gurke|paprika|karotte|mohre|mohrrube|zucchini|aubergine|zwiebel|susskartoffel|kohlrabi|fenchel/)) u=[...pieces(pw||word(P_VEG)||100),["hand",50,"hand"]];
@@ -203,6 +206,11 @@ function unitsFor(it){
   // 13. Sonst: was die Datenbank weiß
   // Packung in ml (aus der Datenbank), aber am Namen nicht als Getränk erkannt (z. B. „Volvic“, „Sinalco Orange“): Glas & Flasche
   if(it.liquid===true&&kc<=120&&u&&u.every(x=>/^(stueck|stueck_k|stueck_g|handflaeche|spalte|schale|hand)$/.test(x[0]))) u=null;
+  // Flüssige Würzsoßen, Essig, Sirup: Löffel statt Glas (Sojasoße wird nicht glasweise gegessen)
+  if(!u&&it.liquid===true&&has(/sauce|sosse|soja ?sos|sojasaus|shoyu|tamari|essig|vinegar|aceto|balsam|sirup|syrup|sirop|dressing|wurze|maggi|worcester|fischsauce|fish sauce/)){ u=[["tl",5],["el",15,"el",1]]; }
+  // Kalorienreiche Flüssigkeiten (Öl, Sirup, Sahne, Kokosmilch) nie als 200-ml-Glas vorschlagen
+  if(!u&&it.liquid===true&&kc>300){ u=[["tl",5],["el",15,"el",1]]; }
+  if(!u&&it.liquid===true&&kc>150){ u=[["el",15,"el",1],["portion",100,"portion"]]; }
   if(!u&&it.liquid===true){ u=[["glas",200,"glas",1],["flasche",500,"flasche"]]; }
   if(!u&&pw) u=[["stueck",pw,"stueck",1]];
   if(!u&&sw) u=[["scheibe",sw,"scheibe",1]];

@@ -230,12 +230,12 @@ function gymParse(text){
   rows.forEach(r=>{
     const x=get(r); if(x.skip||x.warm||!x.ex) return;
     if(!(x.reps>0||x.kg>0||x.sec>0)) return;
-    const d=gymDate(x.start, dmy); if(!d) return;
+    const d=gymDate(x.start, dmy); if(!d||d.date>todayIso()) return;   // Datum in der Zukunft: Tippfehler, nicht übernehmen
     let w=wos.get(x.key);
     if(!w){ const e=x.end&&gymDate(x.end, dmy); w={ imp:app+":"+x.key, date:d.date, name:gymClean(x.name)||"Training", min:Math.min(300,x.min||(e?Math.max(1,Math.round((e.t-d.t)/60000)):45)), ex:new Map() }; wos.set(x.key,w); }
     const title=gymClean(x.ex,80);
     if(!w.ex.has(title)) w.ex.set(title,[]);
-    for(let i=0;i<(x.n||1);i++) w.ex.get(title).push({ kg:Math.max(0,Math.min(1000,Math.round(x.kg*100)/100)), reps:Math.round(x.reps||x.sec)||0, done:true });   // wie bei der Eingabe: 0–1000 kg, 2 Nachkommastellen
+    for(let i=0;i<(x.n||1);i++) w.ex.get(title).push({ kg:Math.max(0,Math.min(1000,Math.round(x.kg*100)/100)), ...(x.reps>0?{reps:Math.min(1000,Math.round(x.reps))}:{reps:0,sec:Math.min(86400,Math.round(x.sec||0))}), done:true });   // wie bei der Eingabe: 0–1000 kg, 2 Nachkommastellen
     names.set(title,1);
   });
   return { app, workouts:[...wos.values()], names:[...names.keys()] };
