@@ -1,4 +1,6 @@
 // Life Maxxing – Verlauf: Gewicht, Schritte, Schlaf, Maße
+// Tage zwischen zwei ISO-Daten (JJJJ-MM-TT), ohne Zeitzonen-Fehler
+function daysBetween(a,b){ const t=x=>Date.UTC(+x.slice(0,4),+x.slice(5,7)-1,+x.slice(8,10)); return Math.round((t(b)-t(a))/864e5); }
 function weightView(){
   const all = state.weights.slice().sort((a,b)=>a.date<b.date?-1:1);
   const days = ui.wrange==="7"?7:ui.wrange==="30"?30:ui.wrange==="90"?90:ui.wrange==="365"?365:9999;
@@ -12,15 +14,19 @@ function weightView(){
   const moved = start<=goal ? Math.max(0, last-start) : Math.max(0, start-last);
   const pct = Math.max(0, Math.min(1, moved/span));
   const dir = goal>=start ? 1 : -1;
-  const next = +(last + dir*0.5).toFixed(1);
+  // Zwischenziel nie hinter dem Ziel; Ziel erreicht → Ziel selbst
+  const reached = dir>0 ? last>=goal : last<=goal;
+  const next = reached ? goal : +(dir>0 ? Math.min(goal,last+0.5) : Math.max(goal,last-0.5)).toFixed(1);
   const avg = ws.length ? ws.reduce((n,w)=>n+w.kg,0)/ws.length : last;
   const C = 2*Math.PI*70;
   const off = C*(1-pct);
   const vals = (ws.length?ws:[{kg:last}]).map(w=>w.kg);
   const min = Math.min(...vals, goal)-0.8, max = Math.max(...vals, goal)+0.8;
   const W=320,H=120,pad=8;
+  // x nach Datum (nicht nach Eintrags-Nummer), sonst sähe eine Lücke von 2 Monaten aus wie ein Tag
+  const dts=(ws.length?ws:[{date:todayIso()}]).map(w=>w.date), t0=dts[0], tSpan=Math.max(1,daysBetween(t0,dts[dts.length-1]));
   const pts = vals.map((v,i)=>{
-    const x = pad + (vals.length===1? W/2 : i*((W-2*pad)/(vals.length-1)));
+    const x = pad + (vals.length===1? W/2 : daysBetween(t0,dts[i])/tSpan*(W-2*pad));
     const y = H-pad - ((v-min)/(max-min))*(H-2*pad);
     return [x,y];
   });

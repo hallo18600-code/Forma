@@ -70,6 +70,8 @@ function load(){
 function normalize(s){
     s.profile = Object.assign(fresh().profile, s.profile||{});
     s.days = s.days||{}; s.weights = s.weights||[]; s.workouts = s.workouts||[];
+    // Ältere Pläne: Plank mit „30 Wdh.“ gespeichert → 30 Sekunden
+    (Array.isArray(s.routines)?s.routines:[]).forEach(r=>(r&&r.days||[]).forEach(d=>(d&&d.exercises||[]).forEach(e=>{ if(e&&e.id==="plank") (e.sets||[]).forEach(st=>{ if(st&&st.reps>0&&!(st.sec>0)){ st.sec=st.reps; st.reps=0; } }); })));
     s.stack = s.stack||[]; s.customs = s.customs||[]; s.customEx = s.customEx||[]; s.skin = s.skin||{}; s.coach = s.coach||{answers:{}, routine:[]}; s.coach.answers=s.coach.answers||{}; s.coach.routine=s.coach.routine||[]; s.coach.skipped=s.coach.skipped||[]; s.routines = normalizeRoutines(s.routines,(s.profile||{}).sex); s.measures = s.measures||[];
     s.date = s.date || todayIso(); s.ob = s.ob||{}; migrateCoach(s);
     s.favs=Array.isArray(s.favs)?[...new Set(s.favs.filter(x=>typeof x==="string"&&x))]:[];
@@ -299,11 +301,14 @@ function supScore(id,goal){
   const p=state.profile, g=goal||p.goal, gi=Math.max(0,["muscle","lose","skin","energy"].indexOf(g));
   const ea=state.coach.answers.gesundheit||{}, sa=state.coach.answers.schlaf||{}, vegan=ea.stil==="Vegan";
   const hasFish=p.fish==="oft"||day().meals.some(m=>m.id==="lachs");
-  const t=targets(), tot=totals(state.date), lowProt=tot.protein<t.protein*0.55;
+  // Protein aus dem 14-Tage-Schnitt (nicht „heute“: morgens wäre es sonst immer zu wenig). Ohne genug Einträge: neutral.
+  const t=targets(); let cdP=null; try{ cdP=(coachData().protein||{}).v; }catch(e){}
+  const lowProt=cdP!=null&&cdP<t.protein*0.8, protOk=cdP!=null&&!lowProt;
   const lifts=["Krafttraining","Beides"].includes(p.trainType)&&p.trainFreq&&p.trainFreq!=="Gar nicht";
   const winter=[9,10,11,0,1,2].includes(new Date().getMonth());
   let sc=R.g[gi]; const good=[...R.good], bad=[...R.bad]; let why="";
   if(id==="crea"&&lifts){ sc+=3; why="Passt zu deinem Krafttraining. Sehr gut untersucht."; }
+  else if(id==="crea"&&p.trainFreq){ sc-=15; bad.unshift("Bringt vor allem etwas bei Krafttraining"); }
   const notes=[];
   if(id==="whey"&&vegan) notes.push("Enthält Milch – passt nicht zu deiner veganen Ernährung");
   else if(id==="whey"&&(ea.meiden||[]).includes("Milchprodukte")) notes.push("Milcheiweiß – du willst Milchprodukte meiden. Pflanzliches Proteinpulver passt besser");
@@ -312,7 +317,7 @@ function supScore(id,goal){
   if(id==="whey"){
     const pimples=[].concat(((state.coach.answers||{}).haut||{}).stoert||[]).includes("Unreinheiten");
     if(g==="skin"||pimples){ sc=Math.min(sc,75); bad.unshift("Milcheiweiß kann bei manchen Unreinheiten fördern"); }   // für die Haut nur 70–75
-    else if(lowProt){ sc+=3; why="Protein heute liegt noch unter dem Richtwert."; } else { sc-=6; bad.unshift("Dein Protein passt heute schon"); }
+    else if(lowProt){ sc+=3; why=`Dein Protein liegt im Schnitt bei ${cdP} g, Richtwert ${t.protein} g.`; } else if(protOk){ sc-=6; bad.unshift("Dein Protein passt im Schnitt schon"); }
   }
   if(id==="d3"&&winter){ sc+=3; why="Gerade jetzt (Oktober bis März) gibt es wenig Sonne."; }
   if(id==="o3"){ if(hasFish){ sc-=8; bad.unshift("Du isst schon oft Fisch"); } else { sc+=2; why="Du isst wenig Fisch."; } }
@@ -1072,7 +1077,7 @@ document.getElementById("app").addEventListener("click", e=>{
     if(s.done) ui.rest=state.profile.restSec||90;
   }
   else if(act==="rest-pick"){ const v=+el.dataset.v; if(REST_OPTS.includes(v)){ state.profile.restSec=v; save(); } }
-  else if(act==="add-set"){ const sets=ui.workout.exercises[+el.dataset.e].sets; const last=sets[sets.length-1]||{kg:20,reps:6}; sets.push({kg:last.kg,reps:last.reps,done:false}); }
+  else if(act==="add-set"){ const sets=ui.workout.exercises[+el.dataset.e].sets; const last=sets[sets.length-1]||{kg:20,reps:6}; sets.push(Object.assign({kg:last.kg,reps:last.reps,done:false},last.sec>0?{sec:last.sec}:{})); }
   else if(act==="del-ex"){ ui.workout.exercises.splice(+el.dataset.e,1); }
   else if(act==="add-ex"){ if(!ui.workout){ ui.modal=null; render(); return; } ui.workout.exercises.push({id:el.dataset.id, sets:startSets(el.dataset.id, 1).map(s=>({...s, done:false}))}); ui.modal=null; }
   else if(act==="rest-skip") ui.rest=0;
@@ -1203,6 +1208,7 @@ document.getElementById("app").addEventListener("input", e=>{
     const st=((ui.workout.exercises[+el.dataset.e]||{}).sets||[])[+el.dataset.s]; if(!st) return;
     const v=parseFloat(String(el.value).replace(",","."));
     if(el.dataset.act==="set-kg") st.kg=isFinite(v)?Math.max(0,Math.min(1000,Math.round(v*100)/100)):0;
+    else if(isTimed(ui.workout.exercises[+el.dataset.e])) st.sec=isFinite(v)?Math.max(0,Math.min(86400,Math.round(v))):0;
     else st.reps=isFinite(v)?Math.max(0,Math.min(1000,Math.round(v))):0;
     liveSave();
   }

@@ -198,7 +198,7 @@ function rShort(r){ if(["haut","haare","schlaf","aussehen","gesundheit"].include
 // ---------- Aus deinen Einträgen ----------
 // Echte Durchschnitte aus dem Tagebuch der letzten 14 Tage. Nichts wird geschätzt oder hochgerechnet:
 // Ein Wert erscheint nur mit mindestens 5 Einträgen. Heute zählt nur beim Schlaf mit (die Nacht ist vorbei, der Tag noch nicht).
-// Essen zählt nur an Tagen, die ausreichend eingetragen sind (gleiche Regel wie in der Hautanalyse).
+// Essen zählt nur an Tagen, die ausreichend eingetragen sind.
 const CF_DAYS=14, CF_MIN=5, CF_MEMO={fp:null,val:null};
 function coachData(){
   const t0=todayIso(), D=[]; for(let i=1;i<=CF_DAYS;i++) D.push(addDays(t0,-i));
@@ -213,7 +213,8 @@ function coachData(){
   if(wa.length>=CF_MIN) o.water={v:r1(avg(wa)), n:wa.length};
   const st=D.map(s=>g(s)&&g(s).steps).filter(v=>Number.isFinite(v)&&v>0);
   if(st.length>=CF_MIN) o.steps={v:Math.round(avg(st)), n:st.length};
-  // Ein Tag zählt nur, wenn er weitgehend eingetragen ist (mind. 2 Einträge und 60 % des Kalorien-Richtwerts) – sonst sähe „wenig eingetragen“ aus wie „wenig gegessen“
+  // Ein Tag zählt nur, wenn er weitgehend eingetragen ist (mind. 2 Einträge und 60 % des Kalorien-Richtwerts) – sonst sähe „wenig eingetragen“ aus wie „wenig gegessen“.
+  // (Strenger als die Hautanalyse mit 40 %: hier geht es um Durchschnittswerte, dort nur um Ja/Nein-Merkmale.)
   const full=D.filter(s=>{ const d=g(s); if(!d||!Array.isArray(d.meals)||d.meals.filter(m=>m&&m.portion>0).length<2) return false; return totals(s).kcal>=kGoal*0.6; });
   if(full.length>=CF_MIN){ const T=full.map(s=>totals(s)); o.protein={v:Math.round(avg(T.map(x=>x.protein))), n:full.length}; o.kcal={v:Math.round(avg(T.map(x=>x.kcal))), n:full.length}; }
   // Training: Trainingstage pro Woche in den letzten 4 Wochen – nur, wenn die App schon so lange genutzt wird
@@ -338,7 +339,7 @@ function hautProblem(st,a,c){
       lsf("UV-Strahlung ist die Hauptursache für Hautalterung."),
       sens?nia("morgens","Macht Retinol verträglicher."):tip("Vitamin C","Vitamin-C-Serum morgens","Unterstützt die Kollagenbildung.",{product:"vitc"})];
     P.pm.push("Retinol"); P.am.push(sens?"Niacinamid":"Vitamin C"); P.photo=true;
-    P.note=w?"Kein Retinol in Schwangerschaft/Stillzeit.":"";
+    P.note=w&&(+state.profile.age||0)<55?"Kein Retinol in Schwangerschaft/Stillzeit.":"";
   } else {
     P.items=[tip(null,"Reinigung, Creme, LSF reichen","Mehr Produkte sind nicht nötig."),
       tip(null,"Neues einzeln testen, 2 Wochen Abstand","So erkennst du, was deine Haut nicht verträgt.")];
@@ -384,7 +385,9 @@ function hautAdvice(a){
   }
   // Gereizte Haut: abends dieselbe beruhigende Creme (Urea kann auf gereizter Haut brennen)
   const pmCream=calm?cream:pick("pmCream",cream);
-  const morning=[dry||sens?"Wasser":wash, ...am, oily?null:cream, spf].filter(Boolean);
+  // Trockenheit als Problem: morgens nur Wasser + Creme (passt zum Tipp „Morgens nur Wasser“), auch bei fettiger Haut
+  const dryProb=list.includes("Trockenheit");
+  const morning=[dry||sens||dryProb?"Wasser":wash, ...am, oily&&!dryProb?null:cream, spf].filter(Boolean);
   const evening=[wash, ...pm, pmCream, ...spot].filter(Boolean);
   const hasLsfKey=items.some(i=>/LSF/.test(i.k||""));
   const routine=sumRoutine("Haut",items,"",null,hasLsfKey?[]:["LSF"]);
@@ -522,14 +525,15 @@ function schlafAdvice(a){
   let items=pickTips(g,3);
   if(!items.length) items=[tip(null,"Dein Schlaf passt","Behalte deine Zeiten bei.")];
   const routine=sumRoutine("Schlaf",items,"",null);
-  routine.times=[["⏰","Aufstehen",hm(wake)],avoidsCaffeine()?null:["☕","Letzter Kaffee",hm(caf)],["💡","Licht runter",hm(dim)],["🛏️","Ins Bett",hm(bed)]].filter(Boolean);
+  routine.times=[["⏰","Aufstehen",hm(wake)],avoidsCaffeine()||a.kaffee==="Nie"?null:["☕","Letzter Kaffee",hm(caf)],["💡","Licht runter",hm(dim)],["🛏️","Ins Bett",hm(bed)]].filter(Boolean);
   if(!routine.short.includes("Bett")){ routine.short=[`Bett ${hm(bed)}`].concat(routine.short?routine.short.split(" · "):[]).slice(0,4).join(" · "); routine.title="Schlaf: "+routine.short; }
   return {lead:`Aufstehen ${hm(wake)} → Bett ${hm(bed)}`, routine, items};
 }
 
 // ---------- Aussehen ----------
 // Grobe KFA-Schätzung aus BMI, Alter, Geschlecht (Deurenberg). Ungenau, nur Orientierung.
-function kfaGuess(){ const p=state.profile, m=p.height/100, bmi=lastWeight()/(m*m); return Math.round(1.2*bmi+0.23*p.age-10.8*(p.sex==="m"?1:0)-5.4); }
+function kfaGuess(){ const p=state.profile, m=p.height/100, bmi=lastWeight()/(m*m), mn=p.sex==="m"?8:15;
+  return Math.max(mn, Math.round(1.2*bmi+0.23*p.age-10.8*(p.sex==="m"?1:0)-5.4)); }   // unter ca. 8 % (Männer) / 15 % (Frauen) ist die Formel unrealistisch
 function kfaLevel(a){
   const i=kfaOpts().indexOf(a.kfa);
   if(i>=0&&i<4) return i;
@@ -559,12 +563,12 @@ function coachPlan(id,sex){
 }
 function homePlan(sex){
   const P={
-    m:[[["pushup",0],["dip",0],["bench_dip",0],["pull",0],["chin",0],["sq_bw",0],["bulgarian",0],["plank",0,2,30]],
-       [["pushup",0],["dip",0],["bench_dip",0],["chin",0],["pull",0],["lunge_bw",0],["stepup",0],["back_ext",0],["leg_raise",0]]],
-    w:[[["sq_bw",0],["bulgarian",0],["bridge",0,1],["calf_bw",0],["pushup",0],["pull",0],["plank",0,2,30],["crunch",0]],
-       [["lunge_bw",0],["stepup",0],["bridge",0,1],["back_ext",0],["pushup",0],["chin",0],["plank",0,2,30],["leg_raise",0]]],
-    x:[[["pushup",0],["dip",0],["pull",0],["chin",0],["sq_bw",0],["bulgarian",0],["bridge",0,1],["plank",0,2,30]],
-       [["pushup",0],["dip",0],["chin",0],["pull",0],["lunge_bw",0],["stepup",0],["back_ext",0],["leg_raise",0]]]
+    m:[[["pushup",0],["dip",0],["bench_dip",0],["pull",0],["chin",0],["sq_bw",0],["bulgarian_bw",0],["plank",0,2,30]],
+       [["pushup",0],["dip",0],["bench_dip",0],["chin",0],["pull",0],["lunge_bw",0],["stepup_bw",0],["back_ext",0],["leg_raise",0]]],
+    w:[[["sq_bw",0],["bulgarian_bw",0],["bridge",0,1],["calf_bw",0],["pushup",0],["pull",0],["plank",0,2,30],["crunch",0]],
+       [["lunge_bw",0],["stepup_bw",0],["bridge",0,1],["back_ext",0],["pushup",0],["chin",0],["plank",0,2,30],["leg_raise",0]]],
+    x:[[["pushup",0],["dip",0],["pull",0],["chin",0],["sq_bw",0],["bulgarian_bw",0],["bridge",0,1],["plank",0,2,30]],
+       [["pushup",0],["dip",0],["chin",0],["pull",0],["lunge_bw",0],["stepup_bw",0],["back_ext",0],["leg_raise",0]]]
   }[sex==="m"||sex==="w"?sex:"x"];
   return {id:"home", name:"Zuhause Ganzkörper", days:[planDay("hoa","Zuhause A",P[0]), planDay("hob","Zuhause B",P[1])]};
 }
@@ -605,7 +609,8 @@ function aussehenAdvice(a){
   const lean = g==="lose"&&(under||(lvl===0&&(bmiNow<30||kfaStated()!==null))) ? tip("Muskeln aufbauen","Nicht weiter abnehmen","Du bist schon schlank. Mehr Muskeln geben dir jetzt mehr Form.",{act:"coach-goal",v:"muscle",label:"Auf Muskelaufbau stellen",once:1}) : null;
   const sit = (a.sitzen||knownSitzen())==="Über 8" ? tip("Stündlich aufstehen","Jede Stunde 2 Min aufstehen","Das entlastet den Rücken und regt den Kreislauf an.") : null;
   const G={
-    "Weniger Bauchfett":[cal, tip(`${de(Math.max(8000,p.stepGoal||8000))} Schritte`,`${de(Math.max(8000,p.stepGoal||8000))}+ Schritte am Tag`,(cd.steps?`Dein Schnitt: ${de(cd.steps.v)} Schritte an ${cd.steps.n} Tagen. `:"")+"Verbraucht Energie, ohne viel Hunger zu machen."),
+    // Schon schlank: keine Abnehm-Tipps neben „Nicht weiter abnehmen“
+    "Weniger Bauchfett":lean?[]:[cal, tip(`${de(Math.max(8000,p.stepGoal||8000))} Schritte`,`${de(Math.max(8000,p.stepGoal||8000))}+ Schritte am Tag`,(cd.steps?`Dein Schnitt: ${de(cd.steps.v)} Schritte an ${cd.steps.n} Tagen. `:"")+"Verbraucht Energie, ohne viel Hunger zu machen."),
       tip(null,"Bauchübungen allein reichen nicht","Fett lässt sich nicht gezielt an einer Stelle abbauen.")],
     "Gesicht definierter":[lvl>=2?cal:null, tip("Mewing","Mewing: Zunge an den Gaumen, Lippen zu","Achte auf Nasenatmung und eine aufrechte Kopfhaltung. Dass sich die Kieferform dadurch ändert, ist nicht belegt.")],
     "Bessere Haltung":[tip("Rudern & Face Pulls","Mehr ziehen als drücken","Rudern und Face Pulls ziehen die Schultern nach hinten.",{once:1}),
@@ -619,7 +624,7 @@ function aussehenAdvice(a){
     const ab=["Salziges / Fast Food","Alkohol","Spät gegessen"].filter(x=>(a.abend||[]).includes(x));
     const less=ab.filter(x=>x!=="Spät gegessen").map(x=>x==="Alkohol"?"Alkohol":"Salz"), early=ab.includes("Spät gegessen");
     const abT=less.length?`Abends weniger ${less.join(" und ")}${early?(less.length>1?", früher essen":" und früher essen"):""}`:"Abends früher essen";
-    groups.push([tip("Gua Sha","Morgens 2 Min Gua Sha, nach außen","Kann morgendliche Schwellungen kurz verringern. Der Effekt hält nur einige Stunden."),
+    groups.push([tip("Gua Sha","Morgens 2 Min Gua Sha, nach außen","Kann morgendliche Schwellungen kurz verringern. Der Effekt hält nur einige Stunden, ein dauerhafter Effekt ist nicht belegt."),
       ab.length?tip(null,abT,"Das kann über Nacht Wasser im Gesicht einlagern."):tip(null,"Kopf beim Schlafen leicht hoch","Morgens sammelt sich weniger Wasser im Gesicht.")]);
   }
   groups.push([sit]);
@@ -642,7 +647,7 @@ function gesundheitAdvice(a){
   const dc=dietCtx();
   if(a.energie==="Ständig müde") g.push([tip(null,"Blutwerte ärztlich prüfen lassen","Z. B. Ferritin, B12, Vitamin D und Schilddrüse – häufige Ursachen für dauerhafte Müdigkeit.",{must:1}),
     dc.veg?tip("Eisen",dc.noGluten?"Linsen, Quinoa, Kürbiskerne mit Paprika oder Zitrone":"Linsen, Hafer, Kürbiskerne mit Paprika oder Zitrone","Eisen aus Pflanzen wird schlechter aufgenommen. Vitamin C in derselben Mahlzeit hilft.",{e:"🫘"})
-      :tip("Eisen & B12",dc.noRed?"Eier, Fisch und Geflügel jeden Tag":"Rotes Fleisch 1–2× pro Woche, Leber gelegentlich",dc.noRed?"Liefern gut verfügbares Eisen und B12, beides fehlt oft bei Müdigkeit.":"Eisen aus Fleisch nimmt der Körper deutlich besser auf als aus Pflanzen. Leber ist sehr reich an Vitamin A, darum nur gelegentlich.",{e:"🥩"}),
+      :tip("Eisen & B12",dc.noRed?(state.profile.fish!=="oft"?"Eier und Geflügel jeden Tag":"Eier, Fisch und Geflügel jeden Tag"):"Rotes Fleisch 1–2× pro Woche, Leber gelegentlich",dc.noRed?"Liefern gut verfügbares Eisen und B12, beides fehlt oft bei Müdigkeit.":"Eisen aus Fleisch nimmt der Körper deutlich besser auf als aus Pflanzen. Leber ist sehr reich an Vitamin A, darum nur gelegentlich.",{e:"🥩"}),
     tip("Tageslicht am Morgen","Morgens 10 Min raus","Tageslicht macht wach.")]);
   if(a.energie==="Tief nach dem Essen") g.push([tip("Erst Gemüse & Protein","Erst Gemüse & Protein, dann Beilage","Der Blutzucker steigt langsamer, das Tief danach ist kleiner."),
     tip("10 Min gehen","10 Min gehen nach dem Essen","Bewegung senkt den Blutzucker nach dem Essen.")]);
@@ -667,7 +672,7 @@ function gesundheitAdvice(a){
   if(a.stil==="Vegetarisch"){
     const noMilk=intol.includes("Laktose")||(a.meiden||[]).includes("Milchprodukte");
     // Bei „Ständig müde“ steht der Eisen-Tipp schon oben
-    g.push([a.energie==="Ständig müde"?null:tip("Eisen + Vitamin C",intol.includes("Gluten")?"Linsen & Quinoa mit Paprika/Zitrone":"Linsen & Hafer mit Paprika/Zitrone","Vitamin C verbessert die Aufnahme von Eisen."),
+    g.push([a.energie==="Ständig müde"?null:tip("Eisen + Vitamin C",intol.includes("Gluten")||dietCtx().noGluten?"Linsen & Quinoa mit Paprika/Zitrone":"Linsen & Hafer mit Paprika/Zitrone","Vitamin C verbessert die Aufnahme von Eisen."),
       tip("B12 im Blick",noMilk?"Täglich Eier":"Täglich Milch, Ei oder Käse","Sonst B12 als Supplement ergänzen.",{sup:"b12"})]);
   }
   const d=dietCtx();
@@ -715,8 +720,8 @@ function foodTips(id,a){
     }
     if(st.includes("Unreinheiten")&&a.art!=="Tiefe, schmerzhafte Knoten"&&!(own&&/sugar|dairy/.test(own.f.id))){
       // Nur testen, was man nicht schon meidet
-      const what=d.noSugar&&d.noMilk?"Weißmehl und Süßes":d.noSugar?"Milch":d.noMilk?"Zucker und Weißmehl":"Zucker und Milch";
-      out.push(tip("4-Wochen-Test","4 Wochen wenig "+what,`Bei manchen Menschen hängen Unreinheiten mit ${d.noSugar&&!d.noMilk?"Milch":d.noMilk?"stark zuckerhaltigem Essen":"stark zuckerhaltigem Essen und Milch"} zusammen. Der Test zeigt, ob das bei dir so ist.`,{e:"🍬"}));
+      const L=[d.noSugar?null:"Zucker", d.noMilk?null:"Milch"].filter(Boolean);
+      if(L.length) out.push(tip("4-Wochen-Test","4 Wochen wenig "+L.join(" und "),`Bei manchen Menschen hängen Unreinheiten mit ${[d.noSugar?null:"stark zuckerhaltigem Essen", d.noMilk?null:"Milch"].filter(Boolean).join(" und ")} zusammen. Der Test zeigt, ob das bei dir so ist.`,{e:L[0]==="Milch"?"🥛":"🍬"}));
     }
     if(st.includes("Unreinheiten")||st.includes("Glänzt / große Poren"))
       out.push(tip("Zink aus dem Essen","Zinkreich essen: "+foodList([["Rindfleisch",!d.noRed],["Austern",!d.veg],["Eier",!d.vegan],["Kürbiskerne",true],["Linsen",d.veg]],3),"Zink trägt zur Erhaltung normaler Haut bei.",{e:"🥩"}));

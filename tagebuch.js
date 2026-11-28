@@ -160,7 +160,7 @@ function qClass(n){ return scoreClass(n).replace("s-","q-"); }
 function rateRing(n,none){
   if(n==null) return `<div class="fring q-none"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="52" class="trk"/></svg><div class="fring-t"><b>–</b><small>von 100</small></div></div><div class="flabel q-none">${none||"Angaben fehlen"}</div>`;
   const r=52, c=2*Math.PI*r, off=c*(1-Math.max(0,Math.min(100,n))/100), cls=qClass(n);
-  const lab=n>=85?"Sehr gut":n>=70?"Gut":n>=50?"Okay":n>=30?"Mäßig":"Schlecht";
+  const lab=n>=85?"Sehr gut":n>=75?"Gut":n>=50?"Okay":n>=30?"Mäßig":"Schlecht";
   // Zahl im Ring, Einstufung als eigenes Etikett darunter
   return `<div class="fring ${cls}"><svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="${r}" class="trk"/><circle cx="60" cy="60" r="${r}" class="val" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${off.toFixed(1)}"/></svg><div class="fring-t"><b>${n}</b><small>von 100</small></div></div><div class="flabel ${cls}">${lab}</div>`;
 }

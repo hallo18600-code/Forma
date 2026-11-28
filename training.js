@@ -1,4 +1,6 @@
 // Satz als Text: „60 kg×8“ bzw. bei Zeit-Sätzen (z. B. Plank, Laufen aus einer anderen App) „60 s“ / „30 min“
+// Zeit-Übung (Plank, Zeit-Sätze aus anderer App): Eingabe in Sekunden statt Wiederholungen
+function isTimed(e){ return (e.sets||[]).some(s=>s.sec>0&&!(s.reps>0)); }
 function setTxt(s){
   if(s.sec>0&&!(s.reps>0)){ const t=s.sec>=120?Math.round(s.sec/60)+" min":Math.round(s.sec)+" s"; return (+s.kg>0?kgTxt(+s.kg)+" kg · ":"")+t; }
   return kgTxt(+s.kg||0)+"×"+s.reps;
@@ -34,7 +36,7 @@ function startSets(id, n){
     if(done.length) return done.map(s=>Object.assign({kg:s.kg, reps:s.reps},s.sec>0&&!(s.reps>0)?{sec:s.sec}:{}));
   }
   const x=EX[id], bw=x&&x.eq==="Körpergewicht";
-  return Array.from({length:n||1},()=>({kg:bw?0:20, reps:x&&x.pattern==="plank"?30:6}));
+  return Array.from({length:n||1},()=>x&&x.pattern==="plank"?{kg:0, reps:0, sec:30}:{kg:bw?0:20, reps:6});
 }
 function clock(t0){
   const s=Math.max(0, Math.floor((Date.now()-t0)/1000));
@@ -167,8 +169,14 @@ function renderLive(){
         let n=0;
         return `<div class="wo-ex">
           <div class="row space"><button class="ex-open" data-act="exi-open" data-id="${e.id}">${exThumb(e.id)}<span><span class="ex-name">${exName(e.id)}</span><span class="sub">Zuletzt ${lastSet(e.id)}</span></span></button><button class="x" data-act="del-ex" data-e="${ei}" aria-label="Übung entfernen">✕</button></div>
-          <table class="sets"><tr><th>SATZ</th><th>ZUVOR</th><th>KG</th><th>WDH</th><th></th></tr>
-            ${e.sets.map((s,si)=>`<tr class="${s.done?"done":""}">
+          <table class="sets"><tr><th>SATZ</th><th>ZUVOR</th><th>KG</th><th>${isTimed(e)?"SEK":"WDH"}</th><th></th></tr>
+            ${e.sets.map((s,si)=>isTimed(e)?`<tr class="${s.done?"done":""}">
+              <td>${++n}</td>
+              <td class="muted">${prevSet(e.id, si)}</td>
+              <td><input inputmode="decimal" data-act="set-kg" data-e="${ei}" data-s="${si}" value="${numIn(s.kg)}" aria-label="kg"></td>
+              <td><input inputmode="numeric" data-act="set-reps" data-e="${ei}" data-s="${si}" value="${s.sec||0}" aria-label="Sekunden"></td>
+              <td><button class="chk ${s.done?"on":""}" data-act="toggle-set" data-e="${ei}" data-s="${si}">${s.done?"✓":""}</button></td>
+            </tr>`:`<tr class="${s.done?"done":""}">
               <td>${++n}</td>
               <td class="muted">${prevSet(e.id, si)}</td>
               <td><input inputmode="decimal" data-act="set-kg" data-e="${ei}" data-s="${si}" value="${numIn(s.kg)}" aria-label="kg"></td>
@@ -209,7 +217,7 @@ function woEditSheet(){
       <b>${exName(e.id)}</b>
       ${e.sets.map((st,si)=>`<div class="row mt-2"><span class="sub set-lbl">Satz ${si+1}</span>
         <input ${inp} type="text" inputmode="decimal" data-act="wo-set" data-f="kg" data-e="${ei}" data-s="${si}" value="${numIn(st.kg)}" aria-label="kg"><span class="sub">kg ×</span>
-        <input ${inp} type="number" inputmode="numeric" data-act="wo-set" data-f="reps" data-e="${ei}" data-s="${si}" value="${st.reps}" aria-label="Wiederholungen"><span class="sub">Wdh.</span>
+        ${st.sec>0&&!(st.reps>0)?`<input ${inp} type="number" inputmode="numeric" data-act="wo-set" data-f="sec" data-e="${ei}" data-s="${si}" value="${st.sec}" aria-label="Sekunden"><span class="sub">Sek.</span>`:`<input ${inp} type="number" inputmode="numeric" data-act="wo-set" data-f="reps" data-e="${ei}" data-s="${si}" value="${st.reps}" aria-label="Wiederholungen"><span class="sub">Wdh.</span>`}
         <button class="x" data-act="wo-del-set" data-e="${ei}" data-s="${si}" aria-label="Satz entfernen">✕</button></div>`).join("")}
     </div>`).join("")}
     <div class="gap"></div><button class="pill primary" data-act="wo-save">Speichern</button>

@@ -386,7 +386,8 @@ const EX = {}; // wird in uebungen.js mit allen Übungen gefüllt
 // Plan-Vorlagen: max. 2 Sätze pro Übung, 4–5 Sätze pro Muskel und Training (Gesäß: Beinpresse + Hip Thrust), Startwert immer 6 Wdh.
 // Kurzform: [Übungs-ID, Start-kg, Anzahl Sätze (Standard 2), Wdh (Standard 6)]
 function planDay(id, name, list){
-  return {id, name, exercises:list.map(([e,kg,n=2,reps=6])=>({id:e, sets:Array.from({length:n},()=>({kg, reps}))}))};
+  // Plank: Zahl = Sekunden (eigenes Feld sec), damit „30 s“ statt „0×30“ angezeigt wird
+  return {id, name, exercises:list.map(([e,kg,n=2,reps=6])=>({id:e, sets:Array.from({length:n},()=>e==="plank"?{kg, reps:0, sec:reps}:{kg, reps})}))};
 }
 function defaultRoutines(){
   return [

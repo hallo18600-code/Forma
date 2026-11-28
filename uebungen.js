@@ -99,6 +99,8 @@ const EX_LIST = [
   ["walk_lunge","Ausfallschritt gehend","Beine","Kurzhantel","lunge","quads,gesaess","beinbeuger,adduktoren"],
   ["bulgarian","Bulgarische Kniebeuge","Beine","Kurzhantel","split_squat","quads,gesaess","beinbeuger,adduktoren"],
   ["stepup","Step-up","Beine","Kurzhantel","stepup","quads,gesaess","beinbeuger"],
+  ["bulgarian_bw","Bulgarische Kniebeuge","Beine","Körpergewicht","split_squat","quads,gesaess","beinbeuger,adduktoren"],
+  ["stepup_bw","Step-up (Stuhl)","Beine","Körpergewicht","stepup","quads,gesaess","beinbeuger"],
   ["leg_ext","Beinstrecker","Beine","Maschine","leg_ext","quads",""],
   ["leg_curl","Beinbeuger liegend","Beine","Maschine","leg_curl_lying","beinbeuger","waden"],
   ["leg_curl_seat","Beinbeuger sitzend","Beine","Maschine","leg_curl_seat","beinbeuger","waden"],

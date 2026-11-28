@@ -141,7 +141,9 @@ function skinInsights(){
   for(let p=0;p<400;p++){ const B=blocks.slice(), off=Math.floor(rnd()*SK_BLOCK);
     for(let i=B.length-1;i>0;i--){ const j=Math.floor(rnd()*(i+1)); [B[i],B[j]]=[B[j],B[i]]; }
     const flat=[].concat(...B), y=flat.slice(off).concat(flat.slice(0,off)); null_.push(maxStat(y)); }
-  null_.sort((a,b)=>a-b); const T=Math.max(SK_T, null_[Math.floor(null_.length*0.975)]);
+  // Unter 14 Einträgen strenger (t ≥ 3 und 99 %-Schwelle): mit wenigen Tagen gibt es nur wenige Mischungen, Zufall sähe sonst zu oft „auffällig“ aus
+  const few=ys.length<14;
+  null_.sort((a,b)=>a-b); const T=Math.max(few?3:SK_T, null_[Math.floor(null_.length*(few?0.99:0.975))]);
   const chosen=[];
   while(chosen.length<SK_MAXF){
     let best=null; const cand=[];
@@ -174,7 +176,7 @@ function skinInsights(){
   if(chosen.length){
     const m=fit(chosen,ys);   // endgültige Werte aus dem gemeinsamen Modell; jede Auffälligkeit muss dort weiter bestehen
     if(m) res=chosen.map((f,i)=>({f, diff:Math.round(m.o.beta[i+1]*10)/10, n:m.R.filter(k=>X[idx(f)][k]===1).length, t:tOf(m,i+1)}))
-      .filter(x=>Math.sign(x.diff)===x.f.dir&&Math.abs(x.diff)>=SK_EFF&&Math.abs(x.t)>=SK_T)
+      .filter(x=>Math.sign(x.diff)===x.f.dir&&Math.abs(x.diff)>=SK_EFF&&Math.abs(x.t)>=(few?3:SK_T))
       .sort((a,b)=>(a.diff<0?0:1)-(b.diff<0?0:1)||Math.abs(b.diff)-Math.abs(a.diff));
     // Bei genau einer Auffälligkeit zusätzlich die beiden echten Durchschnitte (bei mehreren wären sie nicht mehr sauber trennbar)
     if(res.length===1){ const f=res[0].f, m1=fit([f],ys);

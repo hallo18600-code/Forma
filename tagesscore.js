@@ -22,7 +22,7 @@ function dayScore(s){
   const sorted=items.slice().sort((a,b)=>b.score-a.score||b.kcal-a.kcal);
   return { score, items:sorted, best:sorted[0], worst:sorted.length>1&&sorted[sorted.length-1].score<sorted[0].score?sorted[sorted.length-1]:null };
 }
-function dsLabel(n){ return n>=85?"Sehr gut":n>=70?"Gut":n>=50?"Okay":n>=30?"Mäßig":"Schlecht"; }
+function dsLabel(n){ return n>=85?"Sehr gut":n>=75?"Gut":n>=50?"Okay":n>=30?"Mäßig":"Schlecht"; }
 
 // Schmale Zeile unter der Kalorien-Karte
 function dayScoreRow(){
