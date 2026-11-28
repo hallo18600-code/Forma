@@ -883,9 +883,9 @@ document.getElementById("app").addEventListener("click", e=>{
   }
   else if(act==="water"){ day().water = day().water===+el.dataset.v ? +el.dataset.v-1 : +el.dataset.v; syncAuto(state.date); save(); }
   else if(act==="skin-rate"){ const d=day(); d.skin=Math.max(1,Math.min(10,Math.round(+el.dataset.v))); delete d.skinSkip; ui.skinEdit=false; save(); }
-  else if(act==="skin-adj"){ const d=day(), v=skinVal(state.date); d.skin=v==null?5:Math.max(1,Math.min(10,v+ +el.dataset.v)); save(); }
+  else if(act==="skin-adj"){ const d=day(), v=skinVal(state.date); d.skin=v==null?(+el.dataset.v<0?4:5):Math.max(1,Math.min(10,v+ +el.dataset.v)); save(); }
   else if(act==="skin-edit"){ ui.skinEdit=true; }
-  else if(act==="sleep-adj"){ const d=day(); d.sleep=d.sleep==null?7:Math.max(0,Math.min(14,Math.round((d.sleep+ +el.dataset.v)*2)/2)); save(); }
+  else if(act==="sleep-adj"){ const d=day(); d.sleep=d.sleep==null?(+el.dataset.v<0?6.5:7):Math.max(0,Math.min(14,Math.round((d.sleep+ +el.dataset.v)*2)/2)); save(); }
   else if(act==="water-add"){ day().water=(day().water||0)+1; syncAuto(state.date); save(); }
   else if(act==="water-sub"){ day().water=Math.max(0,(day().water||0)-1); syncAuto(state.date); save(); }
   else if(act==="task"){

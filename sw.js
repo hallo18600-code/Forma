@@ -1,7 +1,7 @@
 // Life Maxxing – Service Worker: macht die App offline nutzbar.
 // C = App-Dateien (Version bei jeder Änderung an index.html/JS hochzählen).
 // D = Produktdatenbank (bleibt über App-Updates erhalten, wird im Hintergrund aktualisiert).
-const C="forma-v138", D="forma-data",
+const C="forma-v139", D="forma-data",
   A=["./","index.html","styles.css","data.js","foods-search.js","portionen.js","texterkennung.js","scanner.js","vorschlaege.js","bedarf.js","erinnerungen.js","tagesscore.js","hautcheck.js","fotos.js","tagebuch.js","coach.js","onboarding.js","training.js","verlauf.js","profil.js","figur.js","uebungen.js","gymimport.js","bewertung.js","alternativen.js","recht.js","i18n.js","app.js","manifest.webmanifest","impressum.html","datenschutz.html","vendor/zxing.min.js","icon.svg","icon-192.png","icon-512.png","apple-touch-icon.png"];
 // cache:"reload": beim Einrichten immer die frischen Dateien vom Server holen (nicht aus dem Browser-Zwischenspeicher)
 self.addEventListener("install",e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(A.map(a=>new Request(a,{cache:"reload"})))).then(()=>self.skipWaiting()));});
@@ -33,7 +33,7 @@ self.addEventListener("fetch",e=>{
     e.respondWith(fetch(e.request).then(r=>{ if(r.ok){ const cp=r.clone(); caches.open(C).then(c=>c.put(e.request,cp)); } return r; }).catch(()=>caches.match(e.request).then(h=>h||(e.request.mode==="navigate"?caches.match("index.html"):Response.error()))));
     return;
   }
-  e.respondWith(caches.match(e.request).then(h=>h||fetch(e.request).then(r=>{ if(r.ok&&u.hostname==="cdn.jsdelivr.net"){ const cp=r.clone(); caches.open(C).then(c=>c.put(e.request,cp)); } return r; })));
+  e.respondWith(caches.match(e.request).then(h=>h||fetch(e.request)));
 });
 // Tippen auf eine Erinnerung: offene App nach vorne holen, sonst öffnen
 self.addEventListener("notificationclick",e=>{
