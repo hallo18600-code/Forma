@@ -23,7 +23,7 @@ const ALT_MAP={
   proteinbar:h=>/(quark|pudding|mousse|joghurt|yog|skyr|creme|dessert|milk|milch|drink|shake)/.test(h)?["Skyr Natur","Magerquark","Griechischer Joghurt"]:["Skyr Natur","Magerquark","Griechischer Joghurt","Mandeln"],
   chips:["Mandeln","Walnüsse","Cashewkerne","Karotte"],
   ricecake:["Mandeln","Walnüsse","Karotte"],
-  fastfood:h=>/(mehl|farine|flour)/.test(h)?[]:/(pommes|fritten|kroketten|rosti|kartoffelpuffer|reibekuchen|wedges)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Bratkartoffeln"]
+  fastfood:h=>/(mehl|farine|flour|sauce|sosse|dressing|gewurz)/.test(h)?[]:/(pommes|fritten|kroketten|rosti|kartoffelpuffer|reibekuchen|wedges)/.test(h)?["Kartoffeln gekocht","Süßkartoffel","Bratkartoffeln"]
     :/(nugget|chicken|wings|hahnchen|huhn|schnitzel|cordon)/.test(h)?["Hähnchenbrust (roh)","Putenbrust (roh)"]
     :/(fisch|fish|hering|herring)/.test(h)?["Lachsfilet (roh)","Kabeljau (roh)","Forelle (roh)"]
     :/(burger|steak)/.test(h)?["Rindersteak (roh)","Hähnchenbrust (roh)","Gulasch"]
@@ -44,7 +44,7 @@ const ALT_MAP={
   processedmeat:h=>/(passata|pomodor|tomat|sugo|sauce|flips|chips)/.test(h)?[]:/kase/.test(h)&&!/(wurst|schinken|salami|lyoner|fleisch|leberkas|kabanos|cabanossi|knacker|wiener|speck)/.test(h)?["Hüttenkäse","Magerquark","Mozzarella"]:["Putenbrust (roh)","Hähnchenbrust (roh)","Rindersteak (roh)","Ei"],
   // Veganer Käse → Käse, veganer Joghurt → Joghurt, sonst Fleisch/Ei/Hülsenfrüchte
   // Vegane Mayo/Soße oder Zwiebelringe sind kein Fleischersatz: keine Alternative
-  ersatz:h=>/(mayo|sauce|sosse|dressing|zwiebelring)/.test(h)?[]
+  ersatz:h=>/(mayo|sauce|sosse|dressing|zwiebelring|cuisine|kochcreme|creme fraiche|sahne|cream)/.test(h)?[]
     :/(frischcreme|streichcreme|aufstrich)/.test(h)?["Hüttenkäse","Magerquark"]
     :/(kase|cheese|mozzarella|gouda|feta|parmesan|reibe|frischkase|camembert|cheddar)/.test(h)?["Mozzarella","Hüttenkäse","Feta"]
     :/(joghurt|yog|quark|skyr|dessert)/.test(h)?["Naturjoghurt 1,5 %","Skyr Natur","Griechischer Joghurt"]

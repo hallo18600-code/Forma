@@ -54,7 +54,7 @@ const R_CATS=[
    b:[20,16,10,18],g:["","","",""],x:["Raffiniertes Samenöl, nicht naturbelassen","~Sehr kalorienreich|Raffiniertes Samenöl","Viel Omega-6, wenig Omega-3|Raffiniertes Samenöl","Raffiniertes Samenöl, nicht naturbelassen"]},
   {id:"coconut",k:["=coco","noix de coco","lait de coco","vita coco","kokos","coconut"],n:["kokosfett gehartet"],w:1,
    b:[52,52,94,84],g:["Natürliches Fett aus der Kokosnuss","MCT-Fette sättigen gut","Kokosfett ist gut für die Haut","MCT-Fette liefern schnell Energie"],x:["Kaum Protein","~Sehr kalorienreich – sparsam","",""]},
-  {id:"goodfat",k:["lebertran","cod liver oil","avocado ol","oliven ol","lein ol","walnuss ol","kurbiskern ol","hanf ol","huile d'olive","huile d olive","aceite de oliva","extra vergine","vierge extra","huile de noix","olivenol","olive oil","olivenoel","=ghee","butterschmalz","avocadool","leinol","walnussol","hanfol","schmalz","=talg","rindertalg","mct ol","mct-ol","kurbiskernol","=olio","olive extra","kakaobutter","mct","=c8","extra virgin","virgen extra","virgem extra","extra vierge","huile olive","olijfolie","olijf olie","olijfo","azeite","aceite de oliva","oliveol","oliv olja","maslinovo","маслиново","оливков","huile d avocat","huile d'avocat","huile d’avocat","avocado oil","walnootolie","leinsaatol","leinsaat ol","lijnzaadolie","schwarzkummelol","cumin noir","klarowane"],n:["kokos","coconut","=coco"],w:1,
+  {id:"goodfat",k:["lebertran","cod liver oil","linseed oil","flaxseed oil","pumpkin seed oil","hemp seed oil","walnut oil","avocado ol","oliven ol","lein ol","walnuss ol","kurbiskern ol","hanf ol","huile d'olive","huile d olive","aceite de oliva","extra vergine","vierge extra","huile de noix","olivenol","olive oil","olivenoel","=ghee","butterschmalz","avocadool","leinol","walnussol","hanfol","schmalz","=talg","rindertalg","mct ol","mct-ol","kurbiskernol","=olio","olive extra","kakaobutter","mct","=c8","extra virgin","virgen extra","virgem extra","extra vierge","huile olive","olijfolie","olijf olie","olijfo","azeite","aceite de oliva","oliveol","oliv olja","maslinovo","маслиново","оливков","huile d avocat","huile d'avocat","huile d’avocat","avocado oil","walnootolie","leinsaatol","leinsaat ol","lijnzaadolie","schwarzkummelol","cumin noir","klarowane"],n:["kokos","coconut","=coco"],w:1,
    b:[48,50,84,74],g:["Natürliches Fett zum Kochen","Natürliches Fett – sparsam gut","Gute Fette für geschmeidige Haut","Fett liefert lange Energie"],x:["Kein Protein","~Sehr kalorienreich – sparsam","",""]},
   {id:"peanut",k:["cacahuete","cacahuetes","mani ","erdnuss","peanut"],w:1,
    b:[60,44,50,64],g:["Viel Protein für eine Nuss","Sättigt gut – kleine Menge","","Fett und Protein liefern gleichmäßige Energie"],x:["Hülsenfrucht, nicht primal","~Sehr kalorienreich|Hülsenfrucht, nicht primal","Viel Omega-6|Hülsenfrucht, nicht primal","Hülsenfrucht, nicht primal"]},
@@ -279,6 +279,10 @@ function brandCat(item){
   return id||null;
 }
 const R_BYID={}; R_CATS.forEach(c=>R_BYID[c.id]=c);
+// Rückfall „Gericht“, wenn die Kategorie nicht passt (z. B. Speck, trockener Reis): gleiche Rechnung, aber ohne Lob-Texte
+// wie „Warme Mahlzeit aus echten Zutaten“ bzw. ohne „Soße & Panade“, die dann oft nicht stimmen
+const R_DISHX=Object.assign({},R_BYID.mixedmeal,{g:["","","",""],b:R_BYID.mixedmeal.b.map(v=>v-12)});   // unklare Zuordnung → vorsichtiger Grundwert
+const R_READYX=Object.assign({},R_BYID.readymeal,{x:["Fertigprodukt mit Zusätzen","Fertigprodukt mit Zusätzen","Viel Salz & Zusätze","Fertigprodukt, macht schnell müde"]});
 // Ortsnamen auf „-burger“ (Limburger Käse, Regensburger Wurst) sind kein Burger
 const R_PLACEBURGER=/(limburger|salzburger|regensburger|altenburger|coburger|freiburger|langenburger|luneburger|mecklenburger|neuburger|toggenburger|harzburger|oldenburger|strassburger|flensburger|bitburger|hachenburger)/g;
 // Getränke (Packung in ml) mit Obst im Namen („Orange“ von Solevita, „Johannisbeere“) sind Saft, Nektar oder Limo – kein ganzes Obst.
@@ -313,7 +317,17 @@ const R_DRIED=/(getrocknet|trocken|dried|\bdry\b|\bsoft|secch|seche|deshidrat|ch
 const R_DRINKW=/(limo|getrank|drink|h2o|schorle|wasser(?!melone)|\bwater\b|spritz|soda|radler|eistee|ice tea|\btea\b|\btee\b|sirup|nektar|nectar|saft|juice|smoothie|\bshot\b|geschmack|\btouch\b)/;
 function rPlausible(cat,n,heavy,h){
   if(!cat) return cat; h=h||"";
-  const id=cat.id, dish=R_BYID[heavy?"readymeal":"mixedmeal"];
+  const id=cat.id, dish=heavy?R_READYX:R_DISHX;
+  // Würzmischungen sind Gewürze (nicht „Gyros“-Gericht oder Fertiggericht)
+  if(id!=="spice"&&/(wurzmischung|gewurzmischung|streuwurze|seasoning|currypulver|curry powder|currypowder)/.test(h)&&n.pr<20) return R_BYID.spice;
+  // Ganze Kaffeebohnen sind Kaffee, keine Hülsenfrucht
+  if(id==="legume"&&/(kaffee|caffe|cafe|espresso|crema|arabica|robusta|coffee)/.test(h)) return R_BYID.coffee||cat;
+  // Essig („Apple Cider Vinegar“) ist kein Alkohol
+  if(id==="alcohol"&&/(vinegar|essig|vinaigre|aceto)/.test(h)) return R_BYID.spice;
+  // Öle mit englischem Namen (Linseed oil) sind Fett, keine Nüsse
+  if(["nuts","peanut"].includes(id)&&n.fa>85&&n.pr<3) return R_BYID.goodfat;
+  // Fisch- und Käse-Sticks sind kein Knabberzeug
+  if(id==="chips"&&/(fisch|fish|surimi|mozzarella|kase|cheese)/.test(h)&&n.pr>=8) return R_BYID.fastfood;
   // Proteinpulver mit Geschmacksnamen („Cheesecake“, „Cookies“, „Vanilla Pudding“): über 60 g Protein bei wenig Fett
   if(n.pr>=60&&n.fa<12&&n.kc>=300&&!["whey","leanfish","fattyfish","redmeat","poultry","organ","processedmeat","egg","soy","legume","spice","protdairy"].includes(id)) return R_BYID.whey;
   // Nur ein Bestandteil im Namen, das Produkt ist etwas anderes (zweiter Versuch ohne diese Art)
@@ -330,7 +344,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="sugar"&&n.pr>=8) return "RETRY";                            // „Frühstücksfleisch im Gelee“            // „Fruchtaufschnitt“ (Fruchtleder)
   if(id==="cereal"&&/(nugget|panade|paniert|schnitzel|backteig|filet|fisch)/.test(h)) return R_BYID.fastfood;
   if(id==="readymeal"&&/lasagne/.test(h)&&n.kc>300&&n.fa<5) return R_BYID.refined;   // trockene Lasagneplatten sind Nudeln, kein Fertiggericht
-  if(id==="fastfood"&&/(\bpane\b|\bpains?\b|\bbrot|brotchen|\bbuns?\b|\brolls?\b|semmel|weckle)/.test(h)&&n.pr<12&&n.fa<12) return R_BYID.refined;   // Hot-Dog-Brötchen
+  if(id==="fastfood"&&/(\bpane\b|\bpains?\b|\bbrot|brotchen|\bbuns?\b|\brolls?\b|semmel|weckle|wrap|tortilla|durum|fladenbrot|\bpita)/.test(h)&&n.pr<12&&n.fa<12) return R_BYID.refined;   // Hot-Dog-Brötchen
   if(id==="cereal"&&/(baguette|bagutte|\bpain\b|brotchen|\bbrot\b|bread)/.test(h)) return R_BYID.refined;   // „Mini baguettes aux céréales“   // Nuggets mit Cornflakes-Panade
   if(id==="ricecake"&&n.su>=15) return R_BYID.sweets;                  // Reiswaffeln mit Schokolade                         // „Sardines sauce tomate“: Fisch in Soße, keine Soße                        // Makrele „vin blanc“, Hähnchen in Weinsoße – Getränke haben kein Protein
   if(id==="softdrink"&&n.kc>150) return n.su>=20?R_BYID.sweets:"RETRY";   // „Sour Cola“-Fruchtgummi – kein Getränk
@@ -352,7 +366,7 @@ function rPlausible(cat,n,heavy,h){
   if(id==="banana"&&n.kc<60) return "RETRY";                         // Bananen-Milchdrink: echte Banane hat ca. 90 kcal
   if(["poultry","redmeat","leanfish","fattyfish"].includes(id)&&n.cb>8) return /(panier|panade|breaded|coated|crispy|knusper|backfisch|nugget|=pane)/.test(h)?R_BYID.fastfood:dish;
   if(id==="fastfood"&&n.kc<90&&/(passata|sugo|tomat|pizzasauce|pizza sauce)/.test(h)) return R_BYID.sauce;
-  if(id==="cereal"&&/(chili|pfeffer|gewurz|spice|paprika)/.test(h)) return R_BYID.spice;
+  if(id==="cereal"&&/(chili|pfeffer|gewurz|spice|paprika)/.test(h)) return n.kc>300&&/(crunch|bites|snack|sticks|cracker|chips|knabber|brezel|saltletts)/.test(h)?R_BYID.chips:R_BYID.spice;
   if(id==="fermentedveg"&&n.kc>150&&n.cb>30) return R_BYID.readymeal;      // Instant-Nudeln "Kimchi"
   if(id==="coconut"&&(n.su>25||n.su>15&&n.cb>30)) return n.su<=25&&/(mix|nuss|cashew|mandel|\bnut)/.test(h)?"RETRY":R_BYID.sweets;  // Kokos-Gebäck; Nuss-Mix: als Nuss prüfen
   if(id==="coconut"&&n.kc<70&&n.su>6) return R_BYID.softdrink;    // Getränk mit Kokos (Kokoswasser hat weniger Zucker)
@@ -385,7 +399,8 @@ function rPlausible(cat,n,heavy,h){
   if(id==="oats"&&n.kc<120&&n.cb<15&&/(drink|barista|milch|milk|oatly|alpro)/.test(h)) return R_BYID.plantmilk; // Haferdrink
   if(id==="broth"&&n.kc>60) return R_BYID.readymeal;
   if(id==="nuts"&&n.fa<25&&n.pr<15) return n.su>20?R_BYID.sweets:dish;
-  if(["nuts","peanut","coconut","avocado"].includes(id)&&n.su>25) return R_BYID.sweets;
+  // Studentenfutter: Zucker aus Rosinen, naturbelassen – nur mit Schoko/Honig/Joghurt als Süßware
+  if(["nuts","peanut","coconut","avocado"].includes(id)&&n.su>25&&!(/(studentenfutter|trail ?mix|nuss.?frucht|fruchte.?nuss|nut.?mix|fruit.?nut)/.test(h)&&!/(schoko|choco|joghurt|yogurt|honig|honey|karamell|caramel|gebrannt|kandiert|dragee)/.test(h))) return R_BYID.sweets;
   if(id==="darkchoc"&&n.su>36) return R_BYID.sweets; // 70 % hat ca. 30 g Zucker, erst darüber wie normale Schokolade
   if(id==="spice"&&n.su>(/(essig|aceto|balsam|vinaigre|vinegar)/.test(h)?25:15)) return R_BYID.sweets;   // Balsamico hat von Natur aus etwas Zucker
   if(id==="honey"&&(n.pr>=4||n.fi>=3)) return (n.fa>8||/(printen|keks|geback|kuchen|lebkuchen|riegel|snack|waffel)/.test(h))?R_BYID.sweets:R_BYID.cereal; // "Dinkel gepufft mit Honig" ist Frühstücksflocke, Honig-Printen sind Gebäck
@@ -483,7 +498,7 @@ function rClassify0(item){
   let kc=+item.kcal||0; const calc=pr*4+cb*4+fa*9;
   // Nicht bei Süßstoffen, Zuckeralkoholen (zuckerfreie Bonbons) und Alkohol: dort zählen Kohlenhydrate bzw. Alkohol anders
   const hk=" "+NORM((item.name||"")+" "+(item.brand||""))+" ";
-  const kcOwn=/(erythrit|stevia|sussstoff|sweetener|edulcorant|sucralose|allulose|xylit|birkenzucker|sukrin|aspartam|zuckerersatz|sans calorie)/.test(hk)||R_ALC.test(hk)||kc<calc&&R_POLYOL.test(hk);
+  const kcOwn=/(erythrit|stevia|sussstoff|sweetener|edulcorant|sucralose|allulose|xylit|birkenzucker|sukrin|aspartam|zuckerersatz|sans calorie)/.test(hk)||R_ALC.test(hk)&&!/(vinegar|essig|vinaigre|aceto)/.test(hk)||kc<calc&&R_POLYOL.test(hk);
   if(calc>30&&!kcOwn&&(kc<calc*0.6||kc>calc*1.6)) kc=Math.round(calc);
   const nova=+item.nova||0; let heavy=nova>=4||(!nova&&item.processed);
   const h=" "+NORM(item.name||"")+" ", words=rWords(h), nut={kc,pr,cb,fa,su,fi,sa,fiU:item.fiber==null||item.fiber==="",liq:item.liquid===true};
@@ -512,7 +527,7 @@ function rClassify0(item){
   for(let t=0;t<4;t++){
     if(cat&&cat.id==="mixedmeal"&&heavy) cat=R_BYID.readymeal;
     // Gerichte mit Fleisch/Fisch (z. B. "Bauerntopf mit Hackfleisch", "Tagliatelle Wildlachs") als Gericht werten
-    if(cat&&R_ANIMAL.includes(cat.id)&&!["broth","organ","cheese"].includes(cat.id)&&/(sauce|sosse|topf|salatbox|schlemmerfilet|a la |bordelaise|gratin|lasagne|tagliatelle|nudel|pasta|spaghetti|pizza|wrap|sandwich|burger|risotto|fertiggericht|mahlzeit|menu|suppe|eintopf)/.test(h.replace(R_PLACEBURGER,""))) cat=R_BYID[heavy?"readymeal":"mixedmeal"];
+    if(cat&&R_ANIMAL.includes(cat.id)&&!["broth","organ","cheese"].includes(cat.id)&&/(sauce|sosse|topf\b|salatbox|schlemmerfilet|a la |bordelaise|gratin|lasagne|tagliatelle|nudel|pasta|spaghetti|pizza|wrap|sandwich|burger|risotto|fertiggericht|mahlzeit|menu|suppe|eintopf)/.test(h.replace(R_PLACEBURGER,""))) cat=R_BYID[heavy?"readymeal":"mixedmeal"];
     const pc=rPlausible(cat,nut,heavy,h);
     // Getränk nur, wenn der Name auch nach Getränk klingt (sonst würde z. B. eine Banane mit zu niedrigen Kalorien zur Limo)
     if(pc==="RETRY"){ if(["fruit","berries","vitc","banana","veg","skinveg"].includes(cat.id)&&nut.kc<70&&R_DRINKW.test(h)) drinkLike=true; skip.add(cat.id); cat=foodCat(item,skip); continue; }
@@ -772,7 +787,7 @@ function scoreFood0(item,goal){
       }
       if(realFood&&cb>=15&&cs>=0.45&&carbGood>=0.6&&!highGI) good("Gute, langsame Carbs",9);
       if(pr<5&&kc>=20) bad("Wenig Protein ("+rG(pr)+" g)",10);
-      else if(["mixedmeal","readymeal"].includes(id)&&ps<0.2&&kc>=60){ score-=6; bad("Wenig Protein für ein Hauptgericht",10); }
+      else if(["mixedmeal","readymeal"].includes(id)&&ps<0.2&&kc>=60&&pr<10){ score-=6; bad("Wenig Protein für ein Hauptgericht",10); }
       if(fs>0.65&&pr>=5&&pr<15&&ps<0.2&&!R_GOODFAT.includes(id)) bad("Viel Fett, wenig Protein",9);
     } else if(g==="lose"){
       const liq=["juice","nectar","vegjuice","softdrink","plantmilk"].includes(id);
@@ -838,6 +853,8 @@ function scoreFood0(item,goal){
     else if(/konzentrat/.test(h)){ score-=[1,0,3,2][gi]; bad("Aus Konzentrat: weniger Vitamine",7); }
   }
   // Milchprodukte mit zugesetztem Zucker (Milch hat von Natur aus ca. 5 g): Fruchtjoghurt, Kakao, Fruchtquark
+  // Gemüse mit zugesetztem Zucker (Apfelrotkohl, Gurkensalat dänische Art): Abzug wie bei Milchprodukten
+  if(["veg","skinveg"].includes(id)&&su>9&&!/(rote bete|rote beete|beet|karotte|mohre|carrot|kurbis|pumpkin|mais|corn|zwiebel|onion|paprika|erbse|susskartoffel)/.test(h)){ const z=Math.min(15,(su-8)*1.5); score-=[z,z,z*1.2,z][gi]; bad("Zugesetzter Zucker ("+rG(su)+" g)",12); }
   if(["dairy","kefir","protdairy"].includes(id)&&su>6.5){ const z=Math.min(18,(su-6)*1.5); score-=[z,z,z*1.2,z][gi]; bad("Zugesetzter Zucker ("+rG(su)+" g)",12); }
   // Sahne, Frischkäse, Crème fraîche: viel Fett, wenig Protein – nicht wie Milch oder Joghurt bewerten
   // weicher Übergang bei 7–9 g Protein (sonst: 7,8 g → −16, 8,0 g → 0)
@@ -1096,11 +1113,12 @@ function rTextCheck(pros,cons,n){
     if(/(ohne kalorien|null kalorien|kalorienfrei|fast ohne kalorien)/.test(t)&&n.kc>(n.id==="spice"?200:20)) return true;
     if(/sehr viel protein/.test(t)&&n.pr<15) return true;
     if(/(viel protein|proteinreich|liefert protein|mehr protein als)/.test(t)&&n.pr<8) return true;
+    if(/etwas protein/.test(t)&&n.pr<3) return true;
     if(/protein/.test(t)&&!/etwas protein/.test(t)&&(n.pr<3||n.pr<8&&n.kc>0&&n.pr*4/n.kc<0.12)) return true;
     if(/kaum fett/.test(t)&&n.fa>5) return true;
     if(/moderaten kalorien/.test(t)&&n.kc>200) return true;
     if(/wenig zucker/.test(t)&&n.su>10) return true;
-    if(/ballaststoff/.test(t)&&fib&&+n.fiber<1.5) return true;
+    if(/ballaststoff/.test(t)&&fib&&+n.fiber<3) return true;   // EU: „Ballaststoffquelle“ erst ab 3 g
     if(/glutenfrei/.test(t)&&glut) return true;
     return false; };
   for(let i=pros.length-1;i>=0;i--) if(badPro(pros[i].t)||n.heavy&&/naturbelassen/i.test(pros[i].t)) pros.splice(i,1);
@@ -1113,7 +1131,7 @@ function rTextCheck(pros,cons,n){
   if(Math.abs((n.kcL||0)-n.kc)>5){ const fx=t=>t.replace(/^Nur \d+ kcal pro 100 g$/,"Wenig Kalorien").replace(/ \(\d+ kcal\)/,"");
     pros.forEach((x,i)=>{ pros[i]={t:fx(x.t),w:x.w}; }); cons.forEach((x,i)=>{ cons[i]={t:fx(x.t),w:x.w}; }); }
   // Vorab: Texte der Art, die bei diesem einen Produkt nicht ganz stimmen, passend umschreiben (oder streichen)
-  const lowSalt=n.saKnown&&n.sa<1;
+  const lowSalt=n.saKnown&&n.sa<=1.2;   // gleiche Grenze wie „Viel Salz“ mit Zahl
   for(let i=cons.length-1;i>=0;i--){ let t=cons[i].t; const t0=t;
     if(lowSalt&&/(salz|salzig)/i.test(t)&&!/\d/.test(t)) t=t.replace(/^Fertigprodukt: oft viel Salz & Zusätze$/,"Fertigprodukt mit Zusätzen").replace(/^Viel Salz & Zusätze$/,"Fertigprodukt mit Zusätzen")
       .replace(/, viel Salz & Pflanzenöl/,", mit Pflanzenöl").replace(/^Schwer & salzig, /,"Schwer, ").replace(/^Verarbeitet: Salz, Nitrit & Zusätze$/,"Verarbeitet: Nitrit & Zusätze")
@@ -1146,6 +1164,8 @@ function rTextCheck(pros,cons,n){
     if(/^kein protein/.test(l)&&n.pr>=3||/^(kaum|fast kein) protein/.test(l)&&n.pr>=8||/^wenig protein$/.test(l)&&n.pr>=12) { cons.splice(i,1); continue; }
     if(/weißmehl/.test(l)&&/(vollkorn|whole ?grain|wholegrain|integral|weetabix|corn|\bmais|hafer|\boat|reis|rice|buchweizen|hirse|quinoa|dinkel ?voll)/.test(n.h)){ cons[i]={t:t.replace(/Zucker & Weißmehl/,"Zucker & verarbeitetes Getreide").replace(/Weißmehl/,"Verarbeitetes Getreide"),w:cons[i].w}; continue; }
     if(/^wenig kalorien/.test(l)&&n.kc>120){ cons.splice(i,1); continue; }
+    if(/^wenig protein für ein hauptgericht/.test(l)&&n.pr>=10){ cons.splice(i,1); continue; }
+    if(/zucker/.test(l)&&n.su!=null&&n.su!==""&&+n.su<1&&!/(zugesetzt|süßstoff|zuckeralkohol|ohne zucker|weniger zucker|blutzucker)/.test(l)){ const f=R_SUGAR_FIX.find(([re])=>re.test(t)); if(f) cons[i]={t:f[1],w:cons[i].w}; else cons.splice(i,1); continue; }
     if(/salz|nitrit/.test(l)&&n.saKnown&&n.sa<0.6&&!R_SALTY.includes(n.id)){ cons.splice(i,1); continue; }
     if(/kaum carbs/.test(l)&&n.cb>=12){ cons.splice(i,1); continue; }
     if(/schnelle carbs/.test(l)&&pros.some(x=>/langsame.*carbs/i.test(x.t))){ cons.splice(i,1); continue; }
