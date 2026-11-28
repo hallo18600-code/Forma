@@ -31,7 +31,7 @@ function startSets(id, n){
   for(const w of [...state.workouts].reverse()){
     const hit=(w.exercises||[]).find(e=>e.id===id);
     const done=hit ? (hit.sets||[]).filter(s=>s.done) : [];
-    if(done.length) return done.map(s=>({kg:s.kg, reps:s.reps}));
+    if(done.length) return done.map(s=>Object.assign({kg:s.kg, reps:s.reps},s.sec>0&&!(s.reps>0)?{sec:s.sec}:{}));
   }
   const x=EX[id], bw=x&&x.eq==="Körpergewicht";
   return Array.from({length:n||1},()=>({kg:bw?0:20, reps:x&&x.pattern==="plank"?30:6}));

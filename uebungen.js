@@ -318,7 +318,7 @@ function renderExInfo(){
         ${exChart(id)}
         ${exRecords(id)}
         ${cues.length?`<h2 class="exi-h">So geht's</h2><ol class="excue">${cues.map(c=>`<li>${c}</li>`).join("")}</ol>`:""}
-        ${hist.length?`<h2 class="exi-h">Verlauf</h2><div class="exhist">${hist.map(s=>`<div><b>${labelDate(s.date)}</b><span>${s.sets.map(t=>kgTxt(+t.kg)+" × "+t.reps).join(" · ")}</span></div>`).join("")}</div>`:""}
+        ${hist.length?`<h2 class="exi-h">Verlauf</h2><div class="exhist">${hist.map(s=>`<div><b>${labelDate(s.date)}</b><span>${s.sets.map(t=>setTxt(t)).join(" · ")}</span></div>`).join("")}</div>`:""}
       </div>
     </div>
     ${mode?`<div class="exi-foot"><button class="pill primary" data-act="${mode==="plan"?"plan-add-ex":"add-ex"}" data-id="${id}">Zum ${mode==="plan"?"Trainingstag":"Training"} hinzufügen</button></div>`:""}

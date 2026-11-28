@@ -50,7 +50,7 @@ function liveRestore(){
     if(!state.onboarded||!w||typeof w!=="object"||!Array.isArray(w.exercises)||!Number.isFinite(w.t0)||w.t0>now||now-w.t0>12*3600e3){ localStorage.removeItem(LIVE_KEY); return; }
     const c=x=>String(x==null?"":x).replace(/[^\w-]/g,""), num=(v,max)=>{ v=+v; return Number.isFinite(v)?Math.max(0,Math.min(max,v)):0; };
     ui.workout={ name:String(w.name||"Training").replace(/[<>]/g,"").slice(0,80), t0:w.t0, routineId:w.routineId?c(w.routineId):null, dayId:w.dayId?c(w.dayId):undefined,
-      exercises:w.exercises.filter(e=>e&&typeof e==="object"&&e.id!=null).map(e=>({id:c(e.id), sets:(Array.isArray(e.sets)?e.sets:[]).filter(s=>s&&typeof s==="object").map(s=>({kg:num(s.kg,1000), reps:Math.round(num(s.reps,1000)), done:!!s.done}))})) };
+      exercises:w.exercises.filter(e=>e&&typeof e==="object"&&e.id!=null).map(e=>({id:c(e.id), sets:(Array.isArray(e.sets)?e.sets:[]).filter(s=>s&&typeof s==="object").map(s=>Object.assign({kg:num(s.kg,1000), reps:Math.round(num(s.reps,1000)), done:!!s.done},num(s.sec,86400)>0?{sec:Math.round(num(s.sec,86400))}:{}))})) };
     startTick();
   }catch(e){ try{ localStorage.removeItem(LIVE_KEY); }catch(_){} }
 }
@@ -255,8 +255,8 @@ function proteinFoods(n){
   return x.length>1?x.slice(0,-1).join(", ")+" "+oder+" "+x[x.length-1]:x[0];
 }
 // Realistische Dauer bis zum Wunschgewicht (in Wochen) aus dem eigenen Richtwert. null = nicht berechenbar.
-function goalWeeks(){
-  const p=state.profile, w=+lastWeight()||70, diff=(+p.target||w)-w;
+function goalWeeks(wNow){
+  const p=state.profile, w=+(wNow||lastWeight())||70, diff=(+p.target||w)-w;
   if(Math.abs(diff)<0.5) return null;
   let rate=0;   // kg pro Woche
   if(p.goal==="lose"&&diff<0) rate=Math.max(0,kcalFor("energy")-targets().kcal)*7/7700;
@@ -624,9 +624,11 @@ function render(){ try{ ensureRoutine(); }catch(e){} try{ adaptCheck(); }catch(e
 }
 // Zurück-Taste (Android/Browser): schließt zuerst das offene Fenster bzw. die Detailseite statt die App zu verlassen
 let histOpen=false, histIgnore=false;
+// Nach einem Neuladen (z. B. Sprache gewechselt) kann noch ein alter Eintrag oben liegen: einmal still zurück
+try{ if(history.state&&history.state.lm){ histIgnore=true; history.back(); } }catch(e){}
 function histSync(){
   try{
-    const want=!!(state.onboarded&&(ui.modal||ui.exInfo||ui.dash));
+    const want=!!(ui.modal||ui.exInfo||state.onboarded&&(ui.dash||ui.workout||ui.plan));
     if(want&&!histOpen){ history.pushState({lm:1},""); histOpen=true; }
     else if(!want&&histOpen){ histOpen=false; histIgnore=true; history.back(); }
   }catch(e){}
@@ -634,7 +636,11 @@ function histSync(){
 window.addEventListener("popstate",()=>{
   if(histIgnore){ histIgnore=false; return; }
   if(!histOpen) return; histOpen=false;
-  if(ui.modal) closeModal(); else if(ui.exInfo){ ui.exInfo=null; render(); } else if(ui.dash){ ui.dash=null; render(); }
+  // Oberste Ebene zuerst: Übungs-Info liegt über der Übungsliste
+  if(ui.exInfo){ ui.exInfo=null; render(); } else if(ui.modal) closeModal();
+  else if(ui.dash){ ui.dash=null; render(); }
+  else if(ui.plan){ render(); toast("Zum Verlassen ✕ tippen (ungespeicherte Änderungen gehen verloren)"); }
+  else if(ui.workout){ render(); toast("Training läuft – mit ✕ abbrechen oder Fertig tippen"); }   // Training nicht per Zurück verlieren
 });
 function seedDemo(){
   state = fresh();
@@ -673,7 +679,8 @@ document.getElementById("app").addEventListener("click", e=>{
   if((el.tagName==="INPUT"&&!["checkbox","radio","range","button"].includes(el.type))||el.tagName==="TEXTAREA") return;
   const p=state.profile;
   if(act==="start-onboard"){ state.step=0; }
-  else if(act==="skip-demo"){ if(p.adult){ seedDemo(); toast("Beispieldaten geladen"); } else { state.demoNext=true; state.step=0; save(); } }   // erst Altersfrage
+  else if(act==="skip-demo"){ if(state.obDone||state.workouts.length||state.weights.length>1) return;   // nie echte Daten durch Beispieldaten ersetzen
+    if(p.adult){ seedDemo(); toast("Beispieldaten geladen"); } else { state.demoNext=true; state.step=0; save(); } }   // erst Altersfrage
   else if(act==="ob-adult"){ if(el.dataset.v==="1"){ p.adult=true; state.obMinor=false; } else { p.adult=false; state.obMinor=true; } save(); }
   else if(act==="ob-terms"){ const on=!termsOk(); p.termsOk=on?TERMS_V:0; p.termsAt=on?todayIso():undefined; if(state.onboarded) ui.termsPending=true; save(); }
   else if(act==="terms-go"){ if(termsOk()){ ui.termsPending=false; render(); } return; }
@@ -983,7 +990,7 @@ document.getElementById("app").addEventListener("click", e=>{
   else if(act==="rem-tog"){ remToggle(el.dataset.k); return; }
   else if(act==="rem-time"){ remTime(el.dataset.k,+el.dataset.d); }
   else if(act==="adapt-seen"){ if(state.adapt){ state.adapt.seen=true; save(); } }
-  else if(act==="set-lang"){ p.lang=el.dataset.v; save(); location.reload(); return; }
+  else if(act==="set-lang"){ p.lang=el.dataset.v; ui.modal=null; save(); render(); setTimeout(()=>location.reload(),60); return; }
   else if(act==="theme"){ p.theme=el.dataset.v; save(); applyTheme(); }
   else if(act==="start-empty"){
     ui.workout={ name:"Training", t0:Date.now(), routineId:null, exercises:[] };
@@ -993,7 +1000,7 @@ document.getElementById("app").addEventListener("click", e=>{
     const r=(state.routines||[]).find(x=>x.id===el.dataset.rid);
     const d=r && (r.days||[]).find(x=>x.id===el.dataset.did);
     if(!d){ toast("Trainingstag fehlt"); return; }
-    ui.workout={ name:r.name+" · "+d.name, routineId:r.id, dayId:d.id, t0:Date.now(), exercises:(d.exercises||[]).map(e=>({id:e.id, sets:e.sets.map(s=>({kg:s.kg, reps:s.reps, done:false}))})) };
+    ui.workout={ name:r.name+" · "+d.name, routineId:r.id, dayId:d.id, t0:Date.now(), exercises:(d.exercises||[]).map(e=>({id:e.id, sets:e.sets.map(s=>Object.assign({kg:s.kg, reps:s.reps, done:false},s.sec>0?{sec:s.sec}:{}))})) };
     ui.modal=null; startTick();
   }
   else if(act==="new-plan"){ ui.plan={ id:null, name:"", days:[{id:uid(), name:"Tag 1", exercises:[]}] }; ui.modal=null; }
@@ -1047,7 +1054,7 @@ document.getElementById("app").addEventListener("click", e=>{
     // Schon Sätze erledigt: erst nach zweitem Tippen verwerfen (sonst ist das Training mit einem Fehltipp weg)
     const done=(ui.workout&&ui.workout.exercises||[]).some(x=>(x.sets||[]).some(st=>st.done));
     if(done&&!ui.woCancelArm){ ui.woCancelArm=true; clearTimeout(ui.woCancelT); ui.woCancelT=setTimeout(()=>{ ui.woCancelArm=false; },3000); toast("Nochmal tippen, um das Training zu verwerfen"); return; }
-    ui.woCancelArm=false; ui.workout=null; stopTick(); }
+    ui.woCancelArm=false; ui.workout=null; stopTick(); if(done) toast("Training verworfen"); }
   else if(act==="finish-wo"){
     const w=ui.workout;
     const sets=w.exercises.reduce((n,e)=>n+e.sets.filter(s=>s.done).length,0);

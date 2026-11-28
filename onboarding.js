@@ -167,7 +167,7 @@ function obNumHint(k){
     if(p.goal==="lose"&&+p.target===min) return `BMI <b>${de(b,1)}</b> · Das ist das niedrigste gesunde Ziel für deine Größe.`;
     // Gesundes Tempo: abnehmen ca. 0,5 % pro Woche, zunehmen ca. 0,25 kg pro Woche (Muskeln brauchen Zeit)
     // Abnehmen: Dauer aus dem echten Richtwert (goalWeeks). Ist kein Defizit möglich, keine Zeitangabe.
-    const wk=Math.abs(d)<0.5?0:d<0?(p.goal==="lose"?(goalWeeks()||0):0):Math.ceil(Math.abs(d)/(p.sex==="w"?0.15:0.25));
+    const wk=Math.abs(d)<0.5?0:d<0?(p.goal==="lose"?(goalWeeks(+p.weight)||0):0):Math.ceil(Math.abs(d)/(p.sex==="w"?0.15:0.25));
     return `BMI <b>${de(b,1)}</b>${wk?` · ${d<0?"−":"+"}${de(Math.abs(d),1)} kg · ca. ${wk>=8?Math.round(wk/4.3)+" Monate":wk+" Wochen"}`:""}`;
   }
   return "";
@@ -350,7 +350,9 @@ function obSkip(){
 function obBack(){
   const st=obSteps()[state.step];
   if(st&&st.kind==="num"&&!obNumBad(st.k)) obClampNum(st.k);
-  if(!state.step){ state.step=null; state.demoNext=false; } else obGo(-1);
+  // Fragebogen neu gemacht: am Anfang „Zurück“ schließt ihn (nicht zur Startseite mit „Beispieldaten“ – die würden alles ersetzen)
+  if(!state.step&&state.obRedo){ state.obRedo=false; state.onboarded=true; state.step=null; }
+  else if(!state.step){ state.step=null; state.demoNext=false; } else obGo(-1);
   save();
 }
 function obFinish(){
